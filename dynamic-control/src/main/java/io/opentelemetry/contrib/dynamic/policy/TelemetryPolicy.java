@@ -18,6 +18,9 @@ import java.util.Objects;
  * <p>As an example, policy type {@code trace-sampling} indicates that trace sampling behavior
  * should be configured.
  *
+ * <p>Direct instantiation of this base class is intentionally supported for type-only policy
+ * signals (for example, to indicate policy removal/reset without policy-specific values).
+ *
  * @see io.opentelemetry.contrib.dynamic.policy
  */
 public class TelemetryPolicy {
@@ -25,6 +28,9 @@ public class TelemetryPolicy {
 
   /**
    * Constructs a new TelemetryPolicy.
+   *
+   * <p>This constructor is used by type-specific subclasses and also directly for type-only policy
+   * signals such as policy removal/reset.
    *
    * @param type the type of the policy (e.g., "trace-sampling"), must not be null.
    */
@@ -43,22 +49,5 @@ public class TelemetryPolicy {
    */
   public String getType() {
     return type;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (!(o instanceof TelemetryPolicy)) {
-      return false;
-    }
-    TelemetryPolicy that = (TelemetryPolicy) o;
-    return Objects.equals(type, that.type);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(type);
   }
 }

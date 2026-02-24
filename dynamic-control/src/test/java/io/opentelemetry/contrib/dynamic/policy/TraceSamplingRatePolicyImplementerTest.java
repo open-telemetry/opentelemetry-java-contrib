@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 class TraceSamplingRatePolicyImplementerTest {
 
   @Test
-  void nullSpecFallsBackToAlwaysOn() {
+  void typeOnlyTraceSamplingPolicyFallsBackToAlwaysOn() {
     DelegatingSampler delegatingSampler = new DelegatingSampler(Sampler.alwaysOff());
     TraceSamplingRatePolicyImplementer implementer =
         new TraceSamplingRatePolicyImplementer(delegatingSampler);
@@ -53,16 +53,6 @@ class TraceSamplingRatePolicyImplementerTest {
     implementer.onPoliciesChanged(singletonList(new TelemetryPolicy("other-policy")));
 
     assertThat(decisionFor(delegatingSampler)).isEqualTo(SamplingDecision.DROP);
-  }
-
-  @Test
-  void typeOnlyTraceSamplingPolicyFallsBackToAlwaysOn() {
-    DelegatingSampler delegatingSampler = new DelegatingSampler(Sampler.alwaysOff());
-    TraceSamplingRatePolicyImplementer implementer =
-        new TraceSamplingRatePolicyImplementer(delegatingSampler);
-
-    implementer.onPoliciesChanged(singletonList(new TelemetryPolicy("trace-sampling")));
-    assertThat(decisionFor(delegatingSampler)).isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
   }
 
   @Test
