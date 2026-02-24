@@ -47,7 +47,8 @@ class TraceSamplingValidatorTest {
     assertThat(policy).isNotNull();
     assertThat(policy.getType()).isEqualTo(TRACE_SAMPLING_POLICY_TYPE);
     assertThat(policy).isInstanceOf(TraceSamplingRatePolicy.class);
-    assertThat(((TraceSamplingRatePolicy) policy).getProbability()).isCloseTo(probability, within(1e-9));
+    assertThat(((TraceSamplingRatePolicy) policy).getProbability())
+        .isCloseTo(probability, within(1e-9));
   }
 
   @Test
@@ -70,8 +71,7 @@ class TraceSamplingValidatorTest {
 
   @Test
   void testValidate_InvalidJson_ProbabilityNotNumber() {
-    String json =
-        "{\"" + TRACE_SAMPLING_POLICY_TYPE + "\": {\"probability\": \"high\"}}";
+    String json = "{\"" + TRACE_SAMPLING_POLICY_TYPE + "\": {\"probability\": \"high\"}}";
     assertThat(validator.validate(json)).isNull();
   }
 

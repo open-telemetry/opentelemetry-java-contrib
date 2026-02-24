@@ -72,9 +72,7 @@ class TraceSamplingRatePolicyImplementerTest {
         new TraceSamplingRatePolicyImplementer(delegatingSampler);
 
     List<TelemetryPolicy> policies =
-        Arrays.asList(
-            new TraceSamplingRatePolicy(0.0),
-            new TraceSamplingRatePolicy(1.0));
+        Arrays.asList(new TraceSamplingRatePolicy(0.0), new TraceSamplingRatePolicy(1.0));
 
     implementer.onPoliciesChanged(policies);
 
