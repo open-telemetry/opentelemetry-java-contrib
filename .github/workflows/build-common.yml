@@ -59,7 +59,7 @@ jobs:
           cache-read-only: ${{ inputs.cache-read-only }}
 
       - name: Build
-        run: ./gradlew build -x spotlessCheck -x test ${{ inputs.no-build-cache && '--no-build-cache' || '' }}
+        run: ./gradlew build -x spotlessCheck -PskipTests=true ${{ inputs.no-build-cache && '--no-build-cache' || '' }}
         env:
           DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           GITHUB_TOKEN: ${{ github.token }}
