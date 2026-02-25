@@ -89,7 +89,10 @@ public final class ReadableFile implements FileOperations {
     return nowMillis(clock) >= expireTimeMillis;
   }
 
-  public long getCreatedTimeMillis() {
+  public synchronized long getCreatedTimeMillis() {
+    if (isClosed.get()) {
+      throw new IllegalStateException("File is closed");
+    }
     return createdTimeMillis;
   }
 
