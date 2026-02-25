@@ -76,10 +76,11 @@ class IntegrationTest {
 
   @BeforeEach
   void setUp() {
-    initStorage(FileStorageConfiguration.builder()
-        .setMaxFileAgeForWriteMillis(MAX_WRITING_TIME_MILLIS)
-        .setMinFileAgeForReadMillis(DELAY_BEFORE_READING_MILLIS)
-        .build());
+    initStorage(
+        FileStorageConfiguration.builder()
+            .setMaxFileAgeForWriteMillis(MAX_WRITING_TIME_MILLIS)
+            .setMinFileAgeForReadMillis(DELAY_BEFORE_READING_MILLIS)
+            .build());
   }
 
   private void initStorage(FileStorageConfiguration storageConfig) {
@@ -164,11 +165,12 @@ class IntegrationTest {
 
   @Test
   void verifyIntegration_withoutAutoDelete() throws InterruptedException {
-    initStorage(FileStorageConfiguration.builder()
-        .setMaxFileAgeForWriteMillis(MAX_WRITING_TIME_MILLIS)
-        .setMinFileAgeForReadMillis(DELAY_BEFORE_READING_MILLIS)
-        .setDeleteItemsOnIteration(false)
-        .build());
+    initStorage(
+        FileStorageConfiguration.builder()
+            .setMaxFileAgeForWriteMillis(MAX_WRITING_TIME_MILLIS)
+            .setMinFileAgeForReadMillis(DELAY_BEFORE_READING_MILLIS)
+            .setDeleteItemsOnIteration(false)
+            .build());
 
     // Writing to first file
     createSpan();
@@ -206,11 +208,12 @@ class IntegrationTest {
 
   @Test
   void verifyIntegration_withoutAutoDelete_explicitRemove() throws InterruptedException {
-    initStorage(FileStorageConfiguration.builder()
-        .setMaxFileAgeForWriteMillis(MAX_WRITING_TIME_MILLIS)
-        .setMinFileAgeForReadMillis(DELAY_BEFORE_READING_MILLIS)
-        .setDeleteItemsOnIteration(false)
-        .build());
+    initStorage(
+        FileStorageConfiguration.builder()
+            .setMaxFileAgeForWriteMillis(MAX_WRITING_TIME_MILLIS)
+            .setMinFileAgeForReadMillis(DELAY_BEFORE_READING_MILLIS)
+            .setDeleteItemsOnIteration(false)
+            .build());
 
     // Writing to first file
     createSpan();
