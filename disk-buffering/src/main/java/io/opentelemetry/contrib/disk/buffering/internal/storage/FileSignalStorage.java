@@ -25,6 +25,7 @@ public final class FileSignalStorage<T> implements SignalStorage<T> {
   private final Storage<T> storage;
   private final SignalSerializer<T> serializer;
   private final SignalDeserializer<T> deserializer;
+  private final boolean deleteItemsOnIteration;
   private final Logger logger = Logger.getLogger(FileSignalStorage.class.getName());
   private final AtomicBoolean isClosed = new AtomicBoolean(false);
   private final Object iteratorLock = new Object();
@@ -34,10 +35,14 @@ public final class FileSignalStorage<T> implements SignalStorage<T> {
   private Iterator<Collection<T>> iterator;
 
   public FileSignalStorage(
-      Storage<T> storage, SignalSerializer<T> serializer, SignalDeserializer<T> deserializer) {
+      Storage<T> storage,
+      SignalSerializer<T> serializer,
+      SignalDeserializer<T> deserializer,
+      boolean deleteItemsOnIteration) {
     this.storage = storage;
     this.serializer = serializer;
     this.deserializer = deserializer;
+    this.deleteItemsOnIteration = deleteItemsOnIteration;
   }
 
   @Override
@@ -84,7 +89,7 @@ public final class FileSignalStorage<T> implements SignalStorage<T> {
   public Iterator<Collection<T>> iterator() {
     synchronized (iteratorLock) {
       if (iterator == null) {
-        iterator = new StorageIterator<>(storage, deserializer);
+        iterator = new StorageIterator<>(storage, deserializer, deleteItemsOnIteration);
       }
       return iterator;
     }

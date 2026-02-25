@@ -19,6 +19,7 @@ import javax.annotation.concurrent.GuardedBy;
 final class StorageIterator<T> implements Iterator<Collection<T>> {
   private final Storage<T> storage;
   private final SignalDeserializer<T> deserializer;
+  private final boolean deleteOnIteration;
   private final Logger logger = Logger.getLogger(StorageIterator.class.getName());
 
   @GuardedBy("this")
@@ -31,9 +32,11 @@ final class StorageIterator<T> implements Iterator<Collection<T>> {
   @GuardedBy("this")
   private boolean removeAllowed = false;
 
-  StorageIterator(Storage<T> storage, SignalDeserializer<T> deserializer) {
+  StorageIterator(
+      Storage<T> storage, SignalDeserializer<T> deserializer, boolean deleteOnIteration) {
     this.storage = storage;
     this.deserializer = deserializer;
+    this.deleteOnIteration = deleteOnIteration;
   }
 
   @Override
@@ -78,6 +81,9 @@ final class StorageIterator<T> implements Iterator<Collection<T>> {
       if (currentResult != null) {
         if (!currentResultConsumed) {
           return true;
+        }
+        if (deleteOnIteration) {
+          currentResult.delete();
         }
         currentResult.close();
         currentResult = null;

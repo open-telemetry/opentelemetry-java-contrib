@@ -76,20 +76,19 @@ class IntegrationTest {
 
   @BeforeEach
   void setUp() {
-    FileStorageConfiguration storageConfig =
-        FileStorageConfiguration.builder()
-            .setMaxFileAgeForWriteMillis(MAX_WRITING_TIME_MILLIS)
-            .setMinFileAgeForReadMillis(DELAY_BEFORE_READING_MILLIS)
-            .build();
+    initStorage(FileStorageConfiguration.builder()
+        .setMaxFileAgeForWriteMillis(MAX_WRITING_TIME_MILLIS)
+        .setMinFileAgeForReadMillis(DELAY_BEFORE_READING_MILLIS)
+        .build());
+  }
 
-    // Setting up spans
+  private void initStorage(FileStorageConfiguration storageConfig) {
     spansDir = new File(rootDir, "spans");
     spanStorage = FileSpanStorage.create(spansDir, storageConfig);
     spanToDiskExporter =
         SpanToDiskExporter.builder(spanStorage).setExporterCallback(spanCallback).build();
     tracer = createTracerProvider(spanToDiskExporter).get("SpanInstrumentationScope");
 
-    // Setting up metrics
     metricsDir = new File(rootDir, "metrics");
     metricStorage = FileMetricStorage.create(metricsDir, storageConfig);
     metricToDiskExporter =
@@ -97,7 +96,6 @@ class IntegrationTest {
     meterProvider = createMeterProvider(metricToDiskExporter);
     meter = meterProvider.get("MetricInstrumentationScope");
 
-    // Setting up logs
     logsDir = new File(rootDir, "logs");
     logStorage = FileLogRecordStorage.create(logsDir, storageConfig);
     logToDiskExporter =
@@ -129,7 +127,7 @@ class IntegrationTest {
   }
 
   @Test
-  void verifyIntegration() throws InterruptedException {
+  void verifyIntegration_defaultAutoDelete() throws InterruptedException {
     // Writing to first file
     createSpan();
     createLog();
@@ -146,7 +144,7 @@ class IntegrationTest {
     // Waiting for read time
     sleep(DELAY_BEFORE_READING_MILLIS);
 
-    // Read
+    // Read (default: items auto-deleted during iteration)
     List<SpanData> storedSpans = new ArrayList<>();
     List<LogRecordData> storedLogs = new ArrayList<>();
     List<MetricData> storedMetrics = new ArrayList<>();
@@ -158,14 +156,20 @@ class IntegrationTest {
     assertThat(storedLogs).hasSize(2);
     assertThat(storedMetrics).hasSize(2);
 
-    // Check that data is still in disk
-    assertDirectoryFileCount(spansDir, 2);
-    assertDirectoryFileCount(logsDir, 2);
-    assertDirectoryFileCount(metricsDir, 2);
+    // Data is auto-deleted from disk
+    assertDirectoryFileCount(spansDir, 0);
+    assertDirectoryFileCount(logsDir, 0);
+    assertDirectoryFileCount(metricsDir, 0);
   }
 
   @Test
-  void verifyIntegration_whenRemovingItems() throws InterruptedException {
+  void verifyIntegration_withoutAutoDelete() throws InterruptedException {
+    initStorage(FileStorageConfiguration.builder()
+        .setMaxFileAgeForWriteMillis(MAX_WRITING_TIME_MILLIS)
+        .setMinFileAgeForReadMillis(DELAY_BEFORE_READING_MILLIS)
+        .setDeleteItemsOnIteration(false)
+        .build());
+
     // Writing to first file
     createSpan();
     createLog();
@@ -182,7 +186,49 @@ class IntegrationTest {
     // Waiting for read time
     sleep(DELAY_BEFORE_READING_MILLIS);
 
-    // Read
+    // Read (items not auto-deleted)
+    List<SpanData> storedSpans = new ArrayList<>();
+    List<LogRecordData> storedLogs = new ArrayList<>();
+    List<MetricData> storedMetrics = new ArrayList<>();
+    spanStorage.forEach(storedSpans::addAll);
+    logStorage.forEach(storedLogs::addAll);
+    metricStorage.forEach(storedMetrics::addAll);
+
+    assertThat(storedSpans).hasSize(2);
+    assertThat(storedLogs).hasSize(2);
+    assertThat(storedMetrics).hasSize(2);
+
+    // Data stays on disk
+    assertDirectoryFileCount(spansDir, 2);
+    assertDirectoryFileCount(logsDir, 2);
+    assertDirectoryFileCount(metricsDir, 2);
+  }
+
+  @Test
+  void verifyIntegration_withoutAutoDelete_explicitRemove() throws InterruptedException {
+    initStorage(FileStorageConfiguration.builder()
+        .setMaxFileAgeForWriteMillis(MAX_WRITING_TIME_MILLIS)
+        .setMinFileAgeForReadMillis(DELAY_BEFORE_READING_MILLIS)
+        .setDeleteItemsOnIteration(false)
+        .build());
+
+    // Writing to first file
+    createSpan();
+    createLog();
+    createMetric();
+
+    // Waiting to write on second file
+    sleep(MAX_WRITING_TIME_MILLIS);
+
+    // Writing to second file
+    createSpan();
+    createLog();
+    createMetric();
+
+    // Waiting for read time
+    sleep(DELAY_BEFORE_READING_MILLIS);
+
+    // Read with explicit removal
     List<SpanData> storedSpans = new ArrayList<>();
     List<LogRecordData> storedLogs = new ArrayList<>();
     List<MetricData> storedMetrics = new ArrayList<>();
@@ -206,7 +252,7 @@ class IntegrationTest {
     assertThat(storedLogs).hasSize(2);
     assertThat(storedMetrics).hasSize(2);
 
-    // Check that data is cleared
+    // Data explicitly cleared
     assertDirectoryFileCount(spansDir, 0);
     assertDirectoryFileCount(logsDir, 0);
     assertDirectoryFileCount(metricsDir, 0);

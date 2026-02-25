@@ -53,12 +53,15 @@ class StorageIteratorTest {
     storage.close();
   }
 
+  // -- Tests with deleteOnIteration=false (explicit removal mode) --
+
   @Test
-  void removeBeforeNext_throwsIllegalStateException() throws IOException {
+  void explicitMode_removeBeforeNext_throwsIllegalStateException() throws IOException {
     writeItem(FIRST_LOG_RECORD);
     forwardToReadTime();
 
-    Iterator<Collection<LogRecordData>> iterator = new StorageIterator<>(storage, DESERIALIZER);
+    Iterator<Collection<LogRecordData>> iterator =
+        new StorageIterator<>(storage, DESERIALIZER, false);
     assertThat(iterator.hasNext()).isTrue();
 
     assertThatThrownBy(iterator::remove)
@@ -67,11 +70,12 @@ class StorageIteratorTest {
   }
 
   @Test
-  void doubleRemove_throwsIllegalStateException() throws IOException {
+  void explicitMode_doubleRemove_throwsIllegalStateException() throws IOException {
     writeItem(FIRST_LOG_RECORD);
     forwardToReadTime();
 
-    Iterator<Collection<LogRecordData>> iterator = new StorageIterator<>(storage, DESERIALIZER);
+    Iterator<Collection<LogRecordData>> iterator =
+        new StorageIterator<>(storage, DESERIALIZER, false);
     iterator.next();
     iterator.remove();
 
@@ -81,11 +85,12 @@ class StorageIteratorTest {
   }
 
   @Test
-  void iterateWithRemove_deletesFiles() throws IOException {
+  void explicitMode_iterateWithRemove_deletesFiles() throws IOException {
     writeItem(FIRST_LOG_RECORD);
     forwardToReadTime();
 
-    Iterator<Collection<LogRecordData>> iterator = new StorageIterator<>(storage, DESERIALIZER);
+    Iterator<Collection<LogRecordData>> iterator =
+        new StorageIterator<>(storage, DESERIALIZER, false);
     List<LogRecordData> items = new ArrayList<>();
     while (iterator.hasNext()) {
       items.addAll(iterator.next());
@@ -97,11 +102,12 @@ class StorageIteratorTest {
   }
 
   @Test
-  void iterateWithoutRemove_preservesFiles() throws IOException {
+  void explicitMode_iterateWithoutRemove_preservesFiles() throws IOException {
     writeItem(FIRST_LOG_RECORD);
     forwardToReadTime();
 
-    Iterator<Collection<LogRecordData>> iterator = new StorageIterator<>(storage, DESERIALIZER);
+    Iterator<Collection<LogRecordData>> iterator =
+        new StorageIterator<>(storage, DESERIALIZER, false);
     List<LogRecordData> items = new ArrayList<>();
     while (iterator.hasNext()) {
       items.addAll(iterator.next());
@@ -112,7 +118,7 @@ class StorageIteratorTest {
   }
 
   @Test
-  void iterateAcrossMultipleFiles_withRemove() throws IOException {
+  void explicitMode_iterateAcrossMultipleFiles_withRemove() throws IOException {
     long firstWriteTime = 1000;
     long secondWriteTime = firstWriteTime + MAX_FILE_AGE_FOR_WRITE_MILLIS + 1;
 
@@ -124,7 +130,8 @@ class StorageIteratorTest {
 
     currentTimeMillis.set(secondWriteTime + MIN_FILE_AGE_FOR_READ_MILLIS);
 
-    Iterator<Collection<LogRecordData>> iterator = new StorageIterator<>(storage, DESERIALIZER);
+    Iterator<Collection<LogRecordData>> iterator =
+        new StorageIterator<>(storage, DESERIALIZER, false);
     List<LogRecordData> items = new ArrayList<>();
     while (iterator.hasNext()) {
       items.addAll(iterator.next());
@@ -136,7 +143,7 @@ class StorageIteratorTest {
   }
 
   @Test
-  void iterateAcrossMultipleFiles_withoutRemove() throws IOException {
+  void explicitMode_iterateAcrossMultipleFiles_withoutRemove() throws IOException {
     long firstWriteTime = 1000;
     long secondWriteTime = firstWriteTime + MAX_FILE_AGE_FOR_WRITE_MILLIS + 1;
 
@@ -148,7 +155,8 @@ class StorageIteratorTest {
 
     currentTimeMillis.set(secondWriteTime + MIN_FILE_AGE_FOR_READ_MILLIS);
 
-    Iterator<Collection<LogRecordData>> iterator = new StorageIterator<>(storage, DESERIALIZER);
+    Iterator<Collection<LogRecordData>> iterator =
+        new StorageIterator<>(storage, DESERIALIZER, false);
     List<LogRecordData> items = new ArrayList<>();
     while (iterator.hasNext()) {
       items.addAll(iterator.next());
@@ -159,7 +167,7 @@ class StorageIteratorTest {
   }
 
   @Test
-  void selectiveRemove_onlyDeletesRemovedItems() throws IOException {
+  void explicitMode_selectiveRemove_onlyDeletesRemovedItems() throws IOException {
     long firstWriteTime = 1000;
     long secondWriteTime = firstWriteTime + MAX_FILE_AGE_FOR_WRITE_MILLIS + 1;
     long thirdWriteTime = secondWriteTime + MAX_FILE_AGE_FOR_WRITE_MILLIS + 1;
@@ -175,7 +183,8 @@ class StorageIteratorTest {
 
     currentTimeMillis.set(thirdWriteTime + MIN_FILE_AGE_FOR_READ_MILLIS);
 
-    Iterator<Collection<LogRecordData>> iterator = new StorageIterator<>(storage, DESERIALIZER);
+    Iterator<Collection<LogRecordData>> iterator =
+        new StorageIterator<>(storage, DESERIALIZER, false);
     List<LogRecordData> items = new ArrayList<>();
     int index = 0;
     while (iterator.hasNext()) {
@@ -189,6 +198,62 @@ class StorageIteratorTest {
     assertThat(items).containsExactly(FIRST_LOG_RECORD, SECOND_LOG_RECORD, THIRD_LOG_RECORD);
     assertThat(destinationDir.list()).hasSize(1);
     assertThat(destinationDir.list()).containsExactly(String.valueOf(secondWriteTime));
+  }
+
+  // -- Tests with deleteOnIteration=true (auto-delete mode) --
+
+  @Test
+  void autoDeleteMode_iterateDeletesFiles() throws IOException {
+    writeItem(FIRST_LOG_RECORD);
+    forwardToReadTime();
+
+    Iterator<Collection<LogRecordData>> iterator =
+        new StorageIterator<>(storage, DESERIALIZER, true);
+    List<LogRecordData> items = new ArrayList<>();
+    while (iterator.hasNext()) {
+      items.addAll(iterator.next());
+    }
+
+    assertThat(items).containsExactly(FIRST_LOG_RECORD);
+    assertThat(destinationDir.list()).isEmpty();
+  }
+
+  @Test
+  void autoDeleteMode_iterateAcrossMultipleFiles_deletesAll() throws IOException {
+    long firstWriteTime = 1000;
+    long secondWriteTime = firstWriteTime + MAX_FILE_AGE_FOR_WRITE_MILLIS + 1;
+
+    currentTimeMillis.set(firstWriteTime);
+    writeItem(FIRST_LOG_RECORD);
+
+    currentTimeMillis.set(secondWriteTime);
+    writeItem(SECOND_LOG_RECORD);
+
+    currentTimeMillis.set(secondWriteTime + MIN_FILE_AGE_FOR_READ_MILLIS);
+
+    Iterator<Collection<LogRecordData>> iterator =
+        new StorageIterator<>(storage, DESERIALIZER, true);
+    List<LogRecordData> items = new ArrayList<>();
+    while (iterator.hasNext()) {
+      items.addAll(iterator.next());
+    }
+
+    assertThat(items).containsExactly(FIRST_LOG_RECORD, SECOND_LOG_RECORD);
+    assertThat(destinationDir.list()).isEmpty();
+  }
+
+  @Test
+  void autoDeleteMode_removeBeforeNext_stillThrows() throws IOException {
+    writeItem(FIRST_LOG_RECORD);
+    forwardToReadTime();
+
+    Iterator<Collection<LogRecordData>> iterator =
+        new StorageIterator<>(storage, DESERIALIZER, true);
+    assertThat(iterator.hasNext()).isTrue();
+
+    assertThatThrownBy(iterator::remove)
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessage("next() must be called before remove()");
   }
 
   private void writeItem(LogRecordData item) throws IOException {
