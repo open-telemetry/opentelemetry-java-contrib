@@ -29,8 +29,7 @@ public final class Storage<T> implements Closeable {
   private static final int MAX_ATTEMPTS = 3;
   private final Logger logger = Logger.getLogger(Storage.class.getName());
   private final FolderManager folderManager;
-  private final AtomicReference<Predicate<FolderManager.CacheFile>> fileExclusion =
-      new AtomicReference<>(file -> false);
+  private volatile Predicate<FolderManager.CacheFile> fileExclusion = file -> false;
   private final AtomicBoolean isClosed = new AtomicBoolean(false);
   private final AtomicBoolean activeReadResultAvailable = new AtomicBoolean(false);
   private final AtomicReference<WritableFile> writableFileRef = new AtomicReference<>();
