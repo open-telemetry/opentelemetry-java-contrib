@@ -15,16 +15,12 @@ import io.opentelemetry.sdk.common.Clock;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
- * Reads from a file and updates it in parallel in order to avoid re-reading the same items later.
- * The way it does so is by creating a temporary file where all the contents are added during the
- * instantiation of this class. Then, the contents are read from the temporary file, after an item
- * has been read from the temporary file, the original file gets updated to remove the recently read
- * data.
+ * Reads items sequentially from a cache file. Items can be explicitly removed after reading via
+ * {@link #removeTopItem()}. If not removed, items remain on disk for future reads.
  *
  * <p>More information on the overall storage process in the CONTRIBUTING.md file.
  */
@@ -63,10 +59,7 @@ public final class ReadableFile implements FileOperations {
     reader = readerFactory.create(fileStream);
   }
 
-  /**
-   * Reads the next line available in the file and provides it to a {@link Function processing}
-   * which will determine whether to remove the provided line or not.
-   */
+  /** Reads the next item available in the file. Returns null if no more items or file is closed. */
   @Nullable
   public synchronized byte[] readNext() throws IOException {
     if (isClosed.get()) {

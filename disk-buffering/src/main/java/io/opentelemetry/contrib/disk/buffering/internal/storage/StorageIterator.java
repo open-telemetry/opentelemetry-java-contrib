@@ -28,6 +28,9 @@ final class StorageIterator<T> implements Iterator<Collection<T>> {
   @GuardedBy("this")
   private boolean currentResultConsumed = false;
 
+  @GuardedBy("this")
+  private boolean removeAllowed = false;
+
   StorageIterator(Storage<T> storage, SignalDeserializer<T> deserializer) {
     this.storage = storage;
     this.deserializer = deserializer;
@@ -49,6 +52,7 @@ final class StorageIterator<T> implements Iterator<Collection<T>> {
     }
     if (findNext()) {
       currentResultConsumed = true;
+      removeAllowed = true;
       return Objects.requireNonNull(currentResult).getContent();
     }
     return null;
@@ -56,6 +60,10 @@ final class StorageIterator<T> implements Iterator<Collection<T>> {
 
   @Override
   public synchronized void remove() {
+    if (!removeAllowed) {
+      throw new IllegalStateException("next() must be called before remove()");
+    }
+    removeAllowed = false;
     if (currentResult != null) {
       try {
         currentResult.delete();

@@ -93,7 +93,11 @@ public final class Storage<T> implements Closeable {
       throw new IllegalStateException(
           "You must close any previous ReadableResult before requesting a new one");
     }
-    return doReadNext(deserializer, 1);
+    ReadableResult<T> result = doReadNext(deserializer, 1);
+    if (result == null) {
+      fileExclusion = file -> false;
+    }
+    return result;
   }
 
   @Nullable
