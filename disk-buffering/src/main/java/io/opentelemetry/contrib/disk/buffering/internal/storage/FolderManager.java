@@ -53,8 +53,8 @@ public final class FolderManager implements Closeable {
   }
 
   public static class CacheFile {
-    public final File file;
-    public final long createdTimeMillis;
+    private final File file;
+    private final long createdTimeMillis;
 
     public CacheFile(File file, long createdTimeMillis) {
       this.file = file;
