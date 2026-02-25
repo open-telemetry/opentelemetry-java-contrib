@@ -56,9 +56,13 @@ public final class FolderManager implements Closeable {
     private final File file;
     private final long createdTimeMillis;
 
-    public CacheFile(File file, long createdTimeMillis) {
+    CacheFile(File file, long createdTimeMillis) {
       this.file = file;
       this.createdTimeMillis = createdTimeMillis;
+    }
+
+    long getCreatedTimeMillis() {
+      return createdTimeMillis;
     }
   }
 
@@ -109,7 +113,6 @@ public final class FolderManager implements Closeable {
     }
   }
 
-  @SuppressWarnings("MixedMutabilityReturnType")
   private List<CacheFile> listCacheFiles(Predicate<CacheFile> exclude) {
     File[] existingFiles = folder.listFiles();
     if (existingFiles == null) {
@@ -122,7 +125,7 @@ public final class FolderManager implements Closeable {
         files.add(cacheFile);
       }
     }
-    return files;
+    return Collections.unmodifiableList(files);
   }
 
   @Nullable

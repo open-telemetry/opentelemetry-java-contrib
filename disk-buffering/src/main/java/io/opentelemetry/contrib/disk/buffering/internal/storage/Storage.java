@@ -110,7 +110,7 @@ public final class Storage<T> implements Closeable {
     ReadableFile readableFile = readableFileRef.get();
     if (readableFile == null) {
       logger.finer("Obtaining a new readableFile from the folderManager.");
-      readableFile = folderManager.getReadableFile(Objects.requireNonNull(fileExclusion.get()));
+      readableFile = folderManager.getReadableFile(Objects.requireNonNull(fileExclusion));
       readableFileRef.set(readableFile);
       if (readableFile == null) {
         logger.fine("Unable to get or create readable file.");
@@ -118,6 +118,7 @@ public final class Storage<T> implements Closeable {
       }
     }
 
+    long currentFileCreatedTime = readableFile.getCreatedTimeMillis();
     logger.finer("Attempting to read data from " + readableFile);
     try {
       byte[] result = readableFile.readNext();
@@ -137,8 +138,7 @@ public final class Storage<T> implements Closeable {
     }
 
     // Search for newer files than the current one.
-    long currentFileCreatedTime = readableFile.getCreatedTimeMillis();
-    fileExclusion.set(file -> file.createdTimeMillis <= currentFileCreatedTime);
+    fileExclusion = file -> file.getCreatedTimeMillis() <= currentFileCreatedTime;
     readableFile.close();
     readableFileRef.set(null);
     return doReadNext(deserializer, ++attemptNumber);
