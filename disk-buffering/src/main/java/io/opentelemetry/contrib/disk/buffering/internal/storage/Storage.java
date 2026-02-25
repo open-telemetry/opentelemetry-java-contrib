@@ -124,6 +124,7 @@ public final class Storage<T> implements Closeable {
     }
 
     logger.finer("Attempting to read data from " + readableFile);
+    long currentFileCreatedTime = readableFile.getCreatedTimeMillis();
     try {
       byte[] result = readableFile.readNext();
       if (result != null) {
@@ -142,7 +143,6 @@ public final class Storage<T> implements Closeable {
     }
 
     // Search for newer files than the current one.
-    long currentFileCreatedTime = readableFile.getCreatedTimeMillis();
     fileExclusion = file -> file.getCreatedTimeMillis() <= currentFileCreatedTime;
     readableFile.close();
     readableFileRef.set(null);
