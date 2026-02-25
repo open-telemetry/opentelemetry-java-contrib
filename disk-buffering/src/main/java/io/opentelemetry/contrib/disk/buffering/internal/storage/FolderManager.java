@@ -52,7 +52,7 @@ public final class FolderManager implements Closeable {
     this.clock = clock;
   }
 
-  public static class CacheFile {
+  static class CacheFile {
     private final File file;
     private final long createdTimeMillis;
 
