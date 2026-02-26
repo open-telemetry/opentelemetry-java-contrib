@@ -34,7 +34,10 @@ public final class FileMetricStorage implements SignalStorage.Metric {
         new Storage<>(FolderManager.create(destinationDir, configuration, Clock.getDefault()));
     return new FileMetricStorage(
         new FileSignalStorage<>(
-            storage, SignalSerializer.ofMetrics(), SignalDeserializer.ofMetrics()));
+            storage,
+            SignalSerializer.ofMetrics(),
+            SignalDeserializer.ofMetrics(),
+            configuration.getDeleteItemsOnIteration()));
   }
 
   private FileMetricStorage(FileSignalStorage<MetricData> fileSignalStorage) {

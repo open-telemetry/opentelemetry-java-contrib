@@ -8,6 +8,7 @@ package io.opentelemetry.contrib.disk.buffering;
 import static java.lang.Thread.sleep;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
@@ -39,6 +40,8 @@ import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,6 +51,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+@SuppressWarnings("unchecked")
 @ExtendWith(MockitoExtension.class)
 class IntegrationTest {
   private Tracer tracer;
@@ -64,31 +68,37 @@ class IntegrationTest {
   @Mock private ExporterCallback<LogRecordData> logCallback;
   @Mock private ExporterCallback<MetricData> metricCallback;
   @TempDir private File rootDir;
+  private File spansDir;
+  private File logsDir;
+  private File metricsDir;
   private static final long DELAY_BEFORE_READING_MILLIS = 500;
+  private static final long MAX_WRITING_TIME_MILLIS = 200;
 
   @BeforeEach
   void setUp() {
-    FileStorageConfiguration storageConfig =
+    initStorage(
         FileStorageConfiguration.builder()
-            .setMaxFileAgeForWriteMillis(DELAY_BEFORE_READING_MILLIS - 1)
+            .setMaxFileAgeForWriteMillis(MAX_WRITING_TIME_MILLIS)
             .setMinFileAgeForReadMillis(DELAY_BEFORE_READING_MILLIS)
-            .build();
+            .build());
+  }
 
-    // Setting up spans
-    spanStorage = FileSpanStorage.create(new File(rootDir, "spans"), storageConfig);
+  private void initStorage(FileStorageConfiguration storageConfig) {
+    spansDir = new File(rootDir, "spans");
+    spanStorage = FileSpanStorage.create(spansDir, storageConfig);
     spanToDiskExporter =
         SpanToDiskExporter.builder(spanStorage).setExporterCallback(spanCallback).build();
     tracer = createTracerProvider(spanToDiskExporter).get("SpanInstrumentationScope");
 
-    // Setting up metrics
-    metricStorage = FileMetricStorage.create(new File(rootDir, "metrics"), storageConfig);
+    metricsDir = new File(rootDir, "metrics");
+    metricStorage = FileMetricStorage.create(metricsDir, storageConfig);
     metricToDiskExporter =
         MetricToDiskExporter.builder(metricStorage).setExporterCallback(metricCallback).build();
     meterProvider = createMeterProvider(metricToDiskExporter);
     meter = meterProvider.get("MetricInstrumentationScope");
 
-    // Setting up logs
-    logStorage = FileLogRecordStorage.create(new File(rootDir, "logs"), storageConfig);
+    logsDir = new File(rootDir, "logs");
+    logStorage = FileLogRecordStorage.create(logsDir, storageConfig);
     logToDiskExporter =
         LogRecordToDiskExporter.builder(logStorage).setExporterCallback(logCallback).build();
     logger = createLoggerProvider(logToDiskExporter).get("LogInstrumentationScope");
@@ -118,28 +128,24 @@ class IntegrationTest {
   }
 
   @Test
-  void verifyIntegration() throws InterruptedException {
-    // Creating span
-    Span span = tracer.spanBuilder("Span name").startSpan();
-    span.end();
-    verify(spanCallback).onExportSuccess(anyCollection());
-    verifyNoMoreInteractions(spanCallback);
+  void verifyIntegration_defaultAutoDelete() throws InterruptedException {
+    // Writing to first file
+    createSpan();
+    createLog();
+    createMetric();
 
-    // Creating log
-    logger.logRecordBuilder().setBody("Log body").emit();
-    verify(logCallback).onExportSuccess(anyCollection());
-    verifyNoMoreInteractions(spanCallback);
+    // Waiting to write on second file
+    sleep(MAX_WRITING_TIME_MILLIS);
 
-    // Creating metric
-    meter.counterBuilder("counter").build().add(1);
-    meterProvider.forceFlush();
-    verify(metricCallback).onExportSuccess(anyCollection());
-    verifyNoMoreInteractions(spanCallback);
+    // Writing to second file
+    createSpan();
+    createLog();
+    createMetric();
 
     // Waiting for read time
     sleep(DELAY_BEFORE_READING_MILLIS);
 
-    // Read
+    // Read (default: items auto-deleted during iteration)
     List<SpanData> storedSpans = new ArrayList<>();
     List<LogRecordData> storedLogs = new ArrayList<>();
     List<MetricData> storedMetrics = new ArrayList<>();
@@ -147,9 +153,140 @@ class IntegrationTest {
     logStorage.forEach(storedLogs::addAll);
     metricStorage.forEach(storedMetrics::addAll);
 
-    assertThat(storedSpans).hasSize(1);
-    assertThat(storedLogs).hasSize(1);
-    assertThat(storedMetrics).hasSize(1);
+    assertThat(storedSpans).hasSize(2);
+    assertThat(storedLogs).hasSize(2);
+    assertThat(storedMetrics).hasSize(2);
+
+    // Data is auto-deleted from disk
+    assertDirectoryFileCount(spansDir, 0);
+    assertDirectoryFileCount(logsDir, 0);
+    assertDirectoryFileCount(metricsDir, 0);
+  }
+
+  @Test
+  void verifyIntegration_withoutAutoDelete() throws InterruptedException {
+    initStorage(
+        FileStorageConfiguration.builder()
+            .setMaxFileAgeForWriteMillis(MAX_WRITING_TIME_MILLIS)
+            .setMinFileAgeForReadMillis(DELAY_BEFORE_READING_MILLIS)
+            .setDeleteItemsOnIteration(false)
+            .build());
+
+    // Writing to first file
+    createSpan();
+    createLog();
+    createMetric();
+
+    // Waiting to write on second file
+    sleep(MAX_WRITING_TIME_MILLIS);
+
+    // Writing to second file
+    createSpan();
+    createLog();
+    createMetric();
+
+    // Waiting for read time
+    sleep(DELAY_BEFORE_READING_MILLIS);
+
+    // Read (items not auto-deleted)
+    List<SpanData> storedSpans = new ArrayList<>();
+    List<LogRecordData> storedLogs = new ArrayList<>();
+    List<MetricData> storedMetrics = new ArrayList<>();
+    spanStorage.forEach(storedSpans::addAll);
+    logStorage.forEach(storedLogs::addAll);
+    metricStorage.forEach(storedMetrics::addAll);
+
+    assertThat(storedSpans).hasSize(2);
+    assertThat(storedLogs).hasSize(2);
+    assertThat(storedMetrics).hasSize(2);
+
+    // Data stays on disk
+    assertDirectoryFileCount(spansDir, 2);
+    assertDirectoryFileCount(logsDir, 2);
+    assertDirectoryFileCount(metricsDir, 2);
+  }
+
+  @Test
+  void verifyIntegration_withoutAutoDelete_explicitRemove() throws InterruptedException {
+    initStorage(
+        FileStorageConfiguration.builder()
+            .setMaxFileAgeForWriteMillis(MAX_WRITING_TIME_MILLIS)
+            .setMinFileAgeForReadMillis(DELAY_BEFORE_READING_MILLIS)
+            .setDeleteItemsOnIteration(false)
+            .build());
+
+    // Writing to first file
+    createSpan();
+    createLog();
+    createMetric();
+
+    // Waiting to write on second file
+    sleep(MAX_WRITING_TIME_MILLIS);
+
+    // Writing to second file
+    createSpan();
+    createLog();
+    createMetric();
+
+    // Waiting for read time
+    sleep(DELAY_BEFORE_READING_MILLIS);
+
+    // Read with explicit removal
+    List<SpanData> storedSpans = new ArrayList<>();
+    List<LogRecordData> storedLogs = new ArrayList<>();
+    List<MetricData> storedMetrics = new ArrayList<>();
+    Iterator<Collection<SpanData>> spanIterator = spanStorage.iterator();
+    while (spanIterator.hasNext()) {
+      storedSpans.addAll(spanIterator.next());
+      spanIterator.remove();
+    }
+    Iterator<Collection<LogRecordData>> logIterator = logStorage.iterator();
+    while (logIterator.hasNext()) {
+      storedLogs.addAll(logIterator.next());
+      logIterator.remove();
+    }
+    Iterator<Collection<MetricData>> metricIterator = metricStorage.iterator();
+    while (metricIterator.hasNext()) {
+      storedMetrics.addAll(metricIterator.next());
+      metricIterator.remove();
+    }
+
+    assertThat(storedSpans).hasSize(2);
+    assertThat(storedLogs).hasSize(2);
+    assertThat(storedMetrics).hasSize(2);
+
+    // Data explicitly cleared
+    assertDirectoryFileCount(spansDir, 0);
+    assertDirectoryFileCount(logsDir, 0);
+    assertDirectoryFileCount(metricsDir, 0);
+  }
+
+  private void createSpan() {
+    Span span = tracer.spanBuilder("Span name").startSpan();
+    span.end();
+    verify(spanCallback).onExportSuccess(anyCollection());
+    verifyNoMoreInteractions(spanCallback);
+    clearInvocations(spanCallback);
+  }
+
+  private void createLog() {
+    logger.logRecordBuilder().setBody("Log body").emit();
+    verify(logCallback).onExportSuccess(anyCollection());
+    verifyNoMoreInteractions(logCallback);
+    clearInvocations(logCallback);
+  }
+
+  private void createMetric() {
+    meter.counterBuilder("counter").build().add(1);
+    meterProvider.forceFlush();
+    verify(metricCallback).onExportSuccess(anyCollection());
+    verifyNoMoreInteractions(metricCallback);
+    clearInvocations(metricCallback);
+  }
+
+  private static void assertDirectoryFileCount(File directory, int fileCount) {
+    assertThat(directory).isDirectory();
+    assertThat(directory.listFiles()).hasSize(fileCount);
   }
 
   private static SdkTracerProvider createTracerProvider(SpanExporter exporter) {

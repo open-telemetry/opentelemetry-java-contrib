@@ -33,7 +33,11 @@ public final class FileSpanStorage implements SignalStorage.Span {
     Storage<SpanData> storage =
         new Storage<>(FolderManager.create(destinationDir, configuration, Clock.getDefault()));
     return new FileSpanStorage(
-        new FileSignalStorage<>(storage, SignalSerializer.ofSpans(), SignalDeserializer.ofSpans()));
+        new FileSignalStorage<>(
+            storage,
+            SignalSerializer.ofSpans(),
+            SignalDeserializer.ofSpans(),
+            configuration.getDeleteItemsOnIteration()));
   }
 
   private FileSpanStorage(FileSignalStorage<SpanData> fileSignalStorage) {

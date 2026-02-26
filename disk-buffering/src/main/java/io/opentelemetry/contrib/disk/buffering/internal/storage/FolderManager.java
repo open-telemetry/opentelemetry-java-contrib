@@ -15,8 +15,12 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,6 +28,8 @@ public final class FolderManager implements Closeable {
   private final File folder;
   private final Clock clock;
   private final FileStorageConfiguration configuration;
+  private final Logger logger = Logger.getLogger(FolderManager.class.getName());
+  private static final Pattern NUMBER_PATTERN = Pattern.compile("\\d+");
   @Nullable private ReadableFile currentReadableFile;
   @Nullable private WritableFile currentWritableFile;
 
@@ -46,19 +52,33 @@ public final class FolderManager implements Closeable {
     this.clock = clock;
   }
 
+  static class CacheFile {
+    private final File file;
+    private final long createdTimeMillis;
+
+    CacheFile(File file, long createdTimeMillis) {
+      this.file = file;
+      this.createdTimeMillis = createdTimeMillis;
+    }
+
+    long getCreatedTimeMillis() {
+      return createdTimeMillis;
+    }
+  }
+
   @Override
   public void close() throws IOException {
     closeCurrentFiles();
   }
 
   @Nullable
-  public synchronized ReadableFile getReadableFile() throws IOException {
+  public synchronized ReadableFile getReadableFile(Predicate<CacheFile> excludeFiles)
+      throws IOException {
     currentReadableFile = null;
-    File readableFile = findReadableFile();
-    if (readableFile != null) {
+    CacheFile selectedFile = selectReadableFile(listCacheFiles(excludeFiles));
+    if (selectedFile != null) {
       currentReadableFile =
-          new ReadableFile(
-              readableFile, Long.parseLong(readableFile.getName()), clock, configuration);
+          new ReadableFile(selectedFile.file, selectedFile.createdTimeMillis, clock, configuration);
       return currentReadableFile;
     }
     return null;
@@ -93,29 +113,56 @@ public final class FolderManager implements Closeable {
     }
   }
 
-  @Nullable
-  private File findReadableFile() throws IOException {
-    long currentTime = nowMillis(clock);
+  private List<CacheFile> listCacheFiles(Predicate<CacheFile> exclude) {
     File[] existingFiles = folder.listFiles();
-    File oldestFileAvailable = null;
+    if (existingFiles == null) {
+      return Collections.emptyList();
+    }
+    ArrayList<CacheFile> files = new ArrayList<>();
+    for (File file : existingFiles) {
+      CacheFile cacheFile = fileToCacheFile(file);
+      if (cacheFile != null && !exclude.test(cacheFile)) {
+        files.add(cacheFile);
+      }
+    }
+    return Collections.unmodifiableList(files);
+  }
+
+  @Nullable
+  private CacheFile fileToCacheFile(File file) {
+    String fileName = file.getName();
+    if (!NUMBER_PATTERN.matcher(fileName).matches()) {
+      logger.finer(String.format("Invalid cache file name: '%s'", fileName));
+      return null;
+    }
+    return new CacheFile(file, Long.parseLong(fileName));
+  }
+
+  @Nullable
+  private CacheFile selectReadableFile(List<CacheFile> files) throws IOException {
+    if (files.isEmpty()) {
+      return null;
+    }
+
+    long currentTime = nowMillis(clock);
+    CacheFile oldestFileAvailable = null;
     long oldestFileCreationTimeMillis = 0;
-    if (existingFiles != null) {
-      for (File existingFile : existingFiles) {
-        long existingFileCreationTimeMillis = Long.parseLong(existingFile.getName());
-        if (isReadyToBeRead(currentTime, existingFileCreationTimeMillis)
-            && !hasExpiredForReading(currentTime, existingFileCreationTimeMillis)) {
-          if (oldestFileAvailable == null
-              || existingFileCreationTimeMillis < oldestFileCreationTimeMillis) {
-            oldestFileCreationTimeMillis = existingFileCreationTimeMillis;
-            oldestFileAvailable = existingFile;
-          }
+    for (CacheFile existingFile : files) {
+      long existingFileCreationTimeMillis = existingFile.createdTimeMillis;
+      if (isReadyToBeRead(currentTime, existingFileCreationTimeMillis)
+          && !hasExpiredForReading(currentTime, existingFileCreationTimeMillis)) {
+        if (oldestFileAvailable == null
+            || existingFileCreationTimeMillis < oldestFileCreationTimeMillis) {
+          oldestFileCreationTimeMillis = existingFileCreationTimeMillis;
+          oldestFileAvailable = existingFile;
         }
       }
     }
+
     // Checking if the oldest available file is currently the writable file.
     if (oldestFileAvailable != null
         && currentWritableFile != null
-        && oldestFileAvailable.equals(currentWritableFile.getFile())) {
+        && oldestFileAvailable.file.equals(currentWritableFile.getFile())) {
       currentWritableFile.close();
     }
     return oldestFileAvailable;

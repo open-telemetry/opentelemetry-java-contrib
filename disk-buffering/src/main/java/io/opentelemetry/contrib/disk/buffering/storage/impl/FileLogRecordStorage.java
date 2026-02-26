@@ -33,7 +33,11 @@ public final class FileLogRecordStorage implements SignalStorage.LogRecord {
     Storage<LogRecordData> storage =
         new Storage<>(FolderManager.create(destinationDir, configuration, Clock.getDefault()));
     return new FileLogRecordStorage(
-        new FileSignalStorage<>(storage, SignalSerializer.ofLogs(), SignalDeserializer.ofLogs()));
+        new FileSignalStorage<>(
+            storage,
+            SignalSerializer.ofLogs(),
+            SignalDeserializer.ofLogs(),
+            configuration.getDeleteItemsOnIteration()));
   }
 
   private FileLogRecordStorage(FileSignalStorage<LogRecordData> fileSignalStorage) {
