@@ -113,7 +113,6 @@ public final class Storage<T> implements Closeable {
     }
     ReadableFile readableFile = readableFileRef.get();
     if (readableFile != null && readableFile.isClosed()) {
-      // The file was deleted from the iterator
       readableFileRef.set(null);
       readableFile = null;
     }
