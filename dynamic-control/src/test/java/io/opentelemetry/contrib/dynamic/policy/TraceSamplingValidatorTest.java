@@ -15,7 +15,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 class TraceSamplingValidatorTest {
 
   private static final String TRACE_SAMPLING_POLICY_TYPE = "trace-sampling";
-  private static final String PROBABILITY_FIELD = "probability";
   private static final String TRACE_SAMPLING_ALIAS = "trace-sampling.probability";
 
   private final TraceSamplingValidator validator = new TraceSamplingValidator();
@@ -36,7 +35,8 @@ class TraceSamplingValidatorTest {
     TelemetryPolicy policy = validator.validate(json);
     assertThat(policy).isNotNull();
     assertThat(policy.getType()).isEqualTo(TRACE_SAMPLING_POLICY_TYPE);
-    assertThat(policy.getSpec().get(PROBABILITY_FIELD).asDouble()).isCloseTo(0.5, within(1e-9));
+    assertThat(policy).isInstanceOf(TraceSamplingRatePolicy.class);
+    assertThat(((TraceSamplingRatePolicy) policy).getProbability()).isCloseTo(0.5, within(1e-9));
   }
 
   @ParameterizedTest
@@ -46,7 +46,8 @@ class TraceSamplingValidatorTest {
     TelemetryPolicy policy = validator.validate(json);
     assertThat(policy).isNotNull();
     assertThat(policy.getType()).isEqualTo(TRACE_SAMPLING_POLICY_TYPE);
-    assertThat(policy.getSpec().get(PROBABILITY_FIELD).asDouble())
+    assertThat(policy).isInstanceOf(TraceSamplingRatePolicy.class);
+    assertThat(((TraceSamplingRatePolicy) policy).getProbability())
         .isCloseTo(probability, within(1e-9));
   }
 
@@ -70,8 +71,7 @@ class TraceSamplingValidatorTest {
 
   @Test
   void testValidate_InvalidJson_ProbabilityNotNumber() {
-    String json =
-        "{\"" + TRACE_SAMPLING_POLICY_TYPE + "\": {\"" + PROBABILITY_FIELD + "\": \"high\"}}";
+    String json = "{\"" + TRACE_SAMPLING_POLICY_TYPE + "\": {\"probability\": \"high\"}}";
     assertThat(validator.validate(json)).isNull();
   }
 
@@ -87,7 +87,8 @@ class TraceSamplingValidatorTest {
     TelemetryPolicy policy = validator.validateAlias(TRACE_SAMPLING_ALIAS, "0.5");
     assertThat(policy).isNotNull();
     assertThat(policy.getType()).isEqualTo(TRACE_SAMPLING_POLICY_TYPE);
-    assertThat(policy.getSpec().get(PROBABILITY_FIELD).asDouble()).isCloseTo(0.5, within(1e-9));
+    assertThat(policy).isInstanceOf(TraceSamplingRatePolicy.class);
+    assertThat(((TraceSamplingRatePolicy) policy).getProbability()).isCloseTo(0.5, within(1e-9));
   }
 
   @ParameterizedTest
@@ -96,7 +97,8 @@ class TraceSamplingValidatorTest {
     TelemetryPolicy policy = validator.validateAlias(TRACE_SAMPLING_ALIAS, probability);
     assertThat(policy).isNotNull();
     assertThat(policy.getType()).isEqualTo(TRACE_SAMPLING_POLICY_TYPE);
-    assertThat(policy.getSpec().get(PROBABILITY_FIELD).asDouble())
+    assertThat(policy).isInstanceOf(TraceSamplingRatePolicy.class);
+    assertThat(((TraceSamplingRatePolicy) policy).getProbability())
         .isCloseTo(Double.parseDouble(probability), within(1e-9));
   }
 
@@ -117,12 +119,6 @@ class TraceSamplingValidatorTest {
   }
 
   private static String jsonForProbability(double probability) {
-    return "{\""
-        + TRACE_SAMPLING_POLICY_TYPE
-        + "\": {\""
-        + PROBABILITY_FIELD
-        + "\": "
-        + probability
-        + "}}";
+    return "{\"" + TRACE_SAMPLING_POLICY_TYPE + "\": {\"probability\": " + probability + "}}";
   }
 }

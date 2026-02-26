@@ -23,7 +23,7 @@ public final class TraceSamplingValidator implements PolicyValidator {
 
   @Override
   public String getPolicyType() {
-    return "trace-sampling";
+    return TraceSamplingRatePolicy.TYPE;
   }
 
   @Override
@@ -43,7 +43,7 @@ public final class TraceSamplingValidator implements PolicyValidator {
           if (probNode.isNumber()) {
             double d = probNode.asDouble();
             if (d >= 0.0 && d <= 1.0) {
-              return new TelemetryPolicy(getPolicyType(), spec);
+              return new TraceSamplingRatePolicy(d);
             }
           }
         }
@@ -62,8 +62,7 @@ public final class TraceSamplingValidator implements PolicyValidator {
       try {
         double d = Double.parseDouble(value);
         if (d >= 0.0 && d <= 1.0) {
-          JsonNode spec = MAPPER.createObjectNode().put("probability", d);
-          return new TelemetryPolicy(getPolicyType(), spec);
+          return new TraceSamplingRatePolicy(d);
         }
       } catch (NumberFormatException e) {
         // invalid
