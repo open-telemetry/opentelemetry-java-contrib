@@ -1,0 +1,34 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+exporters:
+  debug:
+    verbosity: detailed
+  otlp:
+    endpoint: http://golden:4317
+    tls:
+      insecure: true
+    retry_on_failure:
+      enabled: false
+    sending_queue:
+      enabled: false
+processors:
+  groupbyattrs:
+  batch:
+    send_batch_size: 5000
+    timeout: 10s
+service:
+  pipelines:
+    metrics:
+      receivers:
+        - otlp
+      processors:
+        - batch
+        - groupbyattrs
+      exporters:
+        - debug
+        - otlp
