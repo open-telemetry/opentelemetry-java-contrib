@@ -1,7 +1,7 @@
 plugins {
   application
-  id("com.gradleup.shadow")
   id("otel.java-conventions")
+  id("otel.shadow-conventions")
   id("otel.publish-conventions")
   id("otel.weaver-conventions")
 }
@@ -65,6 +65,10 @@ testing {
       }
     }
   }
+}
+
+licenseReport {
+  excludes = arrayOf("com.ibm.mq:com.ibm.mq.allclient")
 }
 
 tasks.shadowJar {
