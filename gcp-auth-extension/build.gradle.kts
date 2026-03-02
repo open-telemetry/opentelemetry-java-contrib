@@ -1,7 +1,7 @@
 plugins {
   id("otel.java-conventions")
+  id("otel.shadow-conventions")
   id("otel.publish-conventions")
-  id("com.gradleup.shadow")
 }
 
 description = "OpenTelemetry extension that provides GCP authentication support for OTLP exporters"

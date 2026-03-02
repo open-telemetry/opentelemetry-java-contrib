@@ -1,5 +1,8 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
   id("otel.java-conventions")
+  id("otel.shadow-conventions")
   id("otel.publish-conventions")
 }
 
@@ -17,4 +20,8 @@ dependencies {
   testImplementation("io.opentelemetry.semconv:opentelemetry-semconv-incubating")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-incubator")
+}
+
+tasks.named<ShadowJar>("shadowJar") {
+  archiveClassifier.set("dist")
 }
