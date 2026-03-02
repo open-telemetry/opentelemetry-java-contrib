@@ -437,12 +437,10 @@ class RecordingTest {
 
   @Test
   void assertStreamedFileEqualsDumpedFile() {
-
     Path dumpedFile = Paths.get(System.getProperty("user.dir"), "testRecordingStream_dumped.jfr");
-    ;
     Path streamedFile =
         Paths.get(System.getProperty("user.dir"), "testRecordingStream_getStream.jfr");
-    ;
+
     RecordingOptions recordingOptions = new RecordingOptions.Builder().disk("true").build();
     try (Recording recording = flightRecorderConnection.newRecording(recordingOptions, null)) {
       recording.start();
