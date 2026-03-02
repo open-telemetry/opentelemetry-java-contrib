@@ -9,7 +9,7 @@ otelJava.moduleName.set("io.opentelemetry.contrib.sampler.cel")
 dependencies {
   api("io.opentelemetry:opentelemetry-sdk")
 
-  implementation("dev.cel:cel:0.11.1")
+  implementation("dev.cel:cel:0.12.0")
 
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-incubator")
