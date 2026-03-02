@@ -35,10 +35,8 @@ class FilteringLogRecordProcessorTest {
 
   private final InMemoryLogRecordExporter memoryLogRecordExporter =
       InMemoryLogRecordExporter.create();
-  ;
   private final LogRecordProcessor logRecordProcessor =
       SimpleLogRecordProcessor.create(memoryLogRecordExporter);
-  ;
   private final InMemorySpanExporter spansExporter = InMemorySpanExporter.create();
   private AutoConfiguredOpenTelemetrySdkBuilder sdkBuilder;
   private Logger logger;
