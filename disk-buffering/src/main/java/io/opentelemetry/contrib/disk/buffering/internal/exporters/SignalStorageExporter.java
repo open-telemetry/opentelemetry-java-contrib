@@ -11,6 +11,7 @@ import io.opentelemetry.sdk.common.CompletableResultCode;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /** Internal utility for common export to disk operations across all exporters. */
 public final class SignalStorageExporter<T> {
@@ -28,6 +29,14 @@ public final class SignalStorageExporter<T> {
   public CompletableResultCode exportToStorage(Collection<T> items) {
     CompletableResultCode result =
         storage.write(items).join(writeTimeout.toMillis(), TimeUnit.MILLISECONDS);
+
+    if (!result.isDone()) {
+      TimeoutException timeout =
+          new TimeoutException("Storage write timed out after " + writeTimeout.toMillis() + "ms");
+      callback.onExportError(items, timeout);
+      return CompletableResultCode.ofExceptionalFailure(timeout);
+    }
+
     if (result.isSuccess()) {
       callback.onExportSuccess(items);
       return CompletableResultCode.ofSuccess();
