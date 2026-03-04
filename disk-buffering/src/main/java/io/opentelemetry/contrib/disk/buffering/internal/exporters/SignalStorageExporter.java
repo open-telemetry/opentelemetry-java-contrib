@@ -37,16 +37,16 @@ public final class SignalStorageExporter<T> {
       return CompletableResultCode.ofExceptionalFailure(timeout);
     }
 
-    if (result.isSuccess()) {
-      callback.onExportSuccess(items);
-      return CompletableResultCode.ofSuccess();
+    if (!result.isSuccess()) {
+      Throwable error = result.getFailureThrowable();
+      callback.onExportError(items, error);
+      if (error != null) {
+        return CompletableResultCode.ofExceptionalFailure(error);
+      }
+      return CompletableResultCode.ofFailure();
     }
 
-    Throwable error = result.getFailureThrowable();
-    callback.onExportError(items, error);
-    if (error != null) {
-      return CompletableResultCode.ofExceptionalFailure(error);
-    }
-    return CompletableResultCode.ofFailure();
+    callback.onExportSuccess(items);
+    return CompletableResultCode.ofSuccess();
   }
 }
