@@ -8,11 +8,10 @@ package io.opentelemetry.contrib.disk.buffering.internal.storage;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.storage.SignalStorage;
-import io.opentelemetry.contrib.disk.buffering.storage.result.WriteResult;
+import io.opentelemetry.sdk.common.CompletableResultCode;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -46,34 +45,34 @@ public final class FileSignalStorage<T> implements SignalStorage<T> {
   }
 
   @Override
-  public CompletableFuture<WriteResult> write(Collection<T> items) {
+  public CompletableResultCode write(Collection<T> items) {
     logger.finer("Intercepting batch.");
     try {
       serializer.initialize(items);
       if (storage.write(serializer)) {
-        return CompletableFuture.completedFuture(WriteResult.successful());
+        return CompletableResultCode.ofSuccess();
       }
       logger.fine("Could not store batch in disk.");
-      return CompletableFuture.completedFuture(
-          WriteResult.error(new Exception("Could not store batch in disk for an unknown reason.")));
+      return CompletableResultCode.ofExceptionalFailure(
+          new Exception("Could not store batch in disk for an unknown reason."));
     } catch (IOException e) {
       logger.log(
           Level.WARNING,
           "An unexpected error happened while attempting to write the data in disk.",
           e);
-      return CompletableFuture.completedFuture(WriteResult.error(e));
+      return CompletableResultCode.ofExceptionalFailure(e);
     } finally {
       serializer.reset();
     }
   }
 
   @Override
-  public CompletableFuture<WriteResult> clear() {
+  public CompletableResultCode clear() {
     try {
       storage.clear();
-      return CompletableFuture.completedFuture(WriteResult.successful());
+      return CompletableResultCode.ofSuccess();
     } catch (IOException e) {
-      return CompletableFuture.completedFuture(WriteResult.error(e));
+      return CompletableResultCode.ofExceptionalFailure(e);
     }
   }
 
