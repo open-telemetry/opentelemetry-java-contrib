@@ -15,7 +15,6 @@ import static org.mockito.Mockito.when;
 
 import io.opentelemetry.contrib.disk.buffering.exporters.callback.ExporterCallback;
 import io.opentelemetry.contrib.disk.buffering.storage.SignalStorage;
-import io.opentelemetry.contrib.disk.buffering.storage.result.WriteResult;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import java.time.Duration;
@@ -25,7 +24,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import javax.annotation.Nonnull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -78,8 +76,7 @@ class SignalStorageExporterTest {
     SpanData item1 = mock();
 
     // Without exception
-    when(storage.write(anyCollection()))
-        .thenReturn(CompletableFuture.completedFuture(WriteResult.error(null)));
+    when(storage.write(anyCollection())).thenReturn(CompletableResultCode.ofFailure());
 
     List<SpanData> items = Collections.singletonList(item1);
     CompletableResultCode resultCode = storageExporter.exportToStorage(items);
@@ -93,7 +90,7 @@ class SignalStorageExporterTest {
     clearInvocations(callback);
     Exception exception = new Exception();
     when(storage.write(anyCollection()))
-        .thenReturn(CompletableFuture.completedFuture(WriteResult.error(exception)));
+        .thenReturn(CompletableResultCode.ofExceptionalFailure(exception));
 
     resultCode = storageExporter.exportToStorage(items);
 
@@ -107,15 +104,15 @@ class SignalStorageExporterTest {
     private final List<Collection<SpanData>> storedItems = new ArrayList<>();
 
     @Override
-    public CompletableFuture<WriteResult> write(Collection<SpanData> items) {
+    public CompletableResultCode write(Collection<SpanData> items) {
       storedItems.add(items);
-      return getSuccessfulFuture();
+      return CompletableResultCode.ofSuccess();
     }
 
     @Override
-    public CompletableFuture<WriteResult> clear() {
+    public CompletableResultCode clear() {
       storedItems.clear();
-      return getSuccessfulFuture();
+      return CompletableResultCode.ofSuccess();
     }
 
     @Override
@@ -125,11 +122,6 @@ class SignalStorageExporterTest {
     @Override
     public Iterator<Collection<SpanData>> iterator() {
       return storedItems.iterator();
-    }
-
-    @Nonnull
-    private static CompletableFuture<WriteResult> getSuccessfulFuture() {
-      return CompletableFuture.completedFuture(WriteResult.successful());
     }
   }
 }

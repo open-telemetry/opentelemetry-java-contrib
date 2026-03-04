@@ -22,7 +22,7 @@ public final class LogRecordToDiskExporter implements LogRecordExporter {
   private final ExporterCallback<LogRecordData> callback;
   private static final ExporterCallback<LogRecordData> DEFAULT_CALLBACK =
       new NoopExporterCallback<>();
-  private static final Duration DEFAULT_EXPORT_TIMEOUT = Duration.ofSeconds(10);
+  private static final Duration DEFAULT_WRITE_TIMEOUT = Duration.ofSeconds(10);
 
   private LogRecordToDiskExporter(
       SignalStorageExporter<LogRecordData> storageExporter,
@@ -54,7 +54,7 @@ public final class LogRecordToDiskExporter implements LogRecordExporter {
   public static final class Builder {
     private final SignalStorage.LogRecord storage;
     private ExporterCallback<LogRecordData> callback = DEFAULT_CALLBACK;
-    private Duration writeTimeout = DEFAULT_EXPORT_TIMEOUT;
+    private Duration writeTimeout = DEFAULT_WRITE_TIMEOUT;
 
     @CanIgnoreReturnValue
     public Builder setExporterCallback(ExporterCallback<LogRecordData> value) {
