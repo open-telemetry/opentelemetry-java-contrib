@@ -5,7 +5,6 @@
 
 package io.opentelemetry.contrib.dynamic.policy;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import io.opentelemetry.contrib.dynamic.sampler.DelegatingSampler;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import java.util.Collections;
@@ -16,25 +15,21 @@ import java.util.Objects;
  * Implements the {@code trace-sampling} policy by updating a {@link DelegatingSampler}.
  *
  * <p>This implementer listens for validated {@link TelemetryPolicy} updates of type {@code
- * "trace-sampling"} and applies the {@code probability} field to the delegate sampler using {@link
- * Sampler#traceIdRatioBased(double)} wrapped by {@link Sampler#parentBased(Sampler)}.
+ * "trace-sampling"} and applies {@link TraceSamplingRatePolicy#getProbability()} to the delegate
+ * sampler using {@link Sampler#traceIdRatioBased(double)} wrapped by {@link
+ * Sampler#parentBased(Sampler)}.
  *
- * <p>If the policy spec is {@code null} (policy removal), the delegate falls back to {@link
- * Sampler#alwaysOn()}.
+ * <p>If a type-only {@link TelemetryPolicy} of type {@code "trace-sampling"} is received, it is
+ * treated as policy removal and the delegate falls back to {@link Sampler#alwaysOn()}.
  *
  * <p>Validation is performed by {@link TraceSamplingValidator}; this implementer only consumes
  * policies produced by that validator.
- *
- * <p>Policies with a non-null spec that omit {@code probability} are ignored, which should not
- * occur if validation is functioning correctly.
  *
  * <p>This class is thread-safe. Calls to {@link #onPoliciesChanged(List)} can occur concurrently
  * with sampling operations on the associated {@link DelegatingSampler}.
  */
 public final class TraceSamplingRatePolicyImplementer implements PolicyImplementer {
 
-  private static final String TRACE_SAMPLING_TYPE = "trace-sampling";
-  private static final String PROBABILITY_FIELD = "probability";
   private static final List<PolicyValidator> VALIDATORS =
       Collections.<PolicyValidator>singletonList(new TraceSamplingValidator());
 
@@ -58,19 +53,17 @@ public final class TraceSamplingRatePolicyImplementer implements PolicyImplement
   @Override
   public void onPoliciesChanged(List<TelemetryPolicy> policies) {
     for (TelemetryPolicy policy : policies) {
-      if (!TRACE_SAMPLING_TYPE.equals(policy.getType())) {
+      if (!TraceSamplingRatePolicy.TYPE.equals(policy.getType())) {
         continue;
       }
-      JsonNode spec = policy.getSpec();
-      if (spec == null) {
+      if (!(policy instanceof TraceSamplingRatePolicy)) {
+        // Type-only policy represents removing trace-sampling config.
         delegatingSampler.setDelegate(Sampler.alwaysOn());
         continue;
       }
-      if (spec.has(PROBABILITY_FIELD)) {
-        double ratio = spec.get(PROBABILITY_FIELD).asDouble(1.0);
-        Sampler sampler = Sampler.parentBased(Sampler.traceIdRatioBased(ratio));
-        delegatingSampler.setDelegate(sampler);
-      }
+      double ratio = ((TraceSamplingRatePolicy) policy).getProbability();
+      Sampler sampler = Sampler.parentBased(Sampler.traceIdRatioBased(ratio));
+      delegatingSampler.setDelegate(sampler);
     }
   }
 }

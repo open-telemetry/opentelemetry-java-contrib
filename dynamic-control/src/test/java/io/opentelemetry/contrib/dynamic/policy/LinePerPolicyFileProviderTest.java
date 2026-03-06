@@ -111,7 +111,7 @@ class LinePerPolicyFileProviderTest {
       if (!acceptJson) {
         return null;
       }
-      return new TelemetryPolicy(TRACE_SAMPLING_TYPE, null);
+      return new TelemetryPolicy(TRACE_SAMPLING_TYPE);
     }
 
     @Override
@@ -124,7 +124,7 @@ class LinePerPolicyFileProviderTest {
       if (!acceptAlias) {
         return null;
       }
-      return new TelemetryPolicy(TRACE_SAMPLING_TYPE, null);
+      return new TelemetryPolicy(TRACE_SAMPLING_TYPE);
     }
 
     @Override
