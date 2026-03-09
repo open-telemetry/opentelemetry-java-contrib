@@ -33,7 +33,6 @@ private admin repo.
 - `CODECOV_TOKEN`
 - `DEVELOCITY_ACCESS_KEY` (scoped only to Java repos)
 - `FOSSA_API_KEY`
-- `OTELBOT_JAVA_CONTRIB_PRIVATE_KEY` (scoped only to this repo)
 - `OTELBOT_PRIVATE_KEY`
 
 ### Organization variables
