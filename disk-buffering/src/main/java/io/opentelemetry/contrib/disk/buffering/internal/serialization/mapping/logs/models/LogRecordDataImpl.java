@@ -12,6 +12,7 @@ import io.opentelemetry.api.incubator.common.ExtendedAttributes;
 import io.opentelemetry.api.logs.Severity;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
+import io.opentelemetry.sdk.logs.data.Body;
 import io.opentelemetry.sdk.logs.data.internal.ExtendedLogRecordData;
 import io.opentelemetry.sdk.resources.Resource;
 import javax.annotation.Nullable;
@@ -24,11 +25,9 @@ public abstract class LogRecordDataImpl implements ExtendedLogRecordData {
   }
 
   @Deprecated
-  public io.opentelemetry.sdk.logs.data.Body getBody() {
+  public Body getBody() {
     Value<?> valueBody = getBodyValue();
-    return valueBody == null
-        ? io.opentelemetry.sdk.logs.data.Body.empty()
-        : io.opentelemetry.sdk.logs.data.Body.string(valueBody.asString());
+    return valueBody == null ? Body.empty() : Body.string(valueBody.asString());
   }
 
   @Override

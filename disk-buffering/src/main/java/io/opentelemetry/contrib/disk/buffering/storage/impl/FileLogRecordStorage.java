@@ -11,14 +11,13 @@ import io.opentelemetry.contrib.disk.buffering.internal.storage.FileSignalStorag
 import io.opentelemetry.contrib.disk.buffering.internal.storage.FolderManager;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.Storage;
 import io.opentelemetry.contrib.disk.buffering.storage.SignalStorage;
-import io.opentelemetry.contrib.disk.buffering.storage.result.WriteResult;
 import io.opentelemetry.sdk.common.Clock;
+import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.concurrent.CompletableFuture;
 import javax.annotation.Nonnull;
 
 public final class FileLogRecordStorage implements SignalStorage.LogRecord {
@@ -33,7 +32,11 @@ public final class FileLogRecordStorage implements SignalStorage.LogRecord {
     Storage<LogRecordData> storage =
         new Storage<>(FolderManager.create(destinationDir, configuration, Clock.getDefault()));
     return new FileLogRecordStorage(
-        new FileSignalStorage<>(storage, SignalSerializer.ofLogs(), SignalDeserializer.ofLogs()));
+        new FileSignalStorage<>(
+            storage,
+            SignalSerializer.ofLogs(),
+            SignalDeserializer.ofLogs(),
+            configuration.getDeleteItemsOnIteration()));
   }
 
   private FileLogRecordStorage(FileSignalStorage<LogRecordData> fileSignalStorage) {
@@ -41,12 +44,12 @@ public final class FileLogRecordStorage implements SignalStorage.LogRecord {
   }
 
   @Override
-  public CompletableFuture<WriteResult> write(Collection<LogRecordData> items) {
+  public CompletableResultCode write(Collection<LogRecordData> items) {
     return fileSignalStorage.write(items);
   }
 
   @Override
-  public CompletableFuture<WriteResult> clear() {
+  public CompletableResultCode clear() {
     return fileSignalStorage.clear();
   }
 

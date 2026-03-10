@@ -21,7 +21,7 @@ public final class SpanToDiskExporter implements SpanExporter {
   private final SignalStorageExporter<SpanData> storageExporter;
   private final ExporterCallback<SpanData> callback;
   private static final ExporterCallback<SpanData> DEFAULT_CALLBACK = new NoopExporterCallback<>();
-  private static final Duration DEFAULT_EXPORT_TIMEOUT = Duration.ofSeconds(10);
+  private static final Duration DEFAULT_WRITE_TIMEOUT = Duration.ofSeconds(10);
 
   private SpanToDiskExporter(
       SignalStorageExporter<SpanData> storageExporter, ExporterCallback<SpanData> callback) {
@@ -52,7 +52,7 @@ public final class SpanToDiskExporter implements SpanExporter {
   public static final class Builder {
     private final SignalStorage.Span storage;
     private ExporterCallback<SpanData> callback = DEFAULT_CALLBACK;
-    private Duration writeTimeout = DEFAULT_EXPORT_TIMEOUT;
+    private Duration writeTimeout = DEFAULT_WRITE_TIMEOUT;
 
     private Builder(SignalStorage.Span storage) {
       this.storage = storage;

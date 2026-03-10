@@ -9,6 +9,7 @@ import com.google.auto.value.AutoValue;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.data.EventData;
@@ -32,7 +33,7 @@ public abstract class SpanDataImpl implements SpanData {
   @SuppressWarnings(
       "deprecation") // Overridden to avoid AutoValue to generate builder method for it.
   @Override
-  public io.opentelemetry.sdk.common.InstrumentationLibraryInfo getInstrumentationLibraryInfo() {
+  public InstrumentationLibraryInfo getInstrumentationLibraryInfo() {
     throw new UnsupportedOperationException();
   }
 

@@ -22,6 +22,7 @@ import io.opentelemetry.proto.trace.v1.ResourceSpans;
 import java.net.URI;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.util.Arrays;
@@ -152,7 +153,7 @@ class GcpAuthExtensionEndToEndTest {
           }
         };
     SSLContext sc = SSLContext.getInstance("SSL");
-    sc.init(null, trustAllCerts, new java.security.SecureRandom());
+    sc.init(null, trustAllCerts, new SecureRandom());
     HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
   }
 

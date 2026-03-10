@@ -41,7 +41,7 @@ public final class OkHttpSender implements HttpSender {
   @Override
   public CompletableFuture<Response> send(BodyWriter writer, int contentLength) {
     CompletableFuture<Response> future = new CompletableFuture<>();
-    okhttp3.Request.Builder builder = new okhttp3.Request.Builder().url(url);
+    Request.Builder builder = new Request.Builder().url(url);
     builder.addHeader("Content-Type", CONTENT_TYPE);
 
     RequestBody body = new RawRequestBody(writer, contentLength, MEDIA_TYPE);

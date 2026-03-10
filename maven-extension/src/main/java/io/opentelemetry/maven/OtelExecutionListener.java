@@ -98,14 +98,11 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
   public void sessionStarted(ExecutionEvent executionEvent) {
     MavenProject project = executionEvent.getSession().getTopLevelProject();
     TextMapGetter<Map<String, String>> toUpperCaseTextMapGetter = new ToUpperCaseTextMapGetter();
-    io.opentelemetry.context.Context context =
+    Context context =
         openTelemetrySdkService
             .getPropagators()
             .getTextMapPropagator()
-            .extract(
-                io.opentelemetry.context.Context.current(),
-                System.getenv(),
-                toUpperCaseTextMapGetter);
+            .extract(Context.current(), System.getenv(), toUpperCaseTextMapGetter);
 
     // TODO question: is this the root span name we want?
     // It's interesting for the root span name to

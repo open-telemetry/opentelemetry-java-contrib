@@ -10,10 +10,6 @@ import io.opentelemetry.api.common.AttributeKey;
 // copied from opentelemetry-semconv-incubating
 final class IncubatingAttributes {
 
-  // service attributes
-  public static final AttributeKey<String> SERVICE_INSTANCE_ID =
-      AttributeKey.stringKey("service.instance.id");
-
   // cloud attributes
   public static final AttributeKey<String> CLOUD_PLATFORM =
       AttributeKey.stringKey("cloud.platform");

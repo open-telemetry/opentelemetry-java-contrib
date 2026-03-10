@@ -53,7 +53,7 @@ public final class JakartaPutGet {
     MQQueueManager ibmQueueManager = WmqUtil.connectToQueueManager(manager);
     PCFMessageAgent agent = WmqUtil.initPcfMessageAgent(manager, ibmQueueManager);
     PCFMessage request = new PCFMessage(CMQCFC.MQCMD_CREATE_Q);
-    request.addParameter(com.ibm.mq.constants.CMQC.MQCA_Q_NAME, name);
+    request.addParameter(CMQC.MQCA_Q_NAME, name);
     request.addParameter(CMQC.MQIA_Q_TYPE, CMQC.MQQT_LOCAL);
 
     request.addParameter(CMQC.MQIA_MAX_Q_DEPTH, maxDepth);

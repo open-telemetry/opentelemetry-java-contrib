@@ -36,6 +36,8 @@ The available configuration parameters are the following:
 * Max age for file reading. After that time passes, the file will be considered stale and will be
   removed when new files are created. No more data will be read from a file past this time. Defaults
   to 18 hours.
+* Delete items on iteration. Controls whether items are automatically removed from disk as the
+  iterator advances. Defaults to `true`. See [Deleting data](#deleting-data) for more details.
 
 ```java
 // Root dir
@@ -105,7 +107,8 @@ Now when creating signals using your `OpenTelemetry` instance, those will get st
 ### Reading data
 
 In order to read data, we can iterate through our signal storage objects and then forward them to
-a network exporter, as shown in the example for spans below.
+a network exporter. By default, items are automatically deleted from disk as the iterator advances,
+so a simple iteration is all that's needed:
 
 ```java
 /**
@@ -129,11 +132,52 @@ public boolean exportSpansFromDisk(SpanExporter networkExporter, long timeout) {
 }
 ```
 
-The `File*Storage` iterators delete the previously returned collection when `next()` is called,
-assuming that if the next collection is requested is because the previous one was successfully
-consumed.
+### Deleting data
 
-Both the writing and reading processes can run in parallel and they don't overlap
+By default, items are automatically deleted from disk as the iterator advances. You can also
+clear all data at once by calling `SignalStorage.clear()`.
+
+#### Automatic vs explicit deletion
+
+The default behavior (`deleteItemsOnIteration = true`) automatically removes items from disk during
+iteration. This means you don't need to call `Iterator.remove()` since the data is cleaned up as the
+iterator advances.
+
+If you need more control (e.g., only deleting items after a successful network export), set
+`deleteItemsOnIteration` to `false` in the configuration:
+
+```java
+FileStorageConfiguration config = FileStorageConfiguration.builder()
+    .setDeleteItemsOnIteration(false)
+    .build();
+SignalStorage.Span spanStorage = FileSpanStorage.create(new File(rootDir, "spans"), config);
+```
+
+With this setting, items remain on disk until explicitly removed via `Iterator.remove()`:
+
+```java
+public boolean exportSpansFromDisk(SpanExporter networkExporter, long timeout) {
+  Iterator<Collection<SpanData>> spansIterator = spanStorage.iterator();
+  while (spansIterator.hasNext()) {
+    CompletableResultCode resultCode = networkExporter.export(spansIterator.next());
+    resultCode.join(timeout, TimeUnit.MILLISECONDS);
+
+    if (resultCode.isSuccess()) {
+      spansIterator.remove();
+    } else {
+      return false;
+    }
+  }
+  return true;
+}
+```
+
+Note that even with explicit deletion, disk usage is still bounded by the configured max folder size and max file
+age, so stale files are automatically purged when there's not enough space available before new data is written.
+
+### More details on the writing and reading processes
+
+Both the writing and reading processes can run in parallel as they won't overlap
 because each is supposed to happen in different files. We ensure that reader and writer don't
 accidentally meet in the same file by using the configurable parameters. These parameters set
 non-overlapping time frames for each action to be done on a single file at a time. On top of that,

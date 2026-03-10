@@ -11,14 +11,13 @@ import io.opentelemetry.contrib.disk.buffering.internal.storage.FileSignalStorag
 import io.opentelemetry.contrib.disk.buffering.internal.storage.FolderManager;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.Storage;
 import io.opentelemetry.contrib.disk.buffering.storage.SignalStorage;
-import io.opentelemetry.contrib.disk.buffering.storage.result.WriteResult;
 import io.opentelemetry.sdk.common.Clock;
+import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.concurrent.CompletableFuture;
 import javax.annotation.Nonnull;
 
 public final class FileSpanStorage implements SignalStorage.Span {
@@ -33,7 +32,11 @@ public final class FileSpanStorage implements SignalStorage.Span {
     Storage<SpanData> storage =
         new Storage<>(FolderManager.create(destinationDir, configuration, Clock.getDefault()));
     return new FileSpanStorage(
-        new FileSignalStorage<>(storage, SignalSerializer.ofSpans(), SignalDeserializer.ofSpans()));
+        new FileSignalStorage<>(
+            storage,
+            SignalSerializer.ofSpans(),
+            SignalDeserializer.ofSpans(),
+            configuration.getDeleteItemsOnIteration()));
   }
 
   private FileSpanStorage(FileSignalStorage<SpanData> fileSignalStorage) {
@@ -41,12 +44,12 @@ public final class FileSpanStorage implements SignalStorage.Span {
   }
 
   @Override
-  public CompletableFuture<WriteResult> write(Collection<SpanData> items) {
+  public CompletableResultCode write(Collection<SpanData> items) {
     return fileSignalStorage.write(items);
   }
 
   @Override
-  public CompletableFuture<WriteResult> clear() {
+  public CompletableResultCode clear() {
     return fileSignalStorage.clear();
   }
 

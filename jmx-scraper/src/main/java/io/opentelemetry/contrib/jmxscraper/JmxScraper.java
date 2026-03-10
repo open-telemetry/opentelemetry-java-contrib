@@ -5,7 +5,7 @@
 
 package io.opentelemetry.contrib.jmxscraper;
 
-import static io.opentelemetry.semconv.incubating.ServiceIncubatingAttributes.SERVICE_INSTANCE_ID;
+import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_INSTANCE_ID;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.logging.Level.INFO;

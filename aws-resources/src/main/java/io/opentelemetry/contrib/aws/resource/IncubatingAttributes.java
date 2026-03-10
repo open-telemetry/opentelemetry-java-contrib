@@ -45,11 +45,6 @@ class IncubatingAttributes {
     private CloudProviderIncubatingValues() {}
   }
 
-  public static final AttributeKey<String> SERVICE_INSTANCE_ID =
-      AttributeKey.stringKey("service.instance.id");
-  public static final AttributeKey<String> SERVICE_NAMESPACE =
-      AttributeKey.stringKey("service.namespace");
-
   public static final AttributeKey<String> HOST_ID = AttributeKey.stringKey("host.id");
   public static final AttributeKey<String> HOST_IMAGE_ID = AttributeKey.stringKey("host.image.id");
   public static final AttributeKey<String> HOST_NAME = AttributeKey.stringKey("host.name");

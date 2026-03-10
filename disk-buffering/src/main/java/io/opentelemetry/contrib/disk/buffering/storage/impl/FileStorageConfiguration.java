@@ -43,6 +43,13 @@ public abstract class FileStorageConfiguration {
    */
   public abstract int getMaxFolderSize();
 
+  /**
+   * Whether to automatically delete items from disk during iteration. When true (the default),
+   * items are removed from disk as the iterator advances. When false, items remain on disk until
+   * explicitly removed via {@link java.util.Iterator#remove()}.
+   */
+  public abstract boolean getDeleteItemsOnIteration();
+
   public static FileStorageConfiguration getDefault() {
     return builder().build();
   }
@@ -53,7 +60,8 @@ public abstract class FileStorageConfiguration {
         .setMaxFolderSize(10 * 1024 * 1024) // 10MB
         .setMaxFileAgeForWriteMillis(SECONDS.toMillis(30))
         .setMinFileAgeForReadMillis(SECONDS.toMillis(33))
-        .setMaxFileAgeForReadMillis(HOURS.toMillis(18));
+        .setMaxFileAgeForReadMillis(HOURS.toMillis(18))
+        .setDeleteItemsOnIteration(true);
   }
 
   @AutoValue.Builder
@@ -67,6 +75,8 @@ public abstract class FileStorageConfiguration {
     public abstract Builder setMaxFileSize(int value);
 
     public abstract Builder setMaxFolderSize(int value);
+
+    public abstract Builder setDeleteItemsOnIteration(boolean value);
 
     abstract FileStorageConfiguration autoBuild();
 

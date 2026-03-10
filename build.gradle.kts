@@ -35,3 +35,11 @@ nexusPublishing {
 }
 
 description = "OpenTelemetry Contrib libraries and utilities for the JVM"
+
+if (project.findProperty("skipTests") as String? == "true") {
+  subprojects {
+    tasks.withType<Test>().configureEach {
+      enabled = false
+    }
+  }
+}

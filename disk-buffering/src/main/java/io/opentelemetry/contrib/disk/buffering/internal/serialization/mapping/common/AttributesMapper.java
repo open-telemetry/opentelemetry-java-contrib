@@ -5,19 +5,37 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.common;
 
+import static java.util.Collections.emptyList;
+
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.AttributeType;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
+import io.opentelemetry.api.common.Value;
 import io.opentelemetry.proto.common.v1.AnyValue;
 import io.opentelemetry.proto.common.v1.ArrayValue;
 import io.opentelemetry.proto.common.v1.KeyValue;
+import io.opentelemetry.proto.common.v1.KeyValueList;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import okio.ByteString;
 
 public final class AttributesMapper {
 
   private static final AttributesMapper INSTANCE = new AttributesMapper();
+
+  /** Represents the type of value stored in a proto AnyValue. */
+  private enum ProtoValueType {
+    STRING,
+    BOOL,
+    INT,
+    DOUBLE,
+    BYTES,
+    ARRAY,
+    KVLIST,
+    EMPTY
+  }
 
   public static AttributesMapper getInstance() {
     return INSTANCE;
@@ -44,7 +62,8 @@ public final class AttributesMapper {
     return builder.build();
   }
 
-  @SuppressWarnings("unchecked") // data type is checked before casting
+  // Type is checked via AttributeType before casting
+  @SuppressWarnings("unchecked")
   private static AnyValue attributeValueToProto(AttributeType type, Object value) {
     switch (type) {
       case STRING:
@@ -63,8 +82,70 @@ public final class AttributesMapper {
         return arrayToAnyValue(longListToAnyValue((List<Long>) value));
       case DOUBLE_ARRAY:
         return arrayToAnyValue(doubleListToAnyValue((List<Double>) value));
+      case VALUE:
+        return valueToAnyValue((Value<?>) value);
     }
     throw new UnsupportedOperationException();
+  }
+
+  // Type is checked via ValueType before casting
+  @SuppressWarnings("unchecked")
+  private static AnyValue valueToAnyValue(Value<?> value) {
+    switch (value.getType()) {
+      case STRING:
+        return stringToAnyValue((String) value.getValue());
+      case BOOLEAN:
+        return booleanToAnyValue((Boolean) value.getValue());
+      case LONG:
+        return longToAnyValue((Long) value.getValue());
+      case DOUBLE:
+        return doubleToAnyValue((Double) value.getValue());
+      case BYTES:
+        ByteBuffer byteBuffer = (ByteBuffer) value.getValue();
+        byte[] bytes = new byte[byteBuffer.remaining()];
+        byteBuffer.get(bytes);
+        return bytesToAnyValue(bytes);
+      case ARRAY:
+        List<Value<?>> arrayValues = (List<Value<?>>) value.getValue();
+        return arrayValueToAnyValue(arrayValues);
+      case KEY_VALUE_LIST:
+        List<io.opentelemetry.api.common.KeyValue> kvList =
+            (List<io.opentelemetry.api.common.KeyValue>) value.getValue();
+        return keyValueListToAnyValue(kvList);
+      case EMPTY:
+        return new AnyValue.Builder().build();
+    }
+    throw new UnsupportedOperationException("Unsupported ValueType: " + value.getType());
+  }
+
+  private static AnyValue bytesToAnyValue(byte[] bytes) {
+    AnyValue.Builder anyValue = new AnyValue.Builder();
+    anyValue.bytes_value(ByteString.of(bytes));
+    return anyValue.build();
+  }
+
+  private static AnyValue arrayValueToAnyValue(List<Value<?>> values) {
+    List<AnyValue> anyValues = new ArrayList<>(values.size());
+    for (Value<?> v : values) {
+      anyValues.add(valueToAnyValue(v));
+    }
+    return new AnyValue.Builder()
+        .array_value(new ArrayValue.Builder().values(anyValues).build())
+        .build();
+  }
+
+  private static AnyValue keyValueListToAnyValue(
+      List<io.opentelemetry.api.common.KeyValue> kvList) {
+    List<KeyValue> protoKeyValues = new ArrayList<>(kvList.size());
+    for (io.opentelemetry.api.common.KeyValue kv : kvList) {
+      KeyValue.Builder kvBuilder = new KeyValue.Builder();
+      kvBuilder.key(kv.getKey());
+      kvBuilder.value(valueToAnyValue(kv.getValue()));
+      protoKeyValues.add(kvBuilder.build());
+    }
+    return new AnyValue.Builder()
+        .kvlist_value(new KeyValueList.Builder().values(protoKeyValues).build())
+        .build();
   }
 
   private static AnyValue arrayToAnyValue(List<AnyValue> value) {
@@ -84,30 +165,106 @@ public final class AttributesMapper {
       builder.put(AttributeKey.doubleKey(key), value.double_value);
     } else if (value.array_value != null) {
       addArray(builder, key, value.array_value);
+    } else if (value.bytes_value != null) {
+      builder.put(AttributeKey.valueKey(key), Value.of(value.bytes_value.toByteArray()));
+    } else if (value.kvlist_value != null) {
+      builder.put(AttributeKey.valueKey(key), anyValueToValue(value));
     } else {
-      // Until we have complex attribute types that could potentially yield
-      // empty objects, we MUST assume here that the writer put an empty string
-      // into the value of the attribute. This will need to change later, when complex
-      // types arrive and the spec issue is resolved.
-      //
-      // See spec issue: https://github.com/open-telemetry/opentelemetry-specification/issues/4660
+      // Update after SDK v1.60.0 is released which includes:
+      // https://github.com/open-telemetry/opentelemetry-java/pull/8014
       builder.put(AttributeKey.stringKey(key), "");
+    }
+  }
+
+  private static Value<?> anyValueToValue(AnyValue value) {
+    if (value.string_value != null) {
+      return Value.of(value.string_value);
+    } else if (value.bool_value != null) {
+      return Value.of(value.bool_value);
+    } else if (value.int_value != null) {
+      return Value.of(value.int_value);
+    } else if (value.double_value != null) {
+      return Value.of(value.double_value);
+    } else if (value.bytes_value != null) {
+      return Value.of(value.bytes_value.toByteArray());
+    } else if (value.array_value != null) {
+      List<Value<?>> values = new ArrayList<>();
+      for (AnyValue anyValue : value.array_value.values) {
+        values.add(anyValueToValue(anyValue));
+      }
+      return Value.of(values);
+    } else if (value.kvlist_value != null) {
+      List<io.opentelemetry.api.common.KeyValue> kvList = new ArrayList<>();
+      for (KeyValue kv : value.kvlist_value.values) {
+        kvList.add(io.opentelemetry.api.common.KeyValue.of(kv.key, anyValueToValue(kv.value)));
+      }
+      return Value.of(kvList.toArray(new io.opentelemetry.api.common.KeyValue[0]));
+    } else {
+      return Value.empty();
     }
   }
 
   private static void addArray(AttributesBuilder builder, String key, ArrayValue arrayValue) {
     List<AnyValue> values = arrayValue.values;
-    AnyValue anyValue = values.get(0);
-    if (anyValue.string_value != null) {
-      builder.put(AttributeKey.stringArrayKey(key), anyValuesToStrings(values));
-    } else if (anyValue.bool_value != null) {
-      builder.put(AttributeKey.booleanArrayKey(key), anyValuesToBooleans(values));
-    } else if (anyValue.int_value != null) {
-      builder.put(AttributeKey.longArrayKey(key), anyValuesToLongs(values));
-    } else if (anyValue.double_value != null) {
-      builder.put(AttributeKey.doubleArrayKey(key), anyValuesToDoubles(values));
+
+    // Per SDK behavior (ArrayBackedAttributesBuilder#attributeType):
+    // "VALUE if the array is empty, non-homogeneous, or contains unsupported element types"
+    if (values.isEmpty()) {
+      builder.put(AttributeKey.valueKey(key), Value.of(emptyList()));
+      return;
+    }
+
+    // Check if array is homogeneous and of a primitive type
+    AnyValue firstValue = values.get(0);
+    boolean isHomogeneous = true;
+    ProtoValueType arrayType = getProtoValueType(firstValue);
+
+    for (int i = 1; i < values.size(); i++) {
+      if (getProtoValueType(values.get(i)) != arrayType) {
+        isHomogeneous = false;
+        break;
+      }
+    }
+
+    // If homogeneous and primitive, use typed array keys
+    if (isHomogeneous) {
+      if (firstValue.string_value != null) {
+        builder.put(AttributeKey.stringArrayKey(key), anyValuesToStrings(values));
+        return;
+      } else if (firstValue.bool_value != null) {
+        builder.put(AttributeKey.booleanArrayKey(key), anyValuesToBooleans(values));
+        return;
+      } else if (firstValue.int_value != null) {
+        builder.put(AttributeKey.longArrayKey(key), anyValuesToLongs(values));
+        return;
+      } else if (firstValue.double_value != null) {
+        builder.put(AttributeKey.doubleArrayKey(key), anyValuesToDoubles(values));
+        return;
+      }
+    }
+
+    // Heterogeneous or complex array - use VALUE type
+    AnyValue anyValue = new AnyValue.Builder().array_value(arrayValue).build();
+    builder.put(AttributeKey.valueKey(key), anyValueToValue(anyValue));
+  }
+
+  private static ProtoValueType getProtoValueType(AnyValue value) {
+    if (value.string_value != null) {
+      return ProtoValueType.STRING;
+    } else if (value.bool_value != null) {
+      return ProtoValueType.BOOL;
+    } else if (value.int_value != null) {
+      return ProtoValueType.INT;
+    } else if (value.double_value != null) {
+      return ProtoValueType.DOUBLE;
+    } else if (value.bytes_value != null) {
+      return ProtoValueType.BYTES;
+    } else if (value.array_value != null) {
+      return ProtoValueType.ARRAY;
+    } else if (value.kvlist_value != null) {
+      return ProtoValueType.KVLIST;
     } else {
-      throw new UnsupportedOperationException();
+      return ProtoValueType.EMPTY;
     }
   }
 

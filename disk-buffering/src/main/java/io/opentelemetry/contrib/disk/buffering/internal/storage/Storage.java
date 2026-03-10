@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 
@@ -28,6 +29,7 @@ public final class Storage<T> implements Closeable {
   private static final int MAX_ATTEMPTS = 3;
   private final Logger logger = Logger.getLogger(Storage.class.getName());
   private final FolderManager folderManager;
+  private volatile Predicate<FolderManager.CacheFile> fileExclusion = file -> false;
   private final AtomicBoolean isClosed = new AtomicBoolean(false);
   private final AtomicBoolean activeReadResultAvailable = new AtomicBoolean(false);
   private final AtomicReference<WritableFile> writableFileRef = new AtomicReference<>();
@@ -91,7 +93,11 @@ public final class Storage<T> implements Closeable {
       throw new IllegalStateException(
           "You must close any previous ReadableResult before requesting a new one");
     }
-    return doReadNext(deserializer, 1);
+    ReadableResult<T> result = doReadNext(deserializer, 1);
+    if (result == null) {
+      fileExclusion = file -> false;
+    }
+    return result;
   }
 
   @Nullable
@@ -106,9 +112,13 @@ public final class Storage<T> implements Closeable {
       return null;
     }
     ReadableFile readableFile = readableFileRef.get();
+    if (readableFile != null && readableFile.isClosed()) {
+      readableFileRef.set(null);
+      readableFile = null;
+    }
     if (readableFile == null) {
       logger.finer("Obtaining a new readableFile from the folderManager.");
-      readableFile = folderManager.getReadableFile();
+      readableFile = folderManager.getReadableFile(Objects.requireNonNull(fileExclusion));
       readableFileRef.set(readableFile);
       if (readableFile == null) {
         logger.fine("Unable to get or create readable file.");
@@ -117,19 +127,27 @@ public final class Storage<T> implements Closeable {
     }
 
     logger.finer("Attempting to read data from " + readableFile);
-    byte[] result = readableFile.readNext();
-    if (result != null) {
-      try {
-        List<T> items = deserializer.deserialize(result);
-        activeReadResultAvailable.set(true);
-        return new FileReadResult(items, readableFile);
-      } catch (DeserializationException e) {
-        // Data corrupted, clear file.
-        readableFile.clear();
+    long currentFileCreatedTime = readableFile.getCreatedTimeMillis();
+    try {
+      byte[] result = readableFile.readNext();
+      if (result != null) {
+        try {
+          List<T> items = deserializer.deserialize(result);
+          activeReadResultAvailable.set(true);
+          return new FileReadResult(items, readableFile);
+        } catch (DeserializationException e) {
+          // Data corrupted, clear file.
+          readableFile.clear();
+        }
       }
+    } catch (IOException e) {
+      // Proto data corrupted, clear file.
+      readableFile.clear();
     }
 
-    // Retry with new file
+    // Search for newer files than the current one.
+    fileExclusion = file -> file.getCreatedTimeMillis() <= currentFileCreatedTime;
+    readableFile.close();
     readableFileRef.set(null);
     return doReadNext(deserializer, ++attemptNumber);
   }

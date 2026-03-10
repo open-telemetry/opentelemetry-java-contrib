@@ -39,6 +39,7 @@ import java.io.StringWriter;
 import java.io.UncheckedIOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.assertj.core.presentation.StandardRepresentation;
@@ -537,7 +538,7 @@ class MetricAdapterTest {
             MetricAdapter.toSamples("full_name", MetricDataType.HISTOGRAM, Collections.emptyList()))
         .isEmpty();
 
-    java.util.List<Sample> result =
+    List<Sample> result =
         MetricAdapter.toSamples(
             "full_name",
             MetricDataType.HISTOGRAM,

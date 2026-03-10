@@ -7,6 +7,27 @@
 - Read `cloud.account.id` from symlink created by the OTel Lambda Extension
   ([#2619](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2619))
 
+## Version 1.54.0 (2026-02-18)
+
+### Compressors
+
+- Update zstd compressor to use new Compressor SPI from SDK
+  ([#2625](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2625))
+
+### Disk buffering
+
+- Add support for complex attributes (arrays, nested structures)
+  ([#2625](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2625))
+- Fix IllegalArgumentException: Unrecognized AnyValue type on empty LogRecord.body
+  ([#2529](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2529))
+
+### Dynamic control
+
+- Add initial TelemetryPolicy
+  ([#2592](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2592))
+- Add trace sampling validation
+  ([#2604](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2604))
+
 ## Version 1.53.0 (2026-01-21)
 
 ### AWS X-Ray propagator

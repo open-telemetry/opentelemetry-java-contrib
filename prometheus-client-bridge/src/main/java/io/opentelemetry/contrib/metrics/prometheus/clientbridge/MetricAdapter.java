@@ -27,6 +27,7 @@ import io.opentelemetry.sdk.metrics.data.ValueAtQuantile;
 import io.prometheus.client.Collector;
 import io.prometheus.client.Collector.MetricFamilySamples;
 import io.prometheus.client.Collector.MetricFamilySamples.Sample;
+import io.prometheus.client.exemplars.Exemplar;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -303,11 +304,10 @@ final class MetricAdapter {
         MILLISECONDS.convert(timestampNanos, NANOSECONDS));
   }
 
-  private static io.prometheus.client.exemplars.Exemplar toPrometheusExemplar(
-      ExemplarData exemplar) {
+  private static Exemplar toPrometheusExemplar(ExemplarData exemplar) {
     SpanContext spanContext = exemplar.getSpanContext();
     if (spanContext.isValid()) {
-      return new io.prometheus.client.exemplars.Exemplar(
+      return new Exemplar(
           getExemplarValue(exemplar),
           // Convert to ms for prometheus, truncate nanosecond precision.
           NANOSECONDS.toMillis(exemplar.getEpochNanos()),
@@ -316,7 +316,7 @@ final class MetricAdapter {
           "span_id",
           spanContext.getSpanId());
     }
-    return new io.prometheus.client.exemplars.Exemplar(getExemplarValue(exemplar));
+    return new Exemplar(getExemplarValue(exemplar));
   }
 
   private static double getExemplarValue(ExemplarData exemplar) {

@@ -84,10 +84,10 @@ class StorageTest {
           .hasMessage("You must close any previous ReadableResult before requesting a new one");
     }
 
-    // Read again when no more data is available (delete file)
+    // Read again when no more data is available
     readResult2.close();
     assertThat(storage.readNext(DESERIALIZER)).isNull();
-    assertThat(destinationDir.list()).isEmpty();
+    assertThat(destinationDir.list()).hasSize(1);
   }
 
   @Test
@@ -168,6 +168,87 @@ class StorageTest {
     assertThat(result2.getContent()).containsExactly(THIRD_LOG_RECORD);
     assertThat(destinationDir.list()).containsExactly(String.valueOf(secondFileWriteTime));
     result2.close();
+  }
+
+  @Test
+  void whenDeleteClosesFile_nextReadRecoversGracefully() throws IOException {
+    long firstFileWriteTime = 1000;
+    long secondFileWriteTime = firstFileWriteTime + MAX_FILE_AGE_FOR_WRITE_MILLIS + 1;
+    currentTimeMillis.set(firstFileWriteTime);
+    assertThat(write(Collections.singletonList(FIRST_LOG_RECORD))).isTrue();
+
+    currentTimeMillis.set(secondFileWriteTime);
+    assertThat(write(Collections.singletonList(SECOND_LOG_RECORD))).isTrue();
+
+    currentTimeMillis.set(secondFileWriteTime + MIN_FILE_AGE_FOR_READ_MILLIS);
+
+    // Read first item and delete it (this empties and closes the first file)
+    ReadableResult<LogRecordData> result = storage.readNext(DESERIALIZER);
+    assertThat(result).isNotNull();
+    assertThat(result.getContent()).containsExactly(FIRST_LOG_RECORD);
+    result.delete();
+    result.close();
+
+    // Next read should recover and find the second file
+    ReadableResult<LogRecordData> result2 = storage.readNext(DESERIALIZER);
+    assertThat(result2).isNotNull();
+    assertThat(result2.getContent()).containsExactly(SECOND_LOG_RECORD);
+    result2.close();
+  }
+
+  @Test
+  void whenReadingMultipleFilesWithoutDeleting_advancesCorrectly() throws IOException {
+    long firstFileWriteTime = 1000;
+    long secondFileWriteTime = firstFileWriteTime + MAX_FILE_AGE_FOR_WRITE_MILLIS + 1;
+    currentTimeMillis.set(firstFileWriteTime);
+    assertThat(write(Collections.singletonList(FIRST_LOG_RECORD))).isTrue();
+
+    currentTimeMillis.set(secondFileWriteTime);
+    assertThat(write(Collections.singletonList(SECOND_LOG_RECORD))).isTrue();
+
+    currentTimeMillis.set(secondFileWriteTime + MIN_FILE_AGE_FOR_READ_MILLIS);
+
+    // Read first item without deleting
+    ReadableResult<LogRecordData> result = storage.readNext(DESERIALIZER);
+    assertThat(result).isNotNull();
+    assertThat(result.getContent()).containsExactly(FIRST_LOG_RECORD);
+    result.close();
+
+    // Read second item (reader advances past first file since it's exhausted)
+    ReadableResult<LogRecordData> result2 = storage.readNext(DESERIALIZER);
+    assertThat(result2).isNotNull();
+    assertThat(result2.getContent()).containsExactly(SECOND_LOG_RECORD);
+    result2.close();
+
+    // No more data
+    assertThat(storage.readNext(DESERIALIZER)).isNull();
+
+    // Both files remain on disk
+    assertThat(destinationDir.list()).hasSize(2);
+  }
+
+  @Test
+  void afterReadSessionEnds_canReReadUnDeletedFiles() throws IOException {
+    assertThat(write(Collections.singletonList(FIRST_LOG_RECORD))).isTrue();
+    forwardToReadTime();
+
+    // First session: read without deleting
+    ReadableResult<LogRecordData> result = storage.readNext(DESERIALIZER);
+    assertThat(result).isNotNull();
+    assertThat(result.getContent()).containsExactly(FIRST_LOG_RECORD);
+    result.close();
+
+    // Exhaust the session (readNext returns null, resetting fileExclusion)
+    assertThat(storage.readNext(DESERIALIZER)).isNull();
+
+    // Second session: should be able to re-read the same file
+    ReadableResult<LogRecordData> result2 = storage.readNext(DESERIALIZER);
+    assertThat(result2).isNotNull();
+    assertThat(result2.getContent()).containsExactly(FIRST_LOG_RECORD);
+    result2.close();
+
+    // File still on disk
+    assertThat(destinationDir.list()).hasSize(1);
   }
 
   @Test

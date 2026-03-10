@@ -11,14 +11,13 @@ import io.opentelemetry.contrib.disk.buffering.internal.storage.FileSignalStorag
 import io.opentelemetry.contrib.disk.buffering.internal.storage.FolderManager;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.Storage;
 import io.opentelemetry.contrib.disk.buffering.storage.SignalStorage;
-import io.opentelemetry.contrib.disk.buffering.storage.result.WriteResult;
 import io.opentelemetry.sdk.common.Clock;
+import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.concurrent.CompletableFuture;
 import javax.annotation.Nonnull;
 
 public final class FileMetricStorage implements SignalStorage.Metric {
@@ -34,7 +33,10 @@ public final class FileMetricStorage implements SignalStorage.Metric {
         new Storage<>(FolderManager.create(destinationDir, configuration, Clock.getDefault()));
     return new FileMetricStorage(
         new FileSignalStorage<>(
-            storage, SignalSerializer.ofMetrics(), SignalDeserializer.ofMetrics()));
+            storage,
+            SignalSerializer.ofMetrics(),
+            SignalDeserializer.ofMetrics(),
+            configuration.getDeleteItemsOnIteration()));
   }
 
   private FileMetricStorage(FileSignalStorage<MetricData> fileSignalStorage) {
@@ -42,12 +44,12 @@ public final class FileMetricStorage implements SignalStorage.Metric {
   }
 
   @Override
-  public CompletableFuture<WriteResult> write(Collection<MetricData> items) {
+  public CompletableResultCode write(Collection<MetricData> items) {
     return fileSignalStorage.write(items);
   }
 
   @Override
-  public CompletableFuture<WriteResult> clear() {
+  public CompletableResultCode clear() {
     return fileSignalStorage.clear();
   }
 

@@ -6,19 +6,13 @@
 package io.opentelemetry.contrib.compressor.zstd;
 
 import com.github.luben.zstd.ZstdOutputStream;
-import io.opentelemetry.exporter.internal.compression.Compressor;
+import io.opentelemetry.sdk.common.export.Compressor;
 import java.io.IOException;
 import java.io.OutputStream;
 
 public final class ZstdCompressor implements Compressor {
 
-  private static final ZstdCompressor INSTANCE = new ZstdCompressor();
-
-  private ZstdCompressor() {}
-
-  public static ZstdCompressor getInstance() {
-    return INSTANCE;
-  }
+  public ZstdCompressor() {}
 
   @Override
   public String getEncoding() {

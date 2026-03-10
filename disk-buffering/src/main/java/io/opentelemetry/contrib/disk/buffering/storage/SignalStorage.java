@@ -5,13 +5,12 @@
 
 package io.opentelemetry.contrib.disk.buffering.storage;
 
-import io.opentelemetry.contrib.disk.buffering.storage.result.WriteResult;
+import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import java.io.Closeable;
 import java.util.Collection;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * Allows writing and iterating over written signal items.
@@ -24,16 +23,16 @@ public interface SignalStorage<T> extends Iterable<Collection<T>>, Closeable {
    * Stores signal items.
    *
    * @param items The items to be stored.
-   * @return A future with {@link WriteResult}.
+   * @return A {@link CompletableResultCode} representing the outcome of the write operation.
    */
-  CompletableFuture<WriteResult> write(Collection<T> items);
+  CompletableResultCode write(Collection<T> items);
 
   /**
    * Removes all the previously stored items.
    *
-   * @return A future with {@link WriteResult}.
+   * @return A {@link CompletableResultCode} representing the outcome of the clear operation.
    */
-  CompletableFuture<WriteResult> clear();
+  CompletableResultCode clear();
 
   /**
    * Abstraction for Spans. Implementations should use this instead of {@link SignalStorage}

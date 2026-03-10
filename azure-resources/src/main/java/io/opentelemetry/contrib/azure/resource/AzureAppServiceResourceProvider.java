@@ -10,7 +10,7 @@ import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.CLOUD
 import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.CloudPlatformIncubatingValues.AZURE_APP_SERVICE;
 import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.DEPLOYMENT_ENVIRONMENT_NAME;
 import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.HOST_ID;
-import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.SERVICE_INSTANCE_ID;
+import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_INSTANCE_ID;
 import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_NAME;
 import static java.util.Objects.requireNonNull;
 

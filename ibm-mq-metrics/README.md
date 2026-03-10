@@ -44,7 +44,7 @@ These jar files are typically found in ```/opt/mqm/java/lib``` on a UNIX server 
 found in an alternate location depending upon your environment.
 
 In case of **CLIENT** transport type, IBM MQ Client must be installed to get the MQ jars.
-[The IBM MQ Client jars can be downloaded here](https://developer.ibm.com/messaging/mq-downloads/).
+[The IBM MQ Client jars can be downloaded here](https://developer.ibm.com/articles/mq-downloads/).
 
 ### MQ monitoring configuration
 
@@ -126,7 +126,7 @@ There are two transport modes in which this extension can be run:
 * **Binding** : Requires WMQ Extension to be deployed in machine agent on the same machine where
   WMQ server is installed.
 * **Client** : In this mode, the WMQ extension is installed on a different host than the IBM MQ
-  server. Please install the [IBM MQ Client](https://developer.ibm.com/messaging/mq-downloads/)
+  server. Please install the [IBM MQ Client](https://developer.ibm.com/articles/mq-downloads/)
   for this mode to get the necessary jars as mentioned previously.
 
 If this extension is configured for **CLIENT** transport type

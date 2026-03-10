@@ -12,6 +12,7 @@ import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.getConfiguration;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -88,8 +89,7 @@ class ReadableFileTest {
   }
 
   @Test
-  void whenNoMoreLinesAvailableToRead_deleteOriginalFile_close_and_returnNoContentStatus()
-      throws IOException {
+  void whenNoMoreLinesAvailableToRead_close_and_returnNoContentStatus() throws IOException {
     File emptyFile = new File(dir, "emptyFile");
     if (!emptyFile.createNewFile()) {
       fail("Could not create file for tests");
@@ -101,7 +101,7 @@ class ReadableFileTest {
     assertThat(emptyReadableFile.readNext()).isNull();
 
     assertThat(emptyReadableFile.isClosed()).isTrue();
-    assertThat(emptyFile.exists()).isFalse();
+    assertThat(emptyFile.exists()).isTrue();
   }
 
   @Test
@@ -118,6 +118,20 @@ class ReadableFileTest {
     readableFile.close();
 
     assertThat(readableFile.readNext()).isNull();
+  }
+
+  @Test
+  void getCreatedTimeMillis_returnsValueWhenOpen() {
+    assertThat(readableFile.getCreatedTimeMillis()).isEqualTo(CREATED_TIME_MILLIS);
+  }
+
+  @Test
+  void getCreatedTimeMillis_throwsWhenClosed() throws IOException {
+    readableFile.close();
+
+    assertThatThrownBy(() -> readableFile.getCreatedTimeMillis())
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessage("File is closed");
   }
 
   private static List<LogRecordData> getRemainingDataAndClose(ReadableFile readableFile)

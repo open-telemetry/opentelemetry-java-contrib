@@ -241,6 +241,17 @@
         'org.springframework.boot:**',
       ],
     },
+    {
+      // group all GitHub Actions updates into a single weekly PR
+      // (Renovate applies packageRules in order and later rules win)
+      groupName: 'github actions',
+      matchManagers: [
+        'github-actions',
+      ],
+      schedule: [
+        'before 8am on Tuesday',
+      ],
+    },
   ],
   customManagers: [
     {

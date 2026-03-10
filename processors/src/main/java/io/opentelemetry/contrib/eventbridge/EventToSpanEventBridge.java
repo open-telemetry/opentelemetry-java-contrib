@@ -17,7 +17,6 @@ import io.opentelemetry.exporter.internal.otlp.AnyValueMarshaler;
 import io.opentelemetry.sdk.logs.LogRecordProcessor;
 import io.opentelemetry.sdk.logs.ReadWriteLogRecord;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
-import io.opentelemetry.sdk.logs.data.internal.ExtendedLogRecordData;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -76,10 +75,7 @@ public final class EventToSpanEventBridge implements LogRecordProcessor {
   @Override
   public void onEmit(Context context, ReadWriteLogRecord logRecord) {
     LogRecordData logRecordData = logRecord.toLogRecordData();
-    if (!(logRecordData instanceof ExtendedLogRecordData)) {
-      return;
-    }
-    String eventName = ((ExtendedLogRecordData) logRecordData).getEventName();
+    String eventName = logRecordData.getEventName();
     if (eventName == null) {
       return;
     }
@@ -101,6 +97,8 @@ public final class EventToSpanEventBridge implements LogRecordProcessor {
         TimeUnit.NANOSECONDS);
   }
 
+  // since we are targeting Java 8 we can't use the ByteArrayOutputStream.toString(Charset)
+  @SuppressWarnings("JdkObsolete")
   private static Attributes toSpanEventAttributes(LogRecordData logRecord) {
     AttributesBuilder builder = logRecord.getAttributes().toBuilder();
 

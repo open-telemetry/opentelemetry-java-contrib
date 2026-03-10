@@ -193,9 +193,7 @@ public final class EcsResource {
           DockerImage parsedImage = DockerImage.parse(value);
           if (parsedImage != null) {
             attrBuilders.put(CONTAINER_IMAGE_NAME, parsedImage.getRepository());
-            attrBuilders.put(
-                io.opentelemetry.contrib.aws.resource.IncubatingAttributes.CONTAINER_IMAGE_TAGS,
-                parsedImage.getTag());
+            attrBuilders.put(IncubatingAttributes.CONTAINER_IMAGE_TAGS, parsedImage.getTag());
           }
           break;
         case "ImageID":
