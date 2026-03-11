@@ -9,13 +9,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 
 /** KEYVALUE-backed source wrapper for a single key/value policy entry. */
 public final class KeyValueSourceWrapper implements SourceWrapper {
   private final String key;
   private final String value;
-  
+
   private static final Pattern LINE_SEPARATOR = Pattern.compile("\\R");
 
   public KeyValueSourceWrapper(String key, String value) {
