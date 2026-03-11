@@ -15,6 +15,8 @@ import javax.annotation.Nullable;
 public final class KeyValueSourceWrapper implements SourceWrapper {
   private final String key;
   private final String value;
+  
+  private static final Pattern LINE_SEPARATOR = Pattern.compile("\\R");
 
   public KeyValueSourceWrapper(String key, String value) {
     this.key = Objects.requireNonNull(key, "key cannot be null");
