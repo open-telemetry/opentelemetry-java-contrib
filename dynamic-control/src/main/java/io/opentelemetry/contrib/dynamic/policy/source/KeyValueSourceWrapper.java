@@ -52,7 +52,7 @@ public final class KeyValueSourceWrapper implements SourceWrapper {
   @Nullable
   public static List<SourceWrapper> parse(String source) {
     Objects.requireNonNull(source, "source cannot be null");
-    String[] lines = source.split("\\R", -1);
+    String[] lines = LINE_SEPARATOR.split(source, -1);
     List<SourceWrapper> wrappers = new ArrayList<>();
     for (String rawLine : lines) {
       String trimmedLine = rawLine.trim();
