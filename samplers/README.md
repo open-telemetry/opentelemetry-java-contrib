@@ -13,7 +13,7 @@ To use:
 * Follow the [instructions](https://github.com/open-telemetry/opentelemetry-java/blob/main/sdk-extensions/incubator/README.md#declarative-configuration) to configure OpenTelemetry with declarative configuration.
 * Configure the `.tracer_provider.sampler` to include the `rule_based_routing` sampler.
 
-Support is now available for the java agent, see an [example here](https://github.com/open-telemetry/opentelemetry-java-examples/blob/main/javaagent).
+Support is now available for the java agent, see an [example here](https://github.com/open-telemetry/opentelemetry-java-examples/tree/main/javaagent).
 
 Schema for `rule_based_routing` sampler:
 
