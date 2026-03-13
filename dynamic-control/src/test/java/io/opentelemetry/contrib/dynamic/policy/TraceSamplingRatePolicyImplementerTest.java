@@ -8,8 +8,6 @@ package io.opentelemetry.contrib.dynamic.policy;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Context;
@@ -24,15 +22,13 @@ import org.junit.jupiter.api.Test;
 
 class TraceSamplingRatePolicyImplementerTest {
 
-  private static final ObjectMapper MAPPER = new ObjectMapper();
-
   @Test
-  void nullSpecFallsBackToAlwaysOn() {
+  void typeOnlyTraceSamplingPolicyFallsBackToAlwaysOn() {
     DelegatingSampler delegatingSampler = new DelegatingSampler(Sampler.alwaysOff());
     TraceSamplingRatePolicyImplementer implementer =
         new TraceSamplingRatePolicyImplementer(delegatingSampler);
 
-    implementer.onPoliciesChanged(singletonList(new TelemetryPolicy("trace-sampling", null)));
+    implementer.onPoliciesChanged(singletonList(new TelemetryPolicy("trace-sampling")));
 
     assertThat(decisionFor(delegatingSampler)).isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
   }
@@ -43,8 +39,7 @@ class TraceSamplingRatePolicyImplementerTest {
     TraceSamplingRatePolicyImplementer implementer =
         new TraceSamplingRatePolicyImplementer(delegatingSampler);
 
-    implementer.onPoliciesChanged(
-        singletonList(new TelemetryPolicy("trace-sampling", spec("probability", 1.0))));
+    implementer.onPoliciesChanged(singletonList(new TraceSamplingRatePolicy(1.0)));
 
     assertThat(decisionFor(delegatingSampler)).isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
   }
@@ -55,20 +50,7 @@ class TraceSamplingRatePolicyImplementerTest {
     TraceSamplingRatePolicyImplementer implementer =
         new TraceSamplingRatePolicyImplementer(delegatingSampler);
 
-    implementer.onPoliciesChanged(
-        singletonList(new TelemetryPolicy("other-policy", spec("value", 1.0))));
-
-    assertThat(decisionFor(delegatingSampler)).isEqualTo(SamplingDecision.DROP);
-  }
-
-  @Test
-  void ignoresTraceSamplingPolicyWithoutProbability() {
-    DelegatingSampler delegatingSampler = new DelegatingSampler(Sampler.alwaysOff());
-    TraceSamplingRatePolicyImplementer implementer =
-        new TraceSamplingRatePolicyImplementer(delegatingSampler);
-
-    implementer.onPoliciesChanged(
-        singletonList(new TelemetryPolicy("trace-sampling", spec("other-field", 1.0))));
+    implementer.onPoliciesChanged(singletonList(new TelemetryPolicy("other-policy")));
 
     assertThat(decisionFor(delegatingSampler)).isEqualTo(SamplingDecision.DROP);
   }
@@ -80,9 +62,7 @@ class TraceSamplingRatePolicyImplementerTest {
         new TraceSamplingRatePolicyImplementer(delegatingSampler);
 
     List<TelemetryPolicy> policies =
-        Arrays.asList(
-            new TelemetryPolicy("trace-sampling", spec("probability", 0.0)),
-            new TelemetryPolicy("trace-sampling", spec("probability", 1.0)));
+        Arrays.asList(new TraceSamplingRatePolicy(0.0), new TraceSamplingRatePolicy(1.0));
 
     implementer.onPoliciesChanged(policies);
 
@@ -99,9 +79,5 @@ class TraceSamplingRatePolicyImplementerTest {
             Attributes.empty(),
             Collections.emptyList());
     return result.getDecision();
-  }
-
-  private static JsonNode spec(String field, double value) {
-    return MAPPER.createObjectNode().put(field, value);
   }
 }
