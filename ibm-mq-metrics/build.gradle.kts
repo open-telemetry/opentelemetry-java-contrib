@@ -1,3 +1,5 @@
+import org.gradle.kotlin.dsl.provideDelegate
+
 plugins {
   application
   id("com.gradleup.shadow")
@@ -71,4 +73,10 @@ tasks.shadowJar {
   dependencies {
     exclude(dependency("com.ibm.mq:com.ibm.mq.allclient"))
   }
+}
+
+task("copyIbmClientJar", Copy::class) {
+  from(ibmClientJar) {
+    rename { "com.ibm.mq.allclient.jar" }
+  }.into("build/libs")
 }
