@@ -81,7 +81,4 @@ configurations {
   }
 }
 
-// Skip OWASP dependencyCheck task on test module
-dependencyCheck {
-  skip = true
-}
+
