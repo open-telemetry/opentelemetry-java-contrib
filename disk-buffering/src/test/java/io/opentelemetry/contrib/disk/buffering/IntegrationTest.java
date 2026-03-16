@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -155,7 +156,7 @@ class IntegrationTest {
 
     assertThat(storedSpans).hasSize(2);
     assertThat(storedLogs).hasSize(2);
-    assertThat(storedMetrics).hasSize(2);
+    assertThat(filterTestMetrics(storedMetrics)).hasSize(2);
 
     // Data is auto-deleted from disk
     assertDirectoryFileCount(spansDir, 0);
@@ -198,7 +199,7 @@ class IntegrationTest {
 
     assertThat(storedSpans).hasSize(2);
     assertThat(storedLogs).hasSize(2);
-    assertThat(storedMetrics).hasSize(2);
+    assertThat(filterTestMetrics(storedMetrics)).hasSize(2);
 
     // Data stays on disk
     assertDirectoryFileCount(spansDir, 2);
@@ -253,7 +254,7 @@ class IntegrationTest {
 
     assertThat(storedSpans).hasSize(2);
     assertThat(storedLogs).hasSize(2);
-    assertThat(storedMetrics).hasSize(2);
+    assertThat(filterTestMetrics(storedMetrics)).hasSize(2);
 
     // Data explicitly cleared
     assertDirectoryFileCount(spansDir, 0);
@@ -282,6 +283,12 @@ class IntegrationTest {
     verify(metricCallback).onExportSuccess(anyCollection());
     verifyNoMoreInteractions(metricCallback);
     clearInvocations(metricCallback);
+  }
+
+  private static List<MetricData> filterTestMetrics(List<MetricData> metrics) {
+    return metrics.stream()
+        .filter(m -> m.getInstrumentationScopeInfo().getName().equals("MetricInstrumentationScope"))
+        .collect(Collectors.toList());
   }
 
   private static void assertDirectoryFileCount(File directory, int fileCount) {

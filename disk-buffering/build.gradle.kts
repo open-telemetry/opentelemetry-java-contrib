@@ -16,7 +16,6 @@ val protos by configurations.creating
 
 dependencies {
   api("io.opentelemetry:opentelemetry-sdk")
-  implementation("io.opentelemetry:opentelemetry-api-incubator")
   implementation("io.opentelemetry:opentelemetry-exporter-otlp-common")
   compileOnly("com.google.auto.value:auto-value-annotations")
   annotationProcessor("com.google.auto.value:auto-value")
