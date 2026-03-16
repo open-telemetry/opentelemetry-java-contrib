@@ -285,6 +285,8 @@ class IntegrationTest {
     clearInvocations(metricCallback);
   }
 
+  private static final String TEST_METRIC_INSTRUMENTATION_SCOPE_NAME = "MetricInstrumentationScope";
+
   /**
    * Filters out upstream's self-instrumentation metrics (e.g. {@code
    * otel.sdk.metric_reader.collection.duration}) that {@link PeriodicMetricReader} automatically
@@ -292,7 +294,11 @@ class IntegrationTest {
    */
   private static List<MetricData> filterTestMetrics(List<MetricData> metrics) {
     return metrics.stream()
-        .filter(m -> m.getInstrumentationScopeInfo().getName().equals("MetricInstrumentationScope"))
+        .filter(
+            m ->
+                m.getInstrumentationScopeInfo()
+                    .getName()
+                    .equals(TEST_METRIC_INSTRUMENTATION_SCOPE_NAME))
         .collect(Collectors.toList());
   }
 
