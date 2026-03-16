@@ -16,6 +16,9 @@
     'dependencies',
   ],
   packageRules: [
+
+    // ── Scheduling & grouping ──────────────────────────────────────────
+
     {
       // reduces the number of Renovate PRs
       // (patch updates are typically non-breaking)
@@ -24,7 +27,7 @@
         'patch',
       ],
       schedule: [
-        'before 8am every weekday',
+        'before 8am on Tuesday',
       ],
     },
     {
@@ -42,6 +45,20 @@
         '!io.opentelemetry.*:**',
       ],
     },
+    {
+      // group all GitHub Actions updates into a single weekly PR
+      // (must be after patch rule so that it wins for GH Action patches)
+      groupName: 'github actions',
+      matchManagers: [
+        'github-actions',
+      ],
+      schedule: [
+        'before 8am on Tuesday',
+      ],
+    },
+
+    // ── Version constraints ────────────────────────────────────────────
+
     {
       matchPackageNames: [
         'io.opentelemetry:**',
@@ -62,6 +79,50 @@
       ],
       allowedVersions: '!/^3\\.0\\.1$/',
     },
+
+    // ── Package family groups ──────────────────────────────────────────
+
+    {
+      groupName: 'spotless packages',
+      matchPackageNames: [
+        'com.diffplug.spotless',
+        'com.diffplug.spotless:**',
+      ],
+    },
+    {
+      groupName: 'hipparchus packages',
+      matchPackageNames: [
+        'org.hipparchus:**',
+      ],
+    },
+    {
+      groupName: 'errorprone packages',
+      matchPackageNames: [
+        'com.google.errorprone:**',
+      ],
+    },
+    {
+      groupName: 'jackson packages',
+      matchPackageNames: [
+        'com.fasterxml.jackson:**',
+        'com.fasterxml.jackson.core:**',
+      ],
+    },
+    {
+      groupName: 'develocity packages',
+      matchPackageNames: [
+        'com.gradle.develocity:**',
+      ],
+    },
+    {
+      groupName: 'bouncycastle packages',
+      matchPackageNames: [
+        'org.bouncycastle:**',
+      ],
+    },
+
+    // ── Disabled updates (Java version compatibility) ──────────────────
+
     {
       // disruptor 4+ requires Java 11+
       matchFileNames: [
@@ -167,44 +228,6 @@
       ],
     },
     {
-      groupName: 'spotless packages',
-      matchPackageNames: [
-        'com.diffplug.spotless',
-        'com.diffplug.spotless:**',
-      ],
-    },
-    {
-      groupName: 'hipparchus packages',
-      matchPackageNames: [
-        'org.hipparchus:**',
-      ],
-    },
-    {
-      groupName: 'errorprone packages',
-      matchPackageNames: [
-        'com.google.errorprone:**',
-      ],
-    },
-    {
-      groupName: 'jackson packages',
-      matchPackageNames: [
-        'com.fasterxml.jackson:**',
-        'com.fasterxml.jackson.core:**',
-      ],
-    },
-    {
-      groupName: 'develocity packages',
-      matchPackageNames: [
-        'com.gradle.develocity:**',
-      ],
-    },
-    {
-      groupName: 'bouncycastle packages',
-      matchPackageNames: [
-        'org.bouncycastle:**',
-      ],
-    },
-    {
       // pinned version for compatibility with java 8 JFR parsing
       matchFileNames: [
         'jfr-connection/build.gradle.kts',
@@ -239,17 +262,6 @@
       enabled: false,
       matchPackageNames: [
         'org.springframework.boot:**',
-      ],
-    },
-    {
-      // group all GitHub Actions updates into a single weekly PR
-      // (Renovate applies packageRules in order and later rules win)
-      groupName: 'github actions',
-      matchManagers: [
-        'github-actions',
-      ],
-      schedule: [
-        'before 8am on Tuesday',
       ],
     },
   ],
