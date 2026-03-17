@@ -3,11 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.dynamic.policy;
+package io.opentelemetry.contrib.dynamic.policy.tracesampling;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.opentelemetry.contrib.dynamic.policy.PolicyValidator;
+import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 

@@ -3,9 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.dynamic.policy;
+package io.opentelemetry.contrib.dynamic.policy.tracesampling;
 
-import io.opentelemetry.contrib.dynamic.sampler.DelegatingSampler;
+import io.opentelemetry.contrib.dynamic.policy.PolicyImplementer;
+import io.opentelemetry.contrib.dynamic.policy.PolicyValidator;
+import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import java.util.Collections;
 import java.util.List;

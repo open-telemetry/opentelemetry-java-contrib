@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.dynamic.sampler;
+package io.opentelemetry.contrib.dynamic.policy.tracesampling;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.SpanKind;

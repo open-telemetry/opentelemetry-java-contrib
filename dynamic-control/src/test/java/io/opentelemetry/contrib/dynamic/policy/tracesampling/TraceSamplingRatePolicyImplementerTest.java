@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.dynamic.policy;
+package io.opentelemetry.contrib.dynamic.policy.tracesampling;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -11,7 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Context;
-import io.opentelemetry.contrib.dynamic.sampler.DelegatingSampler;
+import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingDecision;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
