@@ -39,7 +39,6 @@ components:
     - PeterF778
   disk-buffering:
     - LikeTheSalad
-    - zeitlinger
   gcp-resources:
     - jsuereth
     - psx95
