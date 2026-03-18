@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.dynamic.policy;
+package io.opentelemetry.contrib.dynamic.policy.tracesampling;
+
+import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
 
 public final class TraceSamplingRatePolicy extends TelemetryPolicy {
   public static final String TYPE = "trace-sampling";
