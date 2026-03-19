@@ -36,7 +36,7 @@ jobs:
         if: steps.audit.outcome == 'failure'
         run: |
           echo "=== OSS Index Vulnerability Report ==="
-          cat oss-index-cyclonedx-bom.json
+          find . -name "oss-index-cyclonedx-bom.json" | xargs cat
           exit 1
 
   workflow-notification:
