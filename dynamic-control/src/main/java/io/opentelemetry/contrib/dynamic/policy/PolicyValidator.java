@@ -5,6 +5,9 @@
 
 package io.opentelemetry.contrib.dynamic.policy;
 
+import io.opentelemetry.contrib.dynamic.policy.source.JsonSourceWrapper;
+import io.opentelemetry.contrib.dynamic.policy.source.KeyValueSourceWrapper;
+import io.opentelemetry.contrib.dynamic.policy.source.SourceWrapper;
 import javax.annotation.Nullable;
 
 public interface PolicyValidator {
@@ -17,6 +20,34 @@ public interface PolicyValidator {
    */
   @Nullable
   TelemetryPolicy validate(String json);
+
+  /**
+   * Validates a parsed policy configuration source.
+   *
+   * <p>This is a transitional API: by default it delegates to {@link #validate(String)} and/or
+   * {@link #validateAlias(String, String)} where possible.
+   *
+   * @param source parsed source wrapper containing the format and payload
+   * @return The validated {@link TelemetryPolicy}, or {@code null} if the source does not contain a
+   *     valid policy for this validator.
+   */
+  @Nullable
+  default TelemetryPolicy validate(SourceWrapper source) {
+    if (source == null) {
+      return null;
+    }
+    if (source instanceof JsonSourceWrapper) {
+      return validate(((JsonSourceWrapper) source).asJsonNode().toString());
+    }
+    if (source instanceof KeyValueSourceWrapper) {
+      KeyValueSourceWrapper kv = (KeyValueSourceWrapper) source;
+      String alias = getAlias();
+      if (alias != null && alias.equals(kv.getKey().trim())) {
+        return validateAlias(kv.getKey().trim(), kv.getValue());
+      }
+    }
+    return null;
+  }
 
   /**
    * Returns the type of the policy this validator handles.
