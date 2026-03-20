@@ -218,7 +218,7 @@ afterEvaluate {
 }
 
 ossIndexAudit {
-  excludeCompileOnly.set(true)
+  isExcludeCompileOnly = true
   outputFormat = org.sonatype.gradle.plugins.scan.ossindex.OutputFormat.JSON_CYCLONE_DX_1_4
 
   username = System.getenv("SONATYPE_OSS_INDEX_USER")
