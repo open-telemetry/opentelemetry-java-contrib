@@ -165,7 +165,7 @@ Like with the JMX Gatherer, the selection of provided metrics to use is still do
 However, there is now two distinct sets of metrics to select from using the `otel.jmx.target.source` configuration option:
 
 - `legacy`: [metrics definitions](./src/main/resources) equivalent to JMX Gatherer definitions to help transition and preserve compatibility
-- `instrumentation`: [metrics definitions inherited from instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/instrumentation/jmx-metrics/library/src/main/resources/jmx/rules/), which is now used as a reference for JMX metrics, those also aim to provide better alignment with [metrics semantic conventions](https://opentelemetry.io/docs/specs/semconv/general/metrics/).
+- `instrumentation`: [metrics definitions inherited from instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/jmx-metrics/library/src/main/resources/jmx/rules/), which is now used as a reference for JMX metrics, those also aim to provide better alignment with [metrics semantic conventions](https://opentelemetry.io/docs/specs/semconv/general/metrics/).
 
 In both cases, the metrics definitions themselves are embedded in the JMX Scraper binary, thus they
 will only change if the release version of the JMX Scraper binary changes.
