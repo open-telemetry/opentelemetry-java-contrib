@@ -39,6 +39,7 @@ components:
     - PeterF778
   disk-buffering:
     - LikeTheSalad
+    - breedx-splk
   gcp-resources:
     - jsuereth
     - psx95
