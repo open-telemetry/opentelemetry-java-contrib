@@ -48,7 +48,7 @@ class LinePerPolicyFileProviderTest {
   }
 
   @Test
-  void fetchPoliciesParsesAliasLines() throws Exception {
+  void fetchPoliciesParsesKeyValueLines() throws Exception {
     Path file = writeLines("trace-sampling=0.5");
     LinePerPolicyFileProvider provider =
         new LinePerPolicyFileProvider(file, Collections.singletonList(acceptingValidator()));
@@ -74,7 +74,7 @@ class LinePerPolicyFileProviderTest {
   @Test
   void fetchPoliciesSkipsUnknownOrRejectedPolicies() throws Exception {
     PolicyValidator rejectingValidator =
-        new TestPolicyValidator(/* acceptJson= */ false, /* acceptAlias= */ false);
+        new TestPolicyValidator(/* acceptJson= */ false, /* acceptKeyValue= */ false);
     Path file = writeLines("{\"trace-sampling\": 0.5}", "{\"other-policy\": 0.5}", "other.key=1");
     LinePerPolicyFileProvider provider =
         new LinePerPolicyFileProvider(file, Collections.singletonList(rejectingValidator));
@@ -91,16 +91,16 @@ class LinePerPolicyFileProviderTest {
   }
 
   private static PolicyValidator acceptingValidator() {
-    return new TestPolicyValidator(/* acceptJson= */ true, /* acceptAlias= */ true);
+    return new TestPolicyValidator(/* acceptJson= */ true, /* acceptKeyValue= */ true);
   }
 
   private static class TestPolicyValidator implements PolicyValidator {
     private final boolean acceptJson;
-    private final boolean acceptAlias;
+    private final boolean acceptKeyValue;
 
-    private TestPolicyValidator(boolean acceptJson, boolean acceptAlias) {
+    private TestPolicyValidator(boolean acceptJson, boolean acceptKeyValue) {
       this.acceptJson = acceptJson;
-      this.acceptAlias = acceptAlias;
+      this.acceptKeyValue = acceptKeyValue;
     }
 
     @Override
@@ -117,7 +117,7 @@ class LinePerPolicyFileProviderTest {
         return new TelemetryPolicy(TRACE_SAMPLING_TYPE);
       }
       if (source.getFormat() == SourceFormat.KEYVALUE) {
-        if (!acceptAlias) {
+        if (!acceptKeyValue) {
           return null;
         }
         return new TelemetryPolicy(TRACE_SAMPLING_TYPE);

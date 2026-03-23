@@ -49,6 +49,52 @@ class TraceSamplingValidatorTest {
         .isCloseTo(probability, within(1e-9));
   }
 
+  /**
+   * Regression: {@link TraceSamplingValidator#validateJsonValue} still accepts the legacy nested
+   * object shape {@code {"trace-sampling": {"probability": <n>}}} used before flat numeric values
+   * were introduced.
+   */
+  @Test
+  void testValidate_ValidJson_LegacyObjectShapeWithProbabilityField() {
+    String json = "{\"" + TRACE_SAMPLING_POLICY_TYPE + "\": {\"probability\": 0.5}}";
+    TelemetryPolicy policy = validator.validate(first(SourceFormat.JSONKEYVALUE.parse(json)));
+    assertThat(policy).isNotNull();
+    assertThat(policy.getType()).isEqualTo(TRACE_SAMPLING_POLICY_TYPE);
+    assertThat(policy).isInstanceOf(TraceSamplingRatePolicy.class);
+    assertThat(((TraceSamplingRatePolicy) policy).getProbability()).isCloseTo(0.5, within(1e-9));
+  }
+
+  @ParameterizedTest
+  @ValueSource(doubles = {0.0, 1.0})
+  void testValidate_ValidJson_LegacyObjectShape_BoundaryValues(double probability) {
+    String json =
+        "{\"" + TRACE_SAMPLING_POLICY_TYPE + "\": {\"probability\": " + probability + "}}";
+    TelemetryPolicy policy = validator.validate(first(SourceFormat.JSONKEYVALUE.parse(json)));
+    assertThat(policy).isNotNull();
+    assertThat(((TraceSamplingRatePolicy) policy).getProbability())
+        .isCloseTo(probability, within(1e-9));
+  }
+
+  /**
+   * String probabilities in JSON (object or flat) are accepted via {@code parseDouble} on textual
+   * nodes — keeps migration-compatible configs that quote numeric values.
+   */
+  @Test
+  void testValidate_ValidJson_ProbabilityAsQuotedStringInLegacyObject() {
+    String json = "{\"" + TRACE_SAMPLING_POLICY_TYPE + "\": {\"probability\": \"0.625\"}}";
+    TelemetryPolicy policy = validator.validate(first(SourceFormat.JSONKEYVALUE.parse(json)));
+    assertThat(policy).isNotNull();
+    assertThat(((TraceSamplingRatePolicy) policy).getProbability()).isCloseTo(0.625, within(1e-9));
+  }
+
+  @Test
+  void testValidate_ValidJson_ProbabilityAsQuotedStringFlat() {
+    String json = "{\"" + TRACE_SAMPLING_POLICY_TYPE + "\": \"0.375\"}";
+    TelemetryPolicy policy = validator.validate(first(SourceFormat.JSONKEYVALUE.parse(json)));
+    assertThat(policy).isNotNull();
+    assertThat(((TraceSamplingRatePolicy) policy).getProbability()).isCloseTo(0.375, within(1e-9));
+  }
+
   @Test
   void testValidate_InvalidJson_MissingPolicyType() {
     String json = "{\"other-policy\": 0.5}";

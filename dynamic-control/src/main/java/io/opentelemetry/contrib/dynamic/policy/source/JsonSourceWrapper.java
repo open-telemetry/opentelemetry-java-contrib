@@ -14,7 +14,12 @@ import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nullable;
 
-/** JSONKEYVALUE-backed source wrapper for a single-policy object. */
+/**
+ * Source wrapper for policy payloads parsed from JSON text that matches the {@link
+ * SourceFormat#JSONKEYVALUE} shape: each policy is a JSON object with exactly one top-level key
+ * (the policy type) and one value (the payload). The on-the-wire syntax is standard JSON, not a
+ * separate encoding.
+ */
 public final class JsonSourceWrapper implements SourceWrapper {
   private static final ObjectMapper MAPPER = new ObjectMapper();
   private final JsonNode source;
@@ -43,11 +48,16 @@ public final class JsonSourceWrapper implements SourceWrapper {
   }
 
   /**
-   * Parses JSONKEYVALUE source into one wrapper per top-level policy object.
+   * Parses JSON text into one wrapper per policy object.
    *
-   * @return an empty list if the source is an empty JSONKEYVALUE array; a non-empty list of
-   *     wrappers if the source is a valid single-policy object or array thereof; or {@code null} if
-   *     the shape is unsupported or the source is not valid JSONKEYVALUE.
+   * <p>Input must be valid JSON whose structure matches {@link SourceFormat#JSONKEYVALUE}: either a
+   * single JSON object with exactly one top-level key/value pair, or a JSON array of such objects.
+   * An empty JSON array {@code []} yields an empty list.
+   *
+   * @return an empty list if the source is an empty JSON array {@code []}; a non-empty list of
+   *     wrappers if the source is a valid single-policy object or non-empty array of such objects;
+   *     or {@code null} if the text is not valid JSON or the value shape is not supported for
+   *     {@link SourceFormat#JSONKEYVALUE}.
    * @throws NullPointerException if source is null
    */
   @Nullable

@@ -20,13 +20,14 @@ import java.util.stream.Stream;
  * A {@link PolicyProvider} that reads policies from a local file, where each line represents a
  * separate policy configuration.
  *
- * <p>The file format supports JSON and key-value lines:
+ * <p>Each non-empty line is parsed using one of two {@link SourceFormat}s:
  *
  * <ul>
- *   <li><b>JSON Objects:</b> Lines starting with <code>{</code> are treated as JSONKEYVALUE objects
- *       and validated against the registered {@link PolicyValidator}s.
- *   <li><b>Key-Value:</b> Lines containing <code>=</code> are treated as key-value policy lines and
- *       validated against the registered {@link PolicyValidator}s.
+ *   <li><b>{@link SourceFormat#JSONKEYVALUE JSONKEYVALUE}:</b> Lines starting with <code>{</code>
+ *       use {@link SourceFormat#JSONKEYVALUE}: JSON text for a single top-level object with exactly
+ *       one key (the policy type) and one value (the policy payload).
+ *   <li><b>{@link SourceFormat#KEYVALUE KEYVALUE}:</b> Lines containing <code>=</code> are parsed
+ *       as {@code policyType=value} and validated against the registered {@link PolicyValidator}s.
  * </ul>
  *
  * <p>Empty lines and lines starting with <code>#</code> are ignored.
