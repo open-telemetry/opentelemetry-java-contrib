@@ -5,10 +5,8 @@
 
 package io.opentelemetry.contrib.dynamic.policy.tracesampling;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.opentelemetry.contrib.dynamic.policy.PolicyValidator;
+import io.opentelemetry.contrib.dynamic.policy.AbstractSourcePolicyValidator;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
@@ -16,12 +14,10 @@ import javax.annotation.Nullable;
 /**
  * Validator for trace sampling policies.
  *
- * <p>This validator handles the "trace-sampling" policy type and supports the
- * "trace-sampling.probability" alias.
+ * <p>This validator handles the "trace-sampling" policy type.
  */
-public final class TraceSamplingValidator implements PolicyValidator {
+public final class TraceSamplingValidator extends AbstractSourcePolicyValidator {
   private static final Logger logger = Logger.getLogger(TraceSamplingValidator.class.getName());
-  private static final ObjectMapper MAPPER = new ObjectMapper();
 
   @Override
   public String getPolicyType() {
@@ -29,48 +25,43 @@ public final class TraceSamplingValidator implements PolicyValidator {
   }
 
   @Override
-  public String getAlias() {
-    return "trace-sampling.probability";
+  @Nullable
+  protected TelemetryPolicy validateJsonValue(JsonNode valueNode) {
+    JsonNode probabilityNode = valueNode;
+    if (valueNode.isObject()) {
+      probabilityNode = valueNode.get("probability");
+      if (probabilityNode == null) {
+        return null;
+      }
+    }
+    Double probability = parseDouble(probabilityNode);
+    if (probability == null) {
+      return null;
+    }
+    return createPolicy(probability);
   }
 
   @Override
   @Nullable
-  public TelemetryPolicy validate(String json) {
+  protected TelemetryPolicy validateKeyValueValue(String value) {
+    Double probability = parseDouble(value);
+    if (probability == null) {
+      return null;
+    }
+    return createPolicy(probability);
+  }
+
+  @Nullable
+  private static TelemetryPolicy createPolicy(double probability) {
     try {
-      JsonNode node = MAPPER.readTree(json);
-      if (node.has(getPolicyType())) {
-        JsonNode spec = node.get(getPolicyType());
-        if (spec.has("probability")) {
-          JsonNode probNode = spec.get("probability");
-          if (probNode.isNumber()) {
-            double d = probNode.asDouble();
-            if (d >= 0.0 && d <= 1.0) {
-              return new TraceSamplingRatePolicy(d);
-            }
-          }
-        }
-      }
-    } catch (JsonProcessingException e) {
-      // Not valid JSON for this validator
+      return new TraceSamplingRatePolicy(probability);
+    } catch (IllegalArgumentException e) {
+      logger.info(
+          "Invalid trace-sampling probability '"
+              + probability
+              + "' will be ignored: "
+              + e.getMessage());
+      return null;
     }
-    logger.info("Invalid trace-sampling JSON: " + json);
-    return null;
-  }
-
-  @Override
-  @Nullable
-  public TelemetryPolicy validateAlias(String key, String value) {
-    if (getAlias() != null && getAlias().equals(key)) {
-      try {
-        double d = Double.parseDouble(value);
-        if (d >= 0.0 && d <= 1.0) {
-          return new TraceSamplingRatePolicy(d);
-        }
-      } catch (NumberFormatException e) {
-        // invalid
-      }
-      logger.info("Ignoring invalid trace-sampling.probability value: " + value);
-    }
-    return null;
   }
 }

@@ -15,13 +15,13 @@ class SourceFormatTest {
 
   @Test
   void configValuesAreStable() {
-    assertThat(SourceFormat.JSON.configValue()).isEqualTo("json");
+    assertThat(SourceFormat.JSONKEYVALUE.configValue()).isEqualTo("jsonkeyvalue");
     assertThat(SourceFormat.KEYVALUE.configValue()).isEqualTo("keyvalue");
   }
 
   @Test
   void parseDelegatesToJsonParser() {
-    List<SourceWrapper> parsed = SourceFormat.JSON.parse("{\"trace-sampling\": 0.5}");
+    List<SourceWrapper> parsed = SourceFormat.JSONKEYVALUE.parse("{\"trace-sampling\": 0.5}");
 
     assertThat(parsed).hasSize(1);
     assertThat(parsed.get(0)).isInstanceOf(JsonSourceWrapper.class);
@@ -39,23 +39,23 @@ class SourceFormatTest {
 
   @Test
   void parseSupportsEmptyInputAcrossFormats() {
-    assertThat(SourceFormat.JSON.parse("[]")).isEmpty();
+    assertThat(SourceFormat.JSONKEYVALUE.parse("[]")).isEmpty();
     assertThat(SourceFormat.KEYVALUE.parse("")).isEmpty();
     assertThat(SourceFormat.KEYVALUE.parse("\n   \r\n")).isEmpty();
   }
 
   @Test
   void parseReturnsNullForInvalidInput() {
-    assertThat(SourceFormat.JSON.parse("{invalid-json")).isNull();
-    assertThat(SourceFormat.JSON.parse("{}")).isNull();
-    assertThat(SourceFormat.JSON.parse("{\"a\": 1, \"b\": 2}")).isNull();
-    assertThat(SourceFormat.JSON.parse("[{\"trace-sampling\": 0.5}, {}]")).isNull();
+    assertThat(SourceFormat.JSONKEYVALUE.parse("{invalid-json")).isNull();
+    assertThat(SourceFormat.JSONKEYVALUE.parse("{}")).isNull();
+    assertThat(SourceFormat.JSONKEYVALUE.parse("{\"a\": 1, \"b\": 2}")).isNull();
+    assertThat(SourceFormat.JSONKEYVALUE.parse("[{\"trace-sampling\": 0.5}, {}]")).isNull();
     assertThat(SourceFormat.KEYVALUE.parse("not-key-value")).isNull();
   }
 
   @Test
   void parseReturnsImmutableListsAcrossFormats() {
-    List<SourceWrapper> jsonParsed = SourceFormat.JSON.parse("{\"trace-sampling\": 0.5}");
+    List<SourceWrapper> jsonParsed = SourceFormat.JSONKEYVALUE.parse("{\"trace-sampling\": 0.5}");
     List<SourceWrapper> keyValueParsed = SourceFormat.KEYVALUE.parse("trace-sampling=0.5");
 
     assertThatThrownBy(() -> jsonParsed.add(parsed("other-policy", "1.0")))
@@ -66,7 +66,7 @@ class SourceFormatTest {
 
   @Test
   void parseRejectsNullInputAcrossFormats() {
-    assertThatThrownBy(() -> SourceFormat.JSON.parse(null))
+    assertThatThrownBy(() -> SourceFormat.JSONKEYVALUE.parse(null))
         .isInstanceOf(NullPointerException.class)
         .hasMessage("source cannot be null");
     assertThatThrownBy(() -> SourceFormat.KEYVALUE.parse(null))

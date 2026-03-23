@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nullable;
 
-/** JSON-backed source wrapper for a single-policy object. */
+/** JSONKEYVALUE-backed source wrapper for a single-policy object. */
 public final class JsonSourceWrapper implements SourceWrapper {
   private static final ObjectMapper MAPPER = new ObjectMapper();
   private final JsonNode source;
@@ -25,7 +25,7 @@ public final class JsonSourceWrapper implements SourceWrapper {
 
   @Override
   public SourceFormat getFormat() {
-    return SourceFormat.JSON;
+    return SourceFormat.JSONKEYVALUE;
   }
 
   @Override
@@ -43,11 +43,11 @@ public final class JsonSourceWrapper implements SourceWrapper {
   }
 
   /**
-   * Parses JSON source into one wrapper per top-level policy object.
+   * Parses JSONKEYVALUE source into one wrapper per top-level policy object.
    *
-   * @return an empty list if the source is an empty JSON array; a non-empty list of wrappers if the
-   *     source is a valid single-policy object or array thereof; or {@code null} if the shape is
-   *     unsupported or the source is not valid JSON.
+   * @return an empty list if the source is an empty JSONKEYVALUE array; a non-empty list of
+   *     wrappers if the source is a valid single-policy object or array thereof; or {@code null} if
+   *     the shape is unsupported or the source is not valid JSONKEYVALUE.
    * @throws NullPointerException if source is null
    */
   @Nullable

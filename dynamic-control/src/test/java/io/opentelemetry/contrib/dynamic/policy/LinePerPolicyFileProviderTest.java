@@ -7,6 +7,8 @@ package io.opentelemetry.contrib.dynamic.policy;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.opentelemetry.contrib.dynamic.policy.source.SourceFormat;
+import io.opentelemetry.contrib.dynamic.policy.source.SourceWrapper;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,7 +21,6 @@ import org.junit.jupiter.api.io.TempDir;
 class LinePerPolicyFileProviderTest {
 
   private static final String TRACE_SAMPLING_TYPE = "trace-sampling";
-  private static final String TRACE_SAMPLING_ALIAS = "trace-sampling.probability";
 
   @TempDir Path tempDir;
 
@@ -36,7 +37,7 @@ class LinePerPolicyFileProviderTest {
 
   @Test
   void fetchPoliciesParsesJsonLines() throws Exception {
-    Path file = writeLines("{\"trace-sampling\": {\"probability\": 0.5}}");
+    Path file = writeLines("{\"trace-sampling\": 0.5}");
     LinePerPolicyFileProvider provider =
         new LinePerPolicyFileProvider(file, Collections.singletonList(acceptingValidator()));
 
@@ -48,7 +49,7 @@ class LinePerPolicyFileProviderTest {
 
   @Test
   void fetchPoliciesParsesAliasLines() throws Exception {
-    Path file = writeLines("trace-sampling.probability=0.5");
+    Path file = writeLines("trace-sampling=0.5");
     LinePerPolicyFileProvider provider =
         new LinePerPolicyFileProvider(file, Collections.singletonList(acceptingValidator()));
 
@@ -60,7 +61,7 @@ class LinePerPolicyFileProviderTest {
 
   @Test
   void fetchPoliciesSkipsBlankLinesAndComments() throws Exception {
-    Path file = writeLines("", "   ", "# comment line", "trace-sampling.probability=0.25");
+    Path file = writeLines("", "   ", "# comment line", "trace-sampling=0.25");
     LinePerPolicyFileProvider provider =
         new LinePerPolicyFileProvider(file, Collections.singletonList(acceptingValidator()));
 
@@ -74,11 +75,7 @@ class LinePerPolicyFileProviderTest {
   void fetchPoliciesSkipsUnknownOrRejectedPolicies() throws Exception {
     PolicyValidator rejectingValidator =
         new TestPolicyValidator(/* acceptJson= */ false, /* acceptAlias= */ false);
-    Path file =
-        writeLines(
-            "{\"trace-sampling\": {\"probability\": 0.5}}",
-            "{\"other-policy\": {\"probability\": 0.5}}",
-            "other.key=1");
+    Path file = writeLines("{\"trace-sampling\": 0.5}", "{\"other-policy\": 0.5}", "other.key=1");
     LinePerPolicyFileProvider provider =
         new LinePerPolicyFileProvider(file, Collections.singletonList(rejectingValidator));
 
@@ -107,29 +104,25 @@ class LinePerPolicyFileProviderTest {
     }
 
     @Override
-    public TelemetryPolicy validate(String json) {
-      if (!acceptJson) {
-        return null;
-      }
-      return new TelemetryPolicy(TRACE_SAMPLING_TYPE);
-    }
-
-    @Override
     public String getPolicyType() {
       return TRACE_SAMPLING_TYPE;
     }
 
     @Override
-    public TelemetryPolicy validateAlias(String key, String value) {
-      if (!acceptAlias) {
-        return null;
+    public TelemetryPolicy validate(SourceWrapper source) {
+      if (source.getFormat() == SourceFormat.JSONKEYVALUE) {
+        if (!acceptJson) {
+          return null;
+        }
+        return new TelemetryPolicy(TRACE_SAMPLING_TYPE);
       }
-      return new TelemetryPolicy(TRACE_SAMPLING_TYPE);
-    }
-
-    @Override
-    public String getAlias() {
-      return TRACE_SAMPLING_ALIAS;
+      if (source.getFormat() == SourceFormat.KEYVALUE) {
+        if (!acceptAlias) {
+          return null;
+        }
+        return new TelemetryPolicy(TRACE_SAMPLING_TYPE);
+      }
+      return null;
     }
   }
 }

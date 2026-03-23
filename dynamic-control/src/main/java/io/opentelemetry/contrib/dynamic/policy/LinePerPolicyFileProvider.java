@@ -23,8 +23,8 @@ import java.util.stream.Stream;
  * <p>The file format supports JSON and key-value lines:
  *
  * <ul>
- *   <li><b>JSON Objects:</b> Lines starting with <code>{</code> are treated as JSON objects and
- *       validated against the registered {@link PolicyValidator}s.
+ *   <li><b>JSON Objects:</b> Lines starting with <code>{</code> are treated as JSONKEYVALUE objects
+ *       and validated against the registered {@link PolicyValidator}s.
  *   <li><b>Key-Value:</b> Lines containing <code>=</code> are treated as key-value policy lines and
  *       validated against the registered {@link PolicyValidator}s.
  * </ul>
@@ -60,7 +60,7 @@ final class LinePerPolicyFileProvider implements PolicyProvider {
 
             SourceFormat format;
             if (trimmedLine.startsWith("{")) {
-              format = SourceFormat.JSON;
+              format = SourceFormat.JSONKEYVALUE;
             } else if (trimmedLine.indexOf('=') >= 0) {
               format = SourceFormat.KEYVALUE;
             } else {
@@ -74,12 +74,18 @@ final class LinePerPolicyFileProvider implements PolicyProvider {
             }
 
             SourceWrapper parsedSource = parsedSources.get(0);
+            String policyType = parsedSource.getPolicyType();
+            if (policyType == null || policyType.isEmpty()) {
+              logger.info("Policy type not found in line: " + trimmedLine);
+              return;
+            }
             TelemetryPolicy policy = null;
             for (PolicyValidator validator : validators) {
-              policy = validator.validate(parsedSource);
-              if (policy != null) {
-                break;
+              if (!policyType.equals(validator.getPolicyType())) {
+                continue;
               }
+              policy = validator.validate(parsedSource);
+              break;
             }
             if (policy == null) {
               logger.info("Validator not found or rejected for line: " + trimmedLine);
