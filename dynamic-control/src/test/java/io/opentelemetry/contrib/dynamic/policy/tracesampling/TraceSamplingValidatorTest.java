@@ -18,7 +18,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 class TraceSamplingValidatorTest {
 
-  private static final String TRACE_SAMPLING_POLICY_TYPE = TraceSamplingRatePolicy.TYPE;
+  private static final String TRACE_SAMPLING_POLICY_TYPE = TraceSamplingRatePolicy.POLICY_TYPE;
 
   private final TraceSamplingValidator validator = new TraceSamplingValidator();
 

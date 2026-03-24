@@ -21,7 +21,7 @@ public final class TraceSamplingValidator extends AbstractSourcePolicyValidator 
 
   @Override
   public String getPolicyType() {
-    return TraceSamplingRatePolicy.TYPE;
+    return TraceSamplingRatePolicy.POLICY_TYPE;
   }
 
   @Override
