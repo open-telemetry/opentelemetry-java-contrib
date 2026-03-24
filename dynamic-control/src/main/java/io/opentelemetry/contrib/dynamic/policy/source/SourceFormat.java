@@ -13,7 +13,6 @@ import javax.annotation.Nullable;
 /** Supported source formats and their parser dispatch. */
 public enum SourceFormat {
   KEYVALUE("keyvalue", KeyValueSourceWrapper::parse),
-  JSON("json", JsonSourceWrapper::parse), // Will remove
   JSONKEYVALUE("jsonkeyvalue", JsonSourceWrapper::parse);
 
   private final String configValue;

@@ -20,13 +20,14 @@ import java.util.stream.Stream;
  * A {@link PolicyProvider} that reads policies from a local file, where each line represents a
  * separate policy configuration.
  *
- * <p>The file format supports JSON and key-value lines:
+ * <p>Each non-empty line is parsed using one of two {@link SourceFormat}s:
  *
  * <ul>
- *   <li><b>JSON Objects:</b> Lines starting with <code>{</code> are treated as JSON objects and
- *       validated against the registered {@link PolicyValidator}s.
- *   <li><b>Key-Value:</b> Lines containing <code>=</code> are treated as key-value policy lines and
- *       validated against the registered {@link PolicyValidator}s.
+ *   <li><b>{@link SourceFormat#JSONKEYVALUE JSONKEYVALUE}:</b> Lines starting with <code>{</code>
+ *       use {@link SourceFormat#JSONKEYVALUE}: JSON text for a single top-level object with exactly
+ *       one key (the policy type) and one value (the policy payload).
+ *   <li><b>{@link SourceFormat#KEYVALUE KEYVALUE}:</b> Lines containing <code>=</code> are parsed
+ *       as {@code policyType=value} and validated against the registered {@link PolicyValidator}s.
  * </ul>
  *
  * <p>Empty lines and lines starting with <code>#</code> are ignored.
@@ -60,7 +61,7 @@ final class LinePerPolicyFileProvider implements PolicyProvider {
 
             SourceFormat format;
             if (trimmedLine.startsWith("{")) {
-              format = SourceFormat.JSON;
+              format = SourceFormat.JSONKEYVALUE;
             } else if (trimmedLine.indexOf('=') >= 0) {
               format = SourceFormat.KEYVALUE;
             } else {
@@ -74,12 +75,18 @@ final class LinePerPolicyFileProvider implements PolicyProvider {
             }
 
             SourceWrapper parsedSource = parsedSources.get(0);
+            String policyType = parsedSource.getPolicyType();
+            if (policyType == null || policyType.isEmpty()) {
+              logger.info("Policy type not found in line: " + trimmedLine);
+              return;
+            }
             TelemetryPolicy policy = null;
             for (PolicyValidator validator : validators) {
-              policy = validator.validate(parsedSource);
-              if (policy != null) {
-                break;
+              if (!policyType.equals(validator.getPolicyType())) {
+                continue;
               }
+              policy = validator.validate(parsedSource);
+              break;
             }
             if (policy == null) {
               logger.info("Validator not found or rejected for line: " + trimmedLine);
