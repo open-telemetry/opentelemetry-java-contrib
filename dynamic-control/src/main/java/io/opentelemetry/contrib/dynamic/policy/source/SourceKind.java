@@ -42,11 +42,13 @@ public enum SourceKind {
   }
 
   /**
-   * Parses the value used in JSON configuration, case-insensitive.
+   * Parses the value used in JSON configuration. Leading and trailing whitespace is removed, then
+   * the remainder is matched case-insensitively against {@link #configValue()} for each kind.
    *
    * @param value the string from config (e.g. {@code "file"}, {@code "OPAMP"})
    * @return the matching kind
-   * @throws IllegalArgumentException if the value is null or unknown
+   * @throws NullPointerException if value is null
+   * @throws IllegalArgumentException if no kind matches the trimmed value
    */
   public static SourceKind fromConfigValue(String value) {
     Objects.requireNonNull(value, "value cannot be null");

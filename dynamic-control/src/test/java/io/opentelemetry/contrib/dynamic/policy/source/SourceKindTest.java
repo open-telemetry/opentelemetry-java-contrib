@@ -32,11 +32,16 @@ class SourceKindTest {
   }
 
   @Test
-  void fromConfigValueRejectsNullAndUnknown() {
+  void fromConfigValueRejectsNullInput() {
     assertThatThrownBy(() -> SourceKind.fromConfigValue(null))
-        .isInstanceOf(NullPointerException.class);
+        .isInstanceOf(NullPointerException.class)
+        .hasMessage("value cannot be null");
+  }
+
+  @Test
+  void fromConfigValueRejectsUnknownValue() {
     assertThatThrownBy(() -> SourceKind.fromConfigValue("unknown"))
         .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("Unknown source kind");
+        .hasMessage("Unknown source kind: unknown");
   }
 }
