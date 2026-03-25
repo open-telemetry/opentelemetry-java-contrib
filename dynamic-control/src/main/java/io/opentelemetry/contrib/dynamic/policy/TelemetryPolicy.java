@@ -21,6 +21,14 @@ import java.util.Objects;
  * <p>Direct instantiation of this base class is intentionally supported for type-only policy
  * signals (for example, to indicate policy removal/reset without policy-specific values).
  *
+ * <p><b>Subclasses:</b> {@link #equals(Object)} on this class returns {@code false} when either
+ * operand is a typed subclass (not {@code TelemetryPolicy} itself), so a type-only instance never
+ * equals a value-carrying subclass with the same {@link #getType() type}. Each concrete subclass
+ * <b>must</b> override both {@code equals} and {@code hashCode} consistently with its fields, and
+ * obey the {@code equals}/{@code hashCode} contract. That is required for consumers such as {@link
+ * io.opentelemetry.contrib.dynamic.policy.PolicyStore} that deduplicate and detect changes using
+ * {@link Object#equals(Object)}.
+ *
  * @see io.opentelemetry.contrib.dynamic.policy
  */
 public class TelemetryPolicy {
@@ -53,7 +61,8 @@ public class TelemetryPolicy {
 
   /**
    * Type-only policies ({@link TelemetryPolicy} instances) do not equal typed subclasses that share
-   * the same {@link #getType() type} string.
+   * the same {@link #getType() type} string. Subclasses must override {@code equals} (and {@code
+   * hashCode}) for value-based equality; see the class Javadoc.
    */
   @Override
   public boolean equals(Object obj) {
@@ -72,6 +81,6 @@ public class TelemetryPolicy {
 
   @Override
   public int hashCode() {
-    return Objects.hash(type);
+    return type.hashCode();
   }
 }

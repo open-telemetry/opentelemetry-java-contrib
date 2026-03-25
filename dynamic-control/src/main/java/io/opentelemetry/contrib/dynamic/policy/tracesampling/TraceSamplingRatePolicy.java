@@ -6,7 +6,6 @@
 package io.opentelemetry.contrib.dynamic.policy.tracesampling;
 
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
-import java.util.Objects;
 
 public final class TraceSamplingRatePolicy extends TelemetryPolicy {
   public static final String POLICY_TYPE = "trace-sampling";
@@ -39,6 +38,6 @@ public final class TraceSamplingRatePolicy extends TelemetryPolicy {
 
   @Override
   public int hashCode() {
-    return Objects.hash(probability);
+    return Double.hashCode(probability);
   }
 }

@@ -41,7 +41,7 @@ class PolicyStoreTest {
   }
 
   @Test
-  void updatePoliciesDetectsListOrderChange() {
+  void updatePoliciesReturnsFalseWhenOnlyOrderDiffers() {
     PolicyStore store = new PolicyStore();
     List<TelemetryPolicy> first =
         Arrays.asList(new TraceSamplingRatePolicy(0.1), new TraceSamplingRatePolicy(0.2));
@@ -49,8 +49,17 @@ class PolicyStoreTest {
         Arrays.asList(new TraceSamplingRatePolicy(0.2), new TraceSamplingRatePolicy(0.1));
 
     assertThat(store.updatePolicies(first)).isTrue();
-    assertThat(store.updatePolicies(reordered)).isTrue();
-    assertThat(store.getPolicies()).isEqualTo(reordered);
+    assertThat(store.updatePolicies(reordered)).isFalse();
+    assertThat(store.getPolicies()).isEqualTo(first);
+  }
+
+  @Test
+  void updatePoliciesIgnoresDuplicatePoliciesInInput() {
+    PolicyStore store = new PolicyStore();
+    TraceSamplingRatePolicy p = new TraceSamplingRatePolicy(0.5);
+    assertThat(store.updatePolicies(Arrays.asList(p, new TraceSamplingRatePolicy(0.5)))).isTrue();
+    assertThat(store.getPolicies()).containsExactly(p);
+    assertThat(store.updatePolicies(singletonList(new TraceSamplingRatePolicy(0.5)))).isFalse();
   }
 
   @Test
