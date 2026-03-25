@@ -23,11 +23,11 @@ public final class PolicyStore {
    * Replaces the stored policies when the new snapshot is not equal to the current one.
    *
    * <p>Input lists are normalized to a set of distinct policies ({@link TelemetryPolicy#equals
-   * value equality}): duplicates are dropped and only the first occurrence of each policy is
-   * kept (insertion order). Change detection uses set equality, so list order does not matter.
-   * That matches telemetry policy semantics where the effective result does not depend on
-   * processing order (see the telemetry policy OTEP, commutativity / no user-defined ordering
-   * between policies).
+   * value equality}): duplicates are dropped and only the first occurrence of each policy is kept
+   * (insertion order). Change detection uses set equality, so list order does not matter. That
+   * matches telemetry policy semantics where the effective result does not depend on processing
+   * order (see the telemetry policy OTEP, commutativity / no user-defined ordering between
+   * policies).
    *
    * @return {@code true} if the store was updated, {@code false} if the snapshot was unchanged
    */
