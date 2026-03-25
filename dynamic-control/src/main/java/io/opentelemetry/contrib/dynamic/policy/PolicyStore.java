@@ -33,11 +33,11 @@ public final class PolicyStore {
    */
   public synchronized boolean updatePolicies(List<TelemetryPolicy> newPolicies) {
     Objects.requireNonNull(newPolicies, "newPolicies cannot be null");
-    List<TelemetryPolicy> normalized = new ArrayList<>(new LinkedHashSet<>(newPolicies));
-    if (new LinkedHashSet<>(policies).equals(new LinkedHashSet<>(normalized))) {
+    LinkedHashSet<TelemetryPolicy> newPolicySet = new LinkedHashSet<>(newPolicies);
+    if (new LinkedHashSet<>(policies).equals(newPolicySet)) {
       return false;
     }
-    policies = normalized;
+    policies = new ArrayList<>(newPolicySet);
     return true;
   }
 
