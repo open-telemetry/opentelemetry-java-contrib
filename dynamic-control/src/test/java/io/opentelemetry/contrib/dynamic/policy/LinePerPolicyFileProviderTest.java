@@ -9,6 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.opentelemetry.contrib.dynamic.policy.source.SourceFormat;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceWrapper;
+import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingRatePolicy;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,7 +21,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 class LinePerPolicyFileProviderTest {
 
-  private static final String TRACE_SAMPLING_TYPE = "trace-sampling";
+  private static final String TRACE_SAMPLING_TYPE = TraceSamplingRatePolicy.POLICY_TYPE;
 
   @TempDir Path tempDir;
 

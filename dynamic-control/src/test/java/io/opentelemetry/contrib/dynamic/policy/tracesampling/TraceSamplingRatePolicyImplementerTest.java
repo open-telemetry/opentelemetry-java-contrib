@@ -28,7 +28,8 @@ class TraceSamplingRatePolicyImplementerTest {
     TraceSamplingRatePolicyImplementer implementer =
         new TraceSamplingRatePolicyImplementer(delegatingSampler);
 
-    implementer.onPoliciesChanged(singletonList(new TelemetryPolicy("trace-sampling")));
+    implementer.onPoliciesChanged(
+        singletonList(new TelemetryPolicy(TraceSamplingRatePolicy.POLICY_TYPE)));
 
     assertThat(decisionFor(delegatingSampler)).isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
   }
