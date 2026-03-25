@@ -50,4 +50,28 @@ public class TelemetryPolicy {
   public String getType() {
     return type;
   }
+
+  /**
+   * Type-only policies ({@link TelemetryPolicy} instances) do not equal typed subclasses that share
+   * the same {@link #getType() type} string.
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (!(obj instanceof TelemetryPolicy)) {
+      return false;
+    }
+    TelemetryPolicy that = (TelemetryPolicy) obj;
+    if (that.getClass() != TelemetryPolicy.class || getClass() != TelemetryPolicy.class) {
+      return false;
+    }
+    return type.equals(that.type);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(type);
+  }
 }
