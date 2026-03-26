@@ -1,7 +1,7 @@
 plugins {
   id("otel.java-conventions")
   application
-  id("com.gradleup.shadow")
+  id("otel.shadow-conventions")
 
   id("otel.groovy-conventions")
   id("otel.publish-conventions")
