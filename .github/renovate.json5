@@ -27,7 +27,7 @@
         'patch',
       ],
       schedule: [
-        'before 8am on Tuesday',
+        '* 0-7 * * 2', // weekly, before 8am on Tuesday
       ],
     },
     {
@@ -38,7 +38,7 @@
         'major',
       ],
       schedule: [
-        'before 8am on Monday',
+        '* 0-7 * * 2', // weekly, before 8am on Tuesday
       ],
       matchPackageNames: [
         '!io.opentelemetry:**',
@@ -53,7 +53,7 @@
         'github-actions',
       ],
       schedule: [
-        'before 8am on Tuesday',
+        '* 0-7 * * 2', // weekly, before 8am on Tuesday
       ],
     },
 
