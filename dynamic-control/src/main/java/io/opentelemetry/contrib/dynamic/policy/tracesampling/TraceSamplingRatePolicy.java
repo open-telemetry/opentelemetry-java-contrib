@@ -23,4 +23,21 @@ public final class TraceSamplingRatePolicy extends TelemetryPolicy {
   public double getProbability() {
     return probability;
   }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (!(obj instanceof TraceSamplingRatePolicy)) {
+      return false;
+    }
+    TraceSamplingRatePolicy that = (TraceSamplingRatePolicy) obj;
+    return Double.compare(probability, that.probability) == 0;
+  }
+
+  @Override
+  public int hashCode() {
+    return Double.hashCode(probability);
+  }
 }
