@@ -2,6 +2,60 @@
 
 ## Unreleased
 
+### Disk buffering
+
+- Disk buffering iterator explicit removal config option
+  ([#2560](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2560))
+- Replacing CompletableFuture by CompletableResultCode
+  ([#2670](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2670))
+- Replace IllegalStateException with EOFException in readRawVarint32
+  ([#2687](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2687))
+- Fix/upstream update disk buffering
+  ([#2694](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2694))
+
+### Dynamic control
+
+- [dynamic-control] Add trace sampling-rate implementer
+  ([#2634](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2634))
+- [dynamic control] Add json and keyvalue parsing and mapping
+  ([#2655](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2655))
+- [dynamic control] Move away from JSON requirement
+  ([#2652](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2652))
+- [dynamic control] refactor trace sampling into specific subpackage
+  ([#2698](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2698))
+- [dynamic control] add jsonkeyvalue source
+  ([#2702](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2702))
+- [dynamic control] step 1 in transition to simpler validation
+  ([#2703](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2703))
+- [dynamic control] Move to using SourceWrapper, simplifying parsing
+  ([#2708](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2708))
+- [dynamic control]  complete the jsonkeyvalue and simpler validation migration
+  ([#2715](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2715))
+- [dynamic control] refactor TYPE to POLICY_TYPE for clarity
+  ([#2720](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2720))
+- [dynamic control] Add SourceKind as sources are a known list
+  ([#2722](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2722))
+- [dynamic control] Add policy store
+  ([#2721](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2721))
+
+### Build
+
+- Replace NVD with Sonatype OSS Index
+  ([#2689](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2689))
+- Fix OSS Index Audit again
+  ([#2706](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2706))
+- Fix release workflow
+  ([#2639](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2639))
+
+
+### JMX scraper
+
+- jmx-scraper document activemq metrics from instrumentation
+  ([#2666](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2666))
+- jmx-scraper document kafka-connect support
+  ([#2688](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2688))
+
+
 ## Version 1.54.0 (2026-02-18)
 
 ### Compressors
