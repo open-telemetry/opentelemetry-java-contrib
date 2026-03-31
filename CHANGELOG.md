@@ -15,27 +15,27 @@
 
 ### Dynamic control
 
-- [dynamic-control] Add trace sampling-rate implementer
+- Add trace sampling-rate implementer
   ([#2634](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2634))
-- [dynamic control] Add json and keyvalue parsing and mapping
+- Add json and keyvalue parsing and mapping
   ([#2655](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2655))
-- [dynamic control] Move away from JSON requirement
+- Move away from JSON requirement
   ([#2652](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2652))
-- [dynamic control] Refactor trace sampling into specific subpackage
+- Refactor trace sampling into specific subpackage
   ([#2698](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2698))
-- [dynamic control] Add jsonkeyvalue source
+- Add jsonkeyvalue source
   ([#2702](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2702))
-- [dynamic control] Step 1 in transition to simpler validation
+- Step 1 in transition to simpler validation
   ([#2703](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2703))
-- [dynamic control] Move to using SourceWrapper, simplifying parsing
+- Move to using SourceWrapper, simplifying parsing
   ([#2708](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2708))
-- [dynamic control] Complete the jsonkeyvalue and simpler validation migration
+- Complete the jsonkeyvalue and simpler validation migration
   ([#2715](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2715))
-- [dynamic control] refactor TYPE to POLICY_TYPE for clarity
+- Refactor TYPE to POLICY_TYPE for clarity
   ([#2720](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2720))
-- [dynamic control] Add SourceKind as sources are a known list
+- Add SourceKind as sources are a known list
   ([#2722](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2722))
-- [dynamic control] Add policy store
+- Add policy store
   ([#2721](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2721))
 
 ### Build
@@ -50,9 +50,9 @@
 
 ### JMX scraper
 
-- jmx-scraper document activemq metrics from instrumentation
+- Document ActiveMQ metrics from instrumentation
   ([#2666](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2666))
-- jmx-scraper document kafka-connect support
+- Document Kafka Connect support
   ([#2688](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2688))
 
 
