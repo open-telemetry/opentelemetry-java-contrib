@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## Version 1.55.0 (2026-03-31)
 
 ### Disk buffering
 
