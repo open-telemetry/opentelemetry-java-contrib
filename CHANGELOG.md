@@ -47,14 +47,12 @@
 - Fix release workflow
   ([#2639](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2639))
 
-
 ### JMX scraper
 
 - Document ActiveMQ metrics from instrumentation
   ([#2666](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2666))
 - Document Kafka Connect support
   ([#2688](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2688))
-
 
 ## Version 1.54.0 (2026-02-18)
 
