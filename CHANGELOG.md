@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 1.55.0 (2026-03-31)
+
 ### Disk buffering
 
 - Add configuration option for explicit removal in the disk buffering iterator
