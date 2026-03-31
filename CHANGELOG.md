@@ -4,13 +4,13 @@
 
 ### Disk buffering
 
-- Disk buffering iterator explicit removal config option
+- Add configuration option for explicit removal in the disk buffering iterator
   ([#2560](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2560))
-- Replacing CompletableFuture by CompletableResultCode
+- Replace CompletableFuture with CompletableResultCode
   ([#2670](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2670))
 - Replace IllegalStateException with EOFException in readRawVarint32
   ([#2687](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2687))
-- Fix/upstream update disk buffering
+- Apply upstream fixes to the disk buffering implementation
   ([#2694](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2694))
 
 ### Dynamic control
@@ -21,15 +21,15 @@
   ([#2655](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2655))
 - [dynamic control] Move away from JSON requirement
   ([#2652](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2652))
-- [dynamic control] refactor trace sampling into specific subpackage
+- [dynamic control] Refactor trace sampling into specific subpackage
   ([#2698](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2698))
-- [dynamic control] add jsonkeyvalue source
+- [dynamic control] Add jsonkeyvalue source
   ([#2702](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2702))
-- [dynamic control] step 1 in transition to simpler validation
+- [dynamic control] Step 1 in transition to simpler validation
   ([#2703](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2703))
 - [dynamic control] Move to using SourceWrapper, simplifying parsing
   ([#2708](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2708))
-- [dynamic control]  complete the jsonkeyvalue and simpler validation migration
+- [dynamic control] Complete the jsonkeyvalue and simpler validation migration
   ([#2715](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2715))
 - [dynamic control] refactor TYPE to POLICY_TYPE for clarity
   ([#2720](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2720))
