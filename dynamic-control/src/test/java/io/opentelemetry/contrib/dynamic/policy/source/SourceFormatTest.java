@@ -37,7 +37,7 @@ class SourceFormatTest {
         .hasMessage("value cannot be null");
     assertThatThrownBy(() -> SourceFormat.fromConfigValue("other"))
         .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("Unknown source format: other");
+        .hasMessage("Unknown source format (normalized): 'other' (original: 'other')");
   }
 
   @Test
