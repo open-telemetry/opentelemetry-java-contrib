@@ -29,7 +29,7 @@ public enum SourceFormat {
   }
 
   /**
-   * Converts string value case independently to enum value. Leading and trailing whitespace is
+   * Converts string value case insensitively to enum value. Leading and trailing whitespace is
    * removed, then the remainder is matched case-insensitively against {@link #configValue()} for
    * each format.
    *
