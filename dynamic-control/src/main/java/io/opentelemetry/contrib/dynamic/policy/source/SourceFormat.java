@@ -46,7 +46,8 @@ public enum SourceFormat {
         return format;
       }
     }
-    throw new IllegalArgumentException("Unknown source format: " + value);
+    throw new IllegalArgumentException(
+        "Unknown source format (normalized): '" + normalized + "' (original: '" + value + "')");
   }
 
   /**
