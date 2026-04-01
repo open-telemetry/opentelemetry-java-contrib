@@ -20,6 +20,27 @@ class SourceFormatTest {
   }
 
   @Test
+  void fromConfigValueParsesCaseInsensitive() {
+    assertThat(SourceFormat.fromConfigValue("KEYVALUE")).isEqualTo(SourceFormat.KEYVALUE);
+    assertThat(SourceFormat.fromConfigValue("JsonKeyValue")).isEqualTo(SourceFormat.JSONKEYVALUE);
+  }
+
+  @Test
+  void fromConfigValueTrimsWhitespace() {
+    assertThat(SourceFormat.fromConfigValue("  keyvalue  ")).isEqualTo(SourceFormat.KEYVALUE);
+  }
+
+  @Test
+  void fromConfigValueRejectsNullAndUnknown() {
+    assertThatThrownBy(() -> SourceFormat.fromConfigValue(null))
+        .isInstanceOf(NullPointerException.class)
+        .hasMessage("value cannot be null");
+    assertThatThrownBy(() -> SourceFormat.fromConfigValue("other"))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("Unknown source format: other");
+  }
+
+  @Test
   void parseDelegatesToJsonParser() {
     List<SourceWrapper> parsed = SourceFormat.JSONKEYVALUE.parse("{\"trace-sampling\": 0.5}");
 
