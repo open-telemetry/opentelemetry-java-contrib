@@ -7,7 +7,9 @@ package io.opentelemetry.contrib.dynamic.policy.source;
 
 import com.google.errorprone.annotations.Immutable;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /** Supported source formats and their parser dispatch. */
@@ -25,6 +27,28 @@ public enum SourceFormat {
 
   public String configValue() {
     return configValue;
+  }
+
+  /**
+   * Converts string value case insensitively to enum value. Leading and trailing whitespace is
+   * removed, then the remainder is matched case-insensitively against {@link #configValue()} for
+   * each format.
+   *
+   * @param value the string from config (e.g. {@code "keyvalue"}, {@code "JSONKEYVALUE"})
+   * @return the matching format
+   * @throws NullPointerException if value is null
+   * @throws IllegalArgumentException if no format matches the trimmed value
+   */
+  public static SourceFormat fromConfigValue(@Nonnull String value) {
+    Objects.requireNonNull(value, "value cannot be null");
+    String normalized = value.trim().toLowerCase(Locale.ROOT);
+    for (SourceFormat format : values()) {
+      if (format.configValue.equals(normalized)) {
+        return format;
+      }
+    }
+    throw new IllegalArgumentException(
+        "Unknown source format (normalized): '" + normalized + "' (original: '" + value + "')");
   }
 
   /**
