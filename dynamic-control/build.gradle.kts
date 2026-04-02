@@ -33,14 +33,3 @@ dependencies {
   testImplementation("org.mockito:mockito-inline")
   testImplementation("org.mockito:mockito-junit-jupiter")
 }
-
-tasks.withType<Test>().configureEach {
-  testLogging {
-    events("FAILED", "SKIPPED")
-    exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
-    showExceptions = true
-    showCauses = true
-    showStackTraces = true
-    showStandardStreams = true
-  }
-}

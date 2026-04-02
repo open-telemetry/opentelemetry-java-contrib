@@ -17,11 +17,14 @@ import org.junit.jupiter.api.Test;
 
 class PolicyInitConfigReaderTest {
 
+  private static final String EXAMPLE_FIXTURE =
+      "/io/opentelemetry/contrib/dynamic/policy/registry/yaml/policy-init-example.yaml";
+
   private final PolicyInitConfigReader reader = new PolicyInitConfigReader();
 
   @Test
   void readsSourceCentricFixture() throws Exception {
-    try (InputStream in = getClass().getResourceAsStream("policy-init-example.yaml")) {
+    try (InputStream in = getClass().getResourceAsStream(EXAMPLE_FIXTURE)) {
       assertThat(in).isNotNull();
 
       PolicyInitConfig config = reader.read(in);
