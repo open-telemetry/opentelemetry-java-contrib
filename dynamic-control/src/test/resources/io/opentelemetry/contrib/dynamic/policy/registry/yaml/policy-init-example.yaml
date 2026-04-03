@@ -1,0 +1,13 @@
+sources:
+  - kind: opamp
+    format: jsonkeyvalue
+    location: vendor-specific
+    mappings:
+      - sourceKey: sampling_rate
+        policyType: trace_sampling_rate_policy
+      - sourceKey: send_logs
+        policyType: log_export_enabled_policy
+      - sourceKey: send_traces
+        policyType: trace_export_enabled_policy
+      - sourceKey: send_metrics
+        policyType: metric_export_enabled_policy
