@@ -33,7 +33,7 @@ class PolicyInitConfigReaderTest {
       PolicySourceConfig source = config.getSources().get(0);
       assertThat(source.getKind()).isEqualTo(SourceKind.OPAMP);
       assertThat(source.getFormat()).isEqualTo(SourceFormat.JSONKEYVALUE);
-      assertThat(source.getLocation()).isEqualTo("elastic");
+      assertThat(source.getLocation()).isEqualTo("vendor-specific");
       assertThat(source.getMappings()).hasSize(4);
       assertThat(source.getMappings().get(0).getSourceKey()).isEqualTo("sampling_rate");
       assertThat(source.getMappings().get(0).getPolicyType())
