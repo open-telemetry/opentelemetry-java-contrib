@@ -18,7 +18,7 @@ import jdk.jfr.Name;
 @Description("Open Telemetry trace event corresponding to a span.")
 class SpanEvent extends Event {
 
-  private final String operationName;
+  @Contextual private final String operationName;
   private final String traceId;
   private final String spanId;
   private final String parentId;
