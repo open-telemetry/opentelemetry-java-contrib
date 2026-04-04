@@ -16,6 +16,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import jdk.jfr.Recording;
 import jdk.jfr.consumer.RecordedEvent;
 import jdk.jfr.consumer.RecordingFile;
@@ -77,6 +79,15 @@ class JfrSpanProcessorTest {
           .extracting(e -> e.getValue("spanId"))
           .isEqualTo(span.getSpanContext().getSpanId());
       assertThat(events).extracting(e -> e.getValue("operationName")).isEqualTo(OPERATION_NAME);
+      assertThat(events)
+          .extracting(
+              e ->
+                  e.getFields().stream()
+                      .filter(f -> f.getName().equals("operationName"))
+                      .map(d -> d.getAnnotation(Contextual.class))
+                      .filter(Objects::nonNull)
+                      .collect(Collectors.toList()))
+          .isNotEmpty();
     } finally {
       Files.delete(output);
     }
@@ -119,6 +130,16 @@ class JfrSpanProcessorTest {
           .filteredOn(e -> "Span".equals(e.getEventType().getLabel()))
           .extracting(e -> e.getValue("operationName"))
           .isEqualTo(OPERATION_NAME);
+      assertThat(events)
+          .filteredOn(e -> "Scope".equals(e.getEventType().getLabel()))
+          .extracting(
+              e ->
+                  e.getFields().stream()
+                      .filter(f -> f.getName().equals("traceId"))
+                      .map(d -> d.getAnnotation(Contextual.class))
+                      .filter(Objects::nonNull)
+                      .collect(Collectors.toList()))
+          .isNotEmpty();
 
     } finally {
       Files.delete(output);

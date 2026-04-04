@@ -20,7 +20,7 @@ import jdk.jfr.Name;
         + "in scope/active on this thread.")
 class ScopeEvent extends Event {
 
-  private final String traceId;
+  @Contextual private final String traceId;
   private final String spanId;
 
   ScopeEvent(SpanContext spanContext) {
