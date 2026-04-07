@@ -5,30 +5,30 @@
 
 package io.opentelemetry.contrib.gcp.resource;
 
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.GAE_APP_VERSION;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.GAE_AVAILABILITY_ZONE;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.GAE_CLOUD_REGION;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.GAE_INSTANCE_ID;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.GAE_MODULE_NAME;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.GCE_AVAILABILITY_ZONE;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.GCE_CLOUD_REGION;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.GCE_INSTANCE_HOSTNAME;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.GCE_INSTANCE_ID;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.GCE_INSTANCE_NAME;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.GCE_MACHINE_TYPE;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.GCR_JOB_EXECUTION_KEY;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.GCR_JOB_TASK_INDEX;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.GKE_CLUSTER_LOCATION;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.GKE_CLUSTER_LOCATION_TYPE;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.GKE_CLUSTER_NAME;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.GKE_HOST_ID;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.GKE_LOCATION_TYPE_REGION;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.GKE_LOCATION_TYPE_ZONE;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.SERVERLESS_COMPUTE_AVAILABILITY_ZONE;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.SERVERLESS_COMPUTE_CLOUD_REGION;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.SERVERLESS_COMPUTE_INSTANCE_ID;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.SERVERLESS_COMPUTE_NAME;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.SERVERLESS_COMPUTE_REVISION;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GAE_APP_VERSION;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GAE_AVAILABILITY_ZONE;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GAE_CLOUD_REGION;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GAE_INSTANCE_ID;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GAE_MODULE_NAME;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_AVAILABILITY_ZONE;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_CLOUD_REGION;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_INSTANCE_HOSTNAME;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_INSTANCE_ID;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_INSTANCE_NAME;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_MACHINE_TYPE;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCR_JOB_EXECUTION_KEY;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCR_JOB_TASK_INDEX;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GKE_CLUSTER_LOCATION;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GKE_CLUSTER_LOCATION_TYPE;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GKE_CLUSTER_NAME;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GKE_HOST_ID;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GKE_LOCATION_TYPE_REGION;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GKE_LOCATION_TYPE_ZONE;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.SERVERLESS_COMPUTE_AVAILABILITY_ZONE;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.SERVERLESS_COMPUTE_CLOUD_REGION;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.SERVERLESS_COMPUTE_INSTANCE_ID;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.SERVERLESS_COMPUTE_NAME;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.SERVERLESS_COMPUTE_REVISION;
 import static io.opentelemetry.contrib.gcp.resource.IncubatingAttributes.GCP_CLOUD_RUN_JOB_TASK_INDEX;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_ACCOUNT_ID;
@@ -55,8 +55,6 @@ import static io.opentelemetry.semconv.incubating.K8sIncubatingAttributes.K8S_CL
 import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.verify;
 
-import com.google.cloud.opentelemetry.detection.DetectedPlatform;
-import com.google.cloud.opentelemetry.detection.GCPPlatformDetector;
 import com.google.common.collect.ImmutableMap;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider;
@@ -90,7 +88,7 @@ class GCPResourceProviderTest {
                 GCE_INSTANCE_HOSTNAME, "instance-hostname"));
     DetectedPlatform mockGCEPlatform = Mockito.mock(DetectedPlatform.class);
     Mockito.when(mockGCEPlatform.getSupportedPlatform())
-        .thenReturn(GCPPlatformDetector.SupportedPlatform.GOOGLE_COMPUTE_ENGINE);
+        .thenReturn(GcpPlatformDetector.SupportedPlatform.GOOGLE_COMPUTE_ENGINE);
     Mockito.when(mockGCEPlatform.getAttributes()).thenReturn(mockAttributes);
     Mockito.when(mockGCEPlatform.getProjectId()).thenReturn(DUMMY_PROJECT_ID);
     return mockGCEPlatform;
@@ -107,18 +105,18 @@ class GCPResourceProviderTest {
 
     DetectedPlatform mockGKEPlatform = Mockito.mock(DetectedPlatform.class);
     Mockito.when(mockGKEPlatform.getSupportedPlatform())
-        .thenReturn(GCPPlatformDetector.SupportedPlatform.GOOGLE_KUBERNETES_ENGINE);
+        .thenReturn(GcpPlatformDetector.SupportedPlatform.GOOGLE_KUBERNETES_ENGINE);
     Mockito.when(mockGKEPlatform.getAttributes()).thenReturn(mockAttributes);
     Mockito.when(mockGKEPlatform.getProjectId()).thenReturn(DUMMY_PROJECT_ID);
     return mockGKEPlatform;
   }
 
   private static DetectedPlatform generateMockServerlessPlatform(
-      GCPPlatformDetector.SupportedPlatform platform) {
-    EnumSet<GCPPlatformDetector.SupportedPlatform> serverlessPlatforms =
+      GcpPlatformDetector.SupportedPlatform platform) {
+    EnumSet<GcpPlatformDetector.SupportedPlatform> serverlessPlatforms =
         EnumSet.of(
-            GCPPlatformDetector.SupportedPlatform.GOOGLE_CLOUD_RUN,
-            GCPPlatformDetector.SupportedPlatform.GOOGLE_CLOUD_FUNCTIONS);
+            GcpPlatformDetector.SupportedPlatform.GOOGLE_CLOUD_RUN,
+            GcpPlatformDetector.SupportedPlatform.GOOGLE_CLOUD_FUNCTIONS);
     if (!serverlessPlatforms.contains(platform)) {
       throw new IllegalArgumentException();
     }
@@ -148,7 +146,7 @@ class GCPResourceProviderTest {
                 GCR_JOB_EXECUTION_KEY, "serverless-job-a1b2c3"));
     DetectedPlatform mockServerlessPlatform = Mockito.mock(DetectedPlatform.class);
     Mockito.when(mockServerlessPlatform.getSupportedPlatform())
-        .thenReturn(GCPPlatformDetector.SupportedPlatform.GOOGLE_CLOUD_RUN_JOB);
+        .thenReturn(GcpPlatformDetector.SupportedPlatform.GOOGLE_CLOUD_RUN_JOB);
     Mockito.when(mockServerlessPlatform.getAttributes()).thenReturn(mockAttributes);
     Mockito.when(mockServerlessPlatform.getProjectId()).thenReturn(DUMMY_PROJECT_ID);
     return mockServerlessPlatform;
@@ -165,7 +163,7 @@ class GCPResourceProviderTest {
                 GAE_AVAILABILITY_ZONE, "us-central1-b"));
     DetectedPlatform mockGAEPlatform = Mockito.mock(DetectedPlatform.class);
     Mockito.when(mockGAEPlatform.getSupportedPlatform())
-        .thenReturn(GCPPlatformDetector.SupportedPlatform.GOOGLE_APP_ENGINE);
+        .thenReturn(GcpPlatformDetector.SupportedPlatform.GOOGLE_APP_ENGINE);
     Mockito.when(mockGAEPlatform.getAttributes()).thenReturn(mockAttributes);
     Mockito.when(mockGAEPlatform.getProjectId()).thenReturn(DUMMY_PROJECT_ID);
     return mockGAEPlatform;
@@ -180,14 +178,14 @@ class GCPResourceProviderTest {
 
     DetectedPlatform mockUnknownPlatform = Mockito.mock(DetectedPlatform.class);
     Mockito.when(mockUnknownPlatform.getSupportedPlatform())
-        .thenReturn(GCPPlatformDetector.SupportedPlatform.UNKNOWN_PLATFORM);
+        .thenReturn(GcpPlatformDetector.SupportedPlatform.UNKNOWN_PLATFORM);
     Mockito.when(mockUnknownPlatform.getAttributes()).thenReturn(mockAttributes);
     return mockUnknownPlatform;
   }
 
   @Test
   void testGceResourceAttributesMapping() {
-    GCPPlatformDetector mockDetector = Mockito.mock(GCPPlatformDetector.class);
+    GcpPlatformDetector mockDetector = Mockito.mock(GcpPlatformDetector.class);
     DetectedPlatform mockPlatform = generateMockGcePlatform();
     Mockito.when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
     Map<String, String> detectedAttributes = mockPlatform.getAttributes();
@@ -211,7 +209,7 @@ class GCPResourceProviderTest {
 
   @Test
   void testGkeResourceAttributesMapping_LocationTypeRegion() {
-    GCPPlatformDetector mockDetector = Mockito.mock(GCPPlatformDetector.class);
+    GcpPlatformDetector mockDetector = Mockito.mock(GcpPlatformDetector.class);
     DetectedPlatform mockPlatform = generateMockGkePlatform(GKE_LOCATION_TYPE_REGION);
     Mockito.when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
 
@@ -228,7 +226,7 @@ class GCPResourceProviderTest {
 
   @Test
   void testGkeResourceAttributesMapping_LocationTypeZone() {
-    GCPPlatformDetector mockDetector = Mockito.mock(GCPPlatformDetector.class);
+    GcpPlatformDetector mockDetector = Mockito.mock(GcpPlatformDetector.class);
     DetectedPlatform mockPlatform = generateMockGkePlatform(GKE_LOCATION_TYPE_ZONE);
     Mockito.when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
 
@@ -250,10 +248,10 @@ class GCPResourceProviderTest {
     mockGKEAttributes.put(GKE_CLUSTER_LOCATION_TYPE, "INVALID");
     mockGKEAttributes.put(GKE_CLUSTER_LOCATION, "some-location");
 
-    GCPPlatformDetector mockDetector = Mockito.mock(GCPPlatformDetector.class);
+    GcpPlatformDetector mockDetector = Mockito.mock(GcpPlatformDetector.class);
     DetectedPlatform mockPlatform = Mockito.mock(DetectedPlatform.class);
     Mockito.when(mockPlatform.getSupportedPlatform())
-        .thenReturn(GCPPlatformDetector.SupportedPlatform.GOOGLE_KUBERNETES_ENGINE);
+        .thenReturn(GcpPlatformDetector.SupportedPlatform.GOOGLE_KUBERNETES_ENGINE);
     Mockito.when(mockPlatform.getProjectId()).thenReturn(DUMMY_PROJECT_ID);
     Mockito.when(mockPlatform.getAttributes()).thenReturn(mockGKEAttributes);
     Mockito.when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
@@ -271,7 +269,7 @@ class GCPResourceProviderTest {
 
   @Test
   void testGkeResourceAttributesMapping_LocationMissing() {
-    GCPPlatformDetector mockDetector = Mockito.mock(GCPPlatformDetector.class);
+    GcpPlatformDetector mockDetector = Mockito.mock(GcpPlatformDetector.class);
     DetectedPlatform mockPlatform = generateMockGkePlatform("");
     Mockito.when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
 
@@ -296,9 +294,9 @@ class GCPResourceProviderTest {
 
   @Test
   void testGcrServiceResourceAttributesMapping() {
-    GCPPlatformDetector mockDetector = Mockito.mock(GCPPlatformDetector.class);
+    GcpPlatformDetector mockDetector = Mockito.mock(GcpPlatformDetector.class);
     DetectedPlatform mockPlatform =
-        generateMockServerlessPlatform(GCPPlatformDetector.SupportedPlatform.GOOGLE_CLOUD_RUN);
+        generateMockServerlessPlatform(GcpPlatformDetector.SupportedPlatform.GOOGLE_CLOUD_RUN);
     Mockito.when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
 
     Resource gotResource = new GCPResourceProvider(mockDetector).createResource(mockConfigProps);
@@ -313,10 +311,10 @@ class GCPResourceProviderTest {
 
   @Test
   void testGcfResourceAttributeMapping() {
-    GCPPlatformDetector mockDetector = Mockito.mock(GCPPlatformDetector.class);
+    GcpPlatformDetector mockDetector = Mockito.mock(GcpPlatformDetector.class);
     DetectedPlatform mockPlatform =
         generateMockServerlessPlatform(
-            GCPPlatformDetector.SupportedPlatform.GOOGLE_CLOUD_FUNCTIONS);
+            GcpPlatformDetector.SupportedPlatform.GOOGLE_CLOUD_FUNCTIONS);
     Mockito.when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
 
     Resource gotResource = new GCPResourceProvider(mockDetector).createResource(mockConfigProps);
@@ -344,7 +342,7 @@ class GCPResourceProviderTest {
 
   @Test
   void testGcrJobResourceAttributesMapping() {
-    GCPPlatformDetector mockDetector = Mockito.mock(GCPPlatformDetector.class);
+    GcpPlatformDetector mockDetector = Mockito.mock(GcpPlatformDetector.class);
     DetectedPlatform mockPlatform = generateMockGcrJobPlatform();
     Mockito.when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
     Map<String, String> detectedAttributes = mockPlatform.getAttributes();
@@ -369,7 +367,7 @@ class GCPResourceProviderTest {
 
   @Test
   void testGaeResourceAttributeMapping() {
-    GCPPlatformDetector mockDetector = Mockito.mock(GCPPlatformDetector.class);
+    GcpPlatformDetector mockDetector = Mockito.mock(GcpPlatformDetector.class);
     DetectedPlatform mockPlatform = generateMockGaePlatform();
     Mockito.when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
     Map<String, String> detectedAttributes = mockPlatform.getAttributes();
@@ -391,7 +389,7 @@ class GCPResourceProviderTest {
 
   @Test
   void testUnknownPlatformResourceAttributesMapping() {
-    GCPPlatformDetector mockDetector = Mockito.mock(GCPPlatformDetector.class);
+    GcpPlatformDetector mockDetector = Mockito.mock(GcpPlatformDetector.class);
     DetectedPlatform mockPlatform = generateMockUnknownPlatform();
     Mockito.when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
 

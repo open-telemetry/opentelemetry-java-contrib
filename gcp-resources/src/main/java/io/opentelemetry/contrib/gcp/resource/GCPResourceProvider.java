@@ -5,30 +5,30 @@
 
 package io.opentelemetry.contrib.gcp.resource;
 
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.GAE_APP_VERSION;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.GAE_AVAILABILITY_ZONE;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.GAE_CLOUD_REGION;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.GAE_INSTANCE_ID;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.GAE_MODULE_NAME;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.GCE_AVAILABILITY_ZONE;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.GCE_CLOUD_REGION;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.GCE_INSTANCE_HOSTNAME;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.GCE_INSTANCE_ID;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.GCE_INSTANCE_NAME;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.GCE_MACHINE_TYPE;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.GCR_JOB_EXECUTION_KEY;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.GCR_JOB_TASK_INDEX;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.GKE_CLUSTER_LOCATION;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.GKE_CLUSTER_LOCATION_TYPE;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.GKE_CLUSTER_NAME;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.GKE_HOST_ID;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.GKE_LOCATION_TYPE_REGION;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.GKE_LOCATION_TYPE_ZONE;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.SERVERLESS_COMPUTE_AVAILABILITY_ZONE;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.SERVERLESS_COMPUTE_CLOUD_REGION;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.SERVERLESS_COMPUTE_INSTANCE_ID;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.SERVERLESS_COMPUTE_NAME;
-import static com.google.cloud.opentelemetry.detection.AttributeKeys.SERVERLESS_COMPUTE_REVISION;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GAE_APP_VERSION;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GAE_AVAILABILITY_ZONE;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GAE_CLOUD_REGION;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GAE_INSTANCE_ID;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GAE_MODULE_NAME;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_AVAILABILITY_ZONE;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_CLOUD_REGION;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_INSTANCE_HOSTNAME;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_INSTANCE_ID;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_INSTANCE_NAME;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_MACHINE_TYPE;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCR_JOB_EXECUTION_KEY;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCR_JOB_TASK_INDEX;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GKE_CLUSTER_LOCATION;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GKE_CLUSTER_LOCATION_TYPE;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GKE_CLUSTER_NAME;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GKE_HOST_ID;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GKE_LOCATION_TYPE_REGION;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GKE_LOCATION_TYPE_ZONE;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.SERVERLESS_COMPUTE_AVAILABILITY_ZONE;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.SERVERLESS_COMPUTE_CLOUD_REGION;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.SERVERLESS_COMPUTE_INSTANCE_ID;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.SERVERLESS_COMPUTE_NAME;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.SERVERLESS_COMPUTE_REVISION;
 import static io.opentelemetry.contrib.gcp.resource.IncubatingAttributes.CLOUD_ACCOUNT_ID;
 import static io.opentelemetry.contrib.gcp.resource.IncubatingAttributes.CLOUD_AVAILABILITY_ZONE;
 import static io.opentelemetry.contrib.gcp.resource.IncubatingAttributes.CLOUD_PLATFORM;
@@ -50,8 +50,6 @@ import static io.opentelemetry.contrib.gcp.resource.IncubatingAttributes.HOST_NA
 import static io.opentelemetry.contrib.gcp.resource.IncubatingAttributes.HOST_TYPE;
 import static io.opentelemetry.contrib.gcp.resource.IncubatingAttributes.K8S_CLUSTER_NAME;
 
-import com.google.cloud.opentelemetry.detection.DetectedPlatform;
-import com.google.cloud.opentelemetry.detection.GCPPlatformDetector;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
@@ -66,15 +64,15 @@ public class GCPResourceProvider implements ConditionalResourceProvider {
 
   private static final Logger LOGGER = Logger.getLogger(GCPResourceProvider.class.getSimpleName());
 
-  private final GCPPlatformDetector detector;
+  private final GcpPlatformDetector detector;
 
   // for testing only
-  GCPResourceProvider(GCPPlatformDetector detector) {
+  GCPResourceProvider(GcpPlatformDetector detector) {
     this.detector = detector;
   }
 
   public GCPResourceProvider() {
-    this.detector = GCPPlatformDetector.DEFAULT_INSTANCE;
+    this.detector = GcpPlatformDetector.DEFAULT_INSTANCE;
   }
 
   @Override
@@ -91,7 +89,7 @@ public class GCPResourceProvider implements ConditionalResourceProvider {
   public Attributes getAttributes() {
     DetectedPlatform detectedPlatform = detector.detectPlatform();
     if (detectedPlatform.getSupportedPlatform()
-        == GCPPlatformDetector.SupportedPlatform.UNKNOWN_PLATFORM) {
+        == GcpPlatformDetector.SupportedPlatform.UNKNOWN_PLATFORM) {
       return Attributes.empty();
     }
 

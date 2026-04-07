@@ -12,9 +12,6 @@ dependencies {
   compileOnly("io.opentelemetry:opentelemetry-api-incubator")
   api("io.opentelemetry:opentelemetry-sdk")
 
-  // Provides GCP resource detection support
-  implementation("com.google.cloud.opentelemetry:detector-resources-support:0.36.0")
-
   testImplementation("io.opentelemetry.semconv:opentelemetry-semconv-incubating")
 
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
@@ -26,7 +23,9 @@ dependencies {
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
 
   testImplementation("org.mockito:mockito-core")
+  testImplementation("org.mockito:mockito-inline")
   testImplementation("com.google.guava:guava")
 
   testImplementation("org.junit.jupiter:junit-jupiter-api")
+  testImplementation("com.github.tomakehurst:wiremock-jre8:2.35.0")
 }
