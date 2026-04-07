@@ -32,6 +32,47 @@ logger_provider:
 
 `FilteringLogRecordProcessor` is a `LogRecordProcessor` that only keep logs  based on a predicate
 
+## Filtering Span Exporter
+
+`FilteringSpanExporter` is a `SpanExporter` wrapper that filters spans at the trace level before delegating to the underlying exporter. Filtering is composable via two interfaces:
+
+- `SpanFilter` - evaluates individual spans (e.g., error status, slow duration)
+- `TraceFilter` - evaluates all spans belonging to a trace within the batch (e.g., overall trace wall-clock duration)
+
+A trace is kept if any `SpanFilter` matches any of its spans, OR any `TraceFilter` matches the trace's span group. All spans sharing a trace ID are exported together.
+
+Built-in filters:
+- `ErrorSpanFilter` - keeps traces containing any span with error status
+- `DurationSpanFilter` - keeps traces containing any span exceeding a duration threshold
+- `TraceDurationFilter` - keeps traces whose wall-clock duration (max end - min start) exceeds a threshold
+
+Usage:
+
+```java
+SpanExporter delegate = OtlpGrpcSpanExporter.getDefault();
+
+// Export traces with errors, individual spans > 2s, or trace duration > 10s
+SpanExporter filtering = new FilteringSpanExporter(
+    delegate,
+    Arrays.asList(new ErrorSpanFilter(), new DurationSpanFilter(2000)),
+    Collections.singletonList(new TraceDurationFilter(10000)));
+
+// Custom filters
+SpanFilter nameFilter = span -> span.getName().contains("important");
+SpanExporter custom = new FilteringSpanExporter(
+    delegate,
+    Collections.singletonList(nameFilter),
+    Collections.emptyList());
+
+// Optionally pass a Meter to emit dropped-span metrics
+Meter meter = openTelemetry.getMeter("my-service");
+SpanExporter withMetrics = new FilteringSpanExporter(
+    delegate,
+    Arrays.asList(new ErrorSpanFilter(), new DurationSpanFilter(2000)),
+    Collections.singletonList(new TraceDurationFilter(10000)),
+    meter);
+```
+
 ## Component owners
 
 - [Cesar Munoz](https://github.com/LikeTheSalad), Elastic
