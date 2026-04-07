@@ -19,12 +19,14 @@ public final class JsonPolicyInitConfigReader {
 
   private static final ObjectMapper MAPPER = new ObjectMapper();
 
-  public PolicyInitConfig read(String json) throws IOException {
+  private JsonPolicyInitConfigReader() {}
+
+  public static PolicyInitConfig read(String json) throws IOException {
     Objects.requireNonNull(json, "json cannot be null");
     return read(new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8)));
   }
 
-  public PolicyInitConfig read(InputStream in) throws IOException {
+  public static PolicyInitConfig read(InputStream in) throws IOException {
     Objects.requireNonNull(in, "in cannot be null");
     JsonNode root = MAPPER.readTree(in);
     return JsonNodePolicyInitConfigParser.parse(root);

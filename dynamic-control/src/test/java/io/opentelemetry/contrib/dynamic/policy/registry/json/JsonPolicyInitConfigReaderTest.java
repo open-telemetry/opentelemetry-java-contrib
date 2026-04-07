@@ -20,14 +20,12 @@ class JsonPolicyInitConfigReaderTest {
   private static final String EXAMPLE_FIXTURE =
       "/io/opentelemetry/contrib/dynamic/policy/registry/json/policy-init-example.json";
 
-  private final JsonPolicyInitConfigReader reader = new JsonPolicyInitConfigReader();
-
   @Test
   void readsSourceCentricFixture() throws Exception {
     try (InputStream in = getClass().getResourceAsStream(EXAMPLE_FIXTURE)) {
       assertThat(in).isNotNull();
 
-      PolicyInitConfig config = reader.read(in);
+      PolicyInitConfig config = JsonPolicyInitConfigReader.read(in);
       assertThat(config.getSources()).hasSize(1);
 
       PolicySourceConfig source = config.getSources().get(0);
@@ -43,14 +41,14 @@ class JsonPolicyInitConfigReaderTest {
 
   @Test
   void missingSourcesThrows() {
-    assertThatThrownBy(() -> reader.read("{}"))
+    assertThatThrownBy(() -> JsonPolicyInitConfigReader.read("{}"))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("sources");
   }
 
   @Test
   void emptyPayloadThrows() {
-    assertThatThrownBy(() -> reader.read(""))
+    assertThatThrownBy(() -> JsonPolicyInitConfigReader.read(""))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageMatching("(?s).*(empty|sources).*");
   }
@@ -58,7 +56,7 @@ class JsonPolicyInitConfigReaderTest {
   @Test
   void missingFormatThrows() {
     String json = "{\"sources\":[{\"kind\":\"opamp\",\"mappings\":[]}]}";
-    assertThatThrownBy(() -> reader.read(json))
+    assertThatThrownBy(() -> JsonPolicyInitConfigReader.read(json))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("format");
   }
@@ -66,7 +64,7 @@ class JsonPolicyInitConfigReaderTest {
   @Test
   void missingMappingsThrows() {
     String json = "{\"sources\":[{\"kind\":\"opamp\",\"format\":\"jsonkeyvalue\"}]}";
-    assertThatThrownBy(() -> reader.read(json))
+    assertThatThrownBy(() -> JsonPolicyInitConfigReader.read(json))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("mappings");
   }
@@ -75,7 +73,7 @@ class JsonPolicyInitConfigReaderTest {
   void mappingMissingSourceKeyThrows() {
     String json =
         "{\"sources\":[{\"kind\":\"opamp\",\"format\":\"jsonkeyvalue\",\"mappings\":[{\"policyType\":\"x\"}]}]}";
-    assertThatThrownBy(() -> reader.read(json))
+    assertThatThrownBy(() -> JsonPolicyInitConfigReader.read(json))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("sourceKey");
   }

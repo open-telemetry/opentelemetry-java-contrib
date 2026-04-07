@@ -20,14 +20,12 @@ class YamlPolicyInitConfigReaderTest {
   private static final String EXAMPLE_FIXTURE =
       "/io/opentelemetry/contrib/dynamic/policy/registry/yaml/policy-init-example.yaml";
 
-  private final YamlPolicyInitConfigReader reader = new YamlPolicyInitConfigReader();
-
   @Test
   void readsSourceCentricFixture() throws Exception {
     try (InputStream in = getClass().getResourceAsStream(EXAMPLE_FIXTURE)) {
       assertThat(in).isNotNull();
 
-      PolicyInitConfig config = reader.read(in);
+      PolicyInitConfig config = YamlPolicyInitConfigReader.read(in);
       assertThat(config.getSources()).hasSize(1);
 
       PolicySourceConfig source = config.getSources().get(0);
@@ -43,14 +41,14 @@ class YamlPolicyInitConfigReaderTest {
 
   @Test
   void missingSourcesThrows() {
-    assertThatThrownBy(() -> reader.read("{}"))
+    assertThatThrownBy(() -> YamlPolicyInitConfigReader.read("{}"))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("sources");
   }
 
   @Test
   void emptyPayloadThrows() {
-    assertThatThrownBy(() -> reader.read(""))
+    assertThatThrownBy(() -> YamlPolicyInitConfigReader.read(""))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageMatching("(?s).*(empty|sources).*");
   }
@@ -58,7 +56,7 @@ class YamlPolicyInitConfigReaderTest {
   @Test
   void missingFormatThrows() {
     String yaml = "sources:\n  - kind: opamp\n    mappings: []\n";
-    assertThatThrownBy(() -> reader.read(yaml))
+    assertThatThrownBy(() -> YamlPolicyInitConfigReader.read(yaml))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("format");
   }
@@ -66,7 +64,7 @@ class YamlPolicyInitConfigReaderTest {
   @Test
   void missingMappingsThrows() {
     String yaml = "sources:\n  - kind: opamp\n    format: jsonkeyvalue\n";
-    assertThatThrownBy(() -> reader.read(yaml))
+    assertThatThrownBy(() -> YamlPolicyInitConfigReader.read(yaml))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("mappings");
   }
@@ -79,7 +77,7 @@ class YamlPolicyInitConfigReaderTest {
             + "    format: jsonkeyvalue\n"
             + "    mappings:\n"
             + "      - policyType: x\n";
-    assertThatThrownBy(() -> reader.read(yaml))
+    assertThatThrownBy(() -> YamlPolicyInitConfigReader.read(yaml))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("sourceKey");
   }

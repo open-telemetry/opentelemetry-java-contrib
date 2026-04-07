@@ -21,13 +21,15 @@ public final class YamlPolicyInitConfigReader {
 
   private static final ObjectMapper MAPPER = new ObjectMapper(new YAMLFactory());
 
-  public PolicyInitConfig read(InputStream in) throws IOException {
+  private YamlPolicyInitConfigReader() {}
+
+  public static PolicyInitConfig read(InputStream in) throws IOException {
     Objects.requireNonNull(in, "in cannot be null");
     JsonNode root = MAPPER.readTree(in);
     return JsonNodePolicyInitConfigParser.parse(root);
   }
 
-  public PolicyInitConfig read(String yaml) throws IOException {
+  public static PolicyInitConfig read(String yaml) throws IOException {
     Objects.requireNonNull(yaml, "yaml cannot be null");
     return read(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
   }
