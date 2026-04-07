@@ -45,7 +45,7 @@ class AwsXrayRemoteSamplerIntegrationTest {
   private static final GenericContainer<?> otelCollector =
       new GenericContainer<>(
               DockerImageName.parse(
-                  "otel/opentelemetry-collector-contrib:0.148.0@sha256:8164eab2e6bca9c9b0837a8d2f118a6618489008a839db7f9d6510e66be3923c"))
+                  "otel/opentelemetry-collector-contrib:0.149.0@sha256:0fba96233274f6d665ac8831ad99dfe6479a9a20459f6e2719c0d20945773b46"))
           .withExposedPorts(13133, 2000)
           .waitingFor(Wait.forHttp("/").forPort(13133))
           .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("otel-collector")))
