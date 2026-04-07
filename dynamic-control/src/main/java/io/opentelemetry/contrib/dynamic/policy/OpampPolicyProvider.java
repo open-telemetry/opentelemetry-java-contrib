@@ -45,7 +45,13 @@ import opamp.proto.RemoteConfigStatus;
 import opamp.proto.RemoteConfigStatuses;
 import opamp.proto.ServerErrorResponse;
 
-/** Policy provider backed by OpAMP remote config updates. */
+/**
+ * {@link PolicyProvider} implementation backed by OpAMP remote configuration updates.
+ *
+ * <p>The provider subscribes to an OpAMP endpoint, extracts the configured payload for one source
+ * location key, maps incoming source keys to internal policy types, validates them with the
+ * supplied validators, and publishes the resulting policies to callers.
+ */
 public final class OpampPolicyProvider implements PolicyProvider {
   private static final Logger logger = Logger.getLogger(OpampPolicyProvider.class.getName());
   private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -76,6 +82,16 @@ public final class OpampPolicyProvider implements PolicyProvider {
   private final AtomicReference<OpampClient> clientRef = new AtomicReference<>();
   private final AtomicReference<Thread> shutdownHookRef = new AtomicReference<>();
 
+  /**
+   * Creates a provider for one OpAMP-backed policy source.
+   *
+   * @param properties auto-configuration properties used to resolve endpoint/service identity
+   * @param configuredLocation source location key used to select one OpAMP config entry
+   * @param format payload format parser for the selected source
+   * @param mappings source-key-to-policy-type mappings for this source
+   * @param validators validators used to materialize typed {@link TelemetryPolicy} instances
+   * @throws IllegalArgumentException if required configuration such as OpAMP endpoint is missing
+   */
   public OpampPolicyProvider(
       ConfigProperties properties,
       String configuredLocation,
@@ -105,11 +121,25 @@ public final class OpampPolicyProvider implements PolicyProvider {
                 GLOBAL_POLLING_INTERVAL.get(), "polling interval cannot be null"));
   }
 
+  /**
+   * Returns the latest validated policies received from OpAMP.
+   *
+   * <p>The returned list is the current immutable snapshot held by this provider.
+   */
   @Override
   public List<TelemetryPolicy> fetchPolicies() {
     return Objects.requireNonNull(currentPolicies.get(), "currentPolicies cannot be null");
   }
 
+  /**
+   * Starts the OpAMP watch loop and registers a callback for policy updates.
+   *
+   * <p>If already started, this method is idempotent and returns a handle that still stops the
+   * active watcher.
+   *
+   * @param onUpdate callback invoked with an immutable snapshot whenever policies change
+   * @return a {@link Closeable} that stops watching
+   */
   @Override
   public Closeable startWatching(Consumer<List<TelemetryPolicy>> onUpdate) {
     Objects.requireNonNull(onUpdate, "onUpdate cannot be null");
@@ -283,6 +313,12 @@ public final class OpampPolicyProvider implements PolicyProvider {
     }
   }
 
+  /**
+   * Sets the global polling interval used by all active and future providers.
+   *
+   * @param interval new polling interval, must be greater than zero
+   * @throws IllegalArgumentException if interval is zero or negative
+   */
   public static void setGlobalPollingInterval(Duration interval) {
     Objects.requireNonNull(interval, "interval cannot be null");
     if (interval.isZero() || interval.isNegative()) {
@@ -294,11 +330,13 @@ public final class OpampPolicyProvider implements PolicyProvider {
     }
   }
 
+  /** Returns the current global polling interval for unit tests. */
   static Duration getGlobalPollingIntervalForTest() {
     return Objects.requireNonNull(
         GLOBAL_POLLING_INTERVAL.get(), "global polling interval cannot be null");
   }
 
+  /** Resets shared provider test state, including polling interval and active provider tracking. */
   public static void resetForTest() {
     setGlobalPollingInterval(DEFAULT_POLLING_INTERVAL);
     ACTIVE_PROVIDERS.clear();
@@ -309,7 +347,11 @@ public final class OpampPolicyProvider implements PolicyProvider {
     logger.info("Updated OpAMP polling interval to " + interval);
   }
 
-  // package private for testing
+  /**
+   * Resolves and normalizes the OpAMP endpoint URL from configuration.
+   *
+   * <p>Returns {@code null} when unset.
+   */
   @Nullable
   static String getEndpoint(ConfigProperties properties) {
     String endpoint = properties.getString(OPAMP_ENDPOINT);
@@ -319,7 +361,12 @@ public final class OpampPolicyProvider implements PolicyProvider {
     return normalizeEndpoint(endpoint);
   }
 
-  // package private for testing
+  /**
+   * Resolves service name from configuration.
+   *
+   * <p>Resolution order: {@code otel.service.name}, then {@code service.name} from {@code
+   * otel.resource.attributes}, then {@code unknown_service:java}.
+   */
   static String getServiceName(ConfigProperties properties) {
     String configuredServiceName = properties.getString(SERVICE_NAME);
     if (configuredServiceName != null) {
@@ -333,7 +380,11 @@ public final class OpampPolicyProvider implements PolicyProvider {
     return "unknown_service:java";
   }
 
-  // package private for testing
+  /**
+   * Resolves deployment environment from resource attributes.
+   *
+   * <p>Resolution order: {@code deployment.environment.name}, then {@code deployment.environment}.
+   */
   @Nullable
   static String getServiceEnvironment(ConfigProperties properties) {
     Map<String, String> resourceMap = properties.getMap(RESOURCE_ATTRIBUTES);
