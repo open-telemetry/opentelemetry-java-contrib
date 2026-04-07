@@ -15,12 +15,12 @@ import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import java.io.InputStream;
 import org.junit.jupiter.api.Test;
 
-class PolicyInitConfigReaderTest {
+class JsonPolicyInitConfigReaderTest {
 
   private static final String EXAMPLE_FIXTURE =
       "/io/opentelemetry/contrib/dynamic/policy/registry/json/policy-init-example.json";
 
-  private final PolicyInitConfigReader reader = new PolicyInitConfigReader();
+  private final JsonPolicyInitConfigReader reader = new JsonPolicyInitConfigReader();
 
   @Test
   void readsSourceCentricFixture() throws Exception {

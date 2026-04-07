@@ -17,7 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 /** Reads {@link PolicyInitConfig} from YAML (registry initialization file or payload). */
-public final class PolicyInitConfigReader {
+public final class YamlPolicyInitConfigReader {
 
   private static final ObjectMapper MAPPER = new ObjectMapper(new YAMLFactory());
 
