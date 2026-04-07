@@ -400,12 +400,14 @@ public final class OpampPolicyProvider implements PolicyProvider {
     if (trimmed.isEmpty()) {
       throw new IllegalArgumentException("OpAMP endpoint cannot be empty");
     }
+    while (trimmed.endsWith("/")) {
+      trimmed = trimmed.substring(0, trimmed.length() - 1);
+    }
+    if (trimmed.isEmpty()) {
+      throw new IllegalArgumentException("OpAMP endpoint cannot be empty");
+    }
     if (!trimmed.endsWith("v1/opamp")) {
-      if (trimmed.endsWith("/")) {
-        trimmed += "v1/opamp";
-      } else {
-        trimmed += "/v1/opamp";
-      }
+      trimmed += "/v1/opamp";
     }
     return trimmed;
   }
