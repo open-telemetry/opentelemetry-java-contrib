@@ -42,6 +42,7 @@ logger_provider:
 A trace is kept if any `SpanFilter` matches any of its spans, OR any `TraceFilter` matches the trace's span group. All spans sharing a trace ID are exported together.
 
 Built-in filters:
+
 - `ErrorSpanFilter` - keeps traces containing any span with error status
 - `DurationSpanFilter` - keeps traces containing any span exceeding a duration threshold
 - `TraceDurationFilter` - keeps traces whose wall-clock duration (max end - min start) exceeds a threshold
