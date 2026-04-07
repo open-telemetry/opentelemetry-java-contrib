@@ -13,6 +13,9 @@ java {
 }
 
 dependencies {
+  implementation(project(":opamp-client"))
+  implementation("com.squareup.okhttp3:okhttp")
+
   annotationProcessor("com.google.auto.service:auto-service")
   compileOnly("com.google.auto.service:auto-service-annotations")
 
