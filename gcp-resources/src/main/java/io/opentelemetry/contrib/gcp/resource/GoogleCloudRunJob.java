@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.gcp.resource;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,7 +29,7 @@ final class GoogleCloudRunJob implements DetectedPlatform {
         AttributeKeys.GCR_JOB_TASK_INDEX, this.environmentVariables.get("CLOUD_RUN_TASK_INDEX"));
     map.put(AttributeKeys.SERVERLESS_COMPUTE_INSTANCE_ID, this.metadataConfig.getInstanceId());
     map.put(AttributeKeys.SERVERLESS_COMPUTE_CLOUD_REGION, this.metadataConfig.getRegionFromZone());
-    return map;
+    return Collections.unmodifiableMap(map);
   }
 
   @Override
@@ -38,7 +39,7 @@ final class GoogleCloudRunJob implements DetectedPlatform {
 
   @Override
   public String getProjectId() {
-    return metadataConfig.getProjectId();
+    return this.metadataConfig.getProjectId();
   }
 
   @Override
