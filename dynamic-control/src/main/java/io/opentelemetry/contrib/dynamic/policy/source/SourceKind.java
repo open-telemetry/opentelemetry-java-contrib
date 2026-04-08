@@ -66,6 +66,11 @@ public enum SourceKind {
     Objects.requireNonNull(source, "source cannot be null");
     Objects.requireNonNull(config, "config cannot be null");
     Objects.requireNonNull(validators, "validators cannot be null");
+    SourceKind sourceKind = source.getKind();
+    if (sourceKind != this) {
+      throw new IllegalArgumentException(
+          "Source kind mismatch: expected " + this + " but was " + sourceKind);
+    }
     return providerCreator.create(source, config, validators);
   }
 
