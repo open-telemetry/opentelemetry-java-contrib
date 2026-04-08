@@ -14,6 +14,8 @@ import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.Nullable;
 
 /**
@@ -36,6 +38,7 @@ public enum SourceKind {
 
   private final String configValue;
   private final ProviderCreator providerCreator;
+  private static final Logger logger = Logger.getLogger(SourceKind.class.getName());
 
   SourceKind(String configValue, ProviderCreator providerCreator) {
     this.configValue = configValue;
@@ -79,8 +82,16 @@ public enum SourceKind {
     if (location == null || location.trim().isEmpty()) {
       return null;
     }
-    return new OpampPolicyProvider(
-        config, location, source.getFormat(), source.getMappings(), validators);
+    try {
+      return new OpampPolicyProvider(
+          config, location, source.getFormat(), source.getMappings(), validators);
+    } catch (IllegalArgumentException e) {
+      logger.log(
+          Level.FINE,
+          "Skipping OpAMP provider creation due to invalid/missing OpAMP configuration: {0}",
+          e.getMessage());
+      return null;
+    }
   }
 
   @Immutable

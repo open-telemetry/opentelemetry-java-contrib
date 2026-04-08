@@ -90,6 +90,21 @@ class SourceKindTest {
   }
 
   @Test
+  void opampCreateProviderReturnsNullWhenRequiredConfigMissing() {
+    ConfigProperties config = mock(ConfigProperties.class);
+    when(config.getString("otel.opamp.service.url")).thenReturn(null);
+    when(config.getString("otel.service.name")).thenReturn("test-service");
+    when(config.getMap("otel.experimental.opamp.headers")).thenReturn(Collections.emptyMap());
+    when(config.getMap("otel.resource.attributes")).thenReturn(Collections.emptyMap());
+
+    PolicyProvider provider =
+        SourceKind.OPAMP.createProvider(
+            source(SourceKind.OPAMP, "vendor-specific"), config, Collections.emptyList());
+
+    assertThat(provider).isNull();
+  }
+
+  @Test
   void createProviderRejectsNullArguments() {
     ConfigProperties config = opampConfig();
     PolicySourceConfig source = source(SourceKind.OPAMP, "vendor-specific");
