@@ -9,6 +9,8 @@ import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import javax.annotation.Nonnull;
 
 /**
+ * NOTE PolicyInit not yet added - remove this note when it is added
+ * 
  * Initializes one policy type and returns the implementer that applies that type at runtime.
  *
  * <p>This is used by {@code
