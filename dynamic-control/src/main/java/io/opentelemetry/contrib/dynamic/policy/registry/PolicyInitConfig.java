@@ -46,10 +46,13 @@ public final class PolicyInitConfig {
   /**
    * Reads policy-init configuration based on config properties.
    *
-   * <p>YAML takes precedence over JSON when both are present.
+   * <p>YAML takes precedence over JSON when both are present. If both are present, and the YAML
+   * file is invalid, the JSON file is still ignored. If the file parsed is invalid, a warning is
+   * logged and null is returned.
    *
    * @param config OpenTelemetry config properties
-   * @return parsed init config, or null when no init-config path is configured
+   * @return parsed init config, or null when no init-config path is configured or the file is
+   *     invalid
    * @throws NullPointerException if config is null
    */
   @Nullable
