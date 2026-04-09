@@ -22,10 +22,7 @@ public final class TraceSamplingRatePolicy extends TelemetryPolicy {
 
   public TraceSamplingRatePolicy(double probability) {
     super(POLICY_TYPE);
-    if (Double.isNaN(probability) || probability < 0.0 || probability > 1.0) {
-      throw new IllegalArgumentException("probability must be within [0.0, 1.0]");
-    }
-    this.probability = probability;
+    this.probability = normalizeProbability(probability);
   }
 
   public double getProbability() {
@@ -54,11 +51,17 @@ public final class TraceSamplingRatePolicy extends TelemetryPolicy {
    * @throws IllegalArgumentException if probability is NaN or outside {@code [0.0, 1.0]}
    */
   public static Sampler createSampler(double probability) {
+    probability = normalizeProbability(probability);
+    return CompositeSampler.wrap(
+        ComposableSampler.parentThreshold(ComposableSampler.probability(probability)));
+  }
+
+  private static double normalizeProbability(double probability) {
     if (Double.isNaN(probability) || probability < 0.0 || probability > 1.0) {
       throw new IllegalArgumentException("probability must be within [0.0, 1.0]");
     }
-    return CompositeSampler.wrap(
-        ComposableSampler.parentThreshold(ComposableSampler.probability(probability)));
+    // Normalize -0.0 to +0.0 so equality/hash behavior stays intuitive.
+    return probability == 0.0 ? 0.0 : probability;
   }
 
   @Nullable

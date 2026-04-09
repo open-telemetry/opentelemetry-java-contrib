@@ -19,11 +19,11 @@ import java.util.logging.Logger;
  *
  * <p>This implementer listens for validated {@link TelemetryPolicy} updates of type {@code
  * "trace-sampling"} and applies {@link TraceSamplingRatePolicy#getProbability()} to the delegate
- * sampler using {@link Sampler#traceIdRatioBased(double)} wrapped by {@link
- * Sampler#parentBased(Sampler)}.
+ * sampler via {@link TraceSamplingRatePolicy#createSampler(double)}.
  *
  * <p>If a type-only {@link TelemetryPolicy} of type {@code "trace-sampling"} is received, it is
- * treated as policy removal and the delegate falls back to {@link Sampler#alwaysOn()}.
+ * treated as policy removal and the delegate is reset using {@code
+ * TraceSamplingRatePolicy.createSampler(1.0)}.
  *
  * <p>Validation is performed by {@link TraceSamplingValidator}; this implementer only consumes
  * policies produced by that validator.

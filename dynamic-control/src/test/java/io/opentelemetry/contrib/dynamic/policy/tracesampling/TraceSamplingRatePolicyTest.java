@@ -26,6 +26,18 @@ class TraceSamplingRatePolicyTest {
   }
 
   @Test
+  void constructorNormalizesNegativeZeroToPositiveZero() {
+    TraceSamplingRatePolicy negativeZero = new TraceSamplingRatePolicy(-0.0);
+    TraceSamplingRatePolicy positiveZero = new TraceSamplingRatePolicy(0.0);
+
+    assertThat(negativeZero.getProbability()).isEqualTo(0.0);
+    assertThat(Double.doubleToRawLongBits(negativeZero.getProbability()))
+        .isEqualTo(Double.doubleToRawLongBits(0.0));
+    assertThat(negativeZero).isEqualTo(positiveZero);
+    assertThat(negativeZero.hashCode()).isEqualTo(positiveZero.hashCode());
+  }
+
+  @Test
   void constructorRejectsOutOfRangeOrNaNProbabilities() {
     assertThatThrownBy(() -> new TraceSamplingRatePolicy(Double.NaN))
         .isInstanceOf(IllegalArgumentException.class)
@@ -71,9 +83,11 @@ class TraceSamplingRatePolicyTest {
   @Test
   void createSamplerAcceptsBoundaryProbabilities() {
     Sampler zero = TraceSamplingRatePolicy.createSampler(0.0);
+    Sampler negativeZero = TraceSamplingRatePolicy.createSampler(-0.0);
     Sampler one = TraceSamplingRatePolicy.createSampler(1.0);
 
     assertThat(zero).isNotNull();
+    assertThat(negativeZero).isNotNull();
     assertThat(one).isNotNull();
   }
 
