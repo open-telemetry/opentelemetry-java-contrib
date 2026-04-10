@@ -51,20 +51,20 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 
 @WireMockTest(httpPort = 8089)
-public class GcpPlatformDetectorTest {
+class GcpPlatformDetectorTest {
   private final GcpMetadataConfig mockMetadataConfig =
       new GcpMetadataConfig("http://localhost:8089/");
   private static final Map<String, String> envVars = new HashMap<>();
 
   @BeforeEach
-  public void setup() {
+  void setup() {
     envVars.clear();
   }
 
   @ParameterizedTest
   @NullSource
   @ValueSource(strings = {""})
-  public void testGCPComputeResourceNotGCP(String projectId) {
+  void testGCPComputeResourceNotGCP(String projectId) {
     GcpMetadataConfig mockMetadataConfig = Mockito.mock(GcpMetadataConfig.class);
     Mockito.when(mockMetadataConfig.getProjectId()).thenReturn(projectId);
 
@@ -78,7 +78,7 @@ public class GcpPlatformDetectorTest {
   }
 
   @Test
-  public void testGCPComputeResourceNonGCPEndpoint() {
+  void testGCPComputeResourceNonGCPEndpoint() {
     // intentionally not providing the required Metadata-Flavor header with the
     // request to mimic non GCP endpoint
     stubFor(
@@ -94,7 +94,7 @@ public class GcpPlatformDetectorTest {
 
   /** Google Compute Engine Tests * */
   @Test
-  public void testGCEResourceWithGCEAttributesSucceeds() {
+  void testGCEResourceWithGCEAttributesSucceeds() {
     TestUtils.stubEndpoint("/project/project-id", "GCE-pid");
     TestUtils.stubEndpoint("/instance/zone", "country-gce_region-gce_zone");
     TestUtils.stubEndpoint("/instance/id", "GCE-instance-id");
@@ -123,7 +123,7 @@ public class GcpPlatformDetectorTest {
 
   /** Google Kubernetes Engine Tests * */
   @Test
-  public void testGKEResourceWithGKEAttributesSucceedsLocationZone() {
+  void testGKEResourceWithGKEAttributesSucceedsLocationZone() {
     envVars.put("KUBERNETES_SERVICE_HOST", "GKE-testHost");
     envVars.put("NAMESPACE", "GKE-testNameSpace");
     // Hostname can truncate pod name, so we test downward API override.
@@ -157,7 +157,7 @@ public class GcpPlatformDetectorTest {
   }
 
   @Test
-  public void testGKEResourceWithGKEAttributesSucceedsLocationRegion() {
+  void testGKEResourceWithGKEAttributesSucceedsLocationRegion() {
     envVars.put("KUBERNETES_SERVICE_HOST", "GKE-testHost");
     envVars.put("NAMESPACE", "GKE-testNameSpace");
     // Hostname can truncate pod name, so we test downward API override.
@@ -193,7 +193,7 @@ public class GcpPlatformDetectorTest {
   @ParameterizedTest
   @NullSource
   @ValueSource(strings = {"", "country", "country-region-zone-invalid"})
-  public void testGKEResourceDetectionWithInvalidLocations(String clusterLocation) {
+  void testGKEResourceDetectionWithInvalidLocations(String clusterLocation) {
     envVars.put("KUBERNETES_SERVICE_HOST", "GKE-testHost");
     envVars.put("NAMESPACE", "GKE-testNameSpace");
     // Hostname can truncate pod name, so we test downward API override.
@@ -232,7 +232,7 @@ public class GcpPlatformDetectorTest {
 
   /** Google Cloud Functions Tests * */
   @Test
-  public void testGCFResourceWithCloudFunctionAttributesSucceeds() {
+  void testGCFResourceWithCloudFunctionAttributesSucceeds() {
     // Setup GCF required env vars
     envVars.put("K_SERVICE", "cloud-function-hello");
     envVars.put("K_REVISION", "cloud-function-hello.1");
@@ -263,7 +263,7 @@ public class GcpPlatformDetectorTest {
   }
 
   @Test
-  public void testGCFDetectionWhenGCRAttributesPresent() {
+  void testGCFDetectionWhenGCRAttributesPresent() {
     // Setup GCF required env vars
     envVars.put("K_SERVICE", "cloud-function-hello");
     envVars.put("K_REVISION", "cloud-function-hello.1");
@@ -289,7 +289,7 @@ public class GcpPlatformDetectorTest {
 
   /** Google Cloud Run Tests (Service) * */
   @Test
-  public void testGCFResourceWithCloudRunAttributesSucceeds() {
+  void testGCFResourceWithCloudRunAttributesSucceeds() {
     // Setup GCR service required env vars
     envVars.put("K_SERVICE", "cloud-run-hello");
     envVars.put("K_REVISION", "cloud-run-hello.1");
@@ -321,7 +321,7 @@ public class GcpPlatformDetectorTest {
 
   /** Google Cloud Run Tests (Jobs) * */
   @Test
-  public void testCloudRunJobResourceWithAttributesSucceeds() {
+  void testCloudRunJobResourceWithAttributesSucceeds() {
     // Setup GCR Job required env vars
     envVars.put("CLOUD_RUN_JOB", "cloud-run-hello-job");
     envVars.put("CLOUD_RUN_EXECUTION", "cloud-run-hello-job-1a2b3c");
@@ -353,7 +353,7 @@ public class GcpPlatformDetectorTest {
   /** Google App Engine Tests * */
   @ParameterizedTest
   @MethodSource("provideGAEVariantEnvironmentVariable")
-  public void testGAEResourceWithAppEngineAttributesSucceeds(
+  void testGAEResourceWithAppEngineAttributesSucceeds(
       String gaeEnvironmentVar,
       String metadataZone,
       String expectedZone,
