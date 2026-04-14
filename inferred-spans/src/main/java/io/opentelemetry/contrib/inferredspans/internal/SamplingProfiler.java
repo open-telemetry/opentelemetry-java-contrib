@@ -44,7 +44,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -90,8 +89,8 @@ import org.agrona.collections.Long2ObjectHashMap;
  * one stack trace. Once {@linkplain ActivationEvent#handleDeactivationEvent(SamplingProfiler)
  * handling the deactivation event} of the root span in a thread (after which the current {@link
  * io.opentelemetry.context.Context} would not contain a span anymore), the {@link CallTree} is
- * {@linkplain CallTree#spanify(CallTree.Root, Span, TraceContext, SpanAnchoredClock, BiConsumer,
- * StringBuilder, Tracer)} converted into regular spans}.
+ * {@linkplain CallTree#spanify(CallTree.Root, Span, TraceContext, SpanAnchoredClock,
+ * java.util.function.BiConsumer, StringBuilder, Tracer)} converted into regular spans}.
  *
  * <p>Overall, the allocation rate does not depend on the number of {@link ActivationEvent}s but
  * only on {@link InferredSpansConfiguration#getProfilingInterval()} and {@link
