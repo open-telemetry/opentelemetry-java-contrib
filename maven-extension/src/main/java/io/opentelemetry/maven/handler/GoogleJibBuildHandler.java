@@ -40,12 +40,12 @@ final class GoogleJibBuildHandler implements MojoGoalExecutionHandler {
       return;
     }
     Xpp3Dom toNode = pluginNode.getChild("to");
-    if (pluginNode == null) {
+    if (toNode == null) {
       logger.debug("OpenTelemetry: GoogleJibBuildHandler: 'to' node not found");
       return;
     }
     Xpp3Dom imageNode = toNode.getChild("image");
-    if (pluginNode == null) {
+    if (imageNode == null) {
       logger.debug("OpenTelemetry: GoogleJibBuildHandler: 'to/image' node not found");
       return;
     }
