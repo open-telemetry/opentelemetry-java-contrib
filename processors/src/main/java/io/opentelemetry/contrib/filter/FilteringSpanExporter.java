@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import javax.annotation.Nullable;
 
@@ -61,14 +62,17 @@ public final class FilteringSpanExporter implements SpanExporter {
       List<SpanFilter> spanFilters,
       List<TraceFilter> traceFilters,
       @Nullable Meter meter) {
-    this.delegate = delegate;
+    this.delegate = Objects.requireNonNull(delegate, "delegate");
+    Objects.requireNonNull(spanFilters, "spanFilters");
+    Objects.requireNonNull(traceFilters, "traceFilters");
     this.spanFilters = Collections.unmodifiableList(new ArrayList<>(spanFilters));
     this.traceFilters = Collections.unmodifiableList(new ArrayList<>(traceFilters));
     if (meter != null) {
       this.droppedSpansCounter =
           meter
-              .counterBuilder("filtering.span.exporter.dropped")
+              .counterBuilder("otel.contrib.processor.span.filtered")
               .setDescription("Number of spans dropped by the filtering span exporter")
+              .setUnit("{span}")
               .build();
     } else {
       this.droppedSpansCounter = null;

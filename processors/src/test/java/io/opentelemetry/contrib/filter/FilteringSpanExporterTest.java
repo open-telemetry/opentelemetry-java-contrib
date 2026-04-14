@@ -24,6 +24,7 @@ import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.data.StatusData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -34,8 +35,8 @@ import org.mockito.ArgumentCaptor;
 
 class FilteringSpanExporterTest {
 
-  private static final long SPAN_THRESHOLD_MS = 2000L;
-  private static final long TRACE_THRESHOLD_MS = 10000L;
+  private static final Duration SPAN_THRESHOLD = Duration.ofSeconds(2);
+  private static final Duration TRACE_THRESHOLD = Duration.ofSeconds(10);
 
   private SpanExporter delegate;
   private FilteringSpanExporter exporter;
@@ -47,8 +48,8 @@ class FilteringSpanExporterTest {
     exporter =
         new FilteringSpanExporter(
             delegate,
-            Arrays.asList(new ErrorSpanFilter(), new DurationSpanFilter(SPAN_THRESHOLD_MS)),
-            Collections.singletonList(new TraceDurationFilter(TRACE_THRESHOLD_MS)));
+            Arrays.asList(new ErrorSpanFilter(), new DurationSpanFilter(SPAN_THRESHOLD)),
+            Collections.singletonList(new TraceDurationFilter(TRACE_THRESHOLD)));
   }
 
   // --- Trace grouping: if one span is interesting, all siblings are kept ---
@@ -132,7 +133,7 @@ class FilteringSpanExporterTest {
         new FilteringSpanExporter(
             delegate,
             Collections.<SpanFilter>emptyList(),
-            Collections.singletonList(new TraceDurationFilter(TRACE_THRESHOLD_MS)));
+            Collections.singletonList(new TraceDurationFilter(TRACE_THRESHOLD)));
 
     SpanData earlySpan = createSpan("trace-1", "span-1", StatusCode.OK, 0, 500);
     SpanData lateSpan = createSpan("trace-1", "span-2", StatusCode.OK, 11500, 500);
@@ -171,15 +172,16 @@ class FilteringSpanExporterTest {
     Meter meter = mock(Meter.class);
     LongCounterBuilder counterBuilder = mock(LongCounterBuilder.class);
     LongCounter counter = mock(LongCounter.class);
-    when(meter.counterBuilder("filtering.span.exporter.dropped")).thenReturn(counterBuilder);
+    when(meter.counterBuilder("otel.contrib.processor.span.filtered")).thenReturn(counterBuilder);
     when(counterBuilder.setDescription("Number of spans dropped by the filtering span exporter"))
         .thenReturn(counterBuilder);
+    when(counterBuilder.setUnit("{span}")).thenReturn(counterBuilder);
     when(counterBuilder.build()).thenReturn(counter);
 
     FilteringSpanExporter exporterWithMetrics =
         new FilteringSpanExporter(
             delegate,
-            Collections.singletonList(new DurationSpanFilter(SPAN_THRESHOLD_MS)),
+            Collections.singletonList(new DurationSpanFilter(SPAN_THRESHOLD)),
             Collections.<TraceFilter>emptyList(),
             meter);
 
@@ -194,15 +196,16 @@ class FilteringSpanExporterTest {
     Meter meter = mock(Meter.class);
     LongCounterBuilder counterBuilder = mock(LongCounterBuilder.class);
     LongCounter counter = mock(LongCounter.class);
-    when(meter.counterBuilder("filtering.span.exporter.dropped")).thenReturn(counterBuilder);
+    when(meter.counterBuilder("otel.contrib.processor.span.filtered")).thenReturn(counterBuilder);
     when(counterBuilder.setDescription("Number of spans dropped by the filtering span exporter"))
         .thenReturn(counterBuilder);
+    when(counterBuilder.setUnit("{span}")).thenReturn(counterBuilder);
     when(counterBuilder.build()).thenReturn(counter);
 
     FilteringSpanExporter exporterWithMetrics =
         new FilteringSpanExporter(
             delegate,
-            Collections.singletonList(new DurationSpanFilter(SPAN_THRESHOLD_MS)),
+            Collections.singletonList(new DurationSpanFilter(SPAN_THRESHOLD)),
             Collections.<TraceFilter>emptyList(),
             meter);
 

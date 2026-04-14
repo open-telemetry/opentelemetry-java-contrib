@@ -6,19 +6,21 @@
 package io.opentelemetry.contrib.filter;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import io.opentelemetry.sdk.trace.data.SpanData;
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 
 class DurationSpanFilterTest {
 
-  private static final long THRESHOLD_MS = 2000L;
-  private static final long THRESHOLD_NANOS = TimeUnit.MILLISECONDS.toNanos(THRESHOLD_MS);
+  private static final Duration THRESHOLD = Duration.ofSeconds(2);
+  private static final long THRESHOLD_NANOS = THRESHOLD.toNanos();
 
-  private final DurationSpanFilter filter = new DurationSpanFilter(THRESHOLD_MS);
+  private final DurationSpanFilter filter = new DurationSpanFilter(THRESHOLD);
 
   @Test
   void spanOverThresholdIsKept() {
@@ -36,6 +38,13 @@ class DurationSpanFilterTest {
   void spanUnderThresholdIsDropped() {
     SpanData span = spanWithDurationNanos(TimeUnit.MILLISECONDS.toNanos(500));
     assertThat(filter.shouldKeep(span)).isFalse();
+  }
+
+  @Test
+  void negativeThresholdThrows() {
+    assertThatThrownBy(() -> new DurationSpanFilter(Duration.ofMillis(-1)))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("threshold must be non-negative");
   }
 
   private static SpanData spanWithDurationNanos(long durationNanos) {

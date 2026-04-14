@@ -6,8 +6,8 @@
 package io.opentelemetry.contrib.filter;
 
 import io.opentelemetry.sdk.trace.data.SpanData;
+import java.time.Duration;
 import java.util.Collection;
-import java.util.concurrent.TimeUnit;
 
 /**
  * A {@link TraceFilter} that keeps traces whose overall wall-clock duration (max end - min start
@@ -20,15 +20,21 @@ public final class TraceDurationFilter implements TraceFilter {
   /**
    * Creates a new {@code TraceDurationFilter}.
    *
-   * @param thresholdMs the trace duration threshold in milliseconds; traces with wall-clock
-   *     duration strictly greater than this are considered interesting
+   * @param threshold the trace duration threshold; traces with wall-clock duration strictly greater
+   *     than this are considered interesting
    */
-  public TraceDurationFilter(long thresholdMs) {
-    this.thresholdNanos = TimeUnit.MILLISECONDS.toNanos(thresholdMs);
+  public TraceDurationFilter(Duration threshold) {
+    if (threshold.isNegative()) {
+      throw new IllegalArgumentException("threshold must be non-negative, got: " + threshold);
+    }
+    this.thresholdNanos = threshold.toNanos();
   }
 
   @Override
   public boolean shouldKeep(String traceId, Collection<SpanData> spans) {
+    if (spans.isEmpty()) {
+      return false;
+    }
     long minStart = Long.MAX_VALUE;
     long maxEnd = Long.MIN_VALUE;
     for (SpanData span : spans) {

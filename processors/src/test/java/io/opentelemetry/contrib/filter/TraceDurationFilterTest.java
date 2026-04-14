@@ -6,10 +6,12 @@
 package io.opentelemetry.contrib.filter;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import io.opentelemetry.sdk.trace.data.SpanData;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
@@ -17,10 +19,10 @@ import org.junit.jupiter.api.Test;
 
 class TraceDurationFilterTest {
 
-  private static final long THRESHOLD_MS = 10000L;
-  private static final long THRESHOLD_NANOS = TimeUnit.MILLISECONDS.toNanos(THRESHOLD_MS);
+  private static final Duration THRESHOLD = Duration.ofSeconds(10);
+  private static final long THRESHOLD_NANOS = THRESHOLD.toNanos();
 
-  private final TraceDurationFilter filter = new TraceDurationFilter(THRESHOLD_MS);
+  private final TraceDurationFilter filter = new TraceDurationFilter(THRESHOLD);
 
   @Test
   void traceOverThresholdIsKept() {
@@ -59,6 +61,18 @@ class TraceDurationFilterTest {
     SpanData span = spanAt(0, 500);
 
     assertThat(filter.shouldKeep("trace-1", Collections.singletonList(span))).isFalse();
+  }
+
+  @Test
+  void emptySpanListReturnsFalse() {
+    assertThat(filter.shouldKeep("trace-1", Collections.emptyList())).isFalse();
+  }
+
+  @Test
+  void negativeThresholdThrows() {
+    assertThatThrownBy(() -> new TraceDurationFilter(Duration.ofMillis(-1)))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("threshold must be non-negative");
   }
 
   private static SpanData spanAt(long startOffsetMs, long durationMs) {

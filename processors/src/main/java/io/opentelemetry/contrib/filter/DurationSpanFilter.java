@@ -6,7 +6,7 @@
 package io.opentelemetry.contrib.filter;
 
 import io.opentelemetry.sdk.trace.data.SpanData;
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 
 /**
  * A {@link SpanFilter} that keeps traces containing any span whose duration exceeds a configurable
@@ -19,11 +19,14 @@ public final class DurationSpanFilter implements SpanFilter {
   /**
    * Creates a new {@code DurationSpanFilter}.
    *
-   * @param thresholdMs the duration threshold in milliseconds; spans with duration strictly greater
-   *     than this are considered interesting
+   * @param threshold the duration threshold; spans with duration strictly greater than this are
+   *     considered interesting
    */
-  public DurationSpanFilter(long thresholdMs) {
-    this.thresholdNanos = TimeUnit.MILLISECONDS.toNanos(thresholdMs);
+  public DurationSpanFilter(Duration threshold) {
+    if (threshold.isNegative()) {
+      throw new IllegalArgumentException("threshold must be non-negative, got: " + threshold);
+    }
+    this.thresholdNanos = threshold.toNanos();
   }
 
   @Override
