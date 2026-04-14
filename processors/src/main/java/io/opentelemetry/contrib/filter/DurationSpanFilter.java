@@ -9,8 +9,8 @@ import io.opentelemetry.sdk.trace.data.SpanData;
 import java.time.Duration;
 
 /**
- * A {@link SpanFilter} that keeps traces containing any span whose duration exceeds a configurable
- * threshold.
+ * A {@link SpanFilter} that matches spans whose duration exceeds a configurable threshold, causing
+ * all batch-colocated spans sharing the same trace ID to be exported.
  */
 public final class DurationSpanFilter implements SpanFilter {
 

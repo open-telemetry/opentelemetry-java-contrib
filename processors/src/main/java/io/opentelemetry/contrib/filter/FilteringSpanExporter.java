@@ -25,8 +25,8 @@ import javax.annotation.Nullable;
 
 /**
  * A {@link SpanExporter} wrapper that filters spans before delegating to the underlying exporter.
- * Filtering operates at the trace level: if any filter matches, all spans sharing that trace ID are
- * exported together.
+ * Filtering operates at the trace level within each export batch: if any filter matches, all spans
+ * sharing that trace ID <em>in that batch</em> are exported together.
  *
  * <p>Two types of filters are supported:
  *
@@ -36,8 +36,12 @@ import javax.annotation.Nullable;
  *       overall trace wall-clock duration)
  * </ul>
  *
- * <p>A trace is kept if any {@code SpanFilter} matches any of its spans, OR any {@code TraceFilter}
- * matches the trace's span group.
+ * <p>A trace's spans are kept if any {@code SpanFilter} matches any span in the batch, OR any
+ * {@code TraceFilter} matches the trace's span group within the batch.
+ *
+ * <p><strong>Important:</strong> Filtering decisions are scoped to a single {@link
+ * #export(Collection)} call. Spans from the same trace that arrive in different batches are
+ * evaluated independently, so a trace split across batches may be partially exported.
  */
 public final class FilteringSpanExporter implements SpanExporter {
 
@@ -52,8 +56,9 @@ public final class FilteringSpanExporter implements SpanExporter {
    * Creates a new {@code FilteringSpanExporter}.
    *
    * @param delegate the exporter to delegate to for spans that pass filtering
-   * @param spanFilters per-span filters; a trace is kept if any filter matches any span
-   * @param traceFilters batch-level filters; a trace is kept if any filter matches the trace group
+   * @param spanFilters per-span filters; a trace's spans in the batch are kept if any filter matches
+   * @param traceFilters batch-level filters; a trace's spans in the batch are kept if any filter
+   *     matches
    * @param meter optional {@link Meter} for emitting dropped-span metrics; pass {@code null} to
    *     disable metrics
    */

@@ -10,8 +10,8 @@ import java.time.Duration;
 import java.util.Collection;
 
 /**
- * A {@link TraceFilter} that keeps traces whose overall wall-clock duration (max end - min start
- * across all spans in the batch sharing a trace ID) exceeds a configurable threshold.
+ * A {@link TraceFilter} that matches when the wall-clock duration (max end - min start across all
+ * spans in the batch sharing a trace ID) exceeds a configurable threshold.
  */
 public final class TraceDurationFilter implements TraceFilter {
 

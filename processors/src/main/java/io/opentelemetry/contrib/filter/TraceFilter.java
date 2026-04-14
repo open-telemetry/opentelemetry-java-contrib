@@ -10,11 +10,11 @@ import java.util.Collection;
 
 /**
  * A filter that evaluates all spans belonging to a single trace within an export batch to determine
- * if the trace should be exported. Used by {@link FilteringSpanExporter} for decisions that require
- * batch-level context (e.g., overall trace wall-clock duration).
+ * if those spans should be exported. Used by {@link FilteringSpanExporter} for decisions that
+ * require batch-level context (e.g., overall trace wall-clock duration).
  *
  * <p>If any {@code TraceFilter} returns {@code true} for a trace, all spans sharing that trace ID
- * are exported.
+ * within the same batch are exported.
  */
 public interface TraceFilter {
 
