@@ -27,5 +27,5 @@ dependencies {
   testImplementation("com.google.guava:guava")
 
   testImplementation("org.junit.jupiter:junit-jupiter-api")
-  testImplementation("com.github.tomakehurst:wiremock-jre8:2.35.0")
+  testImplementation("com.github.tomakehurst:wiremock-jre8:2.35.2")
 }
