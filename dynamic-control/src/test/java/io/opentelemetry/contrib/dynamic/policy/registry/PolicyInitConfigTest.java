@@ -336,6 +336,7 @@ class PolicyInitConfigTest {
     return mapping;
   }
 
+  @SuppressWarnings("EffectivelyPrivate")
   private static final class ConfigProviderWithGeneralConfig implements ConfigProvider {
     private final DeclarativeConfigProperties generalConfig;
 
@@ -349,7 +350,7 @@ class PolicyInitConfigTest {
     }
 
     @SuppressWarnings("unused")
-    DeclarativeConfigProperties getGeneralConfig() {
+    public DeclarativeConfigProperties getGeneralConfig() {
       return generalConfig;
     }
   }

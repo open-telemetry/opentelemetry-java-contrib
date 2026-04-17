@@ -255,17 +255,15 @@ public final class PolicyInitConfig {
       ConfigProvider configProvider) {
     // Prefer the general config accessor when available in the API/runtime.
     try {
-      Method method = configProvider.getClass().getDeclaredMethod("getGeneralConfig");
-      if (!method.isAccessible()) {
-        method.setAccessible(true);
-      }
+      Method method = configProvider.getClass().getMethod("getGeneralConfig");
       Object maybeConfig = method.invoke(configProvider);
       if (maybeConfig instanceof DeclarativeConfigProperties) {
         return (DeclarativeConfigProperties) maybeConfig;
       }
-    } catch (NoSuchMethodException ignored) {
-      // Fall through to backwards-compatible accessor below.
-    } catch (IllegalAccessException | InvocationTargetException ignored) {
+    } catch (NoSuchMethodException
+        | IllegalAccessException
+        | InvocationTargetException
+        | RuntimeException ignored) {
       // Fall through to backwards-compatible accessor below.
     }
     return configProvider.getGeneralInstrumentationConfig();
