@@ -30,13 +30,16 @@ import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nonnull;
@@ -60,6 +63,8 @@ public class GcpAuthAutoConfigurationCustomizerProvider
 
   private static final Logger logger =
       Logger.getLogger(GcpAuthAutoConfigurationCustomizerProvider.class.getName());
+  private static final Map<ConfigProperties, GoogleCredentials> credentialsCache =
+      Collections.synchronizedMap(new WeakHashMap<>());
   private static final String SIGNAL_TARGET_WARNING_FIX_SUGGESTION =
       String.format(
           "You may safely ignore this warning if it is intentional, otherwise please configure the '%s' by exporting valid values to environment variable: %s or by setting valid values in system property: %s.",
@@ -105,44 +110,51 @@ public class GcpAuthAutoConfigurationCustomizerProvider
     autoConfiguration
         .addSpanExporterCustomizer(
             (spanExporter, configProperties) ->
-                customizeSpanExporter(spanExporter, resolveCredentials(configProperties), configProperties))
+                customizeSpanExporter(
+                    spanExporter, resolveCredentials(configProperties), configProperties))
         .addMetricExporterCustomizer(
             (metricExporter, configProperties) ->
-                customizeMetricExporter(metricExporter, resolveCredentials(configProperties), configProperties))
+                customizeMetricExporter(
+                    metricExporter, resolveCredentials(configProperties), configProperties))
         .addResourceCustomizer(
             (resource, configProperties) ->
-                customizeResource(resource, resolveCredentials(configProperties), configProperties));
+                customizeResource(
+                    resource, resolveCredentials(configProperties), configProperties));
   }
 
   private static GoogleCredentials resolveCredentials(ConfigProperties configProperties) {
-    Optional<String> credsPath =
-        ConfigurableOption.GOOGLE_CLOUD_CREDENTIALS_PATH.getConfiguredValueAsOptional(
-            configProperties);
-    if (credsPath.isPresent()) {
-      try (FileInputStream fis = new FileInputStream(credsPath.get())) {
-        return GoogleCredentials.fromStream(fis);
-      } catch (IOException e) {
-        throw new ConfigurationException("Failed to load credentials from file: " + credsPath.get(), e);
-      }
-    }
+    return credentialsCache.computeIfAbsent(
+        configProperties,
+        props -> {
+          Optional<String> credsPath =
+              ConfigurableOption.GOOGLE_CLOUD_CREDENTIALS_PATH.getConfiguredValueAsOptional(props);
+          if (credsPath.isPresent()) {
+            try (FileInputStream fis = new FileInputStream(credsPath.get())) {
+              return GoogleCredentials.fromStream(fis);
+            } catch (IOException e) {
+              throw new ConfigurationException(
+                  "Failed to load credentials from file: " + new File(credsPath.get()).getName(),
+                  e);
+            }
+          }
 
-    Optional<String> credsJson =
-        ConfigurableOption.GOOGLE_CLOUD_CREDENTIALS_JSON.getConfiguredValueAsOptional(
-            configProperties);
-    if (credsJson.isPresent()) {
-      try (ByteArrayInputStream bais =
-          new ByteArrayInputStream(credsJson.get().getBytes(StandardCharsets.UTF_8))) {
-        return GoogleCredentials.fromStream(bais);
-      } catch (IOException e) {
-        throw new ConfigurationException("Failed to load credentials from JSON string", e);
-      }
-    }
+          Optional<String> credsJson =
+              ConfigurableOption.GOOGLE_CLOUD_CREDENTIALS_JSON.getConfiguredValueAsOptional(props);
+          if (credsJson.isPresent()) {
+            try (ByteArrayInputStream bais =
+                new ByteArrayInputStream(credsJson.get().getBytes(StandardCharsets.UTF_8))) {
+              return GoogleCredentials.fromStream(bais);
+            } catch (IOException e) {
+              throw new ConfigurationException("Failed to load credentials from JSON string", e);
+            }
+          }
 
-    try {
-      return GoogleCredentials.getApplicationDefault();
-    } catch (IOException e) {
-      throw new GoogleAuthException(Reason.FAILED_ADC_RETRIEVAL, e);
-    }
+          try {
+            return GoogleCredentials.getApplicationDefault();
+          } catch (IOException e) {
+            throw new GoogleAuthException(Reason.FAILED_ADC_RETRIEVAL, e);
+          }
+        });
   }
 
   @Override

@@ -56,13 +56,15 @@ enum ConfigurableOption {
 
   /**
    * Represents the Google Cloud Credentials Path option. Can be configured using the environment
-   * variable `GOOGLE_CLOUD_CREDENTIALS_PATH` or the system property `google.cloud.credentials.path`.
+   * variable `GOOGLE_CLOUD_CREDENTIALS_PATH` or the system property
+   * `google.cloud.credentials.path`.
    */
   GOOGLE_CLOUD_CREDENTIALS_PATH("Google Cloud Credentials Path"),
 
   /**
    * Represents the Google Cloud Credentials JSON option. Can be configured using the environment
-   * variable `GOOGLE_CLOUD_CREDENTIALS_JSON` or the system property `google.cloud.credentials.json`.
+   * variable `GOOGLE_CLOUD_CREDENTIALS_JSON` or the system property
+   * `google.cloud.credentials.json`.
    */
   GOOGLE_CLOUD_CREDENTIALS_JSON("Google Cloud Credentials JSON String");
 
