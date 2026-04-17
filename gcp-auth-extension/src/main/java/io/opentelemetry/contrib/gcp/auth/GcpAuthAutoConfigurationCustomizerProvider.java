@@ -29,7 +29,10 @@ import io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -99,22 +102,47 @@ public class GcpAuthAutoConfigurationCustomizerProvider
    */
   @Override
   public void customize(@Nonnull AutoConfigurationCustomizer autoConfiguration) {
-    GoogleCredentials credentials;
-    try {
-      credentials = GoogleCredentials.getApplicationDefault();
-    } catch (IOException e) {
-      throw new GoogleAuthException(Reason.FAILED_ADC_RETRIEVAL, e);
-    }
     autoConfiguration
         .addSpanExporterCustomizer(
             (spanExporter, configProperties) ->
-                customizeSpanExporter(spanExporter, credentials, configProperties))
+                customizeSpanExporter(spanExporter, resolveCredentials(configProperties), configProperties))
         .addMetricExporterCustomizer(
             (metricExporter, configProperties) ->
-                customizeMetricExporter(metricExporter, credentials, configProperties))
+                customizeMetricExporter(metricExporter, resolveCredentials(configProperties), configProperties))
         .addResourceCustomizer(
             (resource, configProperties) ->
-                customizeResource(resource, credentials, configProperties));
+                customizeResource(resource, resolveCredentials(configProperties), configProperties));
+  }
+
+  private static GoogleCredentials resolveCredentials(ConfigProperties configProperties) {
+    Optional<String> credsPath =
+        ConfigurableOption.GOOGLE_CLOUD_CREDENTIALS_PATH.getConfiguredValueAsOptional(
+            configProperties);
+    if (credsPath.isPresent()) {
+      try (FileInputStream fis = new FileInputStream(credsPath.get())) {
+        return GoogleCredentials.fromStream(fis);
+      } catch (IOException e) {
+        throw new ConfigurationException("Failed to load credentials from file: " + credsPath.get(), e);
+      }
+    }
+
+    Optional<String> credsJson =
+        ConfigurableOption.GOOGLE_CLOUD_CREDENTIALS_JSON.getConfiguredValueAsOptional(
+            configProperties);
+    if (credsJson.isPresent()) {
+      try (ByteArrayInputStream bais =
+          new ByteArrayInputStream(credsJson.get().getBytes(StandardCharsets.UTF_8))) {
+        return GoogleCredentials.fromStream(bais);
+      } catch (IOException e) {
+        throw new ConfigurationException("Failed to load credentials from JSON string", e);
+      }
+    }
+
+    try {
+      return GoogleCredentials.getApplicationDefault();
+    } catch (IOException e) {
+      throw new GoogleAuthException(Reason.FAILED_ADC_RETRIEVAL, e);
+    }
   }
 
   @Override

@@ -52,7 +52,19 @@ enum ConfigurableOption {
    * configured using the environment variable `GOOGLE_OTEL_AUTH_TARGET_SIGNALS` or the system
    * property `google.otel.auth.target.signals`.
    */
-  GOOGLE_OTEL_AUTH_TARGET_SIGNALS("Target Signals for Google Authentication Extension");
+  GOOGLE_OTEL_AUTH_TARGET_SIGNALS("Target Signals for Google Authentication Extension"),
+
+  /**
+   * Represents the Google Cloud Credentials Path option. Can be configured using the environment
+   * variable `GOOGLE_CLOUD_CREDENTIALS_PATH` or the system property `google.cloud.credentials.path`.
+   */
+  GOOGLE_CLOUD_CREDENTIALS_PATH("Google Cloud Credentials Path"),
+
+  /**
+   * Represents the Google Cloud Credentials JSON option. Can be configured using the environment
+   * variable `GOOGLE_CLOUD_CREDENTIALS_JSON` or the system property `google.cloud.credentials.json`.
+   */
+  GOOGLE_CLOUD_CREDENTIALS_JSON("Google Cloud Credentials JSON String");
 
   private final String userReadableName;
   private final String environmentVariableName;

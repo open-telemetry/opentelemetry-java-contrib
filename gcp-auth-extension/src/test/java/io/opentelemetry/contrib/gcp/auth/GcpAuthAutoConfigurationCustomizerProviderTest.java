@@ -51,7 +51,12 @@ import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.AbstractMap.SimpleEntry;
@@ -240,6 +245,103 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
                 assertThat(spanData.getAttributes().asMap())
                     .containsKey(AttributeKey.longKey("work_loop"));
               });
+    }
+  }
+
+  @Test
+  void testCredentialsLoadedFromFilePath() throws IOException {
+    System.setProperty(
+        ConfigurableOption.GOOGLE_CLOUD_PROJECT.getSystemProperty(), DUMMY_GCP_RESOURCE_PROJECT_ID);
+    System.setProperty(
+        ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getSystemProperty(), SIGNAL_TYPE_ALL);
+    
+    File tempFile = File.createTempFile("gcp-creds", ".json");
+    tempFile.deleteOnExit();
+    try (Writer writer = Files.newBufferedWriter(tempFile.toPath(), StandardCharsets.UTF_8)) {
+        writer.write("{}");
+    }
+    
+    System.setProperty(
+        ConfigurableOption.GOOGLE_CLOUD_CREDENTIALS_PATH.getSystemProperty(), tempFile.getAbsolutePath());
+
+    prepareMockBehaviorForGoogleCredentials();
+    OtlpGrpcSpanExporter mockOtlpGrpcSpanExporter = Mockito.mock(OtlpGrpcSpanExporter.class);
+    OtlpGrpcSpanExporterBuilder spyOtlpGrpcSpanExporterBuilder =
+        Mockito.spy(OtlpGrpcSpanExporter.builder());
+    List<SpanData> exportedSpans = new ArrayList<>();
+    configureGrpcMockSpanExporter(
+        mockOtlpGrpcSpanExporter, spyOtlpGrpcSpanExporterBuilder, exportedSpans);
+
+    try (MockedStatic<GoogleCredentials> googleCredentialsMockedStatic =
+        Mockito.mockStatic(GoogleCredentials.class)) {
+      googleCredentialsMockedStatic
+          .when(() -> GoogleCredentials.fromStream(any(InputStream.class)))
+          .thenReturn(mockedGoogleCredentials);
+
+      buildOpenTelemetrySdkWithExporter(mockOtlpGrpcSpanExporter);
+      
+      googleCredentialsMockedStatic.verify(() -> GoogleCredentials.fromStream(any(InputStream.class)), Mockito.atLeastOnce());
+    } finally {
+        System.clearProperty(ConfigurableOption.GOOGLE_CLOUD_CREDENTIALS_PATH.getSystemProperty());
+    }
+  }
+
+  @Test
+  void testCredentialsLoadedFromJsonString() throws IOException {
+    System.setProperty(
+        ConfigurableOption.GOOGLE_CLOUD_PROJECT.getSystemProperty(), DUMMY_GCP_RESOURCE_PROJECT_ID);
+    System.setProperty(
+        ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getSystemProperty(), SIGNAL_TYPE_ALL);
+    
+    System.setProperty(
+        ConfigurableOption.GOOGLE_CLOUD_CREDENTIALS_JSON.getSystemProperty(), "{}");
+
+    prepareMockBehaviorForGoogleCredentials();
+    OtlpGrpcSpanExporter mockOtlpGrpcSpanExporter = Mockito.mock(OtlpGrpcSpanExporter.class);
+    OtlpGrpcSpanExporterBuilder spyOtlpGrpcSpanExporterBuilder =
+        Mockito.spy(OtlpGrpcSpanExporter.builder());
+    List<SpanData> exportedSpans = new ArrayList<>();
+    configureGrpcMockSpanExporter(
+        mockOtlpGrpcSpanExporter, spyOtlpGrpcSpanExporterBuilder, exportedSpans);
+
+    try (MockedStatic<GoogleCredentials> googleCredentialsMockedStatic =
+        Mockito.mockStatic(GoogleCredentials.class)) {
+      googleCredentialsMockedStatic
+          .when(() -> GoogleCredentials.fromStream(any(InputStream.class)))
+          .thenReturn(mockedGoogleCredentials);
+
+      buildOpenTelemetrySdkWithExporter(mockOtlpGrpcSpanExporter);
+      
+      googleCredentialsMockedStatic.verify(() -> GoogleCredentials.fromStream(any(InputStream.class)), Mockito.atLeastOnce());
+    } finally {
+        System.clearProperty(ConfigurableOption.GOOGLE_CLOUD_CREDENTIALS_JSON.getSystemProperty());
+    }
+  }
+
+  @Test
+  void testFallbackToApplicationDefaultCredentials() throws IOException {
+    System.setProperty(
+        ConfigurableOption.GOOGLE_CLOUD_PROJECT.getSystemProperty(), DUMMY_GCP_RESOURCE_PROJECT_ID);
+    System.setProperty(
+        ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getSystemProperty(), SIGNAL_TYPE_ALL);
+    
+    prepareMockBehaviorForGoogleCredentials();
+    OtlpGrpcSpanExporter mockOtlpGrpcSpanExporter = Mockito.mock(OtlpGrpcSpanExporter.class);
+    OtlpGrpcSpanExporterBuilder spyOtlpGrpcSpanExporterBuilder =
+        Mockito.spy(OtlpGrpcSpanExporter.builder());
+    List<SpanData> exportedSpans = new ArrayList<>();
+    configureGrpcMockSpanExporter(
+        mockOtlpGrpcSpanExporter, spyOtlpGrpcSpanExporterBuilder, exportedSpans);
+
+    try (MockedStatic<GoogleCredentials> googleCredentialsMockedStatic =
+        Mockito.mockStatic(GoogleCredentials.class)) {
+      googleCredentialsMockedStatic
+          .when(GoogleCredentials::getApplicationDefault)
+          .thenReturn(mockedGoogleCredentials);
+
+      buildOpenTelemetrySdkWithExporter(mockOtlpGrpcSpanExporter);
+      
+      googleCredentialsMockedStatic.verify(GoogleCredentials::getApplicationDefault, Mockito.atLeastOnce());
     }
   }
 
