@@ -76,9 +76,10 @@ public final class PolicyInitConfig {
    * }</pre>
    *
    * @param declarativeConfig declarative config root
-   * @return parsed init config, or null when telemetry_policy/sources is not configured
+   * @return parsed init config, or null when telemetry_policy is not configured
    * @throws NullPointerException if declarativeConfig is null
-   * @throws IllegalArgumentException if telemetry_policy is present but invalid
+   * @throws IllegalArgumentException if telemetry_policy is present but invalid (for example,
+   *     missing or empty sources)
    */
   @Nullable
   public static PolicyInitConfig readFromDeclarativeConfigProperties(
@@ -92,7 +93,7 @@ public final class PolicyInitConfig {
     List<DeclarativeConfigProperties> sourceConfigs =
         telemetryPolicyConfig.getStructuredList(SOURCES_DECLARATIVE_KEY);
     if (sourceConfigs == null || sourceConfigs.isEmpty()) {
-      return null;
+      throw new IllegalArgumentException("Config must contain a non-empty 'sources' array.");
     }
 
     List<PolicySourceConfig> sources = new ArrayList<>();
@@ -168,11 +169,7 @@ public final class PolicyInitConfig {
         try (InputStream in = Files.newInputStream(Paths.get(mappingPathJson.trim()))) {
           return JsonPolicyInitConfigReader.read(in);
         } catch (IOException | RuntimeException e) {
-          logger.log(
-              Level.WARNING,
-              "Failed to load telemetry policy init config from {0}",
-              mappingPathJson.trim());
-          logger.log(Level.WARNING, "Policy init config read failed", e);
+          logReadFailure(mappingPathJson.trim(), e);
           return null;
         }
       }
@@ -180,11 +177,7 @@ public final class PolicyInitConfig {
       try (InputStream in = Files.newInputStream(Paths.get(mappingPathYaml.trim()))) {
         return YamlPolicyInitConfigReader.read(in);
       } catch (IOException | RuntimeException e) {
-        logger.log(
-            Level.WARNING,
-            "Failed to load telemetry policy init config from {0}",
-            mappingPathYaml.trim());
-        logger.log(Level.WARNING, "Policy init config read failed", e);
+        logReadFailure(mappingPathYaml.trim(), e);
         return null;
       }
     }
@@ -200,7 +193,8 @@ public final class PolicyInitConfig {
         requireDeclarativeText(
             sourceConfig.getString(FORMAT_DECLARATIVE_KEY),
             "Each source must define string 'format'.");
-    String location = sourceConfig.getString(LOCATION_DECLARATIVE_KEY);
+    String location =
+        normalizeOptionalDeclarativeText(sourceConfig.getString(LOCATION_DECLARATIVE_KEY));
 
     List<DeclarativeConfigProperties> mappingConfigs =
         sourceConfig.getStructuredList(MAPPINGS_DECLARATIVE_KEY);
@@ -245,10 +239,26 @@ public final class PolicyInitConfig {
   }
 
   @Nullable
+  private static String normalizeOptionalDeclarativeText(@Nullable String value) {
+    if (value == null) {
+      return null;
+    }
+    String trimmed = value.trim();
+    return trimmed.isEmpty() ? null : trimmed;
+  }
+
+  @Nullable
   static ConfigProvider getConfigProvider(@Nullable OpenTelemetry openTelemetry) {
     return openTelemetry instanceof ExtendedOpenTelemetry
         ? ((ExtendedOpenTelemetry) openTelemetry).getConfigProvider()
         : null;
+  }
+
+  private static void logReadFailure(String configuredPath, Throwable throwable) {
+    logger.log(
+        Level.WARNING,
+        "Failed to load telemetry policy init config from " + configuredPath,
+        throwable);
   }
 
   private static DeclarativeConfigProperties getGeneralDeclarativeConfig(

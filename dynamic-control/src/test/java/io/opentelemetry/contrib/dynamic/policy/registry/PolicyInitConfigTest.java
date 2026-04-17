@@ -6,6 +6,7 @@
 package io.opentelemetry.contrib.dynamic.policy.registry;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -121,11 +122,56 @@ class PolicyInitConfigTest {
   }
 
   @Test
+  void readFromConfigPropertiesTrimsLocationFromJsonFile() throws Exception {
+    Path jsonPath = tempDir.resolve("policy-init.json");
+    Files.write(jsonPath, jsonWithLocation("  from-json  ").getBytes(StandardCharsets.UTF_8));
+
+    ConfigProperties config = mock(ConfigProperties.class);
+    when(config.getString(PolicyInitConfig.POLICY_INIT_CONFIG_PROPERTY_YAML)).thenReturn(null);
+    when(config.getString(PolicyInitConfig.POLICY_INIT_CONFIG_PROPERTY_JSON))
+        .thenReturn(jsonPath.toString());
+
+    PolicyInitConfig initConfig = PolicyInitConfig.readFromConfigProperties(config);
+
+    assertThat(initConfig).isNotNull();
+    assertThat(initConfig.getSources()).hasSize(1);
+    assertThat(initConfig.getSources().get(0).getLocation()).isEqualTo("from-json");
+  }
+
+  @Test
   void readFromDeclarativeConfigPropertiesReturnsNullWhenTelemetryPolicyMissing() {
     DeclarativeConfigProperties root = mock(DeclarativeConfigProperties.class);
     when(root.getStructured(PolicyInitConfig.TELEMETRY_POLICY_DECLARATIVE_KEY)).thenReturn(null);
 
     assertThat(PolicyInitConfig.readFromDeclarativeConfigProperties(root)).isNull();
+  }
+
+  @Test
+  void readFromDeclarativeConfigPropertiesThrowsWhenTelemetryPolicySourcesMissing() {
+    DeclarativeConfigProperties root = mock(DeclarativeConfigProperties.class);
+    DeclarativeConfigProperties telemetryPolicy = mock(DeclarativeConfigProperties.class);
+    when(root.getStructured(PolicyInitConfig.TELEMETRY_POLICY_DECLARATIVE_KEY))
+        .thenReturn(telemetryPolicy);
+    when(telemetryPolicy.getStructuredList(PolicyInitConfig.SOURCES_DECLARATIVE_KEY))
+        .thenReturn(null);
+
+    assertThatThrownBy(() -> PolicyInitConfig.readFromDeclarativeConfigProperties(root))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("sources");
+  }
+
+  @Test
+  void readFromDeclarativeConfigPropertiesThrowsWhenTelemetryPolicySourcesEmpty() {
+    DeclarativeConfigProperties root = mock(DeclarativeConfigProperties.class);
+    DeclarativeConfigProperties telemetryPolicy = mock(DeclarativeConfigProperties.class);
+    when(root.getStructured(PolicyInitConfig.TELEMETRY_POLICY_DECLARATIVE_KEY))
+        .thenReturn(telemetryPolicy);
+    when(telemetryPolicy.getStructuredList(PolicyInitConfig.SOURCES_DECLARATIVE_KEY))
+        .thenReturn(Collections.emptyList());
+
+    assertThatThrownBy(() -> PolicyInitConfig.readFromDeclarativeConfigProperties(root))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("sources");
   }
 
   @Test
@@ -146,6 +192,20 @@ class PolicyInitConfigTest {
     assertThat(source.getMappings()).hasSize(1);
     assertThat(source.getMappings().get(0).getSourceKey()).isEqualTo("sampling_rate");
     assertThat(source.getMappings().get(0).getPolicyType()).isEqualTo("trace_sampling_rate_policy");
+  }
+
+  @Test
+  void readFromDeclarativeConfigPropertiesTrimsLocation() {
+    DeclarativeConfigProperties root = mock(DeclarativeConfigProperties.class);
+    DeclarativeConfigProperties telemetryPolicy = telemetryPolicyConfig("  from-declarative  ");
+    when(root.getStructured(PolicyInitConfig.TELEMETRY_POLICY_DECLARATIVE_KEY))
+        .thenReturn(telemetryPolicy);
+
+    PolicyInitConfig config = PolicyInitConfig.readFromDeclarativeConfigProperties(root);
+
+    assertThat(config).isNotNull();
+    assertThat(config.getSources()).hasSize(1);
+    assertThat(config.getSources().get(0).getLocation()).isEqualTo("from-declarative");
   }
 
   @Test
