@@ -123,38 +123,46 @@ public class GcpAuthAutoConfigurationCustomizerProvider
   }
 
   private static GoogleCredentials resolveCredentials(ConfigProperties configProperties) {
-    return credentialsCache.computeIfAbsent(
-        configProperties,
-        props -> {
-          Optional<String> credsPath =
-              ConfigurableOption.GOOGLE_CLOUD_CREDENTIALS_PATH.getConfiguredValueAsOptional(props);
-          if (credsPath.isPresent()) {
-            try (FileInputStream fis = new FileInputStream(credsPath.get())) {
-              return GoogleCredentials.fromStream(fis);
-            } catch (IOException e) {
-              throw new ConfigurationException(
-                  "Failed to load credentials from file: " + new File(credsPath.get()).getName(),
-                  e);
-            }
-          }
+    synchronized (credentialsCache) {
+      GoogleCredentials cachedCredentials = credentialsCache.get(configProperties);
+      if (cachedCredentials != null) {
+        return cachedCredentials;
+      }
 
-          Optional<String> credsJson =
-              ConfigurableOption.GOOGLE_CLOUD_CREDENTIALS_JSON.getConfiguredValueAsOptional(props);
-          if (credsJson.isPresent()) {
-            try (ByteArrayInputStream bais =
-                new ByteArrayInputStream(credsJson.get().getBytes(StandardCharsets.UTF_8))) {
-              return GoogleCredentials.fromStream(bais);
-            } catch (IOException e) {
-              throw new ConfigurationException("Failed to load credentials from JSON string", e);
-            }
-          }
+      GoogleCredentials resolvedCredentials = loadCredentials(configProperties);
+      credentialsCache.put(configProperties, resolvedCredentials);
+      return resolvedCredentials;
+    }
+  }
 
-          try {
-            return GoogleCredentials.getApplicationDefault();
-          } catch (IOException e) {
-            throw new GoogleAuthException(Reason.FAILED_ADC_RETRIEVAL, e);
-          }
-        });
+  private static GoogleCredentials loadCredentials(ConfigProperties props) {
+    Optional<String> credsPath =
+        ConfigurableOption.GOOGLE_CLOUD_CREDENTIALS_PATH.getConfiguredValueAsOptional(props);
+    if (credsPath.isPresent()) {
+      try (FileInputStream fis = new FileInputStream(credsPath.get())) {
+        return GoogleCredentials.fromStream(fis);
+      } catch (IOException e) {
+        throw new ConfigurationException(
+            "Failed to load credentials from file: " + new File(credsPath.get()).getName(), e);
+      }
+    }
+
+    Optional<String> credsJson =
+        ConfigurableOption.GOOGLE_CLOUD_CREDENTIALS_JSON.getConfiguredValueAsOptional(props);
+    if (credsJson.isPresent()) {
+      try (ByteArrayInputStream bais =
+          new ByteArrayInputStream(credsJson.get().getBytes(StandardCharsets.UTF_8))) {
+        return GoogleCredentials.fromStream(bais);
+      } catch (IOException e) {
+        throw new ConfigurationException("Failed to load credentials from JSON string", e);
+      }
+    }
+
+    try {
+      return GoogleCredentials.getApplicationDefault();
+    } catch (IOException e) {
+      throw new GoogleAuthException(Reason.FAILED_ADC_RETRIEVAL, e);
+    }
   }
 
   @Override
