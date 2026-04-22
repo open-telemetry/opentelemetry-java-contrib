@@ -11,6 +11,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -114,6 +115,20 @@ class HttpRequestServiceTest {
     verifySingleRequestSent();
     verifyRequestSuccessCallback(serverToAgent);
     verify(callback).onConnectionSuccess();
+  }
+
+  @Test
+  void verifySendingRequest_successNotCalledForNon200() {
+    ServerToAgent serverToAgent = new ServerToAgent.Builder().build();
+    HttpSender.Response httpResponse = createFailedResponse(403);
+    requestSender.enqueueResponse(httpResponse);
+
+    httpRequestService.sendRequest();
+
+    verifySingleRequestSent();
+    verify(callback, never()).onRequestSuccess(Response.create(serverToAgent));
+    verify(callback, never()).onConnectionSuccess();
+    verifyRequestFailedCallback(403);
   }
 
   @Test
