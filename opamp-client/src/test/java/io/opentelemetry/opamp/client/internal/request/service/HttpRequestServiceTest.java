@@ -5,6 +5,7 @@
 
 package io.opentelemetry.opamp.client.internal.request.service;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -129,6 +130,22 @@ class HttpRequestServiceTest {
     verify(callback, never()).onRequestSuccess(Response.create(serverToAgent));
     verify(callback, never()).onConnectionSuccess();
     verifyRequestFailedCallback(403);
+  }
+
+  @Test
+  void verifySuccessWithInvalidBodyIsConsideredFailure() {
+    ServerToAgent serverToAgent = new ServerToAgent.Builder().build();
+    byte[] responseBody = "kablooey!!!".getBytes(UTF_8);
+    HttpSender.Response httpResponse = createFailedResponse(200, responseBody, null);
+    requestSender.enqueueResponse(httpResponse);
+
+    httpRequestService.sendRequest();
+
+    verifySingleRequestSent();
+    verify(callback, never()).onRequestSuccess(Response.create(serverToAgent));
+    verify(callback, never()).onRequestFailed(any());
+    verify(callback, never()).onConnectionSuccess();
+    verify(callback).onConnectionFailed(any());
   }
 
   @Test
@@ -333,9 +350,23 @@ class HttpRequestServiceTest {
   }
 
   private static HttpSender.Response createFailedResponse(int statusCode) {
+    return createFailedResponse(statusCode, "".getBytes(UTF_8));
+  }
+
+  private static HttpSender.Response createFailedResponse(int statusCode, byte[] body) {
+    return createFailedResponse(statusCode, body, "Error message");
+  }
+
+  private static HttpSender.Response createFailedResponse(
+      int statusCode, byte[] body, String status) {
     HttpSender.Response response = mock();
     when(response.statusCode()).thenReturn(statusCode);
-    when(response.statusMessage()).thenReturn("Error message");
+    if (status != null) {
+      when(response.statusMessage()).thenReturn(status);
+    }
+    if (body.length > 0) {
+      when(response.bodyInputStream()).thenReturn(new ByteArrayInputStream(body));
+    }
     return response;
   }
 
