@@ -17,7 +17,7 @@ jobs:
     secrets:
       DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
 
-  link-check:
+  lint:
     uses: ./.github/workflows/reusable-link-check.yml
 
   publish-snapshots:
@@ -55,13 +55,13 @@ jobs:
     if: always()
     needs:
       - common
-      - link-check
+      - lint
       - publish-snapshots
     uses: ./.github/workflows/reusable-workflow-notification.yml
     with:
       success: >-
         ${{
           needs.common.result == 'success' &&
-          needs.link-check.result == 'success' &&
+          needs.lint.result == 'success' &&
           needs.publish-snapshots.result == 'success'
         }}
