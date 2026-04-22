@@ -154,8 +154,8 @@ public final class HttpRequestService implements RequestService {
     try (HttpSender.Response response = future.get(30, TimeUnit.SECONDS)) {
       getCallback().onConnectionSuccess();
       if (isSuccessful(response)) {
-        handleHttpSuccess(
-            Response.create(ServerToAgent.ADAPTER.decode(response.bodyInputStream())));
+        ServerToAgent serverToAgent = ServerToAgent.ADAPTER.decode(response.bodyInputStream());
+        handleHttpSuccess(Response.create(serverToAgent));
       } else {
         handleHttpError(response);
       }
