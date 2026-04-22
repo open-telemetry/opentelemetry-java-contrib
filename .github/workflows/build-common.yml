@@ -133,6 +133,3 @@ jobs:
       - name: Build scan
         if: ${{ !cancelled() && hashFiles('build-scan.txt') != '' }}
         run: cat build-scan.txt
-
-  lint:
-    uses: ./.github/workflows/reusable-link-check.yml
