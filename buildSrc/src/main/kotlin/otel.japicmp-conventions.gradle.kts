@@ -12,20 +12,34 @@ plugins {
 }
 
 /**
- * The latest *released* version of the project. Evaluated lazily so the work is only done if necessary.
+ * The latest *released* version of the project.
+ *
+ * Avoid dynamic `latest.release` metadata lookups here: they are flaky in CI and have started
+ * failing on Windows with Maven Central HEAD requests. The repo versioning scheme is monotonic, so
+ * derive the previous released stable version locally instead.
  */
 val latestReleasedVersion: String by lazy {
-  // hack to find the current released version of the project
-  val temp: Configuration = configurations.create("tempConfig") {
-    resolutionStrategy.cacheChangingModulesFor(0, "seconds")
-    resolutionStrategy.cacheDynamicVersionsFor(0, "seconds")
+  val stableVersionLine = rootProject.file("version.gradle.kts").useLines { lines ->
+    lines.first { it.startsWith("val stableVersion = ") }
   }
-  // pick aws-xray, since it's a stable module that's always there.
-  dependencies.add(temp.name, "io.opentelemetry.contrib:opentelemetry-aws-xray:latest.release")
-  val moduleVersion = configurations["tempConfig"].resolvedConfiguration.firstLevelModuleDependencies.elementAt(0).moduleVersion
-  configurations.remove(temp)
-  logger.debug("Discovered latest release version: " + moduleVersion)
-  moduleVersion
+  val currentStableVersion = stableVersionLine.substringAfter('"').substringBefore('"')
+  val currentReleaseVersion = currentStableVersion.removeSuffix("-SNAPSHOT")
+  val versionParts = currentReleaseVersion.split('.')
+  require(versionParts.size == 3) {
+    "Unexpected stable version format: $currentStableVersion"
+  }
+
+  val major = versionParts[0].toInt()
+  val minor = versionParts[1].toInt()
+  val patch = versionParts[2].toInt()
+
+  val previousReleaseVersion = when {
+    patch > 0 -> "$major.$minor.${patch - 1}"
+    minor > 0 -> "$major.${minor - 1}.0"
+    else -> error("Cannot derive previous release version from $currentStableVersion")
+  }
+  logger.debug("Derived latest release version: $previousReleaseVersion")
+  previousReleaseVersion
 }
 
 class AllowNewAbstractMethodOnAutovalueClasses : AbstractRecordingSeenMembers() {
