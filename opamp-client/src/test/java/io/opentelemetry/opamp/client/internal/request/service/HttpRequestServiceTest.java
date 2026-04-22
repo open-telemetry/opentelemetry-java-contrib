@@ -379,11 +379,11 @@ class HttpRequestServiceTest {
   }
 
   private static HttpSender.Response createFailedResponse(
-      int statusCode, byte[] body, String status) {
+      int statusCode, byte[] body, String statusMessage) {
     HttpSender.Response response = mock();
     when(response.statusCode()).thenReturn(statusCode);
-    if (status != null) {
-      when(response.statusMessage()).thenReturn(status);
+    if (statusMessage != null) {
+      when(response.statusMessage()).thenReturn(statusMessage);
     }
     if (body.length > 0) {
       when(response.bodyInputStream()).thenReturn(new ByteArrayInputStream(body));
