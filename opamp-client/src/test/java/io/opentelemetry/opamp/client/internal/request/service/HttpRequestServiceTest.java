@@ -25,8 +25,10 @@ import io.opentelemetry.opamp.client.internal.request.delay.PeriodicDelay;
 import io.opentelemetry.opamp.client.internal.response.Response;
 import io.opentelemetry.opamp.client.request.service.RequestService;
 import java.io.ByteArrayInputStream;
+import java.io.EOFException;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -133,8 +135,9 @@ class HttpRequestServiceTest {
   }
 
   @Test
-  void verifySuccessWithInvalidBodyIsConsideredFailure() {
+  void verifySuccessWithInvalidBodyIsConsideredConnectionFailure() {
     ServerToAgent serverToAgent = new ServerToAgent.Builder().build();
+    // This will generate an EOFException
     byte[] responseBody = "kablooey!!!".getBytes(UTF_8);
     HttpSender.Response httpResponse = createFailedResponse(200, responseBody, null);
     requestSender.enqueueResponse(httpResponse);
@@ -145,7 +148,25 @@ class HttpRequestServiceTest {
     verify(callback, never()).onRequestSuccess(Response.create(serverToAgent));
     verify(callback, never()).onRequestFailed(any());
     verify(callback, never()).onConnectionSuccess();
-    verify(callback).onConnectionFailed(any());
+    verify(callback).onConnectionFailed(any(EOFException.class));
+  }
+
+  @Test
+  void verifyIllegalStateExceptionInParsingIsConsideredRequestFailure() {
+    ServerToAgent serverToAgent = new ServerToAgent.Builder().build();
+    byte[] responseBody = new byte[9024];
+    // This will generate an IllegalStateException
+    Arrays.fill(responseBody, (byte) 0x11);
+    HttpSender.Response httpResponse = createFailedResponse(200, responseBody, null);
+    requestSender.enqueueResponse(httpResponse);
+
+    httpRequestService.sendRequest();
+
+    verifySingleRequestSent();
+    verify(callback, never()).onRequestSuccess(Response.create(serverToAgent));
+    verify(callback, never()).onConnectionSuccess();
+    verify(callback, never()).onConnectionFailed(any());
+    verify(callback).onRequestFailed(any(IllegalStateException.class));
   }
 
   @Test

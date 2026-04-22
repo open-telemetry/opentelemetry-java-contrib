@@ -159,6 +159,9 @@ public final class HttpRequestService implements RequestService {
       } else {
         handleHttpError(response);
       }
+    } catch (IllegalStateException e) {
+      getCallback().onRequestFailed(e);
+      connectionStatus.retryAfter(null);
     } catch (IOException | InterruptedException | TimeoutException e) {
       getCallback().onConnectionFailed(e);
       connectionStatus.retryAfter(null);
