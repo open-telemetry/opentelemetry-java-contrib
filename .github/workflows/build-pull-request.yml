@@ -20,7 +20,7 @@ jobs:
       max-test-retries: ${{ github.event_name == 'merge_group' && 5 || 0 }}
 
   lint:
-    uses: ./.github/workflows/reusable-link-check.yml
+    uses: ./.github/workflows/reusable-lint.yml
 
   required-status-check:
     if: always()

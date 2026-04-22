@@ -18,7 +18,7 @@ jobs:
       DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
 
   lint:
-    uses: ./.github/workflows/reusable-link-check.yml
+    uses: ./.github/workflows/reusable-lint.yml
 
   publish-snapshots:
     needs:
