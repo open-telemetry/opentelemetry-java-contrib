@@ -25,7 +25,8 @@ class EventToSpanBridgeComponentProviderTest {
 
     OpenTelemetrySdk openTelemetrySdk =
         DeclarativeConfiguration.parseAndCreate(
-            new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+                new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)))
+            .getSdk();
 
     assertThat(openTelemetrySdk.getSdkLoggerProvider().toString())
         .matches("SdkLoggerProvider\\{.*logRecordProcessor=EventToSpanEventBridge\\{}.*}");

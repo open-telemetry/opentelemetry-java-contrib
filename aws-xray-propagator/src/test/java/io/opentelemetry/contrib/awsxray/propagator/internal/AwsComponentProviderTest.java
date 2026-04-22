@@ -29,7 +29,8 @@ class AwsComponentProviderTest {
 
     OpenTelemetrySdk openTelemetrySdk =
         DeclarativeConfiguration.parseAndCreate(
-            new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+                new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)))
+            .getSdk();
     TextMapPropagator expectedPropagator =
         TextMapPropagator.composite(
             AwsXrayPropagator.getInstance(), AwsXrayLambdaPropagator.getInstance());

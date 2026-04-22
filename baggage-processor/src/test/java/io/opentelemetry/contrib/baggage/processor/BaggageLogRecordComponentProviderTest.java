@@ -27,7 +27,8 @@ class BaggageLogRecordComponentProviderTest {
 
     OpenTelemetrySdk sdk =
         DeclarativeConfiguration.parseAndCreate(
-            new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+                new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)))
+            .getSdk();
 
     assertThat(sdk).asString().contains("BaggageLogRecordProcessor");
   }

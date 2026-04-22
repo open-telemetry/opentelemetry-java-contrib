@@ -46,7 +46,8 @@ class CelBasedSamplerComponentProviderTest {
     // Load YAML configuration from resource file
     InputStream configStream = loadResource("cel-sampler-config.yaml");
 
-    OpenTelemetrySdk openTelemetrySdk = DeclarativeConfiguration.parseAndCreate(configStream);
+    OpenTelemetrySdk openTelemetrySdk =
+        DeclarativeConfiguration.parseAndCreate(configStream).getSdk();
     Sampler sampler = openTelemetrySdk.getSdkTracerProvider().getSampler();
 
     // Create expected sampler for comparison

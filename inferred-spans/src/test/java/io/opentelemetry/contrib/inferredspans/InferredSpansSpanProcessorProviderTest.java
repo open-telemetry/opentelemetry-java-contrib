@@ -46,7 +46,8 @@ class InferredSpansSpanProcessorProviderTest {
 
     OpenTelemetrySdk sdk =
         DeclarativeConfiguration.parseAndCreate(
-            new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+                new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)))
+            .getSdk();
 
     assertThat(sdk)
         .extracting("tracerProvider")
@@ -70,7 +71,8 @@ class InferredSpansSpanProcessorProviderTest {
 
     OpenTelemetrySdk sdk =
         DeclarativeConfiguration.parseAndCreate(
-            new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+                new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)))
+            .getSdk();
 
     assertThat(sdk)
         .extracting("tracerProvider")

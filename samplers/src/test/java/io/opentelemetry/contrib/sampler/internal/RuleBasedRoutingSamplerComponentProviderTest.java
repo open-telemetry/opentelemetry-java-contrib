@@ -52,7 +52,8 @@ class RuleBasedRoutingSamplerComponentProviderTest {
             + "              action: DROP\n";
     OpenTelemetrySdk openTelemetrySdk =
         DeclarativeConfiguration.parseAndCreate(
-            new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+                new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)))
+            .getSdk();
     Sampler sampler = openTelemetrySdk.getSdkTracerProvider().getSampler();
     assertThat(sampler.toString())
         .isEqualTo(

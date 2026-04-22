@@ -28,7 +28,8 @@ class StackTraceComponentProviderTest {
 
     OpenTelemetrySdk openTelemetrySdk =
         DeclarativeConfiguration.parseAndCreate(
-            new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+                new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)))
+            .getSdk();
 
     assertThat(openTelemetrySdk.getSdkTracerProvider().toString())
         .contains(
