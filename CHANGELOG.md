@@ -2,6 +2,40 @@
 
 ## Unreleased
 
+### Consistent sampling
+
+- **Breaking change**: the legacy OTEP 4673 probability samplers in the
+  `io.opentelemetry.contrib.sampler.consistent` package
+  (`ConsistentProbabilityBasedSampler`, `ConsistentComposedAnd/OrSampler`,
+  and the legacy `ConsistentAlwaysOn/OffSampler` / `ConsistentParentBasedSampler`
+  factories on `ConsistentSampler`) have been removed.
+- `ConsistentReservoirSamplingSpanProcessor` and the
+  `parentbased_consistent_probability` autoconfigure sampler name are retained.
+  The autoconfigure provider now builds its sampler on top of the upstream
+  `ComposableSampler` / `CompositeSampler` API; the resulting behavior is
+  equivalent to `CompositeSampler.wrap(ComposableSampler.parentThreshold(ComposableSampler.probability(p)))`.
+- **Breaking change**: the `consistent56` package has been rewritten on top of
+  the upstream `opentelemetry-sdk-extension-incubator` composable-samplers API
+  and promoted to the `io.opentelemetry.contrib.sampler.consistent` package
+  name. Classes that duplicated upstream functionality (`Composable`,
+  `SamplingIntent`, `ConsistentAlwaysOn/OffSampler`,
+  `ConsistentFixedThresholdSampler`, `ConsistentParentBasedSampler`,
+  `ConsistentRuleBasedSampler`, `RandomValueGenerator(s)`,
+  `Predicate`/`PredicatedSampler`) have been removed. The remaining
+  `ConsistentRateLimitingSampler`, `ConsistentVariableThresholdSampler`, and
+  `ConsistentAnyOf` now implement the upstream
+  `io.opentelemetry.sdk.extension.incubator.trace.samplers.ComposableSampler`
+  interface. Use `CompositeSampler.wrap(composable)` to turn a composable
+  sampler into a `Sampler`, and use `ComposableSampler`'s static factories
+  (`alwaysOn`, `alwaysOff`, `probability`, `parentThreshold`, …) directly
+  instead of the removed `ConsistentSampler.alwaysOn/alwaysOff/probabilityBased/parentBased/asSampler`.
+  Migration mapping:
+  - `ConsistentSampler.alwaysOn()` → `ComposableSampler.alwaysOn()`
+  - `ConsistentSampler.alwaysOff()` → `ComposableSampler.alwaysOff()`
+  - `ConsistentSampler.probabilityBased(p)` → `ComposableSampler.probability(p)`
+  - `ConsistentSampler.parentBased(root)` → `ComposableSampler.parentThreshold(root)`
+  - `ConsistentSampler.asSampler(c)` → `CompositeSampler.wrap(c)`
+
 ## Version 1.55.0 (2026-03-31)
 
 ### Disk buffering
@@ -219,7 +253,6 @@ an issue if this causes problems.
 
 - Add declarative configuration support
   ([#2262](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2262))
-
 
 ## Version 1.49.0 (2025-08-25)
 
@@ -870,7 +903,7 @@ which can be sent later on demand.
 
 - JFR connection is a library to allow configuration and control of JFR
   without depending on jdk.jfr.
-  This is a contribution of https://github.com/microsoft/jfr-streaming.
+  This is a contribution of <https://github.com/microsoft/jfr-streaming>.
 
 ## Version 1.24.0 (2023-04-03)
 
@@ -1052,8 +1085,8 @@ All components updated to target OpenTelemetry SDK 1.13.0.
 ### Consistent sampling - New 🌟
 
 This component adds various Sampler implementations for consistent sampling as defined by
-https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/tracestate-probability-sampling.md
-and https://github.com/open-telemetry/opentelemetry-specification/pull/2047.
+<https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/tracestate-probability-sampling.md>
+and <https://github.com/open-telemetry/opentelemetry-specification/pull/2047>.
 
 ## Version 1.12.0 (2022-03-14)
 

@@ -5,79 +5,50 @@
 
 package io.opentelemetry.contrib.sampler.consistent;
 
+import static io.opentelemetry.contrib.sampler.consistent.ConsistentSamplingUtil.INVALID_THRESHOLD;
+import static io.opentelemetry.contrib.sampler.consistent.ConsistentSamplingUtil.calculateSamplingProbability;
+import static io.opentelemetry.contrib.sampler.consistent.ConsistentSamplingUtil.calculateThreshold;
+import static io.opentelemetry.contrib.sampler.consistent.ConsistentSamplingUtil.isValidThreshold;
 import static java.util.Objects.requireNonNull;
 
-import io.opentelemetry.sdk.trace.samplers.Sampler;
-import java.util.Locale;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.context.Context;
+import io.opentelemetry.sdk.extension.incubator.trace.samplers.ComposableSampler;
+import io.opentelemetry.sdk.extension.incubator.trace.samplers.SamplingIntent;
+import io.opentelemetry.sdk.trace.data.LinkData;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.LongSupplier;
 import javax.annotation.concurrent.Immutable;
 
 /**
- * This consistent {@link Sampler} adjusts the sampling probability dynamically to limit the rate of
- * sampled spans.
+ * A consistent rate-limiting sampler that adjusts the effective sampling probability dynamically to
+ * meet a target maximum number of sampled spans per second.
  *
- * <p>This sampler uses exponential smoothing to estimate on irregular data (compare Wright, David
- * J. "Forecasting data published at irregular time intervals using an extension of Holt's method."
- * Management science 32.4 (1986): 499-510.) to estimate the average waiting time between spans
- * which further allows to estimate the current rate of spans. In the paper, Eq. 2 defines the
- * weighted average of a sequence of data
- *
- * <p>{@code ..., X(n-2), X(n-1), X(n)}
- *
- * <p>at irregular times
- *
- * <p>{@code ..., t(n-2), t(n-1), t(n)}
- *
- * <p>as
- *
- * <p>{@code E(X(n)) := A(n) * V(n)}.
- *
- * <p>{@code A(n)} and {@code V(n)} are computed recursively using Eq. 5 and Eq. 6 given by
- *
- * <p>{@code A(n) = b(n) * A(n-1) + X(n)} and {@code V(n) = V(n-1) / (b(n) + V(n-1))}
- *
- * <p>where
- *
- * <p>{@code b(n) := (1 - a)^(t(n) - t(n-1)) = exp((t(n) - t(n-1)) * ln(1 - a))}.
- *
- * <p>Introducing
- *
- * <p>{@code C(n) := 1 / V(n)}
- *
- * <p>the recursion can be rewritten as
- *
- * <p>{@code A(n) = b(n) * A(n-1) + X(n)} and {@code C(n) = b(n) * C(n-1) + 1}.
- *
- * <p>
- *
- * <p>Since we want to estimate the average waiting time, our data is given by
- *
- * <p>{@code X(n) := t(n) - t(n-1)}.
- *
- * <p>
- *
- * <p>The following correspondence is used for the implementation:
- *
- * <ul>
- *   <li>{@code effectiveWindowNanos} corresponds to {@code A(n)}
- *   <li>{@code effectiveWindowCount} corresponds to {@code C(n)}
- *   <li>{@code decayFactor} corresponds to {@code b(n)}
- *   <li>{@code adaptationTimeSeconds} corresponds to {@code -1 / ln(1 - a)}
- * </ul>
+ * <p>The implementation uses exponential smoothing for the estimation of the effective sampling
+ * probability and the effective span rate.
  */
-final class ConsistentRateLimitingSampler extends ConsistentSampler {
+final class ConsistentRateLimitingSampler implements ComposableSampler {
+
+  private static final double NANOS_IN_SECONDS = 1e-9;
 
   @Immutable
   private static final class State {
     private final double effectiveWindowCount;
     private final double effectiveWindowNanos;
+    private final double effectiveDelegateProbability;
     private final long lastNanoTime;
 
-    State(double effectiveWindowCount, double effectiveWindowNanos, long lastNanoTime) {
+    State(
+        double effectiveWindowCount,
+        double effectiveWindowNanos,
+        long lastNanoTime,
+        double effectiveDelegateProbability) {
       this.effectiveWindowCount = effectiveWindowCount;
       this.effectiveWindowNanos = effectiveWindowNanos;
       this.lastNanoTime = lastNanoTime;
+      this.effectiveDelegateProbability = effectiveDelegateProbability;
     }
   }
 
@@ -85,26 +56,17 @@ final class ConsistentRateLimitingSampler extends ConsistentSampler {
   private final LongSupplier nanoTimeSupplier;
   private final double inverseAdaptationTimeNanos;
   private final double targetSpansPerNanosecondLimit;
+  private final double probabilitySmoothingFactor;
   private final AtomicReference<State> state;
-  private final RandomGenerator randomGenerator;
+  private final ComposableSampler delegate;
 
-  /**
-   * Constructor.
-   *
-   * @param targetSpansPerSecondLimit the desired spans per second limit
-   * @param adaptationTimeSeconds the typical time to adapt to a new load (time constant used for
-   *     exponential smoothing)
-   * @param rValueGenerator the function to use for generating the r-value
-   * @param randomGenerator a random generator
-   * @param nanoTimeSupplier a supplier for the current nano time
-   */
   ConsistentRateLimitingSampler(
+      ComposableSampler delegate,
       double targetSpansPerSecondLimit,
       double adaptationTimeSeconds,
-      RValueGenerator rValueGenerator,
-      RandomGenerator randomGenerator,
       LongSupplier nanoTimeSupplier) {
-    super(rValueGenerator);
+
+    this.delegate = requireNonNull(delegate);
 
     if (targetSpansPerSecondLimit < 0.0) {
       throw new IllegalArgumentException("Limit for sampled spans per second must be nonnegative!");
@@ -113,64 +75,95 @@ final class ConsistentRateLimitingSampler extends ConsistentSampler {
       throw new IllegalArgumentException("Adaptation rate must be nonnegative!");
     }
     this.description =
-        String.format(
-            Locale.ROOT,
-            "ConsistentRateLimitingSampler{%.6f, %.6f}",
-            targetSpansPerSecondLimit,
-            adaptationTimeSeconds);
+        "ConsistentRateLimitingSampler{targetSpansPerSecondLimit="
+            + targetSpansPerSecondLimit
+            + ", adaptationTimeSeconds="
+            + adaptationTimeSeconds
+            + "}";
     this.nanoTimeSupplier = requireNonNull(nanoTimeSupplier);
 
-    this.inverseAdaptationTimeNanos = 1e-9 / adaptationTimeSeconds;
-    this.targetSpansPerNanosecondLimit = 1e-9 * targetSpansPerSecondLimit;
+    this.inverseAdaptationTimeNanos = NANOS_IN_SECONDS / adaptationTimeSeconds;
+    this.targetSpansPerNanosecondLimit = NANOS_IN_SECONDS * targetSpansPerSecondLimit;
 
-    this.state = new AtomicReference<>(new State(0, 0, nanoTimeSupplier.getAsLong()));
+    this.probabilitySmoothingFactor =
+        determineProbabilitySmoothingFactor(targetSpansPerSecondLimit, adaptationTimeSeconds);
 
-    this.randomGenerator = randomGenerator;
+    this.state = new AtomicReference<>(new State(0, 0, nanoTimeSupplier.getAsLong(), 1.0));
   }
 
-  private State updateState(State oldState, long currentNanoTime) {
-    if (currentNanoTime <= oldState.lastNanoTime) {
-      return new State(
-          oldState.effectiveWindowCount + 1, oldState.effectiveWindowNanos, oldState.lastNanoTime);
-    }
+  private static double determineProbabilitySmoothingFactor(
+      double targetSpansPerSecondLimit, double adaptationTimeSeconds) {
+    double t = 1.0 / (targetSpansPerSecondLimit * adaptationTimeSeconds);
+    return t / (1.0 + t);
+  }
+
+  private State updateState(State oldState, long currentNanoTime, double delegateProbability) {
+    double currentAverageProbability =
+        oldState.effectiveDelegateProbability * (1.0 - probabilitySmoothingFactor)
+            + delegateProbability * probabilitySmoothingFactor;
+
     long nanoTimeDelta = currentNanoTime - oldState.lastNanoTime;
+    if (nanoTimeDelta <= 0.0) {
+      return new State(
+          oldState.effectiveWindowCount + 1,
+          oldState.effectiveWindowNanos,
+          oldState.lastNanoTime,
+          currentAverageProbability);
+    }
+
     double decayFactor = Math.exp(-nanoTimeDelta * inverseAdaptationTimeNanos);
     double currentEffectiveWindowCount = oldState.effectiveWindowCount * decayFactor + 1;
     double currentEffectiveWindowNanos =
         oldState.effectiveWindowNanos * decayFactor + nanoTimeDelta;
-    return new State(currentEffectiveWindowCount, currentEffectiveWindowNanos, currentNanoTime);
+
+    return new State(
+        currentEffectiveWindowCount,
+        currentEffectiveWindowNanos,
+        currentNanoTime,
+        currentAverageProbability);
   }
 
   @Override
-  protected int getP(int parentP, boolean isRoot) {
-    long currentNanoTime = nanoTimeSupplier.getAsLong();
-    State currentState = state.updateAndGet(s -> updateState(s, currentNanoTime));
+  public SamplingIntent getSamplingIntent(
+      Context parentContext,
+      String traceId,
+      String name,
+      SpanKind spanKind,
+      Attributes attributes,
+      List<LinkData> parentLinks) {
 
-    double samplingProbability =
-        (currentState.effectiveWindowNanos * targetSpansPerNanosecondLimit)
-            / currentState.effectiveWindowCount;
+    SamplingIntent delegateIntent =
+        delegate.getSamplingIntent(parentContext, traceId, name, spanKind, attributes, parentLinks);
+    long delegateThreshold = delegateIntent.getThreshold();
 
-    if (samplingProbability >= 1.) {
-      return 0;
-    }
+    long suggestedThreshold;
+    if (isValidThreshold(delegateThreshold)) {
+      double delegateProbability = calculateSamplingProbability(delegateThreshold);
+      long currentNanoTime = nanoTimeSupplier.getAsLong();
+      State currentState =
+          state.updateAndGet(s -> updateState(s, currentNanoTime, delegateProbability));
 
-    int lowerPValue = getLowerBoundP(samplingProbability);
-    int upperPValue = getUpperBoundP(samplingProbability);
+      double targetMaxProbability =
+          (currentState.effectiveWindowNanos * targetSpansPerNanosecondLimit)
+              / currentState.effectiveWindowCount;
 
-    if (lowerPValue == upperPValue) {
-      return lowerPValue;
-    }
-
-    double upperSamplingRate = getSamplingProbability(lowerPValue);
-    double lowerSamplingRate = getSamplingProbability(upperPValue);
-    double probabilityToUseLowerPValue =
-        (samplingProbability - lowerSamplingRate) / (upperSamplingRate - lowerSamplingRate);
-
-    if (randomGenerator.nextBoolean(probabilityToUseLowerPValue)) {
-      return lowerPValue;
+      double suggestedProbability;
+      if (currentState.effectiveDelegateProbability > targetMaxProbability) {
+        suggestedProbability =
+            targetMaxProbability / currentState.effectiveDelegateProbability * delegateProbability;
+      } else {
+        suggestedProbability = delegateProbability;
+      }
+      suggestedThreshold = calculateThreshold(suggestedProbability);
     } else {
-      return upperPValue;
+      suggestedThreshold = INVALID_THRESHOLD;
     }
+
+    return SamplingIntent.create(
+        suggestedThreshold,
+        delegateIntent.isThresholdReliable(),
+        delegateIntent.getAttributes(),
+        delegateIntent.getTraceStateUpdater());
   }
 
   @Override

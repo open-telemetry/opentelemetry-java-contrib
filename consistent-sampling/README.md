@@ -1,59 +1,51 @@
 # Consistent sampling
 
-There are two major components included here.
-
-## Original proposal implementation
-
-The original specification for consistent probability sampling is defined by
-<https://github.com/open-telemetry/opentelemetry-specification/blob/main/oteps/trace/4673-experimental-probability-sampling.md>
-and <https://github.com/open-telemetry/opentelemetry-specification/pull/2047>.
-It supports sampling probabilities that are power of 2 (1, 1/2, 1/4, ...), and uses 8-bit `r-value` and 8-bit `p-value` in tracestate.
-
-The implementation of this proposal is contained by the package `io/opentelemetry/contrib/sampler/consistent` in this repository and provides various Sampler implementations.
-
-* **ConsistentSampler**:
-  abstract base class of all consistent sampler implementations below
-* **ConsistentAlwaysOffSampler**:
-  see <https://github.com/open-telemetry/opentelemetry-specification/blob/main/oteps/trace/4673-experimental-probability-sampling.md#always-off-sampler>
-* **ConsistentAlwaysOnSampler**:
-  see <https://github.com/open-telemetry/opentelemetry-specification/blob/main/oteps/trace/4673-experimental-probability-sampling.md#always-on-consistent-probability-sampler>
-* **ConsistentComposedAndSampler**:
-  allows combining two consistent samplers and samples when both samplers would sample
-* **ConsistentComposedOrSampler**:
-  allows combining two consistent sampler and samples when at least one of both samplers would sample,
-  see <https://github.com/open-telemetry/opentelemetry-specification/blob/main/oteps/trace/4673-experimental-probability-sampling.md#requirement-combine-multiple-consistent-probability-samplers-using-the-minimum-p-value>
-* **ConsistentParentBasedSampler**:
-  see <https://github.com/open-telemetry/opentelemetry-specification/blob/main/oteps/trace/4673-experimental-probability-sampling.md#parentconsistentprobabilitybased-sampler>
-* **ConsistentProbabilityBasedSampler**:
-  see <https://github.com/open-telemetry/opentelemetry-specification/blob/main/oteps/trace/4673-experimental-probability-sampling.md#consistentprobabilitybased-sampler>
-* **ConsistentRateLimitingSampler**:
-  a rate limiting sampler based on exponential smoothing that dynamically adjusts the sampling
-  probability based on the estimated rate of spans occurring to satisfy a given rate of sampled spans
-
-## Current proposal implementation
-
-The current version of the specification for consistent probability sampling is described by
+This module implements the current specification for consistent probability
+sampling described by
 <https://github.com/open-telemetry/oteps/blob/main/text/trace/0235-sampling-threshold-in-trace-state.md>.
-It uses **56** bits for representing _rejection threshold_, which corresponds to a much wider range of sampling probabilities than the original proposal.
+It uses **56** bits for representing the _rejection threshold_, which
+corresponds to a much wider range of sampling probabilities than the original
+OTEP&nbsp;4673 proposal.
 
-The implementation of the current proposal is contained by the package `io/opentelemetry/contrib/sampler/consistent56` in this repository and provides implementation for a number of different Samplers.
+The reference implementation of composable samplers now lives upstream in
+[`opentelemetry-java`](https://github.com/open-telemetry/opentelemetry-java)
+under the `opentelemetry-sdk-extension-incubator` module, in the package
+`io.opentelemetry.sdk.extension.incubator.trace.samplers`. That package provides
+`ComposableSampler` (including the static factories `alwaysOn()`, `alwaysOff()`,
+`probability(ratio)`, `parentThreshold(rootSampler)`, `ruleBasedBuilder()`,
+`annotating(sampler, attributes)`) and `CompositeSampler.wrap(ComposableSampler)`
+for turning a composable sampler into a `Sampler`.
 
-* **ConsistentSampler**
-  abstract base class for all consistent sampler implementations
-* **ComposableSampler**:
-  interface used to build hierarchies of Samplers, see [Composite Samplers](https://github.com/open-telemetry/oteps/pull/250)
-* **ConsistentAlwaysOffSampler**:
-* **ConsistentAlwaysOnSampler**:
-* **ConsistentAnyOfSampler**:
-  allows combining several consistent samplers; it samples when at least one of them would sample,
-* **ConsistentParentBasedSampler**:
-* **ConsistentFixedThresholdSampler**:
-  consistent probability sampler that uses a predefined sampling probability
+The package `io.opentelemetry.contrib.sampler.consistent` in this repository
+adds the following samplers on top of the upstream incubator:
+
 * **ConsistentRateLimitingSampler**:
   a rate limiting sampler based on exponential smoothing that dynamically adjusts the sampling
   probability based on the estimated rate of spans occurring to satisfy a given rate of sampled spans
-* **ConsistentRuleBasedSampler**
-  a sampler that performs stratified sampling by evaluating qualifying conditions and propagating the sampling decision from one of its delegate samplers
+* **ConsistentVariableThresholdSampler**:
+  a consistent probability sampler whose sampling probability can be updated at runtime
+* **ConsistentAnyOf**:
+  allows combining several composable samplers; it samples when at least one of them would sample
+* **ConsistentReservoirSamplingSpanProcessor**:
+  a `SpanProcessor` that buffers ended spans and, if more spans arrive in a
+  period than the configured reservoir size, consistently down-samples the
+  buffer before export
+
+The `ConsistentSampler` class is a convenience factory for the contrib-only
+samplers above. For the common samplers use `ComposableSampler`'s static
+factories directly.
+
+## Autoconfigure
+
+This module registers the `parentbased_consistent_probability` sampler name for
+the OpenTelemetry autoconfigure SDK, equivalent to
+`CompositeSampler.wrap(ComposableSampler.parentThreshold(ComposableSampler.probability(arg)))`.
+Use it via:
+
+```
+OTEL_TRACES_SAMPLER=parentbased_consistent_probability
+OTEL_TRACES_SAMPLER_ARG=0.1
+```
 
 ## Component owners
 

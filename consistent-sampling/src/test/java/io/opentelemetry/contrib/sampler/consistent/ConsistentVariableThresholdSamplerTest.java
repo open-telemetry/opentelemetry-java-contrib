@@ -3,15 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.sampler.consistent56;
+package io.opentelemetry.contrib.sampler.consistent;
 
-import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.calculateThreshold;
-import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.getMaxThreshold;
+import static io.opentelemetry.contrib.sampler.consistent.ConsistentSamplingUtil.calculateThreshold;
+import static io.opentelemetry.contrib.sampler.consistent.ConsistentSamplingUtil.encodeLast56BitHexWithoutTrailingZeros;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
 class ConsistentVariableThresholdSamplerTest {
+
+  private static final long MAX_THRESHOLD = 1L << 56;
 
   @Test
   void testSetSamplingProbability() {
@@ -27,11 +29,8 @@ class ConsistentVariableThresholdSamplerTest {
   private static void testSetSamplingProbability(
       double probability, ConsistentVariableThresholdSampler sampler, boolean updateProbability) {
     long threshold = calculateThreshold(probability);
-    String thresholdString =
-        ConsistentSamplingUtil.appendLast56BitHexEncodedWithoutTrailingZeros(
-                new StringBuilder(), threshold)
-            .toString();
-    if (threshold == getMaxThreshold()) {
+    String thresholdString = encodeLast56BitHexWithoutTrailingZeros(threshold);
+    if (threshold == MAX_THRESHOLD) {
       thresholdString = "max";
     }
     if (updateProbability) {
