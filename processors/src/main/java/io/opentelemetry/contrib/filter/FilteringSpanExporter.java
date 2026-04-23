@@ -56,7 +56,8 @@ public final class FilteringSpanExporter implements SpanExporter {
    * Creates a new {@code FilteringSpanExporter}.
    *
    * @param delegate the exporter to delegate to for spans that pass filtering
-   * @param spanFilters per-span filters; a trace's spans in the batch are kept if any filter matches
+   * @param spanFilters per-span filters; a trace's spans in the batch are kept if any filter
+   *     matches
    * @param traceFilters batch-level filters; a trace's spans in the batch are kept if any filter
    *     matches
    * @param meter optional {@link Meter} for emitting dropped-span metrics; pass {@code null} to
