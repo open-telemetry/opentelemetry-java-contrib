@@ -1,2 +1,9 @@
+[settings]
+exclude = [
+    ".github/pull_request_template.md",
+    "CHANGELOG.md",
+    "ibm-mq-metrics/docs/metrics.md",
+]
+
 [checks.lychee]
 check_all_local = true
