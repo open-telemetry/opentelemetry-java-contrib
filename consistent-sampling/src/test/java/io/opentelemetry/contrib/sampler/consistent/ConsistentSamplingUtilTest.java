@@ -3,17 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.sampler.consistent56;
+package io.opentelemetry.contrib.sampler.consistent;
 
-import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.calculateAdjustedCount;
-import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.calculateSamplingProbability;
-import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.calculateThreshold;
-import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.getInvalidRandomValue;
-import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.getInvalidThreshold;
-import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.getMaxThreshold;
-import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.getMinThreshold;
-import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.isValidRandomValue;
-import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.isValidThreshold;
+import static io.opentelemetry.contrib.sampler.consistent.ConsistentSamplingUtil.calculateAdjustedCount;
+import static io.opentelemetry.contrib.sampler.consistent.ConsistentSamplingUtil.calculateSamplingProbability;
+import static io.opentelemetry.contrib.sampler.consistent.ConsistentSamplingUtil.calculateThreshold;
+import static io.opentelemetry.contrib.sampler.consistent.ConsistentSamplingUtil.getInvalidRandomValue;
+import static io.opentelemetry.contrib.sampler.consistent.ConsistentSamplingUtil.getInvalidThreshold;
+import static io.opentelemetry.contrib.sampler.consistent.ConsistentSamplingUtil.getMaxThreshold;
+import static io.opentelemetry.contrib.sampler.consistent.ConsistentSamplingUtil.getMinThreshold;
+import static io.opentelemetry.contrib.sampler.consistent.ConsistentSamplingUtil.isValidRandomValue;
+import static io.opentelemetry.contrib.sampler.consistent.ConsistentSamplingUtil.isValidThreshold;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 

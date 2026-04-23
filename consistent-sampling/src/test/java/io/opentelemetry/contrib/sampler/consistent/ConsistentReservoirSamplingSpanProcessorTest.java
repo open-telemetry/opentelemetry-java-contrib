@@ -6,7 +6,7 @@
 package io.opentelemetry.contrib.sampler.consistent;
 
 import static io.opentelemetry.contrib.sampler.consistent.ConsistentReservoirSamplingSpanProcessor.DEFAULT_EXPORT_TIMEOUT_NANOS;
-import static io.opentelemetry.contrib.sampler.consistent.TestUtil.verifyObservedPvaluesUsingGtest;
+import static io.opentelemetry.contrib.sampler.consistent.ConsistentReservoirSamplingSpanProcessorTestUtil.verifyObservedPvaluesUsingGtest;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -19,15 +19,22 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
+import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanContext;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.api.trace.TraceState;
 import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.SpanProcessor;
+import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
+import io.opentelemetry.sdk.trace.samplers.SamplingDecision;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -343,7 +350,7 @@ class ConsistentReservoirSamplingSpanProcessorTest {
     when(mockSpanExporter.export(argThat(containsSpanName(SPAN_NAME_2, exportedAgain::countDown))))
         .thenReturn(CompletableResultCode.ofSuccess());
     createEndedSpan(SPAN_NAME_2, sdkTracerProvider);
-    exported.await();
+    exportedAgain.await();
     awaitReservoirEmpty(processor);
 
     shutdown(sdkTracerProvider);
@@ -473,7 +480,7 @@ class ConsistentReservoirSamplingSpanProcessorTest {
 
     SdkTracerProvider sdkTracerProvider =
         SdkTracerProvider.builder()
-            .setSampler(ConsistentSampler.alwaysOn())
+            .setSampler(Sampler.alwaysOn())
             .addSpanProcessor(processor)
             .build();
 
@@ -531,9 +538,7 @@ class ConsistentReservoirSamplingSpanProcessorTest {
     RandomGenerator randomGenerator = RandomGenerator.create(asThreadSafeLongSupplier(rng2));
     SdkTracerProvider sdkTracerProvider =
         SdkTracerProvider.builder()
-            .setSampler(
-                ConsistentSampler.probabilityBased(
-                    samplingProbability, s -> randomGenerator.numberOfLeadingZerosOfRandomLong()))
+            .setSampler(probabilityBased(samplingProbability, randomGenerator))
             .addSpanProcessor(processor)
             .build();
 
@@ -689,5 +694,154 @@ class ConsistentReservoirSamplingSpanProcessorTest {
             Tests.VERIFY_MEAN, Tests.VERIFY_PVALUE_DISTRIBUTION, Tests.VERIFY_ORDER_INDEPENDENCE));
     testConsistentSampling(
         0xc41d327fd1a6866aL, 1000000, 5, 4, 1.0, EnumSet.of(Tests.VERIFY_ORDER_INDEPENDENCE));
+  }
+
+  private static final double SMALLEST_POSITIVE_SAMPLING_PROBABILITY =
+      getSamplingProbability(OtelTraceState.getMaxP() - 1);
+
+  private static Sampler probabilityBased(
+      double samplingProbability, RandomGenerator rValueGenerator) {
+    int lowerPValue = getLowerBoundP(samplingProbability);
+    int upperPValue = getUpperBoundP(samplingProbability);
+
+    double probabilityToUseLowerPValue;
+    if (lowerPValue == upperPValue) {
+      probabilityToUseLowerPValue = 1;
+    } else {
+      double upperSamplingProbability = getSamplingProbability(lowerPValue);
+      double lowerSamplingProbability = getSamplingProbability(upperPValue);
+      probabilityToUseLowerPValue =
+          (samplingProbability - lowerSamplingProbability)
+              / (upperSamplingProbability - lowerSamplingProbability);
+    }
+    RandomGenerator pValueGenerator = RandomGenerator.getDefault();
+
+    return new Sampler() {
+      @Override
+      public SamplingResult shouldSample(
+          Context parentContext,
+          String traceId,
+          String name,
+          SpanKind spanKind,
+          Attributes attributes,
+          List<LinkData> parentLinks) {
+        Span parentSpan = Span.fromContext(parentContext);
+        SpanContext parentSpanContext = parentSpan.getSpanContext();
+        boolean isParentSampled = parentSpanContext.isSampled();
+
+        TraceState parentTraceState = parentSpanContext.getTraceState();
+        String otelTraceStateString = parentTraceState.get(OtelTraceState.TRACE_STATE_KEY);
+        OtelTraceState otelTraceState = OtelTraceState.parse(otelTraceStateString);
+
+        if (!otelTraceState.hasValidR() || isInvariantViolated(otelTraceState, isParentSampled)) {
+          otelTraceState.invalidateP();
+        }
+
+        if (!otelTraceState.hasValidR()) {
+          otelTraceState.setR(
+              Math.min(
+                  rValueGenerator.numberOfLeadingZerosOfRandomLong(), OtelTraceState.getMaxR()));
+        }
+
+        if (pValueGenerator.nextBoolean(probabilityToUseLowerPValue)) {
+          otelTraceState.setP(lowerPValue);
+        } else {
+          otelTraceState.setP(upperPValue);
+        }
+
+        boolean isSampled;
+        if (otelTraceState.hasValidP()) {
+          isSampled = otelTraceState.getP() <= otelTraceState.getR();
+        } else {
+          isSampled = isParentSampled;
+        }
+        SamplingDecision samplingDecision =
+            isSampled ? SamplingDecision.RECORD_AND_SAMPLE : SamplingDecision.DROP;
+
+        if (!isSampled) {
+          otelTraceState.invalidateP();
+        }
+
+        String newOtTraceState = otelTraceState.serialize();
+
+        return new SamplingResult() {
+          @Override
+          public SamplingDecision getDecision() {
+            return samplingDecision;
+          }
+
+          @Override
+          public Attributes getAttributes() {
+            return Attributes.empty();
+          }
+
+          @Override
+          public TraceState getUpdatedTraceState(TraceState parentTraceState) {
+            return parentTraceState.toBuilder()
+                .put(OtelTraceState.TRACE_STATE_KEY, newOtTraceState)
+                .build();
+          }
+        };
+      }
+
+      @Override
+      public String getDescription() {
+        return "TestProbabilityBasedSampler{" + samplingProbability + "}";
+      }
+    };
+  }
+
+  private static boolean isInvariantViolated(
+      OtelTraceState otelTraceState, boolean isParentSampled) {
+    if (otelTraceState.hasValidR() && otelTraceState.hasValidP()) {
+      int p = otelTraceState.getP();
+      int r = otelTraceState.getR();
+      int maxP = OtelTraceState.getMaxP();
+      boolean isInvariantTrue = ((p <= r) == isParentSampled) || (isParentSampled && (p == maxP));
+      return !isInvariantTrue;
+    } else {
+      return false;
+    }
+  }
+
+  private static double getSamplingProbability(int p) {
+    if (OtelTraceState.isValidP(p)) {
+      if (p == OtelTraceState.getMaxP()) {
+        return 0.0;
+      } else {
+        return Double.longBitsToDouble((0x3FFL - p) << 52);
+      }
+    } else {
+      throw new IllegalArgumentException("Invalid p-value!");
+    }
+  }
+
+  private static int getLowerBoundP(double samplingProbability) {
+    if (!(samplingProbability >= 0.0 && samplingProbability <= 1.0)) {
+      throw new IllegalArgumentException();
+    }
+    if (samplingProbability == 0.) {
+      return OtelTraceState.getMaxP();
+    } else if (samplingProbability <= SMALLEST_POSITIVE_SAMPLING_PROBABILITY) {
+      return OtelTraceState.getMaxP() - 1;
+    } else {
+      long longSamplingProbability = Double.doubleToRawLongBits(samplingProbability);
+      long mantissa = longSamplingProbability & 0x000FFFFFFFFFFFFFL;
+      long exponent = longSamplingProbability >>> 52;
+      return (int) (0x3FFL - exponent) - (mantissa != 0 ? 1 : 0);
+    }
+  }
+
+  private static int getUpperBoundP(double samplingProbability) {
+    if (!(samplingProbability >= 0.0 && samplingProbability <= 1.0)) {
+      throw new IllegalArgumentException();
+    }
+    if (samplingProbability <= SMALLEST_POSITIVE_SAMPLING_PROBABILITY) {
+      return OtelTraceState.getMaxP();
+    } else {
+      long longSamplingProbability = Double.doubleToRawLongBits(samplingProbability);
+      long exponent = longSamplingProbability >>> 52;
+      return (int) (0x3FFL - exponent);
+    }
   }
 }
