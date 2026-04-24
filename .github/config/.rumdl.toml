@@ -1,5 +1,29 @@
+[MD004]
+enabled = false
+
 [MD013]
-enabled = true
-line-length = 120
-code-blocks = false
-tables = false
+enabled = false
+
+[MD024]
+siblings_only = true
+
+[MD026]
+enabled = false
+
+[MD029]
+style = "ordered"
+
+[MD033]
+enabled = false
+
+[MD040]
+enabled = false
+
+[MD064]
+enabled = false
+
+[MD065]
+enabled = false
+
+[MD076]
+enabled = false

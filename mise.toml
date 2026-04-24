@@ -31,8 +31,8 @@ use_file_shell_for_executable_tasks = true
 [tasks.lint]
 description = "Run markdown and link linting"
 raw_args = true
-run = "flint run"
+run = "flint run rumdl lychee"
 
 [tasks."lint:fix"]
 description = "Auto-fix lint issues"
-run = "flint run --fix"
+run = "flint run --fix rumdl"
