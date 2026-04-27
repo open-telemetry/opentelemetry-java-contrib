@@ -34,6 +34,13 @@
 - Improve error handling
   ([#2778](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2778))
 
+
+### Processors
+
+- Add FilteringSpanExporter with composable SpanFilter and TraceFilter interfaces
+  ([#2745](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2745))
+
+
 ## Version 1.55.0 (2026-03-31)
 
 ### Disk buffering
