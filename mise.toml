@@ -19,7 +19,6 @@ use_file_shell_for_executable_tasks = true
 
 [tasks.lint]
 description = "Run markdown and link linting"
-raw_args = true
 run = "flint run"
 
 [tasks."lint:fix"]
