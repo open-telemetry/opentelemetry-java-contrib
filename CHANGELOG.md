@@ -33,8 +33,6 @@
 
 - Improve error handling
   ([#2778](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2778))
-
-
 ### Processors
 
 - Add FilteringSpanExporter with composable SpanFilter and TraceFilter interfaces
