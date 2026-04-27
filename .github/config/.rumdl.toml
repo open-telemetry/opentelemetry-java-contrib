@@ -1,0 +1,9 @@
+[MD013]
+enabled = true
+line-length = 120
+code-blocks = false
+tables = false
+
+[MD060]
+enabled = true
+style = "aligned"
