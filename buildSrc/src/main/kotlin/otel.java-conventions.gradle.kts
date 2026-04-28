@@ -151,7 +151,7 @@ dependencies {
 
 testing {
   suites.withType(JvmTestSuite::class).configureEach {
-    useJUnitJupiter("5.14.3")
+    useJUnitJupiter("5.14.4")
 
     dependencies {
       implementation(project())

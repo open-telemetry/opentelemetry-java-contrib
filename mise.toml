@@ -2,7 +2,7 @@
 # Linters
 "github:grafana/flint" = "0.20.3"
 lychee = "0.23.0"
-markdownlint-cli2 = "0.22.0"
+markdownlint-cli2 = "0.22.1"
 
 [env]
 FLINT_CONFIG_DIR = ".github/config"
