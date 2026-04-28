@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 1.56.0 (2026-04-28)
+
 ### Dynamic control
 
 - Add SourceFormat string to enum conversion
