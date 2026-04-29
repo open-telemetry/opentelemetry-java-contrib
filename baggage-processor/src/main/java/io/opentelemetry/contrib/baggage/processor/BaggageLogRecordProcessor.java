@@ -28,14 +28,6 @@ public final class BaggageLogRecordProcessor implements LogRecordProcessor {
     this.baggageKeyPredicate = baggageKeyPredicate;
   }
 
-  /**
-   * Creates a new {@link BaggageLogRecordProcessor} that copies all baggage entries into the newly
-   * created log record.
-   */
-  public static BaggageLogRecordProcessor allowAllBaggageKeys() {
-    return new BaggageLogRecordProcessor(baggageKey -> true);
-  }
-
   @Override
   public void onEmit(Context context, ReadWriteLogRecord logRecord) {
     Baggage.fromContext(context)

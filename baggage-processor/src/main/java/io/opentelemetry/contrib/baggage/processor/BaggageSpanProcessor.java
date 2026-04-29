@@ -27,14 +27,6 @@ public final class BaggageSpanProcessor implements SpanProcessor {
     this.baggageKeyPredicate = baggageKeyPredicate;
   }
 
-  /**
-   * Creates a new {@link BaggageSpanProcessor} that copies all baggage entries into the newly
-   * created {@link io.opentelemetry.api.trace.Span}.
-   */
-  public static BaggageSpanProcessor allowAllBaggageKeys() {
-    return new BaggageSpanProcessor(baggageKey -> true);
-  }
-
   @Override
   public void onStart(Context parentContext, ReadWriteSpan span) {
     Baggage.fromContext(parentContext)
