@@ -55,6 +55,10 @@ This will configure the respective processor to include baggage keys listed in `
 exclude those in `excluded` as explained in
 [Properties requiring pattern matching](https://github.com/open-telemetry/opentelemetry-configuration/blob/main/CONTRIBUTING.md#properties-requiring-pattern-matching).
 
+When both `included` and `excluded` are empty or not set, all the baggage entries will be copied.
+When only `included` is set, only the baggage entries matching the patterns in `included` will be copied (opt-in).
+When only `excluded` is set, all baggage entries except those matching the patterns in `excluded` will be copied (opt-out).
+
 ### Usage through programmatic activation
 
 Add the span and log processor when configuring the tracer and logger providers.
