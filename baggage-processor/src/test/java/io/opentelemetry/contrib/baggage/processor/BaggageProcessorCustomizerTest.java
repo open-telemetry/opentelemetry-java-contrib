@@ -6,6 +6,7 @@
 package io.opentelemetry.contrib.baggage.processor;
 
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
+import static java.util.Collections.singletonList;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.Mockito.verify;
 
@@ -122,7 +123,7 @@ class BaggageProcessorCustomizerTest {
                   @Override
                   public <T> List<T> load(Class<T> spiClass) {
                     if (spiClass.equals(ConfigurableSpanExporterProvider.class)) {
-                      return Collections.singletonList(
+                      return singletonList(
                           spiClass.cast(
                               new ConfigurableSpanExporterProvider() {
                                 @Override
@@ -137,7 +138,7 @@ class BaggageProcessorCustomizerTest {
                                 }
                               }));
                     } else if (spiClass.equals(ConfigurableLogRecordExporterProvider.class)) {
-                      return Collections.singletonList(
+                      return singletonList(
                           spiClass.cast(
                               new ConfigurableLogRecordExporterProvider() {
                                 @Override
@@ -160,8 +161,7 @@ class BaggageProcessorCustomizerTest {
 
   @Test
   void test_baggageSpanProcessor_adds_attributes_to_spans(@Mock ReadWriteSpan span) {
-    try (BaggageSpanProcessor processor =
-        BaggageProcessorCustomizer.createBaggageSpanProcessor(Collections.singletonList("*"))) {
+    try (BaggageSpanProcessor processor = new BaggageSpanProcessor(singletonList("*"), null)) {
       try (Scope ignore = Baggage.current().toBuilder().put("key", "value").build().makeCurrent()) {
         processor.onStart(Context.current(), span);
         verify(span).setAttribute("key", "value");
@@ -172,8 +172,7 @@ class BaggageProcessorCustomizerTest {
   @Test
   void test_baggageSpanProcessor_adds_attributes_to_spans_when_key_filter_matches(
       @Mock ReadWriteSpan span) {
-    try (BaggageSpanProcessor processor =
-        BaggageProcessorCustomizer.createBaggageSpanProcessor(Collections.singletonList("key"))) {
+    try (BaggageSpanProcessor processor = new BaggageSpanProcessor(singletonList("key"), null)) {
       try (Scope ignore =
           Baggage.current().toBuilder()
               .put("key", "value")
@@ -191,8 +190,7 @@ class BaggageProcessorCustomizerTest {
   void test_baggageLogRecordProcessor_adds_attributes_to_logRecord(
       @Mock ReadWriteLogRecord logRecord) {
     try (BaggageLogRecordProcessor processor =
-        BaggageProcessorCustomizer.createBaggageLogRecordProcessor(
-            Collections.singletonList("*"))) {
+        new BaggageLogRecordProcessor(singletonList("*"), null)) {
       try (Scope ignore = Baggage.current().toBuilder().put("key", "value").build().makeCurrent()) {
         processor.onEmit(Context.current(), logRecord);
         verify(logRecord).setAttribute(AttributeKey.stringKey("key"), "value");
@@ -204,8 +202,7 @@ class BaggageProcessorCustomizerTest {
   void test_baggageLogRecordProcessor_adds_attributes_to_spans_when_key_filter_matches(
       @Mock ReadWriteLogRecord logRecord) {
     try (BaggageLogRecordProcessor processor =
-        BaggageProcessorCustomizer.createBaggageLogRecordProcessor(
-            Collections.singletonList("key"))) {
+        new BaggageLogRecordProcessor(singletonList("k*"), null)) {
       try (Scope ignore =
           Baggage.current().toBuilder()
               .put("key", "value")
@@ -215,6 +212,25 @@ class BaggageProcessorCustomizerTest {
         processor.onEmit(Context.current(), logRecord);
         verify(logRecord).setAttribute(AttributeKey.stringKey("key"), "value");
         verify(logRecord, Mockito.never()).setAttribute(AttributeKey.stringKey("other"), "value");
+      }
+    }
+  }
+
+  @Test
+  void test_baggageLogRecordProcessor_adds_attributes_to_spans_include_exclude(
+      @Mock ReadWriteLogRecord logRecord) {
+    try (BaggageLogRecordProcessor processor =
+        new BaggageLogRecordProcessor(singletonList("key*"), singletonList("*excluded"))) {
+      try (Scope ignore =
+          Baggage.current().toBuilder()
+              .put("key", "value")
+              .put("key_is_excluded", "value")
+              .build()
+              .makeCurrent()) {
+        processor.onEmit(Context.current(), logRecord);
+        verify(logRecord).setAttribute(AttributeKey.stringKey("key"), "value");
+        verify(logRecord, Mockito.never())
+            .setAttribute(AttributeKey.stringKey("key_is_excluded"), "value");
       }
     }
   }

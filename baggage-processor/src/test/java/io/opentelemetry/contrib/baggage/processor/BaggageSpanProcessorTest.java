@@ -5,11 +5,12 @@
 
 package io.opentelemetry.contrib.baggage.processor;
 
+import static java.util.Collections.singletonList;
+
 import io.opentelemetry.api.baggage.Baggage;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.sdk.trace.ReadWriteSpan;
-import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -21,7 +22,7 @@ class BaggageSpanProcessorTest {
 
   @Test
   void test_baggageSpanProcessor_adds_attributes_to_spans(@Mock ReadWriteSpan span) {
-    try (BaggageSpanProcessor processor = new BaggageSpanProcessor(baggageKey -> true)) {
+    try (BaggageSpanProcessor processor = new BaggageSpanProcessor(null, null)) {
       try (Scope ignore = Baggage.current().toBuilder().put("key", "value").build().makeCurrent()) {
         processor.onStart(Context.current(), span);
         Mockito.verify(span).setAttribute("key", "value");
@@ -32,7 +33,7 @@ class BaggageSpanProcessorTest {
   @Test
   void test_baggageSpanProcessor_adds_attributes_to_spans_when_key_filter_matches(
       @Mock ReadWriteSpan span) {
-    try (BaggageSpanProcessor processor = new BaggageSpanProcessor(key -> key.startsWith("k"))) {
+    try (BaggageSpanProcessor processor = new BaggageSpanProcessor(singletonList("k*"), null)) {
       try (Scope ignore =
           Baggage.current().toBuilder()
               .put("key", "value")
@@ -47,20 +48,19 @@ class BaggageSpanProcessorTest {
   }
 
   @Test
-  void test_baggageSpanProcessor_adds_attributes_to_spans_when_key_filter_matches_regex(
+  void test_baggageSpanProcessor_adds_attributes_to_spans_include_exclude(
       @Mock ReadWriteSpan span) {
-    Pattern pattern = Pattern.compile("k.*");
     try (BaggageSpanProcessor processor =
-        new BaggageSpanProcessor(key -> pattern.matcher(key).matches())) {
+        new BaggageSpanProcessor(singletonList("k*"), singletonList("*ignored"))) {
       try (Scope ignore =
           Baggage.current().toBuilder()
               .put("key", "value")
-              .put("other", "value")
+              .put("key_is_ignored", "value")
               .build()
               .makeCurrent()) {
         processor.onStart(Context.current(), span);
         Mockito.verify(span).setAttribute("key", "value");
-        Mockito.verify(span, Mockito.never()).setAttribute("other", "value");
+        Mockito.verify(span, Mockito.never()).setAttribute("key_is_ignored", "value");
       }
     }
   }

@@ -9,7 +9,6 @@ import com.google.auto.service.AutoService;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
-import io.opentelemetry.sdk.common.internal.IncludeExcludePredicate;
 import io.opentelemetry.sdk.logs.SdkLoggerProviderBuilder;
 import io.opentelemetry.sdk.trace.SdkTracerProviderBuilder;
 import java.util.List;
@@ -41,11 +40,7 @@ public final class BaggageProcessorCustomizer implements AutoConfigurationCustom
     }
 
     // need to add before the batch span processor
-    sdkTracerProviderBuilder.addSpanProcessorFirst(createBaggageSpanProcessor(keys));
-  }
-
-  static BaggageSpanProcessor createBaggageSpanProcessor(List<String> keys) {
-    return new BaggageSpanProcessor(IncludeExcludePredicate.createPatternMatching(keys, null));
+    sdkTracerProviderBuilder.addSpanProcessorFirst(new BaggageSpanProcessor(keys, null));
   }
 
   private static void addLogRecordProcessor(
@@ -58,10 +53,6 @@ public final class BaggageProcessorCustomizer implements AutoConfigurationCustom
     }
 
     // need to add before the batch log processor
-    sdkLoggerProviderBuilder.addLogRecordProcessorFirst(createBaggageLogRecordProcessor(keys));
-  }
-
-  static BaggageLogRecordProcessor createBaggageLogRecordProcessor(List<String> keys) {
-    return new BaggageLogRecordProcessor(IncludeExcludePredicate.createPatternMatching(keys, null));
+    sdkLoggerProviderBuilder.addLogRecordProcessorFirst(new BaggageLogRecordProcessor(keys, null));
   }
 }
