@@ -49,8 +49,7 @@ public final class BaggageSpanProcessor implements SpanProcessor {
    * created span.
    *
    * @return baggage span processor including all attributes
-   * @deprecated use {@code new BaggageSpanProcessor(Collections.singletonList("*"), null)}
-   *     instead
+   * @deprecated use {@code new BaggageSpanProcessor(Collections.singletonList("*"), null)} instead
    */
   @Deprecated
   public static BaggageSpanProcessor allowAllBaggageKeys() {
