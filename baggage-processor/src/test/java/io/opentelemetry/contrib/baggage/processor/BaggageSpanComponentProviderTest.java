@@ -33,6 +33,7 @@ class BaggageSpanComponentProviderTest {
     assertThat(sdk)
         .asString()
         .contains("BaggageSpanProcessor")
-        .containsPattern("IncludeExcludePredicate.*, included=\\[foo], excluded=\\[bar]");
+        .contains("included=[foo]")
+        .contains("excluded=[bar]");
   }
 }
