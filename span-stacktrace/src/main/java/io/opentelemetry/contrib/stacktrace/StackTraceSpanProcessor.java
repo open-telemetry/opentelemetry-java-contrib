@@ -59,6 +59,17 @@ public class StackTraceSpanProcessor implements ExtendedSpanProcessor {
     if (!filterPredicate.test(span)) {
       return;
     }
+
+    // inferred spans are generated from sampling, thus the span processor is not actually called
+    // on when the span is active, so the stack trace collection should be skipped.
+    //
+    // we only get such spans when inferred spans processor executes before this span processor
+    // which may be considered to be a configuration error.
+    boolean isInferred = span.getInstrumentationScopeInfo().getName().equals("inferred-spans");
+    if (isInferred) {
+      return;
+    }
+
     span.setAttribute(CodeAttributes.CODE_STACKTRACE, generateSpanEndStacktrace());
   }
 
