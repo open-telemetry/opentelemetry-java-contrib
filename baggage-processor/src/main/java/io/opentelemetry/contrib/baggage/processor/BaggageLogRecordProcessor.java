@@ -49,7 +49,7 @@ public final class BaggageLogRecordProcessor implements LogRecordProcessor {
    * created log record.
    *
    * @return baggage log processor including all attributes
-   * @deprecated use {@code new BaggageLogRecordProcessor(Collections.singletonList("*),null)}
+   * @deprecated use {@code new BaggageLogRecordProcessor(Collections.singletonList("*"), null)}
    *     instead
    */
   @Deprecated
