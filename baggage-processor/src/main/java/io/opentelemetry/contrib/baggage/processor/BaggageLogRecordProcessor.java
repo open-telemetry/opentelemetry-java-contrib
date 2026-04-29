@@ -44,6 +44,16 @@ public final class BaggageLogRecordProcessor implements LogRecordProcessor {
     this.baggageKeyPredicate = IncludeExcludePredicate.createPatternMatching(included, excluded);
   }
 
+  /**
+   * @deprecated use {@code new BaggageLogRecordProcessor(Collections.singletonList("*),null)}
+   *     instead
+   * @return baggage log processor including all attributes
+   */
+  @Deprecated
+  public static BaggageLogRecordProcessor allowAllBaggageKeys() {
+    return new BaggageLogRecordProcessor(excluded -> true);
+  }
+
   @Override
   public void onEmit(Context context, ReadWriteLogRecord logRecord) {
     Baggage.fromContext(context)

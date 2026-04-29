@@ -44,6 +44,15 @@ public final class BaggageSpanProcessor implements SpanProcessor {
     this.baggageKeyPredicate = IncludeExcludePredicate.createPatternMatching(included, excluded);
   }
 
+  /**
+   * @deprecated use {@code new BaggageSpanProcessor(Collections.singletonList("*),null)} instead
+   * @return baggage span processor including all attributes
+   */
+  @Deprecated
+  public static BaggageSpanProcessor allowAllBaggageKeys() {
+    return new BaggageSpanProcessor(baggageKey -> true);
+  }
+
   @Override
   public void onStart(Context parentContext, ReadWriteSpan span) {
     Baggage.fromContext(parentContext)

@@ -63,32 +63,25 @@ To configure the span and log processors to copy all baggage entries during conf
 
 ```java
 import io.opentelemetry.contrib.baggage.processor;
+
 // ...
 
 TracerProvider tracerProvider = SdkTracerProvider.builder()
-    .addSpanProcessor(BaggageSpanProcessor.allowAllBaggageKeys())
+    .addSpanProcessor(new BaggageSpanProcessor(Collections.singletonList("*"), null))
     .build();
 
 LoggerProvider loggerProvider = SdkLoggerProvider.builder()
-    .addLogRecordProcessor(BaggageLogRecordProcessor.allowAllBaggageKeys())
+    .addLogProcessor(new BaggageLogProcessor(Collections.singletonList("*"), null))
     .build();
 ```
 
-Alternatively, you can provide a custom baggage key predicate to select which baggage keys you want to copy.
+Alternatively, you can provide a custom baggage key wildcard to select which baggage keys you want to copy.
 
-For example, to only copy baggage entries that start with `my-key`:
-
-```java
-new BaggageSpanProcessor(baggageKey -> baggageKey.startsWith("my-key"));
-new BaggageLogRecordProcessor(baggageKey -> baggageKey.startsWith("my-key"));
-```
-
-For example, to only copy baggage entries that match the regex `^key.+`:
+For example, to only copy baggage entries that start with `my-key` and ignore keys that end with `*-ignored`
 
 ```java
-Pattern pattern = Pattern.compile("^key.+");
-new BaggageSpanProcessor(baggageKey -> pattern.matcher(baggageKey).matches());
-new BaggageLogRecordProcessor(baggageKey -> pattern.matcher(baggageKey).matches());
+new BaggageSpanProcessor(singletonList("my-key*"), singletonList("*-ignored"));
+new BaggageLogRecordProcessor(singletonList("my-key*"), singletonList("*-ignored"));
 ```
 
 ## Component owners
