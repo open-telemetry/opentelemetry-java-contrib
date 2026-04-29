@@ -61,6 +61,6 @@ public final class BaggageSpanProcessor implements SpanProcessor {
 
   @Override
   public String toString() {
-    return "BaggageSpanProcessor{" + "baggageKeyPredicate=" + baggageKeyPredicate + '}';
+    return "BaggageSpanProcessor{baggageKeyPredicate=" + baggageKeyPredicate + '}';
   }
 }
