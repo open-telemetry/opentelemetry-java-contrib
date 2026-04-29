@@ -30,6 +30,9 @@ class BaggageLogRecordComponentProviderTest {
                 new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)))
             .getSdk();
 
-    assertThat(sdk).asString().contains("BaggageLogRecordProcessor");
+    assertThat(sdk)
+        .asString()
+        .contains("BaggageLogRecordProcessor")
+        .containsPattern("IncludeExcludePredicate.*, included=\\[foo], excluded=\\[bar]");
   }
 }

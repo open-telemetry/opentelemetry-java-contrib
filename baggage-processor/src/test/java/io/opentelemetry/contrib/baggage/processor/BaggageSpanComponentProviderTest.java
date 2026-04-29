@@ -30,6 +30,9 @@ class BaggageSpanComponentProviderTest {
                 new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)))
             .getSdk();
 
-    assertThat(sdk).asString().contains("BaggageSpanProcessor");
+    assertThat(sdk)
+        .asString()
+        .contains("BaggageSpanProcessor")
+        .containsPattern("IncludeExcludePredicate.*, included=\\[foo], excluded=\\[bar]");
   }
 }
