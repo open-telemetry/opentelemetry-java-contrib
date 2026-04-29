@@ -45,11 +45,12 @@ public final class BaggageSpanProcessor implements SpanProcessor {
   }
 
   /**
-   * Creates a new {@link BaggageLogRecordProcessor} that copies all baggage entries into the newly
+   * Creates a new {@link BaggageSpanProcessor} that copies all baggage entries into the newly
    * created span.
    *
    * @return baggage span processor including all attributes
-   * @deprecated use {@code new BaggageSpanProcessor(Collections.singletonList("*),null)} instead
+   * @deprecated use {@code new BaggageSpanProcessor(Collections.singletonList("*"), null)}
+   *     instead
    */
   @Deprecated
   public static BaggageSpanProcessor allowAllBaggageKeys() {
