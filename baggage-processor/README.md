@@ -66,7 +66,8 @@ Add the span and log processor when configuring the tracer and logger providers.
 To configure the span and log processors to copy all baggage entries during configuration:
 
 ```java
-import io.opentelemetry.contrib.baggage.processor;
+import io.opentelemetry.contrib.baggage.processor.BaggageSpanProcessor;
+import io.opentelemetry.contrib.baggage.processor.BaggageLogProcessor;
 
 // ...
 
@@ -84,8 +85,8 @@ Alternatively, you can provide a custom baggage key wildcard to select which bag
 For example, to only copy baggage entries that start with `my-key` and ignore keys that end with `*-ignored`
 
 ```java
-new BaggageSpanProcessor(singletonList("my-key*"), singletonList("*-ignored"));
-new BaggageLogRecordProcessor(singletonList("my-key*"), singletonList("*-ignored"));
+new BaggageSpanProcessor(Collections.singletonList("my-key*"), Collections.singletonList("*-ignored"));
+new BaggageLogRecordProcessor(Collections.singletonList("my-key*"), Collections.singletonList("*-ignored"));
 ```
 
 ## Component owners
