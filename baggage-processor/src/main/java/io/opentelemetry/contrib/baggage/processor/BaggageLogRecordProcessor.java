@@ -24,6 +24,14 @@ public final class BaggageLogRecordProcessor implements LogRecordProcessor {
   private final Predicate<String> baggageKeyPredicate;
 
   /**
+   * @deprecated Use {@link #BaggageLogRecordProcessor(Collection, Collection)} instead.
+   */
+  @Deprecated
+  public BaggageLogRecordProcessor(Predicate<String> baggageKeyPredicate) {
+    this.baggageKeyPredicate = baggageKeyPredicate;
+  }
+
+  /**
    * Creates a new {@link BaggageLogRecordProcessor} that copies baggage entries with keys that pass
    * the provided include/exclude filtering into the newly created log record, when both arguments
    * are null or empty all baggage are included.

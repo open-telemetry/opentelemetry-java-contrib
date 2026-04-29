@@ -23,6 +23,14 @@ public final class BaggageSpanProcessor implements SpanProcessor {
   private final Predicate<String> baggageKeyPredicate;
 
   /**
+   * @deprecated Use {@link #BaggageSpanProcessor(Collection, Collection)} instead.
+   */
+  @Deprecated
+  public BaggageSpanProcessor(Predicate<String> baggageKeyPredicate) {
+    this.baggageKeyPredicate = baggageKeyPredicate;
+  }
+
+  /**
    * Creates a new {@link BaggageSpanProcessor} that copies baggage entries with keys that pass the
    * provided include/exclude filtering into the newly created {@link
    * io.opentelemetry.api.trace.Span}, when both arguments are null or empty all baggage are
