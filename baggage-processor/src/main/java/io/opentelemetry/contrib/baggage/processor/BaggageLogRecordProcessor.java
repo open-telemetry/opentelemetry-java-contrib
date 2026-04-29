@@ -45,9 +45,12 @@ public final class BaggageLogRecordProcessor implements LogRecordProcessor {
   }
 
   /**
+   * Creates a new {@link BaggageLogRecordProcessor} that copies all baggage entries into the newly
+   * created log record.
+   *
+   * @return baggage log processor including all attributes
    * @deprecated use {@code new BaggageLogRecordProcessor(Collections.singletonList("*),null)}
    *     instead
-   * @return baggage log processor including all attributes
    */
   @Deprecated
   public static BaggageLogRecordProcessor allowAllBaggageKeys() {
