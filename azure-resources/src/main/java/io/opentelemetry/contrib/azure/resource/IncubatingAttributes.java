@@ -35,10 +35,6 @@ final class IncubatingAttributes {
     private CloudProviderIncubatingValues() {}
   }
 
-  // deployment attributes
-  public static final AttributeKey<String> DEPLOYMENT_ENVIRONMENT_NAME =
-      AttributeKey.stringKey("deployment.environment.name");
-
   // host attributes
   public static final AttributeKey<String> HOST_ID = AttributeKey.stringKey("host.id");
   public static final AttributeKey<String> HOST_NAME = AttributeKey.stringKey("host.name");

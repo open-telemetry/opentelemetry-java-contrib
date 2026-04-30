@@ -12,7 +12,7 @@ import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOU
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PROVIDER;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_REGION;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_RESOURCE_ID;
-import static io.opentelemetry.semconv.incubating.DeploymentIncubatingAttributes.DEPLOYMENT_ENVIRONMENT_NAME;
+import static io.opentelemetry.semconv.DeploymentAttributes.DEPLOYMENT_ENVIRONMENT_NAME;
 import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_ID;
 
 import com.google.common.collect.ImmutableMap;
