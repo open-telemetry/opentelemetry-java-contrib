@@ -26,6 +26,7 @@ import io.opentelemetry.opamp.client.request.service.RequestService;
 import java.io.ByteArrayInputStream;
 import java.io.EOFException;
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,7 +35,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Queue;
-import java.util.concurrent.TimeoutException;
 import opamp.proto.AgentToServer;
 import opamp.proto.RetryInfo;
 import opamp.proto.ServerErrorResponse;
@@ -191,7 +191,7 @@ class HttpRequestServiceTest {
   }
 
   @Test
-  void verifySendingRequest_whenThereIsAnExecutionError() throws IOException, TimeoutException {
+  void verifySendingRequest_whenThereIsAnExecutionError() throws IOException {
     IOException myException = mock();
     requestSender.enqueueException(myException);
 
@@ -202,8 +202,8 @@ class HttpRequestServiceTest {
   }
 
   @Test
-  void verifySendingRequest_whenThereIsATimeoutException() {
-    TimeoutException myException = mock();
+  void verifySendingRequest_whenThereIsATimeoutException() throws IOException {
+    SocketTimeoutException myException = mock();
     requestSender.enqueueException(myException);
 
     httpRequestService.sendRequest();
@@ -400,8 +400,7 @@ class HttpRequestServiceTest {
     private final Queue<Object> responses = new LinkedList<>();
 
     @Override
-    public HttpSender.Response send(BodyWriter writer, int contentLength)
-        throws IOException, TimeoutException {
+    public HttpSender.Response send(BodyWriter writer, int contentLength) throws IOException {
       requests.add(new RequestParams(contentLength));
       Object response = null;
       try {
@@ -412,9 +411,6 @@ class HttpRequestServiceTest {
       if (response instanceof IOException) {
         throw (IOException) response;
       }
-      if (response instanceof TimeoutException) {
-        throw (TimeoutException) response;
-      }
       return (HttpSender.Response) response;
     }
 
@@ -422,7 +418,7 @@ class HttpRequestServiceTest {
       responses.add(response);
     }
 
-    void enqueueException(Exception exception) {
+    void enqueueException(IOException exception) {
       responses.add(exception);
     }
 

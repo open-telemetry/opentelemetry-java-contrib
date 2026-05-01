@@ -23,7 +23,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
@@ -156,7 +155,7 @@ public final class HttpRequestService implements RequestService {
       } else {
         handleHttpError(response);
       }
-    } catch (IOException | TimeoutException e) {
+    } catch (IOException e) {
       getCallback().onConnectionFailed(e);
       connectionStatus.retryAfter(null);
     } catch (RuntimeException e) {
