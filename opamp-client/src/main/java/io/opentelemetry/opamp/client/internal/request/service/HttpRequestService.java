@@ -19,8 +19,6 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -149,9 +147,8 @@ public final class HttpRequestService implements RequestService {
     AgentToServer agentToServer = Objects.requireNonNull(requestSupplier).get().getAgentToServer();
 
     byte[] data = agentToServer.encodeByteString().toByteArray();
-    CompletableFuture<HttpSender.Response> future =
-        requestSender.send(outputStream -> outputStream.write(data), data.length);
-    try (HttpSender.Response response = future.get(30, TimeUnit.SECONDS)) {
+    try (HttpSender.Response response =
+        requestSender.send(outputStream -> outputStream.write(data), data.length)) {
       if (isSuccessful(response)) {
         ServerToAgent serverToAgent = ServerToAgent.ADAPTER.decode(response.bodyInputStream());
         getCallback().onConnectionSuccess();
@@ -159,15 +156,8 @@ public final class HttpRequestService implements RequestService {
       } else {
         handleHttpError(response);
       }
-    } catch (IOException | InterruptedException | TimeoutException e) {
+    } catch (IOException | TimeoutException e) {
       getCallback().onConnectionFailed(e);
-      connectionStatus.retryAfter(null);
-    } catch (ExecutionException e) {
-      if (e.getCause() != null) {
-        getCallback().onConnectionFailed(e.getCause());
-      } else {
-        getCallback().onConnectionFailed(e);
-      }
       connectionStatus.retryAfter(null);
     } catch (RuntimeException e) {
       getCallback().onRequestFailed(e);

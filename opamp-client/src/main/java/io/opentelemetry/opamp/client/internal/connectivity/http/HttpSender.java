@@ -9,11 +9,11 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeoutException;
 
 public interface HttpSender {
 
-  CompletableFuture<Response> send(BodyWriter writer, int contentLength);
+  Response send(BodyWriter writer, int contentLength) throws IOException, TimeoutException;
 
   interface BodyWriter {
     void writeTo(OutputStream outputStream) throws IOException;
