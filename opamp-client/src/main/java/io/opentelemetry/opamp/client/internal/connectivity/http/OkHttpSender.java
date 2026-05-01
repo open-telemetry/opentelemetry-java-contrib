@@ -36,7 +36,7 @@ public final class OkHttpSender implements HttpSender {
 
   private OkHttpSender(String url, OkHttpClient client) {
     this.url = url;
-    this.client = client;
+    this.client = client.newBuilder().callTimeout(REQUEST_TIMEOUT).build();
   }
 
   @Override
@@ -66,8 +66,7 @@ public final class OkHttpSender implements HttpSender {
   }
 
   private Response doSendRequest(Request request) throws IOException {
-    okhttp3.Response response =
-        client.newBuilder().callTimeout(REQUEST_TIMEOUT).build().newCall(request).execute();
+    okhttp3.Response response = client.newCall(request).execute();
     return new OkHttpResponse(response);
   }
 
