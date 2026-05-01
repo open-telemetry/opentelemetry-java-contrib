@@ -351,9 +351,9 @@
 |---|---|---|---|---|---|
 | `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 | `ibm.mq.queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `messaging.destination.name` | string | The system-specific name of the messaging operation. [9] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `messaging.destination.name` | string | The system-specific name of the messaging operation. [10] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 
-**[9] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
+**[10] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
 
 
 
@@ -370,9 +370,9 @@
 |---|---|---|---|---|---|
 | `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 | `ibm.mq.queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `messaging.destination.name` | string | The system-specific name of the messaging operation. [10] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `messaging.destination.name` | string | The system-specific name of the messaging operation. [11] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 
-**[10] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
+**[11] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
 
 
 
@@ -389,9 +389,9 @@
 |---|---|---|---|---|---|
 | `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 | `ibm.mq.queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `messaging.destination.name` | string | The system-specific name of the messaging operation. [11] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `messaging.destination.name` | string | The system-specific name of the messaging operation. [12] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 
-**[11] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
+**[12] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
 
 
 
@@ -408,9 +408,9 @@
 |---|---|---|---|---|---|
 | `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 | `ibm.mq.queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `messaging.destination.name` | string | The system-specific name of the messaging operation. [12] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `messaging.destination.name` | string | The system-specific name of the messaging operation. [13] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 
-**[12] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
+**[13] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
 
 
 
@@ -427,9 +427,9 @@
 |---|---|---|---|---|---|
 | `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 | `ibm.mq.queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `messaging.destination.name` | string | The system-specific name of the messaging operation. [13] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `messaging.destination.name` | string | The system-specific name of the messaging operation. [14] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 
-**[13] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
+**[14] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
 
 
 
@@ -446,9 +446,9 @@
 |---|---|---|---|---|---|
 | `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 | `ibm.mq.queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `messaging.destination.name` | string | The system-specific name of the messaging operation. [14] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `messaging.destination.name` | string | The system-specific name of the messaging operation. [15] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 
-**[14] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
+**[15] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
 
 
 
@@ -465,9 +465,9 @@
 |---|---|---|---|---|---|
 | `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 | `ibm.mq.queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `messaging.destination.name` | string | The system-specific name of the messaging operation. [15] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `messaging.destination.name` | string | The system-specific name of the messaging operation. [16] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 
-**[15] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
+**[16] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
 
 
 
@@ -484,9 +484,9 @@
 |---|---|---|---|---|---|
 | `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 | `ibm.mq.queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `messaging.destination.name` | string | The system-specific name of the messaging operation. [16] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `messaging.destination.name` | string | The system-specific name of the messaging operation. [17] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 
-**[16] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
+**[17] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
 
 
 
@@ -548,9 +548,9 @@
 |---|---|---|---|---|---|
 | `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 | `ibm.mq.queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `messaging.destination.name` | string | The system-specific name of the messaging operation. [17] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `messaging.destination.name` | string | The system-specific name of the messaging operation. [18] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 
-**[17] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
+**[18] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
 
 
 
@@ -567,9 +567,9 @@
 |---|---|---|---|---|---|
 | `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 | `ibm.mq.queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `messaging.destination.name` | string | The system-specific name of the messaging operation. [18] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `messaging.destination.name` | string | The system-specific name of the messaging operation. [19] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 
-**[18] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
+**[19] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
 
 
 
@@ -586,9 +586,9 @@
 |---|---|---|---|---|---|
 | `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 | `ibm.mq.queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `messaging.destination.name` | string | The system-specific name of the messaging operation. [19] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `messaging.destination.name` | string | The system-specific name of the messaging operation. [20] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 
-**[19] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
+**[20] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
 
 
 
@@ -745,9 +745,9 @@
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
 | `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `messaging.destination.name` | string | The system-specific name of the messaging operation. [20] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `messaging.destination.name` | string | The system-specific name of the messaging operation. [21] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 
-**[20] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
+**[21] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
 
 
 
@@ -763,9 +763,9 @@
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
 | `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `messaging.destination.name` | string | The system-specific name of the messaging operation. [21] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `messaging.destination.name` | string | The system-specific name of the messaging operation. [22] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 
-**[21] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
+**[22] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
 
 
 
@@ -797,12 +797,12 @@
 | Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
 |---|---|---|---|---|---|
 | `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `service.name` | string | Logical name of the service. [22] | `Wordle`; `JMSService` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `user.name` | string | Short name or login/username of the user. [23] | `foo`; `root` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `service.name` | string | Logical name of the service. [23] | `Wordle`; `JMSService` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `user.name` | string | Short name or login/username of the user. [24] | `foo`; `root` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 
-**[22] `service.name`:** This is duplicated from otel semantic-conventions.
+**[23] `service.name`:** This is duplicated from otel semantic-conventions.
 
-**[23] `user.name`:** This is duplicated from otel semantic-conventions.
+**[24] `user.name`:** This is duplicated from otel semantic-conventions.
 
 
 
@@ -834,3 +834,5 @@
 |---|---|---|---|---|---|
 | `error.code` | string | The reason code associated with an error | `2038`; `2543`; `2009` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 | `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+
+
