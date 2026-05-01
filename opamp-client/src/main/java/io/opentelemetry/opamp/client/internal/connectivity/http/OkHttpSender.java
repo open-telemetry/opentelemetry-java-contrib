@@ -67,12 +67,7 @@ public final class OkHttpSender implements HttpSender {
 
   private Response doSendRequest(Request request) throws IOException {
     okhttp3.Response response =
-        client
-            .newBuilder()
-            .callTimeout(REQUEST_TIMEOUT)
-            .build()
-            .newCall(request)
-            .execute();
+        client.newBuilder().callTimeout(REQUEST_TIMEOUT).build().newCall(request).execute();
     return new OkHttpResponse(response);
   }
 
