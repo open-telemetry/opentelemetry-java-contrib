@@ -39,6 +39,7 @@ final class InquireQStatusCmdCollector implements Consumer<MetricsCollectorConte
         CMQCFC.MQIACF_CUR_MAX_FILE_SIZE,
         CMQCFC.MQIACF_OLDEST_MSG_AGE,
         CMQCFC.MQIACF_UNCOMMITTED_MSGS,
+        CMQCFC.MQIACF_EXPIRY_Q_COUNT,
         CMQCFC.MQIACF_Q_TIME_INDICATOR,
         CMQC.MQIA_CURRENT_Q_DEPTH,
       };

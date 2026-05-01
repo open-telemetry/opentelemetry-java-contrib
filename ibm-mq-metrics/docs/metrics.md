@@ -300,6 +300,25 @@
 
 
 
+## Metric `ibm.mq.expired.messages`
+
+| Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
+| -------- | --------------- | ----------- | -------------- | --------- |
+| `ibm.mq.expired.messages` | Gauge | `{message}` | Number of expired messages | ![Development](https://img.shields.io/badge/-development-blue) |
+
+
+### `ibm.mq.expired.messages` Attributes
+
+| Attribute  | Type | Description  | Examples  | [Requirement Level](https://opentelemetry.io/docs/specs/semconv/general/attribute-requirement-level/) | Stability |
+|---|---|---|---|---|---|
+| `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `messaging.destination.name` | string | The system-specific name of the messaging operation. [8] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+
+**[8] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
+
+
+
 ## Metric `ibm.mq.uncommitted.messages`
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
@@ -313,9 +332,9 @@
 |---|---|---|---|---|---|
 | `ibm.mq.queue.manager` | string | The name of the IBM queue manager | `MQ1` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 | `ibm.mq.queue.type` | string | The queue type | `local-normal` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
-| `messaging.destination.name` | string | The system-specific name of the messaging operation. [8] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
+| `messaging.destination.name` | string | The system-specific name of the messaging operation. [9] | `dev/` | `Required` | ![Development](https://img.shields.io/badge/-development-blue) |
 
-**[8] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
+**[9] `messaging.destination.name`:** This is duplicated from otel semantic-conventions.
 
 
 
