@@ -203,7 +203,7 @@ class HttpRequestServiceTest {
   }
 
   @Test
-  void verifySendingRequest_whenThereIsATimeoutException() throws IOException, TimeoutException {
+  void verifySendingRequest_whenThereIsATimeoutException() {
     TimeoutException myException = mock();
     requestSender.enqueueException(myException);
 
