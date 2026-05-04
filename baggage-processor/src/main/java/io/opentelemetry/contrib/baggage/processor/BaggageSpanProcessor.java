@@ -36,8 +36,8 @@ public final class BaggageSpanProcessor implements SpanProcessor {
    * io.opentelemetry.api.trace.Span}, when both arguments are null or empty all baggage are
    * included.
    *
-   * @param included list of included attribute patterns to include
-   * @param excluded list of excluded attribute patterns to exclude
+   * @param included list of included baggage key patterns to include
+   * @param excluded list of excluded baggage key patterns to exclude
    */
   public BaggageSpanProcessor(
       @Nullable Collection<String> included, @Nullable Collection<String> excluded) {

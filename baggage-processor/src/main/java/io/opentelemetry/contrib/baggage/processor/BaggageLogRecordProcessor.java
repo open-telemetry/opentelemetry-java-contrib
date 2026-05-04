@@ -36,8 +36,8 @@ public final class BaggageLogRecordProcessor implements LogRecordProcessor {
    * the provided include/exclude filtering into the newly created log record, when both arguments
    * are null or empty all baggage are included.
    *
-   * @param included list of included attribute patterns to include
-   * @param excluded list of excluded attribute patterns to exclude
+   * @param included list of included baggage key patterns to include
+   * @param excluded list of excluded baggage key patterns to exclude
    */
   public BaggageLogRecordProcessor(
       @Nullable Collection<String> included, @Nullable Collection<String> excluded) {
@@ -54,7 +54,7 @@ public final class BaggageLogRecordProcessor implements LogRecordProcessor {
    */
   @Deprecated
   public static BaggageLogRecordProcessor allowAllBaggageKeys() {
-    return new BaggageLogRecordProcessor(excluded -> true);
+    return new BaggageLogRecordProcessor(baggageKey -> true);
   }
 
   @Override
