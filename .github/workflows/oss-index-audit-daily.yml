@@ -29,8 +29,7 @@ jobs:
         run: ./gradlew ossIndexAudit --no-configuration-cache --no-parallel
         continue-on-error: true
         env:
-          SONATYPE_OSS_INDEX_USER: ${{ secrets.SONATYPE_OSS_INDEX_USER }}
-          SONATYPE_OSS_INDEX_PASSWORD: ${{ secrets.SONATYPE_OSS_INDEX_PASSWORD }}
+          SONATYPE_GUIDE_PAT: ${{ secrets.SONATYPE_GUIDE_PAT }}
           DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
 
       - name: Print vulnerability report
