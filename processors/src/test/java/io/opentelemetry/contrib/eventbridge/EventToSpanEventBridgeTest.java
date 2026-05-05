@@ -38,7 +38,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 
-@SuppressWarnings("deprecation")
+@SuppressWarnings("deprecation") // testing deprecated code
 class EventToSpanEventBridgeTest {
 
   private final InMemorySpanExporter spanExporter = InMemorySpanExporter.create();

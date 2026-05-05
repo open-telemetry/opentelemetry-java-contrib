@@ -19,7 +19,6 @@ import io.opentelemetry.sdk.logs.LogRecordProcessor;
  * @deprecated Will be removed after the 1.59.0 release along with {@link EventToSpanEventBridge}.
  */
 @Deprecated
-@SuppressWarnings("deprecation")
 public class EventToSpanEventBridgeComponentProvider implements ComponentProvider {
 
   @Override
