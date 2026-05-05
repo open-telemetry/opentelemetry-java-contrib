@@ -9,10 +9,3 @@ tables = false
 [MD060]
 enabled = true
 style = "aligned"
-
-[per-file-ignores]
-# These docs intentionally use inline HTML for layout that plain Markdown
-# cannot express cleanly, such as dense line breaks inside config tables.
-"ibm-mq-metrics/README.md" = ["MD033"]
-"inferred-spans/README.md" = ["MD033"]
-"maven-extension/README.md" = ["MD033"]
