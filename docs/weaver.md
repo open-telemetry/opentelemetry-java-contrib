@@ -59,7 +59,7 @@ otelWeaver {
 
 ### Module Structure
 
-```
+```text
 your-module/
 ├── build.gradle.kts
 ├── model/

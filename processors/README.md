@@ -30,12 +30,12 @@ logger_provider:
 
 ## Filtering Log Processor
 
-`FilteringLogRecordProcessor` is a `LogRecordProcessor` that only keep logs  based on a predicate
+`FilteringLogRecordProcessor` is a `LogRecordProcessor` that only keep logs based on a predicate
 
 ## Component owners
 
-- [Cesar Munoz](https://github.com/LikeTheSalad), Elastic
-- [Jack Berg](https://github.com/jack-berg), New Relic
-- [Jason Plumb](https://github.com/breedx-splk), Splunk
+* [Cesar Munoz](https://github.com/LikeTheSalad), Elastic
+* [Jack Berg](https://github.com/jack-berg), New Relic
+* [Jason Plumb](https://github.com/breedx-splk), Splunk
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).

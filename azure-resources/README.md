@@ -5,7 +5,7 @@ This module provides Azure resource detectors for OpenTelemetry.
 The following OpenTelemetry semantic conventions will be detected:
 
 | Resource attribute          | VM       | Functions       | App Service       | Containers           |
-|-----------------------------|----------|-----------------|-------------------|----------------------|
+| --------------------------- | -------- | --------------- | ----------------- | -------------------- |
 | cloud.platform              | azure.vm | azure.functions | azure.app_service | azure.container_apps |
 | cloud.provider              | azure    | azure           | azure             | azure                |
 | cloud.resource_id           | auto     |                 | auto              |                      |

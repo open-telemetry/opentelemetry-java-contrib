@@ -20,6 +20,6 @@ Create JFR events that can be recorded and viewed in Java Mission Control (JMC).
 
 ## Component owners
 
-- [Staffan Friberg](https://github.com/sfriberg)
+* [Staffan Friberg](https://github.com/sfriberg)
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).

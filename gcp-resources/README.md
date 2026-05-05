@@ -5,7 +5,7 @@ This module provides GCP resource detectors for OpenTelemetry.
 The following OpenTelemetry semantic conventions will be detected:
 
 | Resource attribute      | [GCE](https://cloud.google.com/compute/docs) | [GKE](https://cloud.google.com/kubernetes-engine/docs) | [GCR](https://cloud.google.com/run/docs) | [GCF](https://cloud.google.com/functions/docs) | [GAE](https://cloud.google.com/appengine/docs) |
-|-------------------------|----------------------------------------------|--------------------------------------------------------|------------------------------------------|------------------------------------------------|------------------------------------------------|
+| ----------------------- | -------------------------------------------- | ------------------------------------------------------ | ---------------------------------------- | ---------------------------------------------- | ---------------------------------------------- |
 | cloud.platform          | gcp_compute_engine                           | gcp_kubernetes_engine                                  | gcp_cloud_run                            | gcp_cloud_functions                            | gcp_app_engine                                 |
 | cloud.provider          | gcp                                          | gcp                                                    | gcp                                      | gcp                                            | gcp                                            |
 | cloud.account.id        | auto                                         | auto                                                   | auto                                     | auto                                           | auto                                           |
@@ -25,7 +25,7 @@ The following OpenTelemetry semantic conventions will be detected:
 ## Setting Kubernetes attributes
 
 This resource detector does not detect the following resource attributes
-`container.name`, `k8s.pod.name` and `k8s.namespace.name`.  When using this detector,
+`container.name`, `k8s.pod.name` and `k8s.namespace.name`. When using this detector,
 you should use this in your Pod Spec to set these using
 [`OTEL_RESOURCE_ATTRIBUTES`](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.20.0/specification/resource/sdk.md#specifying-resource-information-via-an-environment-variable):
 

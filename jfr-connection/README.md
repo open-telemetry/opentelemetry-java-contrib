@@ -7,8 +7,8 @@ module and will compile and run against JDK 8 or higher. It uses a connection to
 server, which can be the platform MBean server, or a remote MBean server connected by
 means of JMX.
 
-* Java 8+
-* Build with `./gradlew :jfr-connection:build`
+- Java 8+
+- Build with `./gradlew :jfr-connection:build`
 
 The main entry point is `io.opentelemetry.contrib.jfr.connection.FlightRecorderConnection`:
 
@@ -30,6 +30,7 @@ The main entry point is `io.opentelemetry.contrib.jfr.connection.FlightRecorderC
 ```
 
 ---
+
 Note on Oracle JDK 8:
 
 For Oracle JDK 8, it may be necessary to unlock the Java Flight Recorder

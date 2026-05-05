@@ -6,7 +6,7 @@ The module detects environment variable `VCAP_APPLICATION`, which is present for
 This variable contains a JSON structure, which is parsed to fill the following attributes.
 
 | Resource attribute           | `VCAP_APPLICATION` field |
-|------------------------------|--------------------------|
+| ---------------------------- | ------------------------ |
 | cloudfoundry.app.id          | application_id           |
 | cloudfoundry.app.name        | application_name         |
 | cloudfoundry.app.instance.id | instance_index           |

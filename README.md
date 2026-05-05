@@ -8,14 +8,14 @@
 
 This project is intended to provide helpful libraries and standalone OpenTelemetry-based utilities that don't fit
 the express scope of the [OpenTelemetry Java](https://github.com/open-telemetry/opentelemetry-java) or
-[Java Instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation) projects.  If you need an
+[Java Instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation) projects. If you need an
 easier way to bring observability to remote JVM-based applications and workflows that isn't easily satisfied by an SDK
 feature or via instrumentation, this project is hopefully for you.
 
 ## Provided Libraries
 
 | Status* | Library                                                           |
-|---------|-------------------------------------------------------------------|
+| ------- | ----------------------------------------------------------------- |
 | beta    | [AWS Resources](./aws-resources/README.md)                        |
 | stable  | [AWS X-Ray SDK Support](./aws-xray/README.md)                     |
 | alpha   | [AWS X-Ray Propagator](./aws-xray-propagator/README.md)           |
@@ -78,7 +78,7 @@ For more information about the approver role, see the [community repository](htt
 
 For more information about the emeritus role, see the [community repository](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#emeritus-maintainerapprovertriager).
 
-### Thanks to all of our contributors!
+### Thanks to all of our contributors
 
 <a href="https://github.com/open-telemetry/opentelemetry-java-contrib/graphs/contributors">
   <img alt="Repo contributors" src="https://contrib.rocks/image?repo=open-telemetry/opentelemetry-java-contrib" />

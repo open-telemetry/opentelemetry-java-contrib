@@ -4,11 +4,11 @@ This module can be used to bridge OpenTelemetry metrics into the `prometheus-sim
 
 Currently only registers with the CollectorRegistry's `defaultRegistry`.
 
-* Build it with `./gradlew :prometheus-simpleclient-bridge:build`
+- Build it with `./gradlew :prometheus-simpleclient-bridge:build`
 
 ## Usage
 
-```
+```text
 sdkMeterProvider.registerMetricReader(PrometheusCollector.create());
 ```
 

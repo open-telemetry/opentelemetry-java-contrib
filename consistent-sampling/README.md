@@ -57,7 +57,7 @@ The implementation of the current proposal is contained by the package `io/opent
 
 ## Component owners
 
-- [Otmar Ertl](https://github.com/oertl), Dynatrace
-- [Peter Findeisen](https://github.com/PeterF778), Cisco
+* [Otmar Ertl](https://github.com/oertl), Dynatrace
+* [Peter Findeisen](https://github.com/PeterF778), Cisco
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).

@@ -1,11 +1,35 @@
 # See https://rumdl.dev/
 # and https://rumdl.dev/rules/
-[global]
-# Preserve the current repo lint policy while using the compact rumdl format.
-disable = ["MD004", "MD013", "MD026", "MD033", "MD040", "MD064", "MD065", "MD076"]
+[MD013]
+enabled = true
+line-length = 120
+code-blocks = false
+tables = false
+
+[MD060]
+enabled = true
+style = "aligned"
 
 [no-duplicate-heading]
 siblings-only = true
 
 [ol-prefix]
 style = "ordered"
+
+[per-file-ignores]
+"README.md" = ["MD013", "MD033"]
+"baggage-processor/README.md" = ["MD013"]
+"cel-sampler/README.md" = ["MD013"]
+"consistent-sampling/README.md" = ["MD013"]
+"gcp-auth-extension/README.md" = ["MD013"]
+"gcp-resources/README.md" = ["MD013"]
+"ibm-mq-metrics/README.md" = ["MD013", "MD033", "MD076"]
+"inferred-spans/README.md" = ["MD013", "MD033"]
+"jfr-events/README.md" = ["MD013"]
+"jmx-metrics/README.md" = ["MD013", "MD076"]
+"jmx-scraper/README.md" = ["MD013"]
+"kafka-exporter/README.md" = ["MD013"]
+"maven-extension/README.md" = ["MD013", "MD033"]
+"processors/README.md" = ["MD013"]
+"runtime-attach/README.md" = ["MD013"]
+"samplers/README.md" = ["MD013"]

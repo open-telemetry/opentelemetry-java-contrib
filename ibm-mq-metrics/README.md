@@ -24,13 +24,13 @@ The extension has a dependency on the following jar's depending on IBM MQ versio
 
 * v8.0.0 and above
 
-```
+```text
 com.ibm.mq.allclient.jar
 ```
 
 * For other versions
 
-```
+```text
 com.ibm.mq.commonservices.jar
 com.ibm.mq.jar
 com.ibm.mq.jmqi.jar
@@ -112,9 +112,9 @@ semantic convention models in the `model/` directory.
 
 The generation produces:
 
-- `src/main/java/io/opentelemetry/ibm/mq/metrics/*.java` - Generated Java code (attributes, metrics, config)
-- `docs/metrics.md` - Markdown documentation for all metrics
-- `config.yml` - YAML configuration template
+* `src/main/java/io/opentelemetry/ibm/mq/metrics/*.java` - Generated Java code (attributes, metrics, config)
+* `docs/metrics.md` - Markdown documentation for all metrics
+* `config.yml` - YAML configuration template
 
 **Note:** The Java code generation automatically runs `spotlessJavaApply` to ensure the generated
 code follows the project's code style guidelines.
@@ -155,7 +155,7 @@ _Note: The following is only needed for versions of Java 8 before 8u161._
 
 2. Please add the following JVM arguments to the MA start up command or script.
 
-   ```-Dcom.ibm.mq.cfg.useIBMCipherMappings=false```  (If you are using IBM Cipher Suites, set the
+   ```-Dcom.ibm.mq.cfg.useIBMCipherMappings=false``` (If you are using IBM Cipher Suites, set the
    flag to true. Please visit [this link](https://www.ibm.com/docs/en/ibm-mq/8.0.0?topic=java-ssltls-cipherspecs-ciphersuites-in-mq-classes) for more details.
    )
 3. To configure SSL, the MA's trust store and keystore needs to be setup with the JKS filepath.
@@ -170,7 +170,7 @@ _Note: The following is only needed for versions of Java 8 before 8u161._
 
    b. sslConnection in config.yml, configure the trustStorePassword. Same holds for keyStore configuration as well.
 
-    ```
+    ```text
     sslConnection:
       trustStorePath: ""
       trustStorePassword: ""
@@ -245,19 +245,19 @@ See [docs/metrics.md](docs/metrics.md).
 
 5. If you are seeing `NoClassDefFoundError` or `ClassNotFoundException` error for any of the MQ dependency even after providing correct path in monitor.xml, then you can also try copying all the required jars in WMQMonitor (MAHome/monitors/WMQMonitor) folder and provide classpath in monitor.xml like below
 
-   ```
+   ```text
     <classpath>opentelemetry-ibm-mq-monitoring-<version>-all.jar;com.ibm.mq.allclient.jar</classpath>
    ```
 
    OR
 
-   ```
+   ```text
     <classpath>opentelemetry-ibm-mq-monitoring-<version>-all.jar;com.ibm.mq.jar;com.ibm.mq.jmqi.jar;com.ibm.mq.commonservices.jar;com.ibm.mq.headers.jar;com.ibm.mq.pcf.jar;connector.jar;dhbcore.jar</classpath>
    ```
 
 ## Component Owners
 
-- [Antoine Toulme](https://github.com/atoulme), Splunk
-- [Jason Plumb](https://github.com/breedx-splk), Splunk
+* [Antoine Toulme](https://github.com/atoulme), Splunk
+* [Jason Plumb](https://github.com/breedx-splk), Splunk
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).

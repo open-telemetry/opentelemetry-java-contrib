@@ -13,7 +13,7 @@ Only platform threads are supported. Virtual threads are not supported and will 
 This section describes the usage of this extension outside of an agent.
 Add the following dependency to your project:
 
-```
+```text
 <dependency>
     <groupId>io.opentelemetry.contrib</groupId>
     <artifactId>opentelemetry-inferred-spans</artifactId>
@@ -28,7 +28,7 @@ This extension supports [autoconfiguration](https://github.com/open-telemetry/op
 So if you are using an autoconfigured OpenTelemetry SDK, you'll only need to add this extension to your class path and configure it via system properties or environment variables:
 
 | Property Name  / Environment Variable Name                                                    | Default                                                                                                                                                                                                                                                           | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-|-----------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| --------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | otel.inferred.spans.enabled <br/> OTEL_INFERRED_SPANS_ENABLED                                 | `false`                                                                                                                                                                                                                                                           | Enables the inferred spans feature.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | otel.inferred.spans.logging.enabled <br/> OTEL_INFERRED_SPANS_LOGGING_ENABLED                 | `true`                                                                                                                                                                                                                                                            | By default, async profiler prints warning messages about missing JVM symbols to standard output. Set this option to `false` to suppress such messages                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | otel.inferred.spans.backup.diagnostic.files <br/> OTEL_INFERRED_SPANS_BACKUP_DIAGNOSTIC_FILES | `false`                                                                                                                                                                                                                                                           | Do not delete the temporary profiling files, can be used later to reproduce in case of issues.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
@@ -95,7 +95,7 @@ The `setTracerProvider(..)` call shown at the end may be omitted, in that case `
   - Under load, processing can take seconds; ~200ms are normal.
   - Log:
 
-    ```
+    ```text
     DEBUG Processing {} stack traces
     ...
     DEBUG Processing traces took {}µs
@@ -106,7 +106,7 @@ The `setTracerProvider(..)` call shown at the end may be omitted, in that case `
   - Lost activation events can lead to orpaned call trees (lost end event), missing roots (lost start event) and messed up parent/child relationships (lost span activations/deactivations)
     Log:
 
-  ```
+  ```text
   DEBUG Illegal state ...
   ```
 
@@ -115,14 +115,14 @@ The `setTracerProvider(..)` call shown at the end may be omitted, in that case `
 - As a result of the above, some transactions don't contain inferred spans, even if their duration is longer than `otel.inferred.spans.sampling.interval`.
   Log:
 
-  ```
+  ```text
   DEBUG Created no spans for thread {} (count={})
   ```
 
 - There can be a race condition when putting activation events into the queue which leads to older events being in front of newer ones, like `1, 2, 4, 3, 5`. But this is quite infrequent and the consequences are similar to loosing that activation event or event without any consequence.
   Log:
 
-  ```
+  ```text
   Timestamp of current activation event ({}) is lower than the one from the previous event ({})
   ```
 
@@ -132,7 +132,7 @@ The `setTracerProvider(..)` call shown at the end may be omitted, in that case `
 
 Inferred span starts after actual span, even though it should be the parent
 
-```
+```text
  ---------[inferred ]
  [actual]
 ^         ^         ^
@@ -140,13 +140,13 @@ Inferred span starts after actual span, even though it should be the parent
 
 Inferred span ends before actual span, even though it should be the parent
 
-```
+```text
 [inferred   ]------------
              [actual]
 ^           ^           ^
 ```
 
-```
+```text
    -------[inferred ]-------                 [actual         ]
        [actual         ]          ->     -------[inferred ]-------
 ^         ^         ^         ^
@@ -154,7 +154,7 @@ Inferred span ends before actual span, even though it should be the parent
 
 Two consecutive method invocations are interpreted as one longer execution
 
-```
+```text
 [actual]   [actual]   ->  [--------  --------]
 ^          ^
 ```
@@ -170,7 +170,7 @@ Inferred spans are sent later - after the profiling session ends.
 
 This is how the situation looks like without a workaround:
 
-```
+```text
 [transaction   ]     [transaction   ]
 └─[inferred  ]    -> ├─[inferred  ]
   └─[actual]         └───[actual]
@@ -185,7 +185,7 @@ pointing to the regular spans they are the parent of.
 
 Workaround: set end timestamp of inferred span to end timestamp of actual span.
 
-```
+```text
 [inferred ]--------         [inferred  -----]--
          [actual]       ->           [actual]
 ^         ^         ^
@@ -195,7 +195,7 @@ Workaround: set end timestamp of inferred span to end timestamp of actual span.
 
 Workaround: set start timestamp of inferred span to start timestamp of actual span.
 
-```
+```text
   --------[inferred ]          --[------inferred ]
     [actual ]           ->       [actual ]
 ^         ^         ^
