@@ -1,5 +1,7 @@
 # Consistent sampling
 
+[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-consistent-sampling/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-consistent-sampling)
+
 There are two major components included here.
 
 ## Original proposal implementation

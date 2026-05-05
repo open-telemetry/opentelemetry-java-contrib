@@ -1,5 +1,7 @@
 # CEL-Based Sampler
 
+[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-cel-sampler/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-cel-sampler)
+
 ## Declarative configuration
 
 The `CelBasedSampler` supports [declarative configuration](https://opentelemetry.io/docs/languages/java/configuration/#declarative-configuration).

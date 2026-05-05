@@ -1,5 +1,7 @@
 # Disk buffering
 
+[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-disk-buffering/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-disk-buffering)
+
 This module provides an abstraction
 named [SignalStorage](src/main/java/io/opentelemetry/contrib/disk/buffering/storage/SignalStorage.java),
 as well as default implementations for each signal type that allow writing signals to disk and

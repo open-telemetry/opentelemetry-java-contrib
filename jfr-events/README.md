@@ -1,5 +1,7 @@
 # OpenTelemetry Java Flight Recorder (JFR) Events
 
+[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-jfr-events/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-jfr-events)
+
 Create JFR events that can be recorded and viewed in Java Mission Control (JMC).
 
 * Creates Open Telemetry Tracing/Span events for spans

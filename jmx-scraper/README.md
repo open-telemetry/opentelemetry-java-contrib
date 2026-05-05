@@ -1,5 +1,7 @@
 # JMX Metric Scraper
 
+[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-jmx-scraper/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-jmx-scraper)
+
 This utility provides a way to query JMX metrics and export them to an OTLP endpoint.
 The JMX MBeans and their metric mappings are defined in YAML and reuse implementation from
 [jmx-metrics instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/jmx-metrics).

@@ -1,5 +1,7 @@
 # Processors
 
+[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-processors/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-processors)
+
 ## Interceptable exporters
 
 This module provides tools to intercept and process signals globally:
