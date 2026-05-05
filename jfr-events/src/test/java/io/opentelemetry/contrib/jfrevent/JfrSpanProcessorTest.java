@@ -72,11 +72,13 @@ class JfrSpanProcessorTest {
       assertThat(events).hasSize(1);
       assertThat(events)
           .extracting(e -> e.getValue("traceId"))
-          .isEqualTo(span.getSpanContext().getTraceId());
+          .containsExactly(span.getSpanContext().getTraceId());
       assertThat(events)
           .extracting(e -> e.getValue("spanId"))
-          .isEqualTo(span.getSpanContext().getSpanId());
-      assertThat(events).extracting(e -> e.getValue("operationName")).isEqualTo(OPERATION_NAME);
+          .containsExactly(span.getSpanContext().getSpanId());
+      assertThat(events)
+          .extracting(e -> e.getValue("operationName"))
+          .containsExactly(OPERATION_NAME);
     } finally {
       Files.delete(output);
     }
@@ -111,14 +113,14 @@ class JfrSpanProcessorTest {
       assertThat(events).hasSize(2);
       assertThat(events)
           .extracting(e -> e.getValue("traceId"))
-          .isEqualTo(span.getSpanContext().getTraceId());
+          .containsOnly(span.getSpanContext().getTraceId());
       assertThat(events)
           .extracting(e -> e.getValue("spanId"))
-          .isEqualTo(span.getSpanContext().getSpanId());
+          .containsOnly(span.getSpanContext().getSpanId());
       assertThat(events)
           .filteredOn(e -> "Span".equals(e.getEventType().getLabel()))
           .extracting(e -> e.getValue("operationName"))
-          .isEqualTo(OPERATION_NAME);
+          .containsExactly(OPERATION_NAME);
 
     } finally {
       Files.delete(output);
