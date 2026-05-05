@@ -41,7 +41,7 @@ environment variables:
 | otel.inferred.spans.backup.diagnostic.files <br/> OTEL_INFERRED_SPANS_BACKUP_DIAGNOSTIC_FILES | `false`                                                                                                                                                                                                                                                           | Do not delete the temporary profiling files, can be used later to reproduce in case of issues.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | otel.inferred.spans.safe.mode <br/> OTEL_INFERRED_SPANS_SAFE_MODE                             | `0`                                                                                                                                                                                                                                                               | Can be used for analysis: the Async Profiler's area that deals with recovering stack trace frames is known to be sensitive in some systems. It is used as a bit mask using values are between 0 and 31, where 0 enables all recovery attempts and 31 disables all five (corresponding 1, 2, 4, 8 and 16).                                                                                                                                                                                                                                                                                                                         |
 | otel.inferred.spans.post.processing.enabled <br/> OTEL_INFERRED_SPANS_POST_PROCESSING_ENABLED | `true`                                                                                                                                                                                                                                                            | Can be used to test the effect of the async-profiler in isolation from the agent's post-processing.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| otel.inferred.spans.sampling.interval <br/> OTEL_INFERRED_SPANS_SAMPLING_INTERVAL             | `50ms`                                                                                                                                                                                                                                                            | The frequency at which stack traces are gathered within a profiling session. The lower you set it, the more accurate the durations will be. This comes at the expense of higher overhead and more spans for potentially irrelevant operations. The minimal duration of a profiling-inferred span is the same as the value of this setting.                                                                                                                                                                                                                                                                                        |
+| otel.inferred.spans.sampling.interval <br/> OTEL_INFERRED_SPANS_SAMPLING_INTERVAL             | `50ms`                                                                                                                                                                                                                                                            | he frequency at which stack traces are gathered within a profiling session. The lower you set it, the more accurate the durations will be. This comes at the expense of higher overhead and more spans for potentially irrelevant operations. The minimal duration of a profiling-inferred span is the same as the value of this setting.                                                                                                                                                                                                                                                                                         |
 | otel.inferred.spans.min.duration <br/> OTEL_INFERRED_SPANS_MIN_DURATION                       | `0ms`                                                                                                                                                                                                                                                             | The minimum duration of an inferred span. Note that the min duration is also implicitly set by the sampling interval. However, increasing the sampling interval also decreases the accuracy of the duration of inferred spans.                                                                                                                                                                                                                                                                                                                                                                                                    |
 | otel.inferred.spans.included.classes <br/> OTEL_INFERRED_SPANS_INCLUDED_CLASSES               | `*`                                                                                                                                                                                                                                                               | If set, the agent will only create inferred spans for methods which match this list. Setting a value may slightly reduce overhead and can reduce clutter by only creating spans for the classes you are interested in. <br/> Example: `org.example.myapp.*`                                                                                                                                                                                                                                                                                                                                                                       |
 | otel.inferred.spans.excluded.classes <br/> OTEL_INFERRED_SPANS_EXCLUDED_CLASSES               | `java.*`<br/>`javax.*`<br/>`sun.*`<br/>`com.sun.*`<br/>`jdk.*`<br/>`org.apache.tomcat.*`<br/>`org.apache.catalina.*`<br/>`org.apache.coyote.*`<br/>`org.jboss.as.*`<br/>`org.glassfish.*`<br/>`org.eclipse.jetty.*`<br/>`com.ibm.websphere.*`<br/>`io.undertow.*` | Excludes classes for which no profiler-inferred spans should be created.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
@@ -58,7 +58,7 @@ You can configure the inferred spans processor using declarative YAML configurat
 OpenTelemetry SDK. For example:
 
 ```yaml
-file_format: 1.0-rc.1
+file_format: '1.0'
 tracer_provider:
   processors:
     - inferred_spans/development:
@@ -94,9 +94,8 @@ SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
 inferredSpans.setTracerProvider(tracerProvider);
 ```
 
-The `setTracerProvider(..)` call shown at the end may be omitted.
-In that case, `GlobalOpenTelemetry` will be used for generating the inferred
-spans.
+The `setTracerProvider(..)` call shown at the end may be omitted, in that case
+`GlobalOpenTelemetry` will be used for generating the inferred spans.
 
 ## Known issues
 
@@ -116,11 +115,11 @@ spans.
   ring buffer.
   However, they don't get processed.
   If, during this period, there are more activation events than the buffer can
-  handle, activation events are lost.
+  handle, we're losing activation events.
   - Log: `Could not add activation event to ring buffer as no slots are available`
-  - Lost activation events can lead to orphaned call trees (lost end event),
-    missing roots (lost start event), and broken parent/child relationships
-    (lost span activations/deactivations).
+  - Lost activation events can lead to orpaned call trees (lost end event),
+    missing roots (lost start event) and messed up parent/child relationships
+    (lost span activations/deactivations)
     Log:
 
   ```text
@@ -129,9 +128,9 @@ spans.
 
 - Under load, the activation event ring buffer can also get full
 - The actual `otel.inferred.spans.sampling.interval` might be a bit lower.
-  async-profiler aims to keep the interval relatively consistent, but if too
-  many threads are actively running transactions or there is a traffic spike,
-  the interval can be lower.
+  async-profiler aims to keep the interval relatively consistent but if there
+  are too many threads actively running transactions or if there's a traffic
+  spike, the interval can be lower.
 - As a result of the above, some transactions don't contain inferred spans, even if their duration is longer than `otel.inferred.spans.sampling.interval`.
   Log:
 
@@ -139,11 +138,11 @@ spans.
   DEBUG Created no spans for thread {} (count={})
   ```
 
-- There can be a race condition when putting activation events into the queue,
+- There can be a race condition when putting activation events into the queue
   which leads to older events being in front of newer ones, like
   `1, 2, 4, 3, 5`.
-  This is infrequent, and the consequences are similar to losing that
-  activation event or getting an event without any consequence.
+  But this is quite infrequent and the consequences are similar to loosing that
+  activation event or event without any consequence.
   Log:
 
   ```text
@@ -228,7 +227,9 @@ Workaround: set start timestamp of inferred span to start timestamp of actual sp
 #### Example
 
 In this screenshot, we can see several problems at once
-![Inferred spans issues](https://user-images.githubusercontent.com/2163464/75677751-710bd880-5c8c-11ea-8bd9-1c6d5f3268d5.png)
+<!-- rumdl-disable MD033 -->
+<img width="1137" alt="inferred spans issues" src="https://user-images.githubusercontent.com/2163464/75677751-710bd880-5c8c-11ea-8bd9-1c6d5f3268d5.png">
+<!-- rumdl-enable MD033 -->
 
 ## Component owners
 
