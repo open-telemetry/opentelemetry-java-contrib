@@ -11,33 +11,33 @@ This is an alternative to the [JMX Gatherer](../jmx-metrics/README.md) utility.
 This project is released as part of the [OpenTelemetry Java Contrib](https://github.com/open-telemetry/opentelemetry-java-contrib) project.
 The latest release is available from:
 
-- [GitHub Release assets](https://github.com/open-telemetry/opentelemetry-java-contrib/releases/latest/download/opentelemetry-jmx-scraper.jar)
-- [Maven Central](https://central.sonatype.com/artifact/io.opentelemetry.contrib/opentelemetry-jmx-scraper)
+* [GitHub Release assets](https://github.com/open-telemetry/opentelemetry-java-contrib/releases/latest/download/opentelemetry-jmx-scraper.jar)
+* [Maven Central](https://central.sonatype.com/artifact/io.opentelemetry.contrib/opentelemetry-jmx-scraper)
 
 ## Usage
 
 The general command to invoke JMX scraper is `java -jar scraper.jar <config>`, where `scraper.jar`
 is the packaged binary:
 
-- `build/libs/opentelemetry-jmx-scraper-<version>.jar` when building from sources
-- `.jar` file downloaded from Maven central or Release assets
+* `build/libs/opentelemetry-jmx-scraper-<version>.jar` when building from sources
+* `.jar` file downloaded from Maven central or Release assets
 
 Minimal configuration required
 
-- `otel.jmx.service.url` for example `service:jmx:rmi:///jndi/rmi://server:9999/jmxrmi` for `server`
+* `otel.jmx.service.url` for example `service:jmx:rmi:///jndi/rmi://server:9999/jmxrmi` for `server`
   host on port `9999` with RMI JMX connector.
-- `otel.jmx.target.system` or `otel.jmx.config`
+* `otel.jmx.target.system` or `otel.jmx.config`
 
 Configuration can be provided through:
 
-- command line arguments:
+* command line arguments:
   `java -jar scraper.jar -config otel.jmx.service.url=service:jmx:rmi:///jndi/rmi://tomcat:9010/jmxrmi otel.jmx.target.system=tomcat`.
-- command line arguments JVM system properties:
+* command line arguments JVM system properties:
   `java -Dotel.jmx.service.url=service:jmx:rmi:///jndi/rmi://tomcat:9010/jmxrmi -Dotel.jmx.target.system=tomcat -jar scraper.jar`.
-- java properties file: `java -jar scraper.jar -config config.properties`.
-- stdin: `java -jar scraper.jar -config -` where `otel.jmx.target.system=tomcat` and
+* java properties file: `java -jar scraper.jar -config config.properties`.
+* stdin: `java -jar scraper.jar -config -` where `otel.jmx.target.system=tomcat` and
   `otel.jmx.service.url=service:jmx:rmi:///jndi/rmi://tomcat:9010/jmxrmi` is written to stdin.
-- environment variables:
+* environment variables:
   `OTEL_JMX_TARGET_SYSTEM=tomcat OTEL_JMX_SERVICE_URL=service:jmx:rmi:///jndi/rmi://tomcat:9010/jmxrmi java -jar scraper.jar`
 
 SDK autoconfiguration is being used, so all the configuration options can be set using the java
@@ -61,9 +61,9 @@ For example the `otel.jmx.service.url` option can be set with the `OTEL_JMX_SERV
 
 When both `otel.jmx.target.system` and `otel.jmx.config` configuration options are used at the same time:
 
-- `otel.jmx.target.system` provides ready-to-use metrics and `otel.jmx.config` allows to add custom definitions.
-- The metrics definitions will be the aggregation of both.
-- There is no guarantee on the priority or any ability to override the definitions.
+* `otel.jmx.target.system` provides ready-to-use metrics and `otel.jmx.config` allows to add custom definitions.
+* The metrics definitions will be the aggregation of both.
+* There is no guarantee on the priority or any ability to override the definitions.
 
 If there is a need to override existing ready-to-use metrics or to keep control
 of the metrics definitions, using a custom YAML definition with
@@ -89,21 +89,21 @@ Supported values for `otel.jmx.target.system` and support for `otel.jmx.target.s
 
 The source of metrics definitions is controlled by `otel.jmx.target.source`:
 
-- `auto` (default): metrics definitions from `instrumentation` with fallback on
+* `auto` (default): metrics definitions from `instrumentation` with fallback on
   `legacy` when not available.
-- `legacy`: metrics definitions embedded in `jmx-scraper`, almost equivalent to
+* `legacy`: metrics definitions embedded in `jmx-scraper`, almost equivalent to
   [JMX Gatherer](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/jmx-metrics).
-- `instrumentation`: metrics definitions embedded in the
+* `instrumentation`: metrics definitions embedded in the
   [instrumentation/jmx-metrics](https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/jmx-metrics/library)
   library.
 
 Setting the value of `otel.jmx.target.source` allows to fit the following use-cases:
 
-- `auto` ensures that the latest metrics definitions in instrumentation
+* `auto` ensures that the latest metrics definitions in instrumentation
   (reference) are used when available, with fallback on `legacy` otherwise.
-- `legacy` keeps using definitions that are very close to JMX Gatherer.
+* `legacy` keeps using definitions that are very close to JMX Gatherer.
   This is the recommended option if preserving compatibility is required.
-- `instrumentation` forces the use of metrics definitions from instrumentation,
+* `instrumentation` forces the use of metrics definitions from instrumentation,
   and supported `otel.jmx.target.system` values will update with that
   dependency.
 
@@ -119,10 +119,10 @@ The following [SDK configuration options](https://opentelemetry.io/docs/language
 In addition to OpenTelemetry configuration, the following Java system properties can be provided
 through the command-line arguments, properties file or stdin and will be propagated to the JVM system properties:
 
-- `javax.net.ssl.keyStore`
-- `javax.net.ssl.keyStorePassword`
-- `javax.net.ssl.trustStore`
-- `javax.net.ssl.trustStorePassword`
+* `javax.net.ssl.keyStore`
+* `javax.net.ssl.keyStorePassword`
+* `javax.net.ssl.trustStore`
+* `javax.net.ssl.trustStorePassword`
 
 Those JVM system properties can't be set through individual environment variables, but they can still
 be set through the standard `JAVA_TOOL_OPTIONS` environment variable using the `-D` prefix.
@@ -140,8 +140,8 @@ Connection to the remote JVM through the JMX can be tested by adding the `-test`
 When doing so, the JMX Scraper will only test the connection to the remote JVM with provided configuration
 and exit.
 
-- Connection OK: `JMX connection test OK` message is written to standard output and exit status = `0`
-- Connection ERROR: `JMX connection test ERROR` message is written to standard output and exit status = `1`
+* Connection OK: `JMX connection test OK` message is written to standard output and exit status = `0`
+* Connection ERROR: `JMX connection test ERROR` message is written to standard output and exit status = `1`
 
 ## Extra libraries in classpath
 
@@ -165,10 +165,10 @@ thus share most features and configuration with it.
 
 Features not supported:
 
-- Define and capture metrics with custom Groovy definitions through
+* Define and capture metrics with custom Groovy definitions through
   `otel.jmx.groovy.script`; this is now replaced with YAML and the
   `otel.jmx.config` configuration option.
-- Ability to export to prometheus collector, only the OTLP exporter is included.
+* Ability to export to prometheus collector, only the OTLP exporter is included.
 
 The YAML-based implementation is provided by [java instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/jmx-metrics)
 and thus should be used for syntax details and documentation.
@@ -178,9 +178,9 @@ with the `otel.jmx.target.system` configuration option.
 
 However, there is now two distinct sets of metrics to select from using the `otel.jmx.target.source` configuration option:
 
-- `legacy`: [metrics definitions](./src/main/resources) equivalent to JMX
+* `legacy`: [metrics definitions](./src/main/resources) equivalent to JMX
   Gatherer definitions, to help transition and preserve compatibility
-- `instrumentation`: [metrics definitions inherited from instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/jmx-metrics/library/src/main/resources/jmx/rules/),
+* `instrumentation`: [metrics definitions inherited from instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/jmx-metrics/library/src/main/resources/jmx/rules/),
   which are now used as a reference for JMX metrics and aim to better align
   with [metrics semantic conventions](https://opentelemetry.io/docs/specs/semconv/general/metrics/).
 
@@ -189,19 +189,19 @@ will only change if the release version of the JMX Scraper binary changes.
 
 By default, `otel.jmx.target.source` is `auto`, which means for each value of `otel.jmx.target.system`:
 
-- Metrics definitions from instrumentation will be used by default, if available.
-- Legacy metrics definitions equivalent to JMX Gatherer will be used as fallback.
-- Whenever new metrics definitions are being added or modified in instrumentation, those newer definitions will be used.
+* Metrics definitions from instrumentation will be used by default, if available.
+* Legacy metrics definitions equivalent to JMX Gatherer will be used as fallback.
+* Whenever new metrics definitions are being added or modified in instrumentation, those newer definitions will be used.
 
 There are multiple possible strategies depending on the ability or willingness to embrace change in metrics definitions:
 
-- To preserve maximum compatibility, use `legacy`, though that means not
+* To preserve maximum compatibility, use `legacy`, though that means not
   benefiting from future updates and contributions.
-- To only get the most recent definitions, use `instrumentation`.
+* To only get the most recent definitions, use `instrumentation`.
   This ensures only the reference definitions are used.
-- To embrace reference definitions whenever they become available, use `auto`,
+* To embrace reference definitions whenever they become available, use `auto`,
   though the produced metrics may change when updating the JMX Scraper version.
-- For more complex migration strategies or tight control of metric
+* For more complex migration strategies or tight control of metric
   definitions, use copies of the YAML metric definitions and provide them
   explicitly with `otel.jmx.config`.
 
@@ -214,8 +214,8 @@ comments on the minor differences from JMX Gatherer Groovy definitions.
 
 ## Component owners
 
-- [Jason Plumb](https://github.com/breedx-splk), Splunk
-- [Robert Niedziela](https://github.com/robsunday), Splunk
-- [Sylvain Juge](https://github.com/sylvainjuge), Elastic
+* [Jason Plumb](https://github.com/breedx-splk), Splunk
+* [Robert Niedziela](https://github.com/robsunday), Splunk
+* [Sylvain Juge](https://github.com/sylvainjuge), Elastic
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).

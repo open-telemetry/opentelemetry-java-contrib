@@ -97,46 +97,46 @@ currently supported target systems are:
 
 ## JMX Query Helpers
 
-- `otel.queryJmx(String objectNameStr)`
-  - This method will query the connected JMX application for the given `objectNameStr`, which can
+* `otel.queryJmx(String objectNameStr)`
+  * This method will query the connected JMX application for the given `objectNameStr`, which can
     include wildcards. The return value will be a sorted `List<GroovyMBean>` of zero or more
     [`GroovyMBean` objects](http://docs.groovy-lang.org/latest/html/api/groovy/jmx/GroovyMBean.html),
     which are conveniently wrapped to make accessing attributes on the MBean simple.
     See <http://groovy-lang.org/jmx.html> for more information about their usage.
 
-- `otel.queryJmx(javax.management.ObjectName objectName)`
-  - This helper has the same functionality as its other signature, but takes an `ObjectName`
+* `otel.queryJmx(javax.management.ObjectName objectName)`
+  * This helper has the same functionality as its other signature, but takes an `ObjectName`
     instance if constructing raw names is undesired.
 
 ## JMX `MBeanHelper` and `InstrumentHelper` Access Methods
 
-- `otel.mbean(String objectNameStr)`
-  - This method will query for the given `objectNameStr` using `otel.queryJmx()` as previously described,
+* `otel.mbean(String objectNameStr)`
+  * This method will query for the given `objectNameStr` using `otel.queryJmx()` as previously described,
     but returns an `MBeanHelper` instance representing the alphabetically first matching MBean for usage by
     subsequent `InstrumentHelper` instances (available via `otel.instrument()`) as described below. It is
     intended to be used in cases where your `objectNameStr` will return a single element `List<GroovyMBean>`
     to avoid redundant item access.
 
-- `otel.mbeans(String objectNameStr)`
-  - This method will query for the given `objectNameStr` using `otel.queryJmx()` as previously described,
+* `otel.mbeans(String objectNameStr)`
+  * This method will query for the given `objectNameStr` using `otel.queryJmx()` as previously described,
     but returns an `MBeanHelper` instance representing all matching MBeans for usage by subsequent `InstrumentHelper`
     instances (available via `otel.instrument()`) as described below. It is intended to be used in cases
     where your given `objectNameStr` can return a multiple element `List<GroovyMBean>`.
 
-- `otel.mbeans(List<String> objectNameStrs)`
-  - This method is equivalent to the above method, except that it adds support
+* `otel.mbeans(List<String> objectNameStrs)`
+  * This method is equivalent to the above method, except that it adds support
     for multiple ObjectNames.
     This is meant for cases where there are multiple mbeans related to the same
     metric and they can be separated using labels in `otel.instrument()`.
 
-- `otel.instrument(`
+* `otel.instrument(`
   `MBeanHelper mBeanHelper, String instrumentName, String description,`
   `String unit, Map<String, Closure> labelFuncs, String attribute,`
   `Closure instrument)`
-  - This method provides the ability to easily create and automatically update
+  * This method provides the ability to easily create and automatically update
     instrument instances from an `MBeanHelper`'s underlying MBeans via an
     OpenTelemetry instrument helper method pointer as described below.
-  - The method parameters map to those of the instrument helpers, while the
+  * The method parameters map to those of the instrument helpers, while the
     additional `Map<String, Closure> labelFuncs` specifies updated instrument
     labels that have access to the inspected MBean:
 
@@ -146,12 +146,12 @@ currently supported target systems are:
      [ "myLabelKey": { mbean -> mbean.name().getKeyProperty("myObjectNameProperty") } ]
   ```
 
-  - If the underlying MBean(s) held by the provided MBeanHelper are
+  * If the underlying MBean(s) held by the provided MBeanHelper are
     [`CompositeData`](https://docs.oracle.com/javase/7/docs/api/javax/management/openmbean/CompositeData.html) instances,
     each key of their `CompositeType` `keySet` will be `.`-appended to the
     specified `instrumentName`, and the resulting instrument will be updated
     for each respective value.
-  - If the underlying MBean(s) held by the provided MBeanHelper are a mixed set
+  * If the underlying MBean(s) held by the provided MBeanHelper are a mixed set
     of
     [`CompositeData`](https://docs.oracle.com/javase/7/docs/api/javax/management/openmbean/CompositeData.html)
     instances
@@ -163,24 +163,24 @@ currently supported target systems are:
 
 `otel.instrument()` provides additional signatures to obtain and update the returned `InstrumentHelper`:
 
-- `otel.instrument(MBeanHelper mBeanHelper, String name, String description, String unit, String attribute, Closure instrument)`
+* `otel.instrument(MBeanHelper mBeanHelper, String name, String description, String unit, String attribute, Closure instrument)`
   `labelFuncs` are an empty map.
-- `otel.instrument(MBeanHelper mBeanHelper, String name, String description, String attribute, Closure instrument)`
+* `otel.instrument(MBeanHelper mBeanHelper, String name, String description, String attribute, Closure instrument)`
   `unit` is `"1"` and `labelFuncs` are an empty map.
-- `otel.instrument(MBeanHelper mBeanHelper, String name, String attribute, Closure instrument)`
+* `otel.instrument(MBeanHelper mBeanHelper, String name, String attribute, Closure instrument)`
   `description` is an empty string, `unit` is `"1"`, and `labelFuncs` are an
   empty map.
 
 In cases where you'd like to share instrument names while creating datapoints
 for multiple MBean attributes:
 
-- `otel.instrument(`
+* `otel.instrument(`
   `MBeanHelper mBeanHelper, String instrumentName, String description,`
   `String unit, Map<String, Closure> labelFuncs,`
   `Map<String, Map<String, Closure>> attributeLabelFuncs,`
   `Closure instrument)`
 
-- An example of this in Tomcat is to consolidate different thread types into
+* An example of this in Tomcat is to consolidate different thread types into
   one `"tomcat.threads"` metric using both `currentThreadCount` and
   `currentThreadsBusy` MBean attributes, labeling with their applicable
   `"Thread Type"`:
@@ -196,15 +196,15 @@ for multiple MBean attributes:
 `otel.instrument()` provides additional signatures to allow this more
 expressive MBean attribute access:
 
-- `otel.instrument(`
+* `otel.instrument(`
   `MBeanHelper mBeanHelper, String name, String description, String unit,`
   `Map<String, Map<String, Closure>> attributeLabelFuncs, Closure instrument)`
   `labelFuncs` are an empty map.
-- `otel.instrument(`
+* `otel.instrument(`
   `MBeanHelper mBeanHelper, String name, String description,`
   `Map<String, Map<String, Closure>> attributeLabelFuncs, Closure instrument)`
   `unit` is `"1"` and `labelFuncs` are an empty map.
-- `otel.instrument(`
+* `otel.instrument(`
   `MBeanHelper mBeanHelper, String name,`
   `Map<String, Map<String, Closure>> attributeLabelFuncs, Closure instrument)`
   `description` is an empty string, `unit` is `"1"`, and `labelFuncs` are an
@@ -217,11 +217,11 @@ attributes, the mbean helper methods let you pass a map of closures to
 transform the original extracted attribute into one that can be consumed by the
 instrument callbacks.
 
-- `otel.mbean(String objectNameStr, Map<String,Closure<?>> attributeTransformation)`
+* `otel.mbean(String objectNameStr, Map<String,Closure<?>> attributeTransformation)`
 
-- `otel.mbeans(String objectNameStr, Map<String,Closure<?>> attributeTransformation)`
+* `otel.mbeans(String objectNameStr, Map<String,Closure<?>> attributeTransformation)`
 
-- `otel.mbeans(List<String> objectNameStrs, Map<String,Closure<?>> attributeTransformation)`
+* `otel.mbeans(List<String> objectNameStrs, Map<String,Closure<?>> attributeTransformation)`
 
 These methods provide the ability to easily convert the attributes extracted
 from the mbeans at the time of creation for the `MBeanHelper`.
@@ -236,47 +236,47 @@ from the mbeans at the time of creation for the `MBeanHelper`.
 
 ## OpenTelemetry Synchronous Instrument Helpers
 
-- `otel.doubleCounter(String name, String description, String unit)`
+* `otel.doubleCounter(String name, String description, String unit)`
 
-- `otel.longCounter(String name, String description, String unit)`
+* `otel.longCounter(String name, String description, String unit)`
 
-- `otel.doubleUpDownCounter(String name, String description, String unit)`
+* `otel.doubleUpDownCounter(String name, String description, String unit)`
 
-- `otel.longUpDownCounter(String name, String description, String unit)`
+* `otel.longUpDownCounter(String name, String description, String unit)`
 
-- `otel.doubleHistogram(String name, String description, String unit)`
+* `otel.doubleHistogram(String name, String description, String unit)`
 
-- `otel.longHistogram(String name, String description, String unit)`
+* `otel.longHistogram(String name, String description, String unit)`
 
 These methods will return a new or previously registered instance of the applicable metric
 instruments. Each one provides three additional signatures where unit and description
 aren't desired upon invocation.
 
-- `otel.<meterMethod>(String name, String description)` - `unit` is "1".
+* `otel.<meterMethod>(String name, String description)` - `unit` is "1".
 
-- `otel.<meterMethod>(String name)` - `description` is empty string and `unit` is "1".
+* `otel.<meterMethod>(String name)` - `description` is empty string and `unit` is "1".
 
 ## OpenTelemetry Asynchronous Instrument Helpers
 
-- `otel.doubleCounterCallback(String name, String description, String unit, Closure updater)`
+* `otel.doubleCounterCallback(String name, String description, String unit, Closure updater)`
 
-- `otel.longCounterCallback(String name, String description, String unit, Closure updater)`
+* `otel.longCounterCallback(String name, String description, String unit, Closure updater)`
 
-- `otel.doubleUpDownCounterCallback(String name, String description, String unit, Closure updater)`
+* `otel.doubleUpDownCounterCallback(String name, String description, String unit, Closure updater)`
 
-- `otel.longUpDownCounterCallback(String name, String description, String unit, Closure updater)`
+* `otel.longUpDownCounterCallback(String name, String description, String unit, Closure updater)`
 
-- `otel.doubleValueCallback(String name, String description, String unit, Closure updater)`
+* `otel.doubleValueCallback(String name, String description, String unit, Closure updater)`
 
-- `otel.longValueCallback(String name, String description, String unit, Closure updater)`
+* `otel.longValueCallback(String name, String description, String unit, Closure updater)`
 
 These methods will return a new or previously registered instance of the applicable metric
 instruments. Each one provides two additional signatures where unit and description aren't
 desired upon invocation.
 
-- `otel.<meterMethod>(String name, String description, Closure updater)` - `unit` is "1".
+* `otel.<meterMethod>(String name, String description, Closure updater)` - `unit` is "1".
 
-- `otel.<meterMethod>(String name, Closure updater)` - `description` is empty string and `unit` is "1".
+* `otel.<meterMethod>(String name, Closure updater)` - `description` is empty string and `unit` is "1".
 
 Though asynchronous instrument callbacks are exclusively set by their builders in the OpenTelemetry API,
 the JMX Metric Gatherer asynchronous instrument helpers allow using the specified updater Closure for
@@ -325,13 +325,13 @@ file contents can also be provided via stdin on startup when using `-config -` a
 
 ## Component owners
 
-- [Jason Plumb](https://github.com/breedx-splk), Splunk
-- [Sylvain Juge](https://github.com/sylvainjuge), Elastic
+* [Jason Plumb](https://github.com/breedx-splk), Splunk
+* [Sylvain Juge](https://github.com/sylvainjuge), Elastic
 
 ## Emeritus owners
 
-- [Miguel Rodriguez](https://github.com/Mrod1598), ObservIQ
-- [Ryan Fitzpatrick](https://github.com/rmfitzpatrick), Splunk
-- [Sam DeHaan](https://github.com/dehaansa), ObservIQ
+* [Miguel Rodriguez](https://github.com/Mrod1598), ObservIQ
+* [Ryan Fitzpatrick](https://github.com/rmfitzpatrick), Splunk
+* [Sam DeHaan](https://github.com/dehaansa), ObservIQ
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).

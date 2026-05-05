@@ -56,6 +56,6 @@ ObservableDoubleGauge gauge = meter.gaugeBuilder("my.gauge")
 
 ## Component owners
 
-- [Justin Spindler](https://github.com/HaloFour), Comcast
+* [Justin Spindler](https://github.com/HaloFour), Comcast
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).

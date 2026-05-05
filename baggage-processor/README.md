@@ -94,7 +94,7 @@ new BaggageLogRecordProcessor(baggageKey -> pattern.matcher(baggageKey).matches(
 
 ## Component owners
 
-- [Mike Golsmith](https://github.com/MikeGoldsmith), Honeycomb
-- [Gregor Zeitlinger](https://github.com/zeitlinger), Grafana
+* [Mike Golsmith](https://github.com/MikeGoldsmith), Honeycomb
+* [Gregor Zeitlinger](https://github.com/zeitlinger), Grafana
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).

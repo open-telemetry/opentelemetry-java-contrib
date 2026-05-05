@@ -56,26 +56,26 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ### Maintainers
 
-- [Jack Berg](https://github.com/jack-berg), Grafana Labs
-- [Jason Plumb](https://github.com/breedx-splk), Splunk
-- [Jay DeLuca](https://github.com/jaydeluca), Grafana Labs
-- [Lauri Tulmin](https://github.com/laurit), Splunk
-- [Trask Stalnaker](https://github.com/trask), Microsoft
+* [Jack Berg](https://github.com/jack-berg), Grafana Labs
+* [Jason Plumb](https://github.com/breedx-splk), Splunk
+* [Jay DeLuca](https://github.com/jaydeluca), Grafana Labs
+* [Lauri Tulmin](https://github.com/laurit), Splunk
+* [Trask Stalnaker](https://github.com/trask), Microsoft
 
 For more information about the maintainer role, see the [community repository](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#maintainer).
 
 ### Approvers
 
-- [Gregor Zeitlinger](https://github.com/zeitlinger), Grafana Labs
-- [John Watson](https://github.com/jkwatson), Sublime Security
+* [Gregor Zeitlinger](https://github.com/zeitlinger), Grafana Labs
+* [John Watson](https://github.com/jkwatson), Sublime Security
 
 For more information about the approver role, see the [community repository](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#approver).
 
 ### Emeritus maintainers
 
-- [Mateusz Rzeszutek](https://github.com/mateuszrzeszutek)
-- [Nikita Salnikov-Tarnovski](https://github.com/iNikem)
-- [Ryan Fitzpatrick](https://github.com/rmfitzpatrick)
+* [Mateusz Rzeszutek](https://github.com/mateuszrzeszutek)
+* [Nikita Salnikov-Tarnovski](https://github.com/iNikem)
+* [Ryan Fitzpatrick](https://github.com/rmfitzpatrick)
 
 For more information about the emeritus role, see the [community repository](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#emeritus-maintainerapprovertriager).
 

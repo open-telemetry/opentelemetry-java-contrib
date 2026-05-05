@@ -69,7 +69,7 @@ enabled by following the instructions provided in the
 
 ## Component Owners
 
-- [Josh Suereth](https://github.com/jsuereth), Google
-- [Pranav Sharma](https://github.com/psx95), Google
+* [Josh Suereth](https://github.com/jsuereth), Google
+* [Pranav Sharma](https://github.com/psx95), Google
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).

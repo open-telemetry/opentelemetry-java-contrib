@@ -1,5 +1,9 @@
 # See https://rumdl.dev/
 # and https://rumdl.dev/rules/
+[MD004]
+enabled = true
+style = "asterisk"
+
 [MD013]
 enabled = true
 line-length = 120

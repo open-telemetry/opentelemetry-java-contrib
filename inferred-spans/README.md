@@ -101,9 +101,9 @@ The `setTracerProvider(..)` call shown at the end may be omitted, in that case
 
 ### Missing inferred spans
 
-- After each profiling session, while the stack traces and activation events are processed, no traces are collected.
-  - Under load, processing can take seconds; ~200ms are normal.
-  - Log:
+* After each profiling session, while the stack traces and activation events are processed, no traces are collected.
+  * Under load, processing can take seconds; ~200ms are normal.
+  * Log:
 
     ```text
     DEBUG Processing {} stack traces
@@ -111,13 +111,13 @@ The `setTracerProvider(..)` call shown at the end may be omitted, in that case
     DEBUG Processing traces took {}µs
     ```
 
-- While stack traces are processed, activation events are still put into the
+* While stack traces are processed, activation events are still put into the
   ring buffer.
   However, they don't get processed.
   If, during this period, there are more activation events than the buffer can
   handle, we're losing activation events.
-  - Log: `Could not add activation event to ring buffer as no slots are available`
-  - Lost activation events can lead to orpaned call trees (lost end event),
+  * Log: `Could not add activation event to ring buffer as no slots are available`
+  * Lost activation events can lead to orpaned call trees (lost end event),
     missing roots (lost start event) and messed up parent/child relationships
     (lost span activations/deactivations)
     Log:
@@ -126,19 +126,19 @@ The `setTracerProvider(..)` call shown at the end may be omitted, in that case
   DEBUG Illegal state ...
   ```
 
-- Under load, the activation event ring buffer can also get full
-- The actual `otel.inferred.spans.sampling.interval` might be a bit lower.
+* Under load, the activation event ring buffer can also get full
+* The actual `otel.inferred.spans.sampling.interval` might be a bit lower.
   async-profiler aims to keep the interval relatively consistent but if there
   are too many threads actively running transactions or if there's a traffic
   spike, the interval can be lower.
-- As a result of the above, some transactions don't contain inferred spans, even if their duration is longer than `otel.inferred.spans.sampling.interval`.
+* As a result of the above, some transactions don't contain inferred spans, even if their duration is longer than `otel.inferred.spans.sampling.interval`.
   Log:
 
   ```text
   DEBUG Created no spans for thread {} (count={})
   ```
 
-- There can be a race condition when putting activation events into the queue
+* There can be a race condition when putting activation events into the queue
   which leads to older events being in front of newer ones, like
   `1, 2, 4, 3, 5`.
   But this is quite infrequent and the consequences are similar to loosing that
@@ -233,8 +233,8 @@ In this screenshot, we can see several problems at once
 
 ## Component owners
 
-- [Jack Shirazi](https://github.com/jackshirazi), Elastic
-- [Jonas Kunz](https://github.com/jonaskunz), Elastic
-- [Sylvain Juge](https://github.com/sylvainjuge), Elastic
+* [Jack Shirazi](https://github.com/jackshirazi), Elastic
+* [Jonas Kunz](https://github.com/jonaskunz), Elastic
+* [Sylvain Juge](https://github.com/sylvainjuge), Elastic
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).

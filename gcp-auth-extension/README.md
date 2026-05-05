@@ -15,8 +15,8 @@ gcloud auth application-default login
 
 Executing this command will save your application credentials to default path which will depend on the type of machine -
 
-- Linux, macOS: `$HOME/.config/gcloud/application_default_credentials.json`
-- Windows: `%APPDATA%\gcloud\application_default_credentials.json`
+* Linux, macOS: `$HOME/.config/gcloud/application_default_credentials.json`
+* Windows: `%APPDATA%\gcloud\application_default_credentials.json`
 
 **NOTE: This method of authentication is not recommended for production environments.**
 
@@ -38,17 +38,17 @@ Here is a list of required and optional configuration available for the extensio
 
 #### Optional Config
 
-- `GOOGLE_CLOUD_PROJECT`: Environment variable that represents the Google Cloud
+* `GOOGLE_CLOUD_PROJECT`: Environment variable that represents the Google Cloud
   Project ID to which the telemetry needs to be exported.
 
-  - Can also be configured using `google.cloud.project` system property.
-  - If neither of these options are set, the extension will attempt to infer
+  * Can also be configured using `google.cloud.project` system property.
+  * If neither of these options are set, the extension will attempt to infer
     the project id from the current credentials as a fallback.
     Not all credential implementations can provide a project id, so this
     inference is only a best-effort attempt.
-  - **Important Note**: The agent configuration will fail if this option is not set and cannot be inferred.
+  * **Important Note**: The agent configuration will fail if this option is not set and cannot be inferred.
 
-- `GOOGLE_CLOUD_QUOTA_PROJECT`: Environment variable that represents the
+* `GOOGLE_CLOUD_QUOTA_PROJECT`: Environment variable that represents the
   Google Cloud Quota Project ID that will be charged for the GCP API usage.
   To learn more about a *quota project*, see the
   [Quota project overview](https://cloud.google.com/docs/quotas/quota-project)
@@ -57,16 +57,16 @@ Here is a list of required and optional configuration available for the extensio
   [Set the quota project](https://cloud.google.com/docs/quotas/set-quota-project)
   page.
 
-  - Can also be configured using `google.cloud.quota.project` system property.
+  * Can also be configured using `google.cloud.quota.project` system property.
 
-- `GOOGLE_OTEL_AUTH_TARGET_SIGNALS`: Environment variable that specifies a
+* `GOOGLE_OTEL_AUTH_TARGET_SIGNALS`: Environment variable that specifies a
   comma-separated list of OpenTelemetry signals for which this authentication
   extension should be active.
   Valid values are `metrics`, `traces`, and `all`.
   If left unspecified, `all` is assumed, meaning the extension will attempt to
   apply authentication to exports for all signals.
 
-  - Can also be configured using `google.otel.auth.target.signals` system property.
+  * Can also be configured using `google.otel.auth.target.signals` system property.
 
 ## Usage
 
@@ -176,7 +176,7 @@ application {
 
 ## Component Owners
 
-- [Josh Suereth](https://github.com/jsuereth), Google
-- [Pranav Sharma](https://github.com/psx95), Google
+* [Josh Suereth](https://github.com/jsuereth), Google
+* [Pranav Sharma](https://github.com/psx95), Google
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).

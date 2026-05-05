@@ -63,15 +63,15 @@ See [Style Guide](docs/style-guide.md).
 
 When submitting a pull request, please ensure that you:
 
-- Clearly describe the change and its motivation
-- Mention any breaking changes
-- Include tests for new functionality
-- Follow the [Style Guide](docs/style-guide.md)
+* Clearly describe the change and its motivation
+* Mention any breaking changes
+* Include tests for new functionality
+* Follow the [Style Guide](docs/style-guide.md)
 
 ## Getting Help
 
 If you need assistance or have questions:
 
-- Post on the [#otel-java](https://cloud-native.slack.com/archives/C014L2KCTE3) Slack channel
-- [Open an issue](https://github.com/open-telemetry/opentelemetry-java-contrib/issues/new/choose) in
+* Post on the [#otel-java](https://cloud-native.slack.com/archives/C014L2KCTE3) Slack channel
+* [Open an issue](https://github.com/open-telemetry/opentelemetry-java-contrib/issues/new/choose) in
   this repository
