@@ -10,7 +10,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.clearInvocations;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -26,6 +25,8 @@ import io.opentelemetry.opamp.client.internal.response.Response;
 import io.opentelemetry.opamp.client.request.service.RequestService;
 import java.io.ByteArrayInputStream;
 import java.io.EOFException;
+import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,10 +35,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Queue;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import opamp.proto.AgentToServer;
 import opamp.proto.RetryInfo;
 import opamp.proto.ServerErrorResponse;
@@ -194,12 +191,9 @@ class HttpRequestServiceTest {
   }
 
   @Test
-  void verifySendingRequest_whenThereIsAnExecutionError()
-      throws ExecutionException, InterruptedException, TimeoutException {
-    CompletableFuture<HttpSender.Response> future = mock();
-    requestSender.enqueueResponseFuture(future);
-    Exception myException = mock();
-    doThrow(new ExecutionException(myException)).when(future).get(30, TimeUnit.SECONDS);
+  void verifySendingRequest_whenThereIsAnIOException() throws IOException {
+    IOException myException = mock();
+    requestSender.enqueueException(myException);
 
     httpRequestService.sendRequest();
 
@@ -208,12 +202,9 @@ class HttpRequestServiceTest {
   }
 
   @Test
-  void verifySendingRequest_whenThereIsAnInterruptedException()
-      throws ExecutionException, InterruptedException, TimeoutException {
-    CompletableFuture<HttpSender.Response> future = mock();
-    requestSender.enqueueResponseFuture(future);
-    InterruptedException myException = mock();
-    doThrow(myException).when(future).get(30, TimeUnit.SECONDS);
+  void verifySendingRequest_whenThereIsATimeoutException() throws IOException {
+    SocketTimeoutException myException = mock();
+    requestSender.enqueueException(myException);
 
     httpRequestService.sendRequest();
 
@@ -406,26 +397,29 @@ class HttpRequestServiceTest {
     private final List<RequestParams> requests = new ArrayList<>();
 
     @SuppressWarnings("JdkObsolete")
-    private final Queue<CompletableFuture<HttpSender.Response>> responses = new LinkedList<>();
+    private final Queue<Object> responses = new LinkedList<>();
 
     @Override
-    public CompletableFuture<HttpSender.Response> send(BodyWriter writer, int contentLength) {
+    public HttpSender.Response send(BodyWriter writer, int contentLength) throws IOException {
       requests.add(new RequestParams(contentLength));
-      CompletableFuture<HttpSender.Response> response = null;
+      Object response = null;
       try {
         response = responses.remove();
       } catch (NoSuchElementException e) {
         fail("Unwanted triggered request");
       }
-      return response;
+      if (response instanceof IOException) {
+        throw (IOException) response;
+      }
+      return (HttpSender.Response) response;
     }
 
     void enqueueResponse(HttpSender.Response response) {
-      enqueueResponseFuture(CompletableFuture.completedFuture(response));
+      responses.add(response);
     }
 
-    void enqueueResponseFuture(CompletableFuture<HttpSender.Response> future) {
-      responses.add(future);
+    void enqueueException(IOException exception) {
+      responses.add(exception);
     }
 
     List<RequestParams> getRequests(int size) {

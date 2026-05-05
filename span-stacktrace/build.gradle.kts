@@ -15,7 +15,6 @@ dependencies {
 
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
-  compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-incubator")
   compileOnly("io.opentelemetry.instrumentation:opentelemetry-declarative-config-bridge")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
@@ -30,4 +29,7 @@ dependencies {
   testCompileOnly("com.google.auto.service:auto-service-annotations")
 
   testImplementation("io.opentelemetry:opentelemetry-exporter-logging")
+
+  // allows to test inferred spans that should be filtered-out
+  testCompileOnly(project(":inferred-spans"))
 }
