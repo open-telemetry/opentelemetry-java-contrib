@@ -33,20 +33,20 @@ To run the tests:
 
 ## Markdown linting
 
-This repository uses [markdownlint](https://github.com/DavidAnson/markdownlint) via `markdownlint-cli2` managed by [mise](https://github.com/jdx/mise).
+This repository uses [rumdl](https://rumdl.dev/) via [Flint](https://github.com/grafana/flint), managed by [mise](https://github.com/jdx/mise).
 
-To check all Markdown files:
+To check Markdown and links:
 
 ```bash
-mise run lint:markdown
+mise run lint
 ```
 
 (note: Windows users may need to run `mise install` first)
 
-To automatically fix fixable issues:
+To automatically fix fixable Markdown issues:
 
 ```bash
-mise run lint:markdown --fix
+mise run lint:fix
 ```
 
 ## Snapshot Builds

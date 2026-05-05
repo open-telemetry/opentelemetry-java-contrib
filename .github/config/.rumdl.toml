@@ -1,29 +1,11 @@
-[MD004]
-enabled = false
+# See https://rumdl.dev/
+# and https://rumdl.dev/rules/
+[global]
+# Preserve the current repo lint policy while using the compact rumdl format.
+disable = ["MD004", "MD013", "MD026", "MD033", "MD040", "MD064", "MD065", "MD076"]
 
-[MD013]
-enabled = false
+[no-duplicate-heading]
+siblings-only = true
 
-[MD024]
-siblings_only = true
-
-[MD026]
-enabled = false
-
-[MD029]
+[ol-prefix]
 style = "ordered"
-
-[MD033]
-enabled = false
-
-[MD040]
-enabled = false
-
-[MD064]
-enabled = false
-
-[MD065]
-enabled = false
-
-[MD076]
-enabled = false
