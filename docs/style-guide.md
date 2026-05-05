@@ -23,36 +23,36 @@ need to run `./gradlew spotlessApply` periodically.
 
 Consider statically importing the following commonly used methods and constants:
 
-- **Test methods**
-  - `io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.*`
-  - `org.assertj.core.api.Assertions.*`
-  - `org.mockito.Mockito.*`
-  - `org.mockito.ArgumentMatchers.*`
-- **Utility methods**
-  - `io.opentelemetry.api.common.AttributeKey.*`
-  - `java.util.Arrays` - asList, stream
-  - `java.util.Collections` - singleton*, empty*, unmodifiable*, synchronized*, checked*
-  - `java.util.Objects` - requireNonNull
-  - `java.util.function.Function` - identity
-  - `java.util.stream.Collectors.*`
-- **Utility constants**
-  - `java.util.Locale.*`
-  - `java.util.concurrent.TimeUnit.*`
-  - `java.util.logging.Level.*`
-  - `java.nio.charset.StandardCharsets.*`
-- **OpenTelemetry semantic convention constants**
-  - All constants under `io.opentelemetry.semconv.**`, except for
+* **Test methods**
+  * `io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.*`
+  * `org.assertj.core.api.Assertions.*`
+  * `org.mockito.Mockito.*`
+  * `org.mockito.ArgumentMatchers.*`
+* **Utility methods**
+  * `io.opentelemetry.api.common.AttributeKey.*`
+  * `java.util.Arrays` - asList, stream
+  * `java.util.Collections` - singleton*, empty*, unmodifiable*, synchronized*, checked*
+  * `java.util.Objects` - requireNonNull
+  * `java.util.function.Function` - identity
+  * `java.util.stream.Collectors.*`
+* **Utility constants**
+  * `java.util.Locale.*`
+  * `java.util.concurrent.TimeUnit.*`
+  * `java.util.logging.Level.*`
+  * `java.nio.charset.StandardCharsets.*`
+* **OpenTelemetry semantic convention constants**
+  * All constants under `io.opentelemetry.semconv.**`, except for
     `io.opentelemetry.semconv.SchemaUrls.*` constants.
 
 ### Class organization
 
 Prefer this order:
 
-- Static fields (final before non-final)
-- Instance fields (final before non-final)
-- Constructors
-- Methods
-- Nested classes
+* Static fields (final before non-final)
+* Instance fields (final before non-final)
+* Constructors
+* Methods
+* Nested classes
 
 **Method ordering**: Place calling methods above the methods they call. For example, place private
 methods below the non-private methods that use them.
@@ -72,9 +72,9 @@ still allows the code to function correctly.
 Classes in `.internal` packages are not considered public API and may change without notice. These
 packages contain implementation details that should not be used by external consumers.
 
-- Use `.internal` packages for implementation classes that need to be public within the module but
+* Use `.internal` packages for implementation classes that need to be public within the module but
   should not be used externally
-- Try to avoid referencing `.internal` classes from other modules
+* Try to avoid referencing `.internal` classes from other modules
 
 ### `final` keyword usage
 
@@ -107,8 +107,8 @@ Following the reasoning from
 
 **Guidelines**:
 
-- `Optional` shouldn't appear in public API signatures
-- Avoid `Optional` on the hot path (instrumentation code), unless the instrumented library uses it
+* `Optional` shouldn't appear in public API signatures
+* Avoid `Optional` on the hot path (instrumentation code), unless the instrumented library uses it
 
 ## Tooling conventions
 
@@ -125,17 +125,17 @@ sufficient for JUnit to discover and execute tests.
 
 ### Gradle
 
-- Use Kotlin instead of Groovy for build scripts
-- Plugin versions should be specified in `settings.gradle.kts`, not in individual modules
-- All modules should use `plugins { id("otel.java-conventions") }`
-- Set module names with `otelJava.moduleName.set("io.opentelemetry.contrib.mymodule")`
+* Use Kotlin instead of Groovy for build scripts
+* Plugin versions should be specified in `settings.gradle.kts`, not in individual modules
+* All modules should use `plugins { id("otel.java-conventions") }`
+* Set module names with `otelJava.moduleName.set("io.opentelemetry.contrib.mymodule")`
 
 ## Configuration
 
-- Use `otel.` prefix for all configuration property keys
-- Read configuration via the `ConfigProperties` interface
-- Provide sensible defaults and document all options
-- Validate configuration early with clear error messages
+* Use `otel.` prefix for all configuration property keys
+* Read configuration via the `ConfigProperties` interface
+* Provide sensible defaults and document all options
+* Validate configuration early with clear error messages
 
 ## Performance
 
@@ -152,8 +152,8 @@ to `forEach` may be capturing/allocating lambdas).
 
 ### Component README files
 
-- Include a component owners section in each module's README
-- Document configuration options with examples
+* Include a component owners section in each module's README
+* Document configuration options with examples
 
 ### Deprecation and breaking changes
 

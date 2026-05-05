@@ -8,12 +8,12 @@ Currently only registers with the CollectorRegistry's `defaultRegistry`.
 
 ## Usage
 
-```
+```text
 sdkMeterProvider.registerMetricReader(PrometheusCollector.create());
 ```
 
 ## Component owners
 
-- [John Watson](https://github.com/jkwatson), Verta.ai
+* [John Watson](https://github.com/jkwatson), Verta.ai
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).

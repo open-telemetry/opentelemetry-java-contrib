@@ -26,8 +26,8 @@ It is capable of detecting common scenarios among the popular application server
 
 ## Component owners
 
-- [Jason Plumb](https://github.com/breedx-splk), Splunk
-- [Mateusz Rzeszutek](https://github.com/mateuszrzeszutek), Splunk
-- [Lauri Tulmin](https://github.com/laurit), Splunk
+* [Jason Plumb](https://github.com/breedx-splk), Splunk
+* [Mateusz Rzeszutek](https://github.com/mateuszrzeszutek), Splunk
+* [Lauri Tulmin](https://github.com/laurit), Splunk
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).

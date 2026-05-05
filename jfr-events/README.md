@@ -3,7 +3,8 @@
 Create JFR events that can be recorded and viewed in Java Mission Control (JMC).
 
 * Creates Open Telemetry Tracing/Span events for spans
-  * The thread and stacktrace will be of the thead ending the span which might be different from the thread creating the span.
+  * The thread and stacktrace will be of the thread ending the span, which might
+    be different from the thread creating the span.
   * Has the fields
     * Operation Name
     * Trace ID
@@ -20,6 +21,6 @@ Create JFR events that can be recorded and viewed in Java Mission Control (JMC).
 
 ## Component owners
 
-- [Staffan Friberg](https://github.com/sfriberg)
+* [Staffan Friberg](https://github.com/sfriberg)
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).
