@@ -1,5 +1,6 @@
 [tools]
 
+# Linters
 "github:grafana/flint" = "0.21.0"
 lychee = "0.24.2"
 rumdl = "0.1.83"
@@ -7,15 +8,11 @@ rumdl = "0.1.83"
 [env]
 FLINT_CONFIG_DIR = ".github/config"
 
-[settings]
-# Only install tools explicitly defined in the [tools] section above
-idiomatic_version_file_enable_tools = []
-
-[tasks.lint]
-description = "Run markdown and link linting"
+[tasks."lint"]
+description = "Run all lints"
 raw_args = true
-run = "flint run rumdl lychee"
+run = "flint run"
 
 [tasks."lint:fix"]
 description = "Auto-fix lint issues"
-run = "flint run --fix rumdl"
+run = "flint run --fix"
