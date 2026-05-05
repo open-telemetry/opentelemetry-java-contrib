@@ -10,6 +10,11 @@ This module provides tools to intercept and process signals globally:
 
 ## Event to SpanEvent Bridge
 
+> [!WARNING]
+> `EventToSpanEventBridge` is deprecated and will be removed after the 1.59.0 release. Use
+> `io.opentelemetry.sdk.extension.incubator.logs.EventToSpanEventBridge` from the
+> `opentelemetry-sdk-extension-incubator` artifact instead.
+
 `EventToSpanEventBridge` is a `LogRecordProcessor` which records events (i.e. log records with an `event.name` attribute) as span events for the current span if:
 
 * The log record has a valid span context
