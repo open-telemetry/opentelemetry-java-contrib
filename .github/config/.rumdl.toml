@@ -10,16 +10,6 @@ tables = false
 enabled = true
 style = "aligned"
 
-# Preserve the previous markdownlint behavior of allowing duplicate headings
-# across sections while still flagging duplicates among siblings.
-[no-duplicate-heading]
-siblings-only = true
-
-# Preserve the previous markdownlint behavior of requiring explicit ordered list
-# numbering instead of auto-incremented `1.` markers.
-[ol-prefix]
-style = "ordered"
-
 [per-file-ignores]
 # These docs intentionally use inline HTML for layout that plain Markdown
 # cannot express cleanly, such as dense line breaks inside config tables.
