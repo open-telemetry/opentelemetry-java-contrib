@@ -1,5 +1,7 @@
 # GCP Resource Detectors for OpenTelemetry
 
+[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-gcp-resources/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-gcp-resources)
+
 This module provides GCP resource detectors for OpenTelemetry.
 
 The following OpenTelemetry semantic conventions will be detected:

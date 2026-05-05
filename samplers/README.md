@@ -1,5 +1,7 @@
 # Samplers
 
+[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-samplers/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-samplers)
+
 ## Declarative configuration
 
 The following samplers support [declarative configuration](https://opentelemetry.io/docs/languages/java/configuration/#declarative-configuration):

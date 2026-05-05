@@ -1,5 +1,7 @@
 # JMX Metric Gatherer
 
+[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-jmx-metrics/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-jmx-metrics)
+
 **Deprecation notice**: the JMX Metric Gatherer is deprecated and replaced by
 [JMX Scraper](../jmx-scraper/).
 See [migration instructions](../jmx-scraper/README.md#migration-from-jmx-gatherer).

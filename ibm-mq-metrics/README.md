@@ -1,5 +1,7 @@
 # IBM MQ Metrics
 
+[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-ibm-mq-metrics/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-ibm-mq-metrics)
+
 :warning: This software is under development.
 
 ## Use case

@@ -1,6 +1,8 @@
 
 # Resource Providers
 
+[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-resource-providers/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-resource-providers)
+
 This module contains various `ResourceProvider` implementations.
 
 ## AppServerServiceNameProvider

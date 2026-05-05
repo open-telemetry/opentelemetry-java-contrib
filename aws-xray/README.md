@@ -1,5 +1,7 @@
 # AWS X-Ray Support
 
+[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-aws-xray/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-aws-xray)
+
 This module contains a custom `IdGenerator` and `Sampler` for use with AWS X-Ray.
 
 ## Component owners

@@ -1,5 +1,7 @@
 # OpenTelemetry CloudFoundry Resource Support
 
+[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-cloudfoundry-resources/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-cloudfoundry-resources)
+
 This module contains CloudFoundry resource detectors for OpenTelemetry.
 
 The module detects environment variable `VCAP_APPLICATION`, which is present for applications deployed in CloudFoundry.
