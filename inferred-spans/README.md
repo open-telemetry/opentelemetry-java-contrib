@@ -1,7 +1,10 @@
 # OpenTelemetry Inferred Spans Extension
 
 OpenTelemetry extension for generating spans via profiling instead of instrumentation.
-This extension enhances traces by running [async-profiler](https://github.com/async-profiler/async-profiler) in wall-clock profiling mode whenever there is an active sampled OpenTelemetry span.
+This extension enhances traces by running
+[async-profiler](https://github.com/async-profiler/async-profiler) in
+wall-clock profiling mode whenever there is an active sampled OpenTelemetry
+span.
 
 The resulting profiling data is analyzed afterward and spans are "inferred".
 This means there is a delay between the regular and the inferred spans being visible in your OpenTelemetry backend/UI.
@@ -25,23 +28,66 @@ Add the following dependency to your project:
 
 This extension supports [autoconfiguration](https://github.com/open-telemetry/opentelemetry-java/tree/main/sdk-extensions/autoconfigure).
 
-So if you are using an autoconfigured OpenTelemetry SDK, you'll only need to add this extension to your class path and configure it via system properties or environment variables:
+So if you are using an autoconfigured OpenTelemetry SDK, you only need to add
+this extension to your class path and configure it via system properties or
+environment variables:
 
-| Property Name  / Environment Variable Name                                                    | Default                                                                                                                                                                                                                                                           | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| --------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| otel.inferred.spans.enabled <br/> OTEL_INFERRED_SPANS_ENABLED                                 | `false`                                                                                                                                                                                                                                                           | Enables the inferred spans feature.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| otel.inferred.spans.logging.enabled <br/> OTEL_INFERRED_SPANS_LOGGING_ENABLED                 | `true`                                                                                                                                                                                                                                                            | By default, async profiler prints warning messages about missing JVM symbols to standard output. Set this option to `false` to suppress such messages                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| otel.inferred.spans.backup.diagnostic.files <br/> OTEL_INFERRED_SPANS_BACKUP_DIAGNOSTIC_FILES | `false`                                                                                                                                                                                                                                                           | Do not delete the temporary profiling files, can be used later to reproduce in case of issues.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| otel.inferred.spans.safe.mode <br/> OTEL_INFERRED_SPANS_SAFE_MODE                             | `0`                                                                                                                                                                                                                                                               | Can be used for analysis: the Async Profiler's area that deals with recovering stack trace frames is known to be sensitive in some systems. It is used as a bit mask using values are between 0 and 31, where 0 enables all recovery attempts and 31 disables all five (corresponding 1, 2, 4, 8 and 16).                                                                                                                                                                                                                                                                                                                         |
-| otel.inferred.spans.post.processing.enabled <br/> OTEL_INFERRED_SPANS_POST_PROCESSING_ENABLED | `true`                                                                                                                                                                                                                                                            | Can be used to test the effect of the async-profiler in isolation from the agent's post-processing.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| otel.inferred.spans.sampling.interval <br/> OTEL_INFERRED_SPANS_SAMPLING_INTERVAL             | `50ms`                                                                                                                                                                                                                                                            | he frequency at which stack traces are gathered within a profiling session. The lower you set it, the more accurate the durations will be. This comes at the expense of higher overhead and more spans for potentially irrelevant operations. The minimal duration of a profiling-inferred span is the same as the value of this setting.                                                                                                                                                                                                                                                                                         |
-| otel.inferred.spans.min.duration <br/> OTEL_INFERRED_SPANS_MIN_DURATION                       | `0ms`                                                                                                                                                                                                                                                             | The minimum duration of an inferred span. Note that the min duration is also implicitly set by the sampling interval. However, increasing the sampling interval also decreases the accuracy of the duration of inferred spans.                                                                                                                                                                                                                                                                                                                                                                                                    |
-| otel.inferred.spans.included.classes <br/> OTEL_INFERRED_SPANS_INCLUDED_CLASSES               | `*`                                                                                                                                                                                                                                                               | If set, the agent will only create inferred spans for methods which match this list. Setting a value may slightly reduce overhead and can reduce clutter by only creating spans for the classes you are interested in. <br/> Example: `org.example.myapp.*`                                                                                                                                                                                                                                                                                                                                                                       |
-| otel.inferred.spans.excluded.classes <br/> OTEL_INFERRED_SPANS_EXCLUDED_CLASSES               | `java.*`<br/>`javax.*`<br/>`sun.*`<br/>`com.sun.*`<br/>`jdk.*`<br/>`org.apache.tomcat.*`<br/>`org.apache.catalina.*`<br/>`org.apache.coyote.*`<br/>`org.jboss.as.*`<br/>`org.glassfish.*`<br/>`org.eclipse.jetty.*`<br/>`com.ibm.websphere.*`<br/>`io.undertow.*` | Excludes classes for which no profiler-inferred spans should be created.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| otel.inferred.spans.interval <br/> OTEL_INFERRED_SPANS_INTERVAL                               | `5s`                                                                                                                                                                                                                                                              | The interval at which profiling sessions should be started.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| otel.inferred.spans.duration <br/> OTEL_INFERRED_SPANS_DURATION                               | `5s`                                                                                                                                                                                                                                                              | The duration of a profiling session. For sampled transactions which fall within a profiling session (they start after and end before the session), so-called inferred spans will be created. They appear in the trace waterfall view like regular spans. <br/> NOTE: It is not recommended to set much higher durations as it may fill the activation events file and async-profiler's frame buffer. Warnings will be logged if the activation events file is full. If you want to have more profiling coverage, try decreasing `profiling_inferred_spans_interval`                                                               |
-| otel.inferred.spans.lib.directory <br/> OTEL_INFERRED_SPANS_LIB_DIRECTORY                     | Defaults to the value of `java.io.tmpdir`                                                                                                                                                                                                                         | Profiling requires that the [async-profiler](https://github.com/async-profiler/async-profiler) shared library  is exported to a temporary location and loaded by the JVM. The partition backing this location must be executable, however in some server-hardened environments,  `noexec` may be set on the standard `/tmp` partition, leading to `java.lang.UnsatisfiedLinkError` errors. Set this property to an alternative directory (e.g. `/var/tmp`) to resolve this.                                                                                                                                                       |
-| otel.inferred.spans.parent.override.handler <br/> OTEL_INFERRED_SPANS_PARENT_OVERRIDE_HANDLER | Defaults to a handler adding span-links to the inferred span                                                                                                                                                                                                      | Inferred spans sometimes need to be inserted as the new parent of a normal span, which is not directly possible because that span has already been sent. For this reason, this relationship needs to be represented differently, which normally is done by adding a span-link to the inferred span. This configuration can be used to override that behaviour by providing the fully qualified name of a class implementing `BiConsumer<SpanBuilder, SpanContext>`: The biconsumer will be invoked with the inferred span as first argument and the span for which the inferred one was detected as new parent as second argument |
+Configuration options:
+
+- `otel.inferred.spans.enabled` / `OTEL_INFERRED_SPANS_ENABLED`
+  Default: `false`
+  Enables the inferred spans feature.
+- `otel.inferred.spans.logging.enabled` / `OTEL_INFERRED_SPANS_LOGGING_ENABLED`
+  Default: `true`
+  By default, async-profiler prints warning messages about missing JVM symbols
+  to standard output. Set this option to `false` to suppress those messages.
+- `otel.inferred.spans.backup.diagnostic.files` / `OTEL_INFERRED_SPANS_BACKUP_DIAGNOSTIC_FILES`
+  Default: `false`
+  Do not delete the temporary profiling files so they can be used later for
+  reproduction.
+- `otel.inferred.spans.safe.mode` / `OTEL_INFERRED_SPANS_SAFE_MODE`
+  Default: `0`
+  Controls the async-profiler recovery behavior as a bit mask from `0` to `31`.
+  `0` enables all recovery attempts and `31` disables all five.
+- `otel.inferred.spans.post.processing.enabled` / `OTEL_INFERRED_SPANS_POST_PROCESSING_ENABLED`
+  Default: `true`
+  Lets you test the effect of async-profiler in isolation from the agent's
+  post-processing.
+- `otel.inferred.spans.sampling.interval` / `OTEL_INFERRED_SPANS_SAMPLING_INTERVAL`
+  Default: `50ms`
+  Controls how often stack traces are gathered within a profiling session.
+  Lower values improve duration accuracy at the cost of higher overhead.
+- `otel.inferred.spans.min.duration` / `OTEL_INFERRED_SPANS_MIN_DURATION`
+  Default: `0ms`
+  Sets the minimum duration of an inferred span.
+- `otel.inferred.spans.included.classes` / `OTEL_INFERRED_SPANS_INCLUDED_CLASSES`
+  Default: `*`
+  Limits inferred spans to matching classes.
+  Example: `org.example.myapp.*`
+- `otel.inferred.spans.excluded.classes` / `OTEL_INFERRED_SPANS_EXCLUDED_CLASSES`
+  Default:
+  `java.*`, `javax.*`, `sun.*`, `com.sun.*`, `jdk.*`,
+  `org.apache.tomcat.*`, `org.apache.catalina.*`, `org.apache.coyote.*`,
+  `org.jboss.as.*`, `org.glassfish.*`, `org.eclipse.jetty.*`,
+  `com.ibm.websphere.*`, and `io.undertow.*`
+  Excludes classes for which no profiler-inferred spans should be created.
+- `otel.inferred.spans.interval` / `OTEL_INFERRED_SPANS_INTERVAL`
+  Default: `5s`
+  Sets the interval at which profiling sessions should be started.
+- `otel.inferred.spans.duration` / `OTEL_INFERRED_SPANS_DURATION`
+  Default: `5s`
+  Sets the duration of each profiling session.
+  For sampled transactions fully contained within a profiling session,
+  inferred spans will be created and shown in the trace waterfall.
+- `otel.inferred.spans.lib.directory` / `OTEL_INFERRED_SPANS_LIB_DIRECTORY`
+  Default: `java.io.tmpdir`
+  Controls where the async-profiler shared library is extracted before loading.
+  If `/tmp` is mounted `noexec`, set this to an executable directory such as
+  `/var/tmp`.
+- `otel.inferred.spans.parent.override.handler` / `OTEL_INFERRED_SPANS_PARENT_OVERRIDE_HANDLER`
+  Default: a handler that adds span-links to the inferred span
+  Lets you override how inferred-parent relationships are represented by
+  providing a `BiConsumer<SpanBuilder, SpanContext>` implementation.
 
 ### Usage with declarative configuration
 
@@ -85,7 +131,9 @@ SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
 inferredSpans.setTracerProvider(tracerProvider);
 ```
 
-The `setTracerProvider(..)` call shown at the end may be omitted, in that case `GlobalOpenTelemetry` will be used for generating the inferred spans.
+The `setTracerProvider(..)` call shown at the end may be omitted.
+In that case, `GlobalOpenTelemetry` will be used for generating the inferred
+spans.
 
 ## Known issues
 
@@ -101,9 +149,15 @@ The `setTracerProvider(..)` call shown at the end may be omitted, in that case `
     DEBUG Processing traces took {}µs
     ```
 
-- While stack traces are processed, activation events are still put into the ring buffer. However, they don't get processed. If, during this period, there are more activation events than the buffer can handle, we're losing activation events.
+- While stack traces are processed, activation events are still put into the
+  ring buffer.
+  However, they don't get processed.
+  If, during this period, there are more activation events than the buffer can
+  handle, activation events are lost.
   - Log: `Could not add activation event to ring buffer as no slots are available`
-  - Lost activation events can lead to orpaned call trees (lost end event), missing roots (lost start event) and messed up parent/child relationships (lost span activations/deactivations)
+  - Lost activation events can lead to orphaned call trees (lost end event),
+    missing roots (lost start event), and broken parent/child relationships
+    (lost span activations/deactivations).
     Log:
 
   ```text
@@ -111,7 +165,10 @@ The `setTracerProvider(..)` call shown at the end may be omitted, in that case `
   ```
 
 - Under load, the activation event ring buffer can also get full
-- The actual `otel.inferred.spans.sampling.interval` might be a bit lower. async-profiler aims to keep the interval relatively consistent but if there are too many threads actively running transactions or if there's a traffic spike, the interval can be lower.
+- The actual `otel.inferred.spans.sampling.interval` might be a bit lower.
+  async-profiler aims to keep the interval relatively consistent, but if too
+  many threads are actively running transactions or there is a traffic spike,
+  the interval can be lower.
 - As a result of the above, some transactions don't contain inferred spans, even if their duration is longer than `otel.inferred.spans.sampling.interval`.
   Log:
 
@@ -119,7 +176,11 @@ The `setTracerProvider(..)` call shown at the end may be omitted, in that case `
   DEBUG Created no spans for thread {} (count={})
   ```
 
-- There can be a race condition when putting activation events into the queue which leads to older events being in front of newer ones, like `1, 2, 4, 3, 5`. But this is quite infrequent and the consequences are similar to loosing that activation event or event without any consequence.
+- There can be a race condition when putting activation events into the queue,
+  which leads to older events being in front of newer ones, like
+  `1, 2, 4, 3, 5`.
+  This is infrequent, and the consequences are similar to losing that
+  activation event or getting an event without any consequence.
   Log:
 
   ```text
@@ -204,7 +265,7 @@ Workaround: set start timestamp of inferred span to start timestamp of actual sp
 #### Example
 
 In this screenshot, we can see several problems at once
-<img width="1137" alt="inferred spans issues" src="https://user-images.githubusercontent.com/2163464/75677751-710bd880-5c8c-11ea-8bd9-1c6d5f3268d5.png">
+![Inferred spans issues](https://user-images.githubusercontent.com/2163464/75677751-710bd880-5c8c-11ea-8bd9-1c6d5f3268d5.png)
 
 ## Component owners
 

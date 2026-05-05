@@ -1,6 +1,8 @@
 # JMX Metric Gatherer
 
-**Deprecation notice**: the JMX Metric Gatherer is deprecated and replaced by [JMX Scraper](../jmx-scraper/), see [migration instructions](../jmx-scraper/README.md#migration-from-jmx-gatherer).
+**Deprecation notice**: the JMX Metric Gatherer is deprecated and replaced by
+[JMX Scraper](../jmx-scraper/).
+See [migration instructions](../jmx-scraper/README.md#migration-from-jmx-gatherer).
 
 This utility provides an easy framework for gathering and reporting metrics based on queried
 MBeans from a JMX server. It loads included and/or custom Groovy scripts and establishes a helpful,
@@ -8,9 +10,11 @@ bound `otel` object with methods for obtaining MBeans and constructing OpenTelem
 
 ## Usage
 
-The JMX Metric Gatherer is intended to be run as an uber jar and configured with properties from the command line,
-properties file, and stdin (`-`). Its metric-gathering scripts are specified by supported `otel.jmx.target.system`
-values and/or a `otel.jmx.groovy.script` path to run your own.
+The JMX Metric Gatherer is intended to be run as an uber jar and configured
+with properties from the command line, properties file, and stdin (`-`).
+Its metric-gathering scripts are specified by supported
+`otel.jmx.target.system` values and/or an `otel.jmx.groovy.script` path to run
+your own.
 
 ```bash
 java -D<otel.jmx.property=value> -jar opentelemetry-jmx-metrics-<version>.jar [-config {session.properties, '-'}]
@@ -37,8 +41,10 @@ Kafka metric-gathering scripts determined by the comma-separated list in `otel.j
 it will then run the scripts on the desired interval length of `otel.jmx.interval.milliseconds` and
 export the resulting metrics.
 
-Some metrics (e.g. `tomcat.sessions`) are configured to query multiple MBeans. By default, only the value in the first MBean
-is recorded for the metric and all other values are dropped. To aggregate the MBean values together, set the
+Some metrics (e.g. `tomcat.sessions`) are configured to query multiple MBeans.
+By default, only the value in the first MBean is recorded for the metric and
+all other values are dropped.
+To aggregate the MBean values together, set the
 `otel.jmx.aggregate.across.mbeans` property to `true`.
 
 For custom metrics and unsupported targets, you can provide your own MBean querying scripts to produce
@@ -116,15 +122,23 @@ currently supported target systems are:
     but returns an `MBeanHelper` instance representing all matching MBeans for usage by subsequent `InstrumentHelper`
     instances (available via `otel.instrument()`) as described below. It is intended to be used in cases
     where your given `objectNameStr` can return a multiple element `List<GroovyMBean>`.
-- `otel.mbeans(List<String> objectNameStrs)`
-  - This method is equivalent to the above method except, it adds support for multiple ObjectNames.
-    This support is meant for when there are multiple mbeans that relate to the same metric and can be separated using labels in `otel.instrument()`.
 
-- `otel.instrument(MBeanHelper mBeanHelper, String instrumentName, String description, String unit, Map<String, Closure> labelFuncs, String attribute, Closure instrument)`
-  - This method provides the ability to easily create and automatically update instrument instances from an
-    `MBeanHelper`'s underlying MBeans via an OpenTelemetry instrument helper method pointer as described below.
-  - The method parameters map to those of the instrument helpers, while the additional `Map<String, Closure> labelFuncs`
-    will be used to specify updated instrument labels that have access to the inspected MBean:
+- `otel.mbeans(List<String> objectNameStrs)`
+  - This method is equivalent to the above method, except that it adds support
+    for multiple ObjectNames.
+    This is meant for cases where there are multiple mbeans related to the same
+    metric and they can be separated using labels in `otel.instrument()`.
+
+- `otel.instrument(`
+  `MBeanHelper mBeanHelper, String instrumentName, String description,`
+  `String unit, Map<String, Closure> labelFuncs, String attribute,`
+  `Closure instrument)`
+  - This method provides the ability to easily create and automatically update
+    instrument instances from an `MBeanHelper`'s underlying MBeans via an
+    OpenTelemetry instrument helper method pointer as described below.
+  - The method parameters map to those of the instrument helpers, while the
+    additional `Map<String, Closure> labelFuncs` specifies updated instrument
+    labels that have access to the inspected MBean:
 
   ```groovy
      // This example's resulting datapoint(s) will have Labels consisting of the specified key
@@ -134,25 +148,42 @@ currently supported target systems are:
 
   - If the underlying MBean(s) held by the provided MBeanHelper are
     [`CompositeData`](https://docs.oracle.com/javase/7/docs/api/javax/management/openmbean/CompositeData.html) instances,
-    each key of their `CompositeType` `keySet` will be `.`-appended to the specified `instrumentName`, whose resulting
-    instrument will be updated for each respective value.
-  - If the underlying MBean(s) held by the provided MBeanHelper are a mixed set of
-    [`CompositeData`](https://docs.oracle.com/javase/7/docs/api/javax/management/openmbean/CompositeData.html) instances
-    and simple values, the InstrumentHelper will not attempt to collect the metric. This is to prevent generating
-    metrics identified with the `instrumentName` and also the `instrumentName` with the `keySet` `.`-appended,
-    which breaks OpenTelemetry metric conventions.
+    each key of their `CompositeType` `keySet` will be `.`-appended to the
+    specified `instrumentName`, and the resulting instrument will be updated
+    for each respective value.
+  - If the underlying MBean(s) held by the provided MBeanHelper are a mixed set
+    of
+    [`CompositeData`](https://docs.oracle.com/javase/7/docs/api/javax/management/openmbean/CompositeData.html)
+    instances
+    and simple values, the InstrumentHelper will not attempt to collect the
+    metric.
+    This prevents generating metrics identified both by `instrumentName` and by
+    `instrumentName` with the `keySet` `.` appended, which would break
+    OpenTelemetry metric conventions.
 
 `otel.instrument()` provides additional signatures to obtain and update the returned `InstrumentHelper`:
 
-- `otel.instrument(MBeanHelper mBeanHelper, String name, String description, String unit, String attribute, Closure instrument)` - `labelFuncs` are empty map.
-- `otel.instrument(MBeanHelper mBeanHelper, String name, String description, String attribute, Closure instrument)` - `unit` is "1" and `labelFuncs` are empty map.
-- `otel.instrument(MBeanHelper mBeanHelper, String name, String attribute, Closure instrument)` - `description` is empty string, `unit` is "1" and `labelFuncs` are empty map.
+- `otel.instrument(MBeanHelper mBeanHelper, String name, String description, String unit, String attribute, Closure instrument)`
+  `labelFuncs` are an empty map.
+- `otel.instrument(MBeanHelper mBeanHelper, String name, String description, String attribute, Closure instrument)`
+  `unit` is `"1"` and `labelFuncs` are an empty map.
+- `otel.instrument(MBeanHelper mBeanHelper, String name, String attribute, Closure instrument)`
+  `description` is an empty string, `unit` is `"1"`, and `labelFuncs` are an
+  empty map.
 
-In cases where you'd like to share instrument names while creating datapoints for multiple MBean attributes:
+In cases where you'd like to share instrument names while creating datapoints
+for multiple MBean attributes:
 
-- `otel.instrument(MBeanHelper mBeanHelper, String instrumentName, String description, String unit, Map<String, Closure> labelFuncs, Map<String, Map<String, Closure>> attributeLabelFuncs, Closure instrument)`
+- `otel.instrument(`
+  `MBeanHelper mBeanHelper, String instrumentName, String description,`
+  `String unit, Map<String, Closure> labelFuncs,`
+  `Map<String, Map<String, Closure>> attributeLabelFuncs,`
+  `Closure instrument)`
 
-- An example of this in Tomcat is to consolidate different thread types into one `"tomcat.threads"` metric using both `currentThreadCount` and `currentThreadsBusy` MBean attributes, labeling with their applicable `"Thread Type"`:
+- An example of this in Tomcat is to consolidate different thread types into
+  one `"tomcat.threads"` metric using both `currentThreadCount` and
+  `currentThreadsBusy` MBean attributes, labeling with their applicable
+  `"Thread Type"`:
 
   ```groovy
     otel.instrument(otel.mbean("Catalina:type=ThreadPool,name=*"), "tomcat.threads", "description", "1",
@@ -162,15 +193,29 @@ In cases where you'd like to share instrument names while creating datapoints fo
     otel.&doubleValueObserver)
   ```
 
-`otel.instrument()` provides additional signatures to allow this more expressive MBean attribute access:
+`otel.instrument()` provides additional signatures to allow this more
+expressive MBean attribute access:
 
-- `otel.instrument(MBeanHelper mBeanHelper, String name, String description, String unit, Map<String, Map<String, Closure>> attributeLabelFuncs, Closure instrument)` - `labelFuncs` are empty map.
-- `otel.instrument(MBeanHelper mBeanHelper, String name, String description, Map<String, Map<String, Closure>> attributeLabelFuncs, Closure instrument)` - `unit` is "1" and `labelFuncs` are empty map.
-- `otel.instrument(MBeanHelper mBeanHelper, String name, Map<String, Map<String, Closure>> attributeLabelFuncs, Closure instrument)` - `description` is empty string, `unit` is "1" and `labelFuncs` are empty map
+- `otel.instrument(`
+  `MBeanHelper mBeanHelper, String name, String description, String unit,`
+  `Map<String, Map<String, Closure>> attributeLabelFuncs, Closure instrument)`
+  `labelFuncs` are an empty map.
+- `otel.instrument(`
+  `MBeanHelper mBeanHelper, String name, String description,`
+  `Map<String, Map<String, Closure>> attributeLabelFuncs, Closure instrument)`
+  `unit` is `"1"` and `labelFuncs` are an empty map.
+- `otel.instrument(`
+  `MBeanHelper mBeanHelper, String name,`
+  `Map<String, Map<String, Closure>> attributeLabelFuncs, Closure instrument)`
+  `description` is an empty string, `unit` is `"1"`, and `labelFuncs` are an
+  empty map.
 
 ### MBeans with non-numeric attributes
 
-In cases where you'd like to create metrics based on non-numeric MBean attributes, the mbean helper methods provide the ability to pass a map of closures, to transform the original extracted attribute into one that can be consumed by the instrument callbacks.
+In cases where you'd like to create metrics based on non-numeric MBean
+attributes, the mbean helper methods let you pass a map of closures to
+transform the original extracted attribute into one that can be consumed by the
+instrument callbacks.
 
 - `otel.mbean(String objectNameStr, Map<String,Closure<?>> attributeTransformation)`
 
@@ -178,7 +223,8 @@ In cases where you'd like to create metrics based on non-numeric MBean attribute
 
 - `otel.mbeans(List<String> objectNameStrs, Map<String,Closure<?>> attributeTransformation)`
 
-These methods provide the ability to easily convert the attributes you will be extracting from the mbeans, at the time of creation for the MBeanHelper.
+These methods provide the ability to easily convert the attributes extracted
+from the mbeans at the time of creation for the `MBeanHelper`.
 
   ```groovy
      // In this example a String based health attribute is converted to a numeric binary value

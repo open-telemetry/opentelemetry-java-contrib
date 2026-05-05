@@ -27,7 +27,8 @@ processors through configuration.
 
 ### Usage with declarative configuration
 
-You can configure the baggage span and log record processors using declarative YAML configuration with the OpenTelemetry SDK.
+You can configure the baggage span and log record processors using declarative YAML
+configuration with the OpenTelemetry SDK.
 
 For the tracer provider (span processor):
 

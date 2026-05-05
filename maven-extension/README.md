@@ -4,7 +4,8 @@ Maven extension to observe Maven builds as distributed traces.
 
 ## Getting Started
 
-The Maven OpenTelemetry Extension is configured using environment variables or JVM system properties and can be added to a build using one of the following ways:
+The Maven OpenTelemetry Extension is configured using environment variables or
+JVM system properties and can be added to a build in one of the following ways:
 
 * adding the extension jar to `${maven.home}/lib/ext`
 * adding the path to the extension jar to`-Dmaven.ext.class.path`,
@@ -55,21 +56,41 @@ mvn verify
 
 ## Configuration
 
-❕ The setting `-Dotel.traces.exporter` / `OTEL_TRACES_EXPORTER` MUST be defined for the Maven OpenTelemetry Extension to export traces.
+❕ The setting `-Dotel.traces.exporter` / `OTEL_TRACES_EXPORTER` MUST be defined
+for the Maven OpenTelemetry Extension to export traces.
 
-Without this setting, the traces won't be exported and the OpenTelemetry Maven Extension will behave as a NoOp extension. `otlp` is currently the only supported exporter.
+Without this setting, traces will not be exported and the OpenTelemetry Maven
+Extension will behave as a NoOp extension.
+`otlp` is currently the only supported exporter.
 
-The Maven OpenTelemetry Extension supports a subset of the [OpenTelemetry autoconfiguration environment variables and JVM system properties](https://github.com/open-telemetry/opentelemetry-java/tree/main/sdk-extensions/autoconfigure).
+The Maven OpenTelemetry Extension supports a subset of the
+[OpenTelemetry autoconfiguration environment variables and JVM system properties](https://github.com/open-telemetry/opentelemetry-java/tree/main/sdk-extensions/autoconfigure).
 
-| System property                           <br /> Environment variable                              | Default value           | Description                                                                                                                                     |
-| -------------------------------------------------------------------------------------------------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `otel.traces.exporter`                    <br /> `OTEL_TRACES_EXPORTER`                            | `none`                  | Select the OpenTelemetry exporter for tracing, the currently only supported values are `none` and `otlp`. `none` makes the instrumentation NoOp |
-| `otel.exporter.otlp.endpoint`             <br /> `OTEL_EXPORTER_OTLP_ENDPOINT`                     | `http://localhost:4317` | The OTLP traces and metrics endpoint to connect to. Must be a URL with a scheme of either `http` or `https` based on the use of TLS.            |
-| `otel.exporter.otlp.headers`              <br /> `OTEL_EXPORTER_OTLP_HEADERS`                      |                         | Key-value pairs separated by commas to pass as request headers on OTLP trace and metrics requests.                                              |
-| `otel.exporter.otlp.timeout`              <br /> `OTEL_EXPORTER_OTLP_TIMEOUT`                      | `10000`                 | The maximum waiting time, in milliseconds, allowed to send each OTLP trace and metric batch.                                                    |
-| `otel.resource.attributes`                <br /> `OTEL_RESOURCE_ATTRIBUTES`                        |                         | Specify resource attributes in the following format: key1=val1,key2=val2,key3=val3                                                              |
-| `otel.instrumentation.maven.mojo.enabled` <br /> `OTEL_INSTRUMENTATION_MAVEN_MOJO_ENABLED`         | `true`                  | Whether to create spans for mojo goal executions, `true` or `false`. Can be configured to reduce the number of spans created for large builds.  |
-| `otel.instrumentation.maven.transfer.enabled` <br /> `OTEL_INSTRUMENTATION_MAVEN_TRANSFER_ENABLED` | `false`                 | Whether to create spans for artifact transfers, `true` or `false`. Can be activated to understand impact of artifact transfers on performances. |
+Supported configuration:
+
+* `otel.traces.exporter` / `OTEL_TRACES_EXPORTER`
+  Default: `none`
+  Selects the tracing exporter.
+  The only supported values are `none` and `otlp`.
+* `otel.exporter.otlp.endpoint` / `OTEL_EXPORTER_OTLP_ENDPOINT`
+  Default: `http://localhost:4317`
+  Sets the OTLP traces and metrics endpoint.
+* `otel.exporter.otlp.headers` / `OTEL_EXPORTER_OTLP_HEADERS`
+  Passes comma-separated request headers for OTLP trace and metric requests.
+* `otel.exporter.otlp.timeout` / `OTEL_EXPORTER_OTLP_TIMEOUT`
+  Default: `10000`
+  Sets the maximum wait time in milliseconds for each OTLP trace or metric
+  batch.
+* `otel.resource.attributes` / `OTEL_RESOURCE_ATTRIBUTES`
+  Specifies resource attributes in the format `key1=val1,key2=val2`.
+* `otel.instrumentation.maven.mojo.enabled` /
+  `OTEL_INSTRUMENTATION_MAVEN_MOJO_ENABLED`
+  Default: `true`
+  Controls whether spans are created for mojo goal executions.
+* `otel.instrumentation.maven.transfer.enabled` /
+  `OTEL_INSTRUMENTATION_MAVEN_TRANSFER_ENABLED`
+  Default: `false`
+  Controls whether spans are created for artifact transfers.
 
 ℹ️ The `service.name` is set to `maven` and the `service.version` to the version of the Maven runtime in use.
 
@@ -81,7 +102,11 @@ Example of a trace of a Maven build.
 
 ### Example of a distributed trace of a Jenkins pipeline executing a Maven build
 
-Distributed trace of a Jenkins pipeline invoking a Maven build instrumented with the [Jenkins OpenTelemetry plugin](https://plugins.jenkins.io/opentelemetry/) and the OpenTelemetry Maven Extension and visualized with [Jaeger Tracing](https://www.jaegertracing.io/)
+This is a distributed trace of a Jenkins pipeline invoking a Maven build
+instrumented with the
+[Jenkins OpenTelemetry plugin](https://plugins.jenkins.io/opentelemetry/) and
+the OpenTelemetry Maven Extension, visualized with
+[Jaeger Tracing](https://www.jaegertracing.io/).
 
 ![Execution trace of a Jenkins/Maven build](https://raw.githubusercontent.com/open-telemetry/opentelemetry-java-contrib/main/maven-extension/docs/images/jenkins-maven-execution-trace-jaeger.png)
 
@@ -132,12 +157,12 @@ The `span.kind` is set to `client`
 
 See <https://github.com/snyk/snyk-maven-plugin>.
 
-| Span attribute | Type   | Description                                                                                     |
-| -------------- | ------ | ----------------------------------------------------------------------------------------------- |
-| `http.method`  | string | `POST`                                                                                          |
-| `http.url`     | string | `https://snyk.io/api/v1/monitor/maven` the underlying Snyk API URL invoked by the Maven plugin. |
-| `rpc.method`   | string | `monitor`, the underlying Snyk CLI command invoked by the Maven plugin.                         |
-| `peer.service` | string | `snyk.io`                                                                                       |
+| Span attribute | Type   | Description                                                                                  |
+| -------------- | ------ | -------------------------------------------------------------------------------------------- |
+| `http.method`  | string | `POST`                                                                                       |
+| `http.url`     | string | Underlying Snyk API URL invoked by the Maven plugin: `https://snyk.io/api/v1/monitor/maven`. |
+| `rpc.method`   | string | `monitor`, the underlying Snyk CLI command invoked by the Maven plugin.                      |
+| `peer.service` | string | `snyk.io`                                                                                    |
 
 The `span.kind` is set to `client`
 
@@ -169,11 +194,15 @@ The `span.kind` is set to `client`
 
 ## Other CI/CD Tools supporting OpenTelemetry traces
 
-List of other CI/CD tools that support OpenTelemetry traces and integrate with the Maven OpenTelemetry Extension creating a distributed traces providing end to end visibility.
+This section lists other CI/CD tools that support OpenTelemetry traces and
+integrate with the Maven OpenTelemetry Extension to provide end-to-end
+visibility.
 
 ### Jenkins OpenTelemetry Plugin
 
-The [Jenkins OpenTelemetry Plugin](https://plugins.jenkins.io/opentelemetry/) exposes Jenkins pipelines & jobs as OpenTelemetry traces and exposes Jenkins health indicators as OpenTelemetry metrics.
+The [Jenkins OpenTelemetry Plugin](https://plugins.jenkins.io/opentelemetry/)
+exposes Jenkins pipelines and jobs as OpenTelemetry traces and Jenkins health
+indicators as OpenTelemetry metrics.
 
 ### Otel CLI
 
@@ -193,14 +222,15 @@ Otherwise, the instrumentation of the Maven plugin is noop.
 
 It is recommended to enrich spans using the [OpenTelemetry Semantic Conventions](https://opentelemetry.io/docs/concepts/semantic-conventions/)
 to improve the visualization and analysis in Observability products.
-The HTTP and database client [semantic conventions](https://github.com/open-telemetry/semantic-conventions)
+The HTTP and database client
+[semantic conventions](https://github.com/open-telemetry/semantic-conventions)
 are particularly useful when invoking external systems.
 
 Steps to instrument a Maven Mojo:
 
 * Add the OpenTelemetry API dependency in the `pom.xml` of the Maven plugin.
-  Replace `OPENTELEMETRY_VERSION` with the [latest
-  release](https://central.sonatype.com/artifact/io.opentelemetry/opentelemetry-api).
+  Replace `OPENTELEMETRY_VERSION` with the
+  [latest release](https://central.sonatype.com/artifact/io.opentelemetry/opentelemetry-api).
 
 ```xml
 <project>

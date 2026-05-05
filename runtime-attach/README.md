@@ -1,6 +1,9 @@
 # Runtime attachment
 
-If you can't update the JVM arguments to attach the [OpenTelemetry Java agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation) (_-javaagent:path/to/opentelemetry-javaagent.jar_), this project allows you to do attachment programmatically.
+If you can't update the JVM arguments to attach the
+[OpenTelemetry Java agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation)
+(`-javaagent:path/to/opentelemetry-javaagent.jar`), this project allows you to
+do attachment programmatically.
 
 ## Quick start
 
@@ -28,7 +31,9 @@ This dependency embeds the OpenTelemetry agent JAR.
 
 ### Call runtime attach method
 
-The `io.opentelemetry.contrib.attach.RuntimeAttach` class has an `attachJavaagentToCurrentJVM` method allowing to trigger the attachment of the OTel agent for Java.
+The `io.opentelemetry.contrib.attach.RuntimeAttach` class has an
+`attachJavaagentToCurrentJVM` method allowing you to trigger the attachment of
+the OTel agent for Java.
 
 You have to call this method at the beginning of your application's `main` method.
 

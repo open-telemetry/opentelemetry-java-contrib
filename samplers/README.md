@@ -10,7 +10,9 @@ To use:
 
 * Add a dependency on `io.opentelemetry.contrib:opentelemetry-samplers:<version>`
   * NOTE: if using the java agent, this sampler is already included in versions 2.21+ and no additional dependency is required.
-* Follow the [instructions](https://github.com/open-telemetry/opentelemetry-java/blob/main/sdk-extensions/incubator/README.md#declarative-configuration) to configure OpenTelemetry with declarative configuration.
+* Follow the
+  [instructions](https://github.com/open-telemetry/opentelemetry-java/blob/main/sdk-extensions/incubator/README.md#declarative-configuration)
+  to configure OpenTelemetry with declarative configuration.
 * Configure the `.tracer_provider.sampler` to include the `rule_based_routing` sampler.
 
 Support is now available for the java agent, see an [example here](https://github.com/open-telemetry/opentelemetry-java-examples/tree/main/javaagent).
@@ -33,11 +35,16 @@ rules:
     pattern: /actuator.*
 ```
 
-`rule_based_routing` sampler can be used anywhere a sampler is used in the configuration model. For example, the following YAML demonstrates a typical configuration, setting `rule_based_routing` sampler as the `root` sampler of `parent_based` sampler. In this configuration:
+`rule_based_routing` sampler can be used anywhere a sampler is used in the
+configuration model.
+For example, the following YAML demonstrates a typical configuration, setting
+`rule_based_routing` sampler as the `root` sampler of `parent_based` sampler.
+In this configuration:
 
 * The `parent_based` sampler samples based on the sampling status of the parent.
 * Or, if there is no parent, delegates to the `rule_based_routing` sampler.
-* The `rule_based_routing` sampler drops spans where `kind=SERVER` and `url.full matches /actuator.*`, else it samples and records.
+* The `rule_based_routing` sampler drops spans where `kind=SERVER` and
+  `url.full matches /actuator.*`; otherwise, it samples and records.
 
 ```yaml
 // ... the rest of the configuration file is omitted for brevity

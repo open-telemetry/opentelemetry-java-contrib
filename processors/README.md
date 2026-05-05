@@ -10,7 +10,9 @@ This module provides tools to intercept and process signals globally:
 
 ## Event to SpanEvent Bridge
 
-`EventToSpanEventBridge` is a `LogRecordProcessor` which records events (i.e. log records with an `event.name` attribute) as span events for the current span if:
+`EventToSpanEventBridge` is a `LogRecordProcessor` which records events
+(i.e. log records with an `event.name` attribute) as span events for the current
+span if:
 
 * The log record has a valid span context
 * `Span.current()` returns a span where `Span.isRecording()` is true

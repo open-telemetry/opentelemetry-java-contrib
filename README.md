@@ -47,7 +47,8 @@ feature or via instrumentation, this project is hopefully for you.
 To reach stable status, the library needs to have stable APIs, stable semantic conventions, and be production ready.
 On reaching stable status, the `otel.stable` value in `gradle.properties` should be set to `true`.
 Note that currently all the libraries are released together with the version of this repo, so breaking changes (after stable
-status is reached) would bump the major version of all libraries together. This could get complicated so `stable` has a high bar.
+status is reached) would bump the major version of all libraries together.
+This could get complicated, so `stable` has a high bar.
 
 ## Contributing
 
@@ -80,6 +81,4 @@ For more information about the emeritus role, see the [community repository](htt
 
 ### Thanks to all of our contributors
 
-<a href="https://github.com/open-telemetry/opentelemetry-java-contrib/graphs/contributors">
-  <img alt="Repo contributors" src="https://contrib.rocks/image?repo=open-telemetry/opentelemetry-java-contrib" />
-</a>
+[![Repo contributors](https://contrib.rocks/image?repo=open-telemetry/opentelemetry-java-contrib)](https://github.com/open-telemetry/opentelemetry-java-contrib/graphs/contributors)

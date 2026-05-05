@@ -10,26 +10,19 @@ tables = false
 enabled = true
 style = "aligned"
 
+# Preserve the previous markdownlint behavior of allowing duplicate headings
+# across sections while still flagging duplicates among siblings.
 [no-duplicate-heading]
 siblings-only = true
 
+# Preserve the previous markdownlint behavior of requiring explicit ordered list
+# numbering instead of auto-incremented `1.` markers.
 [ol-prefix]
 style = "ordered"
 
 [per-file-ignores]
-"README.md" = ["MD013", "MD033"]
-"baggage-processor/README.md" = ["MD013"]
-"cel-sampler/README.md" = ["MD013"]
-"consistent-sampling/README.md" = ["MD013"]
-"gcp-auth-extension/README.md" = ["MD013"]
-"gcp-resources/README.md" = ["MD013"]
-"ibm-mq-metrics/README.md" = ["MD013", "MD033", "MD076"]
-"inferred-spans/README.md" = ["MD013", "MD033"]
-"jfr-events/README.md" = ["MD013"]
-"jmx-metrics/README.md" = ["MD013", "MD076"]
-"jmx-scraper/README.md" = ["MD013"]
-"kafka-exporter/README.md" = ["MD013"]
-"maven-extension/README.md" = ["MD013", "MD033"]
-"processors/README.md" = ["MD013"]
-"runtime-attach/README.md" = ["MD013"]
-"samplers/README.md" = ["MD013"]
+# These docs intentionally use inline HTML for layout that plain Markdown
+# cannot express cleanly, such as dense line breaks inside config tables.
+"ibm-mq-metrics/README.md" = ["MD033"]
+"inferred-spans/README.md" = ["MD033"]
+"maven-extension/README.md" = ["MD033"]
