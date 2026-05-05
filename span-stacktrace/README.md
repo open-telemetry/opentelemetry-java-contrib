@@ -29,7 +29,7 @@ SDK when included in the application runtime dependencies.
 You can enable the stacktrace span processor using declarative YAML configuration with the OpenTelemetry SDK. For example:
 
 ```yaml
-file_format: 1.0-rc.1
+file_format: '1.0'
 tracer_provider:
   processors:
     - stacktrace/development:

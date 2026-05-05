@@ -32,7 +32,7 @@ You can configure the baggage span and log record processors using declarative Y
 For the tracer provider (span processor):
 
 ```yaml
-file_format: 1.0-rc.1
+file_format: '1.0'
 tracer_provider:
   processors:
     - baggage:
@@ -43,7 +43,7 @@ tracer_provider:
 For the logger provider (log record processor):
 
 ```yaml
-file_format: 1.0-rc.1
+file_format: '1.0'
 logger_provider:
   processors:
     - baggage:

@@ -3,7 +3,7 @@ plugins {
 }
 
 val otelInstrumentationVersion = "2.27.0-alpha"
-val semconvVersion = "1.40.0"
+val semconvVersion = "1.41.0"
 
 javaPlatform {
   allowDependencies()
