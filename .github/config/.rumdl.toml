@@ -9,8 +9,3 @@ tables = false
 [MD060]
 enabled = true
 style = "aligned"
-
-[per-file-ignores]
-# This README intentionally uses inline HTML for line breaks inside the
-# autoconfiguration table while preserving the original table structure.
-"inferred-spans/README.md" = ["MD033"]
