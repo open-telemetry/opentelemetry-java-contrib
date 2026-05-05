@@ -5,12 +5,14 @@
 
 package io.opentelemetry.opamp.client.internal.request.service;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -23,8 +25,10 @@ import io.opentelemetry.opamp.client.internal.request.delay.PeriodicDelay;
 import io.opentelemetry.opamp.client.internal.response.Response;
 import io.opentelemetry.opamp.client.request.service.RequestService;
 import java.io.ByteArrayInputStream;
+import java.io.EOFException;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -114,6 +118,55 @@ class HttpRequestServiceTest {
     verifySingleRequestSent();
     verifyRequestSuccessCallback(serverToAgent);
     verify(callback).onConnectionSuccess();
+  }
+
+  @Test
+  void verifySendingRequest_successNotCalledForNon200() {
+    ServerToAgent serverToAgent = new ServerToAgent.Builder().build();
+    HttpSender.Response httpResponse = createFailedResponse(403);
+    requestSender.enqueueResponse(httpResponse);
+
+    httpRequestService.sendRequest();
+
+    verifySingleRequestSent();
+    verify(callback, never()).onRequestSuccess(Response.create(serverToAgent));
+    verify(callback, never()).onConnectionSuccess();
+    verifyRequestFailedCallback(403);
+  }
+
+  @Test
+  void verifySuccessWithInvalidBodyIsConsideredConnectionFailure() {
+    ServerToAgent serverToAgent = new ServerToAgent.Builder().build();
+    // This will generate an EOFException
+    byte[] responseBody = "kablooey!!!".getBytes(UTF_8);
+    HttpSender.Response httpResponse = createFailedResponse(200, responseBody, null);
+    requestSender.enqueueResponse(httpResponse);
+
+    httpRequestService.sendRequest();
+
+    verifySingleRequestSent();
+    verify(callback, never()).onRequestSuccess(Response.create(serverToAgent));
+    verify(callback, never()).onRequestFailed(any());
+    verify(callback, never()).onConnectionSuccess();
+    verify(callback).onConnectionFailed(any(EOFException.class));
+  }
+
+  @Test
+  void verifyIllegalStateExceptionInParsingIsConsideredRequestFailure() {
+    ServerToAgent serverToAgent = new ServerToAgent.Builder().build();
+    byte[] responseBody = new byte[9024];
+    // This will generate an IllegalStateException
+    Arrays.fill(responseBody, (byte) 0x11);
+    HttpSender.Response httpResponse = createFailedResponse(200, responseBody, null);
+    requestSender.enqueueResponse(httpResponse);
+
+    httpRequestService.sendRequest();
+
+    verifySingleRequestSent();
+    verify(callback, never()).onRequestSuccess(Response.create(serverToAgent));
+    verify(callback, never()).onConnectionSuccess();
+    verify(callback, never()).onConnectionFailed(any());
+    verify(callback).onRequestFailed(any(IllegalStateException.class));
   }
 
   @Test
@@ -318,9 +371,23 @@ class HttpRequestServiceTest {
   }
 
   private static HttpSender.Response createFailedResponse(int statusCode) {
+    return createFailedResponse(statusCode, "".getBytes(UTF_8));
+  }
+
+  private static HttpSender.Response createFailedResponse(int statusCode, byte[] body) {
+    return createFailedResponse(statusCode, body, "Error message");
+  }
+
+  private static HttpSender.Response createFailedResponse(
+      int statusCode, byte[] body, String statusMessage) {
     HttpSender.Response response = mock();
     when(response.statusCode()).thenReturn(statusCode);
-    when(response.statusMessage()).thenReturn("Error message");
+    if (statusMessage != null) {
+      when(response.statusMessage()).thenReturn(statusMessage);
+    }
+    if (body.length > 0) {
+      when(response.bodyInputStream()).thenReturn(new ByteArrayInputStream(body));
+    }
     return response;
   }
 

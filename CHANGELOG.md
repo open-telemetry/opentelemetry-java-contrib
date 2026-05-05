@@ -2,6 +2,45 @@
 
 ## Unreleased
 
+## Version 1.56.0 (2026-04-28)
+
+### Dynamic control
+
+- Add SourceFormat string to enum conversion
+  ([#2737](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2737))
+- Add policy config model classes (record-style structure)
+  ([#2736](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2736))
+- Add config parsing for both JSON and YAML
+  ([#2738](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2738))
+- Add OpampPolicyProvider for the policy pipeline
+  ([#2748](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2748))
+- Create providers from SourceKind
+  ([#2749](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2749))
+- Use composable samplers and add sampler initialization
+  ([#2752](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2752))
+- Add PolicyTypeInitializer interface for better readability
+  ([#2754](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2754))
+
+### GCP resources
+
+- Unify gcp resource detector
+  ([#2747](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2747))
+
+### JMX scraper
+
+- Pin bouncycastle to 1.84 to fix CVE-2026-0636, CVE-2026-5588, CVE-2026-5598
+  ([#2783](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2783))
+
+### OpAMP client
+
+- Improve error handling
+  ([#2778](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2778))
+### Processors
+
+- Add FilteringSpanExporter with composable SpanFilter and TraceFilter interfaces
+  ([#2745](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2745))
+
+
 ## Version 1.55.0 (2026-03-31)
 
 ### Disk buffering

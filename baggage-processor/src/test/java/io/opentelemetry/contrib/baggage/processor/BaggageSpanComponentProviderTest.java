@@ -18,7 +18,7 @@ class BaggageSpanComponentProviderTest {
   @Test
   void declarativeConfig() {
     String yaml =
-        "file_format: 1.0-rc.1\n"
+        "file_format: '1.0'\n"
             + "tracer_provider:\n"
             + "  processors:\n"
             + "    - baggage:\n"
@@ -30,6 +30,10 @@ class BaggageSpanComponentProviderTest {
                 new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)))
             .getSdk();
 
-    assertThat(sdk).asString().contains("BaggageSpanProcessor");
+    assertThat(sdk)
+        .asString()
+        .contains("BaggageSpanProcessor")
+        .contains("included=[foo]")
+        .contains("excluded=[bar]");
   }
 }

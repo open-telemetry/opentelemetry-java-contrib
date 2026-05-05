@@ -46,4 +46,9 @@ public final class BaggageLogRecordProcessor implements LogRecordProcessor {
               }
             });
   }
+
+  @Override
+  public String toString() {
+    return "BaggageLogRecordProcessor{baggageKeyPredicate=" + baggageKeyPredicate + '}';
+  }
 }

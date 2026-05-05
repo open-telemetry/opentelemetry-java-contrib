@@ -152,10 +152,10 @@ public final class HttpRequestService implements RequestService {
     CompletableFuture<HttpSender.Response> future =
         requestSender.send(outputStream -> outputStream.write(data), data.length);
     try (HttpSender.Response response = future.get(30, TimeUnit.SECONDS)) {
-      getCallback().onConnectionSuccess();
       if (isSuccessful(response)) {
-        handleHttpSuccess(
-            Response.create(ServerToAgent.ADAPTER.decode(response.bodyInputStream())));
+        ServerToAgent serverToAgent = ServerToAgent.ADAPTER.decode(response.bodyInputStream());
+        getCallback().onConnectionSuccess();
+        handleHttpSuccess(Response.create(serverToAgent));
       } else {
         handleHttpError(response);
       }
@@ -168,6 +168,9 @@ public final class HttpRequestService implements RequestService {
       } else {
         getCallback().onConnectionFailed(e);
       }
+      connectionStatus.retryAfter(null);
+    } catch (RuntimeException e) {
+      getCallback().onRequestFailed(e);
       connectionStatus.retryAfter(null);
     }
   }

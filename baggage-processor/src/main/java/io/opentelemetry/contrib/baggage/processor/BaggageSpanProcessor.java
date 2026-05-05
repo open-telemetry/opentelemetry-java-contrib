@@ -58,4 +58,9 @@ public final class BaggageSpanProcessor implements SpanProcessor {
   public boolean isEndRequired() {
     return false;
   }
+
+  @Override
+  public String toString() {
+    return "BaggageSpanProcessor{baggageKeyPredicate=" + baggageKeyPredicate + '}';
+  }
 }

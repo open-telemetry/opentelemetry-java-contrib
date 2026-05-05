@@ -18,7 +18,7 @@ class BaggageLogRecordComponentProviderTest {
   @Test
   void declarativeConfig() {
     String yaml =
-        "file_format: 1.0-rc.1\n"
+        "file_format: '1.0'\n"
             + "logger_provider:\n"
             + "  processors:\n"
             + "    - baggage:\n"
@@ -30,6 +30,10 @@ class BaggageLogRecordComponentProviderTest {
                 new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)))
             .getSdk();
 
-    assertThat(sdk).asString().contains("BaggageLogRecordProcessor");
+    assertThat(sdk)
+        .asString()
+        .contains("BaggageLogRecordProcessor")
+        .contains("included=[foo]")
+        .contains("excluded=[bar]");
   }
 }
