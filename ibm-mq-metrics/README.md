@@ -24,13 +24,13 @@ The extension has a dependency on the following jar's depending on IBM MQ versio
 
 * v8.0.0 and above
 
-```
+```text
 com.ibm.mq.allclient.jar
 ```
 
 * For other versions
 
-```
+```text
 com.ibm.mq.commonservices.jar
 com.ibm.mq.jar
 com.ibm.mq.jmqi.jar
@@ -112,9 +112,9 @@ semantic convention models in the `model/` directory.
 
 The generation produces:
 
-- `src/main/java/io/opentelemetry/ibm/mq/metrics/*.java` - Generated Java code (attributes, metrics, config)
-- `docs/metrics.md` - Markdown documentation for all metrics
-- `config.yml` - YAML configuration template
+* `src/main/java/io/opentelemetry/ibm/mq/metrics/*.java` - Generated Java code (attributes, metrics, config)
+* `docs/metrics.md` - Markdown documentation for all metrics
+* `config.yml` - YAML configuration template
 
 **Note:** The Java code generation automatically runs `spotlessJavaApply` to ensure the generated
 code follows the project's code style guidelines.
@@ -153,24 +153,30 @@ _Note: The following is only needed for versions of Java 8 before 8u161._
    for more details. For Oracle JRE, please update with [JCE Unlimited Strength Jurisdiction Policy](http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html).
    The download includes a readme file with instructions on how to apply these files to JRE.
 
-2. Please add the following JVM arguments to the MA start up command or script.
+2. Please add the following JVM arguments to the MA startup command or script.
 
-   ```-Dcom.ibm.mq.cfg.useIBMCipherMappings=false```  (If you are using IBM Cipher Suites, set the
-   flag to true. Please visit [this link](https://www.ibm.com/docs/en/ibm-mq/8.0.0?topic=java-ssltls-cipherspecs-ciphersuites-in-mq-classes) for more details.
-   )
-3. To configure SSL, the MA's trust store and keystore needs to be setup with the JKS filepath.
-   They can be passed either as Machine Agent JVM arguments or configured in config.yml (sslConnection) <br />
+   `-Dcom.ibm.mq.cfg.useIBMCipherMappings=false`
+   If you are using IBM Cipher Suites, set the flag to `true`.
+   Please visit
+   [this link](https://www.ibm.com/docs/en/ibm-mq/8.0.0?topic=java-ssltls-cipherspecs-ciphersuites-in-mq-classes)
+   for more details.
+
+3. To configure SSL, the MA's trust store and keystore need to be set up with
+   the JKS filepath.
+   They can be passed either as Machine Agent JVM arguments or configured in
+   `config.yml` under `sslConnection`.
 
    a. Machine Agent JVM arguments as follows:
 
-   ```-Djavax.net.ssl.trustStore=<PATH_TO_JKS_FILE>```<br />
-   ```-Djavax.net.ssl.trustStorePassword=<PASS>```<br />
-   ```-Djavax.net.ssl.keyStore=<PATH_TO_JKS_FILE>```<br />
-   ```-Djavax.net.ssl.keyStorePassword=<PASS>```<br />
+   * `-Djavax.net.ssl.trustStore=<PATH_TO_JKS_FILE>`
+   * `-Djavax.net.ssl.trustStorePassword=<PASS>`
+   * `-Djavax.net.ssl.keyStore=<PATH_TO_JKS_FILE>`
+   * `-Djavax.net.ssl.keyStorePassword=<PASS>`
 
-   b. sslConnection in config.yml, configure the trustStorePassword. Same holds for keyStore configuration as well.
+   b. In `config.yml`, configure `sslConnection.trustStorePassword`.
+      The same applies to the key store configuration.
 
-    ```
+    ```text
     sslConnection:
       trustStorePath: ""
       trustStorePassword: ""
@@ -181,9 +187,10 @@ _Note: The following is only needed for versions of Java 8 before 8u161._
 
 ## Configuration
 
-**Note** : Please make sure to not use tab (\t) while editing yaml files. You may want to validate
-the yaml file using a [yaml validator](https://jsonformatter.org/yaml-validator). Configure the monitor by copying and editing the
-config.yml file.
+**Note**: Please do not use tab (`\t`) while editing YAML files.
+You may want to validate the YAML file using a
+[YAML validator](https://jsonformatter.org/yaml-validator).
+Configure the monitor by copying and editing `config.yml`.
 
 1. Configure the queueManagers with appropriate fields and filters. You can configure multiple
    queue managers in one configuration file.
@@ -210,11 +217,16 @@ See [docs/metrics.md](docs/metrics.md).
 ## Troubleshooting
 
 1. Error `Completion Code '2', Reason '2495'`
-   Normally this error occurs if the environment variables are not set up correctly for this extension to work MQ in Bindings Mode.
+   Normally this error occurs if the environment variables are not set up
+   correctly for this extension to work in Bindings Mode.
 
-   If you are seeing `Failed to load the WebSphere MQ native JNI library: 'mqjbnd'`, please add the following jvm argument when starting the MA.
+   If you are seeing
+   `Failed to load the WebSphere MQ native JNI library: 'mqjbnd'`, please add
+   the following JVM argument when starting the MA.
 
-   -Djava.library.path=\<path to libmqjbnd.so\> For eg. on Unix it could -Djava.library.path=/opt/mqm/java/lib64 for 64-bit or -Djava.library.path=/opt/mqm/java/lib for 32-bit OS
+   `-Djava.library.path=<path to libmqjbnd.so>`
+   For example, on Unix it could be `-Djava.library.path=/opt/mqm/java/lib64`
+   for 64-bit or `-Djava.library.path=/opt/mqm/java/lib` for 32-bit OS.
 
    Sometimes you also have run the setmqenv script before using the above jvm argument to start the machine agent.
 
@@ -222,13 +234,15 @@ See [docs/metrics.md](docs/metrics.md).
 
    For more details, please check this [doc](https://www.ibm.com/support/knowledgecenter/en/SSFKSJ_7.1.0/com.ibm.mq.doc/zr00610_.htm)
 
-   This might occur due to various reasons ranging from incorrect installation to applying
-   IBM Fix Packs, but most of the time it happens when you are trying to connect in `Bindings`
-   mode and machine agent is not on the same machine on which WMQ server is running. If you want
-   to connect to WMQ server from a remote machine then connect using `Client` mode.
+   This might occur for various reasons, from incorrect installation to
+   applying IBM Fix Packs, but most often it happens when you are trying to
+   connect in `Bindings` mode and the machine agent is not on the same machine
+   where the WMQ server is running.
+   If you want to connect to a WMQ server from a remote machine, use `Client`
+   mode.
 
-   Another way to get around this issue is to avoid using the Bindings mode. Connect using CLIENT
-   transport type from a remote box.
+   Another way to get around this issue is to avoid using Bindings mode.
+   Connect using CLIENT transport type from a remote box.
 
 2. Error `Completion Code '2', Reason '2035'`
    This could happen for various reasons but for most of the cases, for **Client** mode the
@@ -238,26 +252,33 @@ See [docs/metrics.md](docs/metrics.md).
    For Bindings mode, please make sure that the MA is owned by a mqm user.
 
 3. `MQJE001: Completion Code '2', Reason '2195'`
-   This could happen in **Client** mode. Please make sure that the IBM MQ dependency jars are correctly referenced in classpath of monitor.xml
+   This could happen in **Client** mode.
+   Please make sure that the IBM MQ dependency jars are correctly referenced in
+   the classpath of `monitor.xml`.
 
 4. `MQJE001: Completion Code '2', Reason '2400'`
-   This could happen if unsupported cipherSuite is provided or JRE not having/enabled unlimited jurisdiction policy files. Please check SSL Support section.
+   This could happen if an unsupported cipherSuite is provided or the JRE does
+   not have unlimited jurisdiction policy files enabled.
+   Please check the SSL Support section.
 
-5. If you are seeing `NoClassDefFoundError` or `ClassNotFoundException` error for any of the MQ dependency even after providing correct path in monitor.xml, then you can also try copying all the required jars in WMQMonitor (MAHome/monitors/WMQMonitor) folder and provide classpath in monitor.xml like below
+5. If you are seeing `NoClassDefFoundError` or `ClassNotFoundException` for an
+   MQ dependency even after providing the correct path in `monitor.xml`, try
+   copying all required jars into `WMQMonitor` (`MAHome/monitors/WMQMonitor`)
+   and provide the classpath in `monitor.xml` like below:
 
-   ```
+   ```text
     <classpath>opentelemetry-ibm-mq-monitoring-<version>-all.jar;com.ibm.mq.allclient.jar</classpath>
    ```
 
    OR
 
-   ```
+   ```text
     <classpath>opentelemetry-ibm-mq-monitoring-<version>-all.jar;com.ibm.mq.jar;com.ibm.mq.jmqi.jar;com.ibm.mq.commonservices.jar;com.ibm.mq.headers.jar;com.ibm.mq.pcf.jar;connector.jar;dhbcore.jar</classpath>
    ```
 
 ## Component Owners
 
-- [Antoine Toulme](https://github.com/atoulme), Splunk
-- [Jason Plumb](https://github.com/breedx-splk), Splunk
+* [Antoine Toulme](https://github.com/atoulme), Splunk
+* [Jason Plumb](https://github.com/breedx-splk), Splunk
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).

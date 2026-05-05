@@ -21,13 +21,14 @@ If you are using the OpenTelemetry SDK auto-configuration, you can add the span 
 processors through configuration.
 
 | Property                                                           | Description                                                                                       |
-|--------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
 | `otel.java.experimental.span-attributes.copy-from-baggage.include` | Add baggage entries as span attributes, e.g. `key1,key2` or `*` to add all baggage items as keys. |
 | `otel.java.experimental.log-attributes.copy-from-baggage.include`  | Add baggage entries as log attributes, e.g. `key1,key2` or `*` to add all baggage items as keys.  |
 
 ### Usage with declarative configuration
 
-You can configure the baggage span and log record processors using declarative YAML configuration with the OpenTelemetry SDK.
+You can configure the baggage span and log record processors using declarative YAML
+configuration with the OpenTelemetry SDK.
 
 For the tracer provider (span processor):
 
@@ -93,7 +94,7 @@ new BaggageLogRecordProcessor(baggageKey -> pattern.matcher(baggageKey).matches(
 
 ## Component owners
 
-- [Mike Golsmith](https://github.com/MikeGoldsmith), Honeycomb
-- [Gregor Zeitlinger](https://github.com/zeitlinger), Grafana
+* [Mike Golsmith](https://github.com/MikeGoldsmith), Honeycomb
+* [Gregor Zeitlinger](https://github.com/zeitlinger), Grafana
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).

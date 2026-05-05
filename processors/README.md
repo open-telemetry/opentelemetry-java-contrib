@@ -10,7 +10,9 @@ This module provides tools to intercept and process signals globally:
 
 ## Event to SpanEvent Bridge
 
-`EventToSpanEventBridge` is a `LogRecordProcessor` which records events (i.e. log records with an `event.name` attribute) as span events for the current span if:
+`EventToSpanEventBridge` is a `LogRecordProcessor` which records events
+(i.e. log records with an `event.name` attribute) as span events for the current
+span if:
 
 * The log record has a valid span context
 * `Span.current()` returns a span where `Span.isRecording()` is true
@@ -30,24 +32,33 @@ logger_provider:
 
 ## Filtering Log Processor
 
-`FilteringLogRecordProcessor` is a `LogRecordProcessor` that only keep logs  based on a predicate
+`FilteringLogRecordProcessor` is a `LogRecordProcessor` that only keeps logs
+based on a predicate.
 
 ## Filtering Span Exporter
 
-`FilteringSpanExporter` is a `SpanExporter` wrapper that filters spans within each export batch before delegating to the underlying exporter. Filtering is composable via two interfaces:
+`FilteringSpanExporter` is a `SpanExporter` wrapper that filters spans within
+each export batch before delegating to the underlying exporter.
+Filtering is composable via two interfaces:
 
-- `SpanFilter` - evaluates individual spans (e.g., error status, slow duration)
-- `TraceFilter` - evaluates all spans belonging to a trace within the batch (e.g., overall trace wall-clock duration)
+* `SpanFilter` - evaluates individual spans (e.g., error status, slow duration)
+* `TraceFilter` - evaluates all spans belonging to a trace within the batch
+  (e.g., overall trace wall-clock duration)
 
-Within a batch, if any `SpanFilter` matches any span or any `TraceFilter` matches a trace's span group, all spans sharing that trace ID in the batch are exported together.
+Within a batch, if any `SpanFilter` matches any span or any `TraceFilter`
+matches a trace's span group, all spans sharing that trace ID in the batch are
+exported together.
 
-**Note:** Filtering decisions are scoped to a single `export()` call. Spans from the same trace arriving in different batches are evaluated independently, so a trace split across batches may be partially exported.
+**Note:** Filtering decisions are scoped to a single `export()` call.
+Spans from the same trace arriving in different batches are evaluated
+independently, so a trace split across batches may be partially exported.
 
 Built-in filters:
 
-- `ErrorSpanFilter` - matches spans with error status
-- `DurationSpanFilter` - matches spans exceeding a duration threshold
-- `TraceDurationFilter` - matches when a trace's wall-clock duration (max end - min start) in the batch exceeds a threshold
+* `ErrorSpanFilter` - matches spans with error status
+* `DurationSpanFilter` - matches spans exceeding a duration threshold
+* `TraceDurationFilter` - matches when a trace's wall-clock duration
+  (`max end - min start`) in the batch exceeds a threshold
 
 Usage:
 
@@ -78,8 +89,8 @@ SpanExporter withMetrics = new FilteringSpanExporter(
 
 ## Component owners
 
-- [Cesar Munoz](https://github.com/LikeTheSalad), Elastic
-- [Jack Berg](https://github.com/jack-berg), New Relic
-- [Jason Plumb](https://github.com/breedx-splk), Splunk
+* [Cesar Munoz](https://github.com/LikeTheSalad), Elastic
+* [Jack Berg](https://github.com/jack-berg), New Relic
+* [Jason Plumb](https://github.com/breedx-splk), Splunk
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).

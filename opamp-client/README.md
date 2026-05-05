@@ -55,7 +55,7 @@ client.close();
 
 ## Component owners
 
-- [Cesar Munoz](https://github.com/LikeTheSalad), Elastic
-- [Jack Shirazi](https://github.com/jackshirazi), Elastic
+* [Cesar Munoz](https://github.com/LikeTheSalad), Elastic
+* [Jack Shirazi](https://github.com/jackshirazi), Elastic
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).

@@ -6,6 +6,6 @@ are allocated nor {@link ThreadLocal}s used in an application using this impleme
 
 ## Component owners
 
-- [Jack Berg](https://github.com/jack-berg), New Relic
+* [Jack Berg](https://github.com/jack-berg), New Relic
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).

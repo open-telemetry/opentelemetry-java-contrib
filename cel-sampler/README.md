@@ -15,7 +15,10 @@ Support is now available for the java agent, see an [example here](https://githu
 
 ## Overview
 
-The `CelBasedSampler` uses [Common Expression Language (CEL)](https://github.com/google/cel-spec) to create advanced sampling rules based on span attributes. CEL provides a powerful, yet simple expression language that allows you to create complex matching conditions.
+The `CelBasedSampler` uses [Common Expression Language (CEL)](https://github.com/google/cel-spec)
+to create advanced sampling rules based on span attributes.
+CEL provides a powerful, yet simple expression language that allows you to create
+complex matching conditions.
 
 ## Schema
 

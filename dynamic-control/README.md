@@ -10,7 +10,7 @@ Current plans and progress is tracked in this [meta issue](https://github.com/op
 
 ## Component owners
 
-- [Jack Shirazi](https://github.com/jackshirazi), Elastic
-- [Cesar Munoz](https://github.com/LikeTheSalad), Elastic
+* [Jack Shirazi](https://github.com/jackshirazi), Elastic
+* [Cesar Munoz](https://github.com/LikeTheSalad), Elastic
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).

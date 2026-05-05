@@ -30,6 +30,7 @@ The main entry point is `io.opentelemetry.contrib.jfr.connection.FlightRecorderC
 ```
 
 ---
+
 Note on Oracle JDK 8:
 
 For Oracle JDK 8, it may be necessary to unlock the Java Flight Recorder
@@ -40,9 +41,9 @@ Starting with JDK 8u262, Java Flight Recorder is available for all OpenJDK distr
 
 ## Component owners
 
-- [Trask Stalnaker](https://github.com/trask), Microsoft
-- [Jason Plumb](https://github.com/breedx-splk), Splunk
-- [Jean Bisutti](https://github.com/jeanbisutti), Microsoft
-- [David Grieve](https://github.com/dsgrieve), Microsoft
+* [Trask Stalnaker](https://github.com/trask), Microsoft
+* [Jason Plumb](https://github.com/breedx-splk), Splunk
+* [Jean Bisutti](https://github.com/jeanbisutti), Microsoft
+* [David Grieve](https://github.com/dsgrieve), Microsoft
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).
