@@ -24,7 +24,9 @@ public final class BaggageLogRecordProcessor implements LogRecordProcessor {
   private final Predicate<String> baggageKeyPredicate;
 
   /**
-   * @deprecated Use {@link #BaggageLogRecordProcessor(Collection, Collection)} instead.
+   * @deprecated Use {@link #BaggageLogRecordProcessor(Collection, Collection)} instead. Most usages
+   *     of this method should be replaceable with glob patterns, but not all thus this method is
+   *     kept to preserve compatibility.
    */
   @Deprecated
   public BaggageLogRecordProcessor(Predicate<String> baggageKeyPredicate) {

@@ -23,7 +23,9 @@ public final class BaggageSpanProcessor implements SpanProcessor {
   private final Predicate<String> baggageKeyPredicate;
 
   /**
-   * @deprecated Use {@link #BaggageSpanProcessor(Collection, Collection)} instead.
+   * @deprecated Use {@link #BaggageSpanProcessor(Collection, Collection)} instead. Most usages of
+   *     this method should be replaceable with glob patterns, but not all thus this method is kept
+   *     to preserve compatibility.
    */
   @Deprecated
   public BaggageSpanProcessor(Predicate<String> baggageKeyPredicate) {
