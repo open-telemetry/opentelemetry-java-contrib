@@ -61,6 +61,7 @@ exclude those in `excluded` as explained in
 When both `included` and `excluded` are empty or not set, all the baggage entries will be copied.
 When only `included` is set, only the baggage entries matching the patterns in `included` will be copied (opt-in).
 When only `excluded` is set, all baggage entries except those matching the patterns in `excluded` will be copied (opt-out).
+When a value matches both `included` and `excluded`, then it is excluded.
 
 ### Usage through programmatic activation
 
@@ -75,15 +76,15 @@ import io.opentelemetry.contrib.baggage.processor.BaggageLogProcessor;
 // ...
 
 TracerProvider tracerProvider = SdkTracerProvider.builder()
-    .addSpanProcessor(new BaggageSpanProcessor(Collections.singletonList("*"), null))
+    .addSpanProcessor(BaggageSpanProcessor.allowAllBaggageKeys())
     .build();
 
 LoggerProvider loggerProvider = SdkLoggerProvider.builder()
-    .addLogProcessor(new BaggageLogProcessor(Collections.singletonList("*"), null))
+    .addLogProcessor(BaggageLogRecordProcessor.allowAllBaggageKeys())
     .build();
 ```
 
-Alternatively, you can provide a custom baggage key wildcard to select which baggage keys you want to copy.
+Alternatively, you can provide a custom baggage key wildcards to select which baggage keys you want to include/exclude for copy.
 
 For example, to only copy baggage entries that start with `my-key` and ignore keys that end with `*-ignored`
 

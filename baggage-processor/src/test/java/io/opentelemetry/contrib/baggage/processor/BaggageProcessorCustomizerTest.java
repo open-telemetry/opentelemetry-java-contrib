@@ -161,7 +161,7 @@ class BaggageProcessorCustomizerTest {
 
   @Test
   void test_baggageSpanProcessor_adds_attributes_to_spans(@Mock ReadWriteSpan span) {
-    try (BaggageSpanProcessor processor = new BaggageSpanProcessor(singletonList("*"), null)) {
+    try (BaggageSpanProcessor processor = BaggageSpanProcessor.allowAllBaggageKeys()) {
       try (Scope ignore = Baggage.current().toBuilder().put("key", "value").build().makeCurrent()) {
         processor.onStart(Context.current(), span);
         verify(span).setAttribute("key", "value");
