@@ -1,5 +1,7 @@
 # OpenTelemetry Baggage Span and Log Record Processor
 
+[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-baggage-processor/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-baggage-processor)
+
 The `BaggageSpanProcessor` and `BaggageLogRecordProcessor` read entries stored in Baggage from the
 parent context and adds the baggage keys and values to the `Span`, respectively `LogRecord`, as
 attributes on start, respectively emit.
@@ -27,7 +29,8 @@ processors through configuration.
 
 ### Usage with declarative configuration
 
-You can configure the baggage span and log record processors using declarative YAML configuration with the OpenTelemetry SDK.
+You can configure the baggage span and log record processors using declarative YAML
+configuration with the OpenTelemetry SDK.
 
 For the tracer provider (span processor):
 
@@ -91,7 +94,7 @@ new BaggageLogRecordProcessor(Collections.singletonList("my-key*"), Collections.
 
 ## Component owners
 
-- [Mike Golsmith](https://github.com/MikeGoldsmith), Honeycomb
-- [Gregor Zeitlinger](https://github.com/zeitlinger), Grafana
+* [Mike Golsmith](https://github.com/MikeGoldsmith), Honeycomb
+* [Gregor Zeitlinger](https://github.com/zeitlinger), Grafana
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).

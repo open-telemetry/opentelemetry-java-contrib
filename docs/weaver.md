@@ -14,7 +14,7 @@ The `otel.weaver-conventions` Gradle plugin automates this process.
 
 ### Prerequisites
 
-- **Docker** must be installed and running
+* **Docker** must be installed and running
 
 ### Applying to Your Module
 
@@ -43,9 +43,9 @@ This determines where generated Java code will be placed under `src/main/java/`.
 
 **Important:**
 
-- Use forward slashes (`/`) for the path, not dots or backslashes
-- The path should match your module's package structure
-- Generated code will be placed in `src/main/java/{your-path}/`
+* Use forward slashes (`/`) for the path, not dots or backslashes
+* The path should match your module's package structure
+* Generated code will be placed in `src/main/java/{your-path}/`
 
 **Example:**
 
@@ -59,7 +59,7 @@ otelWeaver {
 
 ### Module Structure
 
-```
+```text
 your-module/
 ├── build.gradle.kts
 ├── model/
@@ -86,8 +86,8 @@ Generates Java code, markdown documentation, and YAML configuration.
 ./gradlew :your-module:weaverGenerateJava
 ```
 
-- Outputs to `src/main/java/{configured-package}/`
-- **Automatically formats** generated code with `spotlessJavaApply`
+* Outputs to `src/main/java/{configured-package}/`
+* **Automatically formats** generated code with `spotlessJavaApply`
 
 ### Generate Documentation
 
@@ -133,6 +133,6 @@ otelWeaver {
 
 ## Resources
 
-- [OpenTelemetry Weaver Documentation](https://github.com/open-telemetry/weaver)
-- [Semantic Conventions](https://github.com/open-telemetry/semantic-conventions)
-- [IBM MQ Metrics Example](../ibm-mq-metrics/)
+* [OpenTelemetry Weaver Documentation](https://github.com/open-telemetry/weaver)
+* [Semantic Conventions](https://github.com/open-telemetry/semantic-conventions)
+* [IBM MQ Metrics Example](../ibm-mq-metrics/)

@@ -1,5 +1,7 @@
 # Dynamic Control
 
+[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-dynamic-control/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-dynamic-control)
+
 Adding dynamic control of some specific features of the Java agent.
 
 > [!WARNING]
@@ -10,7 +12,7 @@ Current plans and progress is tracked in this [meta issue](https://github.com/op
 
 ## Component owners
 
-- [Jack Shirazi](https://github.com/jackshirazi), Elastic
-- [Cesar Munoz](https://github.com/LikeTheSalad), Elastic
+* [Jack Shirazi](https://github.com/jackshirazi), Elastic
+* [Cesar Munoz](https://github.com/LikeTheSalad), Elastic
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).

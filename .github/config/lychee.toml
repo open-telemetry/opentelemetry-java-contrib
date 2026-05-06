@@ -12,6 +12,8 @@ include_fragments = "full"
 exclude = [
   # excluding links to pull requests and issues is done for performance
   "^https://github.com/open-telemetry/opentelemetry-java-contrib/(issues|pull)/\\d+$",
+  # developer.ibm.com intermittently returns 500 for MQ downloads
+  "^https://developer\\.ibm\\.com/articles/mq-downloads/$",
   # groovy-lang.org is frequently unreachable / times out
   "^https?://[^/]*groovy-lang\\.org",
 ]
