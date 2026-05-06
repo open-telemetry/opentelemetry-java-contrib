@@ -72,6 +72,7 @@ class QueueCollectionBuddyTest {
                 "DEV.DEAD.LETTER.QUEUE",
                 new HashMap<>(
                     ImmutableMap.of(
+                        "ibm.mq.expired.messages", 2L,
                         "ibm.mq.oldest.msg.age", -1L,
                         "ibm.mq.uncommitted.messages", 0L,
                         "ibm.mq.onqtime.short_period", -1L,
@@ -80,6 +81,7 @@ class QueueCollectionBuddyTest {
                 "DEV.QUEUE.1",
                 new HashMap<>(
                     ImmutableMap.of(
+                        "ibm.mq.expired.messages", 3L,
                         "ibm.mq.oldest.msg.age", -1L,
                         "ibm.mq.uncommitted.messages", 10L,
                         "ibm.mq.onqtime.short_period", -1L,
@@ -166,41 +168,44 @@ class QueueCollectionBuddyTest {
       PCFMessage:
       MQCFH [type: 1, strucLength: 36, version: 1, command: 41 (MQCMD_INQUIRE_Q_STATUS), msgSeqNumber: 1, control: 1, compCode: 0, reason: 0, parameterCount: 2]
       MQCFST [type: 4, strucLength: 24, parameter: 2016 (MQCA_Q_NAME), codedCharSetId: 0, stringLength: 1, string: *]
-      MQCFIL [type: 5, strucLength: 32, parameter: 1026 (MQIACF_Q_STATUS_ATTRS), count: 4, values: {2016, 1226, 1227, 1027}]
+      MQCFIL [type: 5, strucLength: 36, parameter: 1026 (MQIACF_Q_STATUS_ATTRS), count: 5, values: {2016, 1226, 1227, 1116, 1027}]
   */
   private static PCFMessage createPCFRequestForInquireQStatusCmd() {
     PCFMessage request = new PCFMessage(CMQCFC.MQCMD_INQUIRE_Q_STATUS);
     request.addParameter(CMQC.MQCA_Q_NAME, "*");
-    request.addParameter(CMQCFC.MQIACF_Q_STATUS_ATTRS, new int[] {2016, 1226, 1227, 1027});
+    request.addParameter(CMQCFC.MQIACF_Q_STATUS_ATTRS, new int[] {2016, 1226, 1227, 1116, 1027});
     return request;
   }
 
   /*
       0 = {PCFMessage@6026} "PCFMessage:
-      MQCFH [type: 2, strucLength: 36, version: 2, command: 41 (MQCMD_INQUIRE_Q_STATUS), msgSeqNumber: 1, control: 0, compCode: 0, reason: 0, parameterCount: 6]
+      MQCFH [type: 2, strucLength: 36, version: 2, command: 41 (MQCMD_INQUIRE_Q_STATUS), msgSeqNumber: 1, control: 0, compCode: 0, reason: 0, parameterCount: 7]
       MQCFST [type: 4, strucLength: 68, parameter: 2016 (MQCA_Q_NAME), codedCharSetId: 819, stringLength: 48, string: AMQ.5AF1608820C7D76E                            ]
       MQCFIN [type: 3, strucLength: 16, parameter: 1103 (MQIACF_Q_STATUS_TYPE), value: 1105]
       MQCFIN [type: 3, strucLength: 16, parameter: 3 (MQIA_CURRENT_Q_DEPTH), value: 12]
       MQCFIN [type: 3, strucLength: 16, parameter: 1227 (MQIACF_OLDEST_MSG_AGE), value: -1]
       MQCFIL [type: 5, strucLength: 24, parameter: 1226 (MQIACF_Q_TIME_INDICATOR), count: 2, values: {-1, -1}]
+      MQCFIN [type: 3, strucLength: 16, parameter: 1116 (MQIACF_EXPIRY_Q_COUNT), value: 0]
       MQCFIN [type: 3, strucLength: 16, parameter: 1027 (MQIACF_UNCOMMITTED_MSGS), value: 0]"
 
       1 = {PCFMessage@6029} "PCFMessage:
-      MQCFH [type: 2, strucLength: 36, version: 2, command: 41 (MQCMD_INQUIRE_Q_STATUS), msgSeqNumber: 2, control: 0, compCode: 0, reason: 0, parameterCount: 6]
+      MQCFH [type: 2, strucLength: 36, version: 2, command: 41 (MQCMD_INQUIRE_Q_STATUS), msgSeqNumber: 2, control: 0, compCode: 0, reason: 0, parameterCount: 7]
       MQCFST [type: 4, strucLength: 68, parameter: 2016 (MQCA_Q_NAME), codedCharSetId: 819, stringLength: 48, string: DEV.DEAD.LETTER.QUEUE                           ]
       MQCFIN [type: 3, strucLength: 16, parameter: 1103 (MQIACF_Q_STATUS_TYPE), value: 1105]
       MQCFIN [type: 3, strucLength: 16, parameter: 3 (MQIA_CURRENT_Q_DEPTH), value: 0]
       MQCFIN [type: 3, strucLength: 16, parameter: 1227 (MQIACF_OLDEST_MSG_AGE), value: -1]
       MQCFIL [type: 5, strucLength: 24, parameter: 1226 (MQIACF_Q_TIME_INDICATOR), count: 2, values: {-1, -1}]
+      MQCFIN [type: 3, strucLength: 16, parameter: 1116 (MQIACF_EXPIRY_Q_COUNT), value: 2]
       MQCFIN [type: 3, strucLength: 16, parameter: 1027 (MQIACF_UNCOMMITTED_MSGS), value: 0]"
 
       2 = {PCFMessage@6030} "PCFMessage:
-      MQCFH [type: 2, strucLength: 36, version: 2, command: 41 (MQCMD_INQUIRE_Q_STATUS), msgSeqNumber: 3, control: 0, compCode: 0, reason: 0, parameterCount: 6]
+      MQCFH [type: 2, strucLength: 36, version: 2, command: 41 (MQCMD_INQUIRE_Q_STATUS), msgSeqNumber: 3, control: 0, compCode: 0, reason: 0, parameterCount: 7]
       MQCFST [type: 4, strucLength: 68, parameter: 2016 (MQCA_Q_NAME), codedCharSetId: 819, stringLength: 48, string: DEV.QUEUE.1                                     ]
       MQCFIN [type: 3, strucLength: 16, parameter: 1103 (MQIACF_Q_STATUS_TYPE), value: 1105]
       MQCFIN [type: 3, strucLength: 16, parameter: 3 (MQIA_CURRENT_Q_DEPTH), value: 1]
       MQCFIN [type: 3, strucLength: 16, parameter: 1227 (MQIACF_OLDEST_MSG_AGE), value: -1]
       MQCFIL [type: 5, strucLength: 24, parameter: 1226 (MQIACF_Q_TIME_INDICATOR), count: 2, values: {-1, -1}]
+      MQCFIN [type: 3, strucLength: 16, parameter: 1116 (MQIACF_EXPIRY_Q_COUNT), value: 3]
       MQCFIN [type: 3, strucLength: 16, parameter: 1027 (MQIACF_UNCOMMITTED_MSGS), value: 0]"
   */
   private static PCFMessage[] createPCFResponseForInquireQStatusCmd() {
@@ -210,6 +215,7 @@ class QueueCollectionBuddyTest {
     response1.addParameter(CMQC.MQIA_CURRENT_Q_DEPTH, 12);
     response1.addParameter(CMQCFC.MQIACF_OLDEST_MSG_AGE, -1);
     response1.addParameter(CMQCFC.MQIACF_Q_TIME_INDICATOR, new int[] {-1, -1});
+    response1.addParameter(CMQCFC.MQIACF_EXPIRY_Q_COUNT, 0);
     response1.addParameter(CMQCFC.MQIACF_UNCOMMITTED_MSGS, 0);
 
     PCFMessage response2 = new PCFMessage(2, CMQCFC.MQCMD_INQUIRE_Q_STATUS, 2, false);
@@ -218,6 +224,7 @@ class QueueCollectionBuddyTest {
     response2.addParameter(CMQC.MQIA_CURRENT_Q_DEPTH, 0);
     response2.addParameter(CMQCFC.MQIACF_OLDEST_MSG_AGE, -1);
     response2.addParameter(CMQCFC.MQIACF_Q_TIME_INDICATOR, new int[] {-1, -1});
+    response2.addParameter(CMQCFC.MQIACF_EXPIRY_Q_COUNT, 2);
     response2.addParameter(CMQCFC.MQIACF_UNCOMMITTED_MSGS, 0);
 
     PCFMessage response3 = new PCFMessage(2, CMQCFC.MQCMD_INQUIRE_Q_STATUS, 1, false);
@@ -226,6 +233,7 @@ class QueueCollectionBuddyTest {
     response3.addParameter(CMQC.MQIA_CURRENT_Q_DEPTH, 1);
     response3.addParameter(CMQCFC.MQIACF_OLDEST_MSG_AGE, -1);
     response3.addParameter(CMQCFC.MQIACF_Q_TIME_INDICATOR, new int[] {-1, -1});
+    response3.addParameter(CMQCFC.MQIACF_EXPIRY_Q_COUNT, 3);
     response3.addParameter(CMQCFC.MQIACF_UNCOMMITTED_MSGS, 10);
 
     return new PCFMessage[] {response1, response2, response3};

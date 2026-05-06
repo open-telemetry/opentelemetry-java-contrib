@@ -159,6 +159,15 @@ public final class Metrics {
         .build();
   }
 
+  public static LongGauge createIbmMqExpiredMessages(Meter meter) {
+    return meter
+        .gaugeBuilder("ibm.mq.expired.messages")
+        .ofLongs()
+        .setUnit("{message}")
+        .setDescription("Number of expired messages")
+        .build();
+  }
+
   public static LongGauge createIbmMqUncommittedMessages(Meter meter) {
     return meter
         .gaugeBuilder("ibm.mq.uncommitted.messages")

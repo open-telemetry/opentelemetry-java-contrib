@@ -109,6 +109,11 @@ final class QueueCollectionBuddy {
             Metrics.createIbmMqUncommittedMessages(meter),
             MetricsConfig::isIbmMqUncommittedMessagesEnabled));
     gauges.put(
+        CMQCFC.MQIACF_EXPIRY_Q_COUNT,
+        createAllowedGauge(
+            Metrics.createIbmMqExpiredMessages(meter),
+            MetricsConfig::isIbmMqExpiredMessagesEnabled));
+    gauges.put(
         CMQC.MQIA_MSG_DEQ_COUNT,
         createAllowedGauge(
             Metrics.createIbmMqMessageDeqCount(meter),

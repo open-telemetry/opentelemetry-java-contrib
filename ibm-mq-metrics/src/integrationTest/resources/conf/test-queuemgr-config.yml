@@ -94,6 +94,8 @@ metrics:
     enabled: true
   "ibm.mq.queue.depth.low.event":  # The number of low queue events
     enabled: true
+  "ibm.mq.expired.messages":  # Number of expired messages
+    enabled: true
   "ibm.mq.uncommitted.messages":  # Number of uncommitted messages
     enabled: true
   "ibm.mq.oldest.msg.age":  # Queue message oldest age
