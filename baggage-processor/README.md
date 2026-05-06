@@ -22,10 +22,12 @@ Do not put sensitive information in Baggage.
 If you are using the OpenTelemetry SDK auto-configuration, you can add the span and log baggage
 processors through configuration.
 
-| Property                                                           | Description                                                                                                                                                                                                                        |
-|--------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `otel.java.experimental.span-attributes.copy-from-baggage.include` | Add baggage entries as span attributes, e.g. `key1,key*`, [wildcard pattern matching](https://github.com/open-telemetry/opentelemetry-configuration/blob/main/CONTRIBUTING.md#properties-requiring-pattern-matching) is supported. |
-| `otel.java.experimental.log-attributes.copy-from-baggage.include`  | Add baggage entries as log attributes, e.g. `key1,key*`, [wildcard pattern matching](https://github.com/open-telemetry/opentelemetry-configuration/blob/main/CONTRIBUTING.md#properties-requiring-pattern-matching) is supported.  |
+| Property                                                           | Description                                                                                      |
+|--------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
+| `otel.java.experimental.span-attributes.copy-from-baggage.include` | Add baggage entries as span attributes, e.g. `key1,key*`, wildcard pattern mathinc is supported. |
+| `otel.java.experimental.log-attributes.copy-from-baggage.include`  | Add baggage entries as log attributes, e.g. `key1,key*`, wildcard pattern mathinc is supported.  |
+
+[Wildcard pattern matching]([wildcard pattern matching](https://github.com/open-telemetry/opentelemetry-configuration/blob/main/CONTRIBUTING.md#properties-requiring-pattern-matching)) is supported for both properties.
 
 ### Usage with declarative configuration
 
