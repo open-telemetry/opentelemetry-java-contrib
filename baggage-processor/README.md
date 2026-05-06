@@ -23,7 +23,7 @@ If you are using the OpenTelemetry SDK auto-configuration, you can add the span 
 processors through configuration.
 
 | Property                                                           | Description                                                                                      |
-|--------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
 | `otel.java.experimental.span-attributes.copy-from-baggage.include` | Add baggage entries as span attributes, e.g. `key1,key*`, wildcard pattern mathinc is supported. |
 | `otel.java.experimental.log-attributes.copy-from-baggage.include`  | Add baggage entries as log attributes, e.g. `key1,key*`, wildcard pattern mathinc is supported.  |
 
@@ -86,7 +86,8 @@ LoggerProvider loggerProvider = SdkLoggerProvider.builder()
     .build();
 ```
 
-Alternatively, you can provide a custom baggage key wildcards to select which baggage keys you want to include/exclude for copy.
+Alternatively, you can provide a custom baggage key wildcards to select which baggage keys you want to include/exclude
+ for copy.
 
 For example, to only copy baggage entries that start with `my-key` and ignore keys that end with `*-ignored`
 
