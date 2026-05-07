@@ -139,7 +139,8 @@ public class GcpAuthAutoConfigurationCustomizerProvider
 
   private static GoogleCredentials loadCredentials(ConfigProperties configProperties) {
     Optional<String> credsPath =
-        ConfigurableOption.GOOGLE_CLOUD_CREDENTIALS_PATH.getConfiguredValueAsOptional(configProperties);
+        ConfigurableOption.GOOGLE_CLOUD_CREDENTIALS_PATH.getConfiguredValueAsOptional(
+            configProperties);
     if (credsPath.isPresent()) {
       File file = new File(credsPath.get());
       if (!file.exists()) {
@@ -153,7 +154,8 @@ public class GcpAuthAutoConfigurationCustomizerProvider
     }
 
     Optional<String> credsJson =
-        ConfigurableOption.GOOGLE_CLOUD_CREDENTIALS_JSON.getConfiguredValueAsOptional(configProperties);
+        ConfigurableOption.GOOGLE_CLOUD_CREDENTIALS_JSON.getConfiguredValueAsOptional(
+            configProperties);
     if (credsJson.isPresent()) {
       try (ByteArrayInputStream bais =
           new ByteArrayInputStream(credsJson.get().getBytes(StandardCharsets.UTF_8))) {

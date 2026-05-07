@@ -283,7 +283,8 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
         buildOpenTelemetrySdkWithExporter(mockOtlpGrpcSpanExporter);
 
         serviceAccountCredentialsMockedStatic.verify(
-            () -> ServiceAccountCredentials.fromStream(any(InputStream.class)), Mockito.atLeastOnce());
+            () -> ServiceAccountCredentials.fromStream(any(InputStream.class)),
+            Mockito.atLeastOnce());
       }
     } finally {
       System.clearProperty(ConfigurableOption.GOOGLE_CLOUD_PROJECT.getSystemProperty());
@@ -318,7 +319,8 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
         buildOpenTelemetrySdkWithExporter(mockOtlpGrpcSpanExporter);
 
         serviceAccountCredentialsMockedStatic.verify(
-            () -> ServiceAccountCredentials.fromStream(any(InputStream.class)), Mockito.atLeastOnce());
+            () -> ServiceAccountCredentials.fromStream(any(InputStream.class)),
+            Mockito.atLeastOnce());
       }
     } finally {
       System.clearProperty(ConfigurableOption.GOOGLE_CLOUD_PROJECT.getSystemProperty());
@@ -344,10 +346,10 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
           mockOtlpGrpcSpanExporter, spyOtlpGrpcSpanExporterBuilder, exportedSpans);
 
       try (MockedStatic<GoogleCredentials> googleCredentialsMockedStatic =
-          Mockito.mockStatic(GoogleCredentials.class);
-           MockedStatic<ServiceAccountCredentials> serviceAccountCredentialsMockedStatic =
-          Mockito.mockStatic(ServiceAccountCredentials.class)) {
-        
+              Mockito.mockStatic(GoogleCredentials.class);
+          MockedStatic<ServiceAccountCredentials> serviceAccountCredentialsMockedStatic =
+              Mockito.mockStatic(ServiceAccountCredentials.class)) {
+
         googleCredentialsMockedStatic
             .when(GoogleCredentials::getApplicationDefault)
             .thenReturn(mockedGoogleCredentials);
@@ -392,10 +394,10 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
           mockOtlpGrpcSpanExporter, spyOtlpGrpcSpanExporterBuilder, exportedSpans);
 
       try (MockedStatic<GoogleCredentials> googleCredentialsMockedStatic =
-          Mockito.mockStatic(GoogleCredentials.class);
-           MockedStatic<ServiceAccountCredentials> serviceAccountCredentialsMockedStatic =
-          Mockito.mockStatic(ServiceAccountCredentials.class)) {
-        
+              Mockito.mockStatic(GoogleCredentials.class);
+          MockedStatic<ServiceAccountCredentials> serviceAccountCredentialsMockedStatic =
+              Mockito.mockStatic(ServiceAccountCredentials.class)) {
+
         serviceAccountCredentialsMockedStatic
             .when(() -> ServiceAccountCredentials.fromStream(any(InputStream.class)))
             .thenReturn(mockedGoogleCredentials);
@@ -403,7 +405,8 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
         buildOpenTelemetrySdkWithExporter(mockOtlpGrpcSpanExporter);
 
         serviceAccountCredentialsMockedStatic.verify(
-            () -> ServiceAccountCredentials.fromStream(any(InputStream.class)), Mockito.atLeastOnce());
+            () -> ServiceAccountCredentials.fromStream(any(InputStream.class)),
+            Mockito.atLeastOnce());
         googleCredentialsMockedStatic.verify(
             GoogleCredentials::getApplicationDefault, Mockito.never());
       }
@@ -422,11 +425,12 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
     System.setProperty(
         ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getSystemProperty(), SIGNAL_TYPE_ALL);
     System.setProperty(
-        ConfigurableOption.GOOGLE_CLOUD_CREDENTIALS_PATH.getSystemProperty(), "/non/existent/path.json");
+        ConfigurableOption.GOOGLE_CLOUD_CREDENTIALS_PATH.getSystemProperty(),
+        "/non/existent/path.json");
 
     try {
       OtlpGrpcSpanExporter mockOtlpGrpcSpanExporter = Mockito.mock(OtlpGrpcSpanExporter.class);
-      
+
       assertThatThrownBy(() -> buildOpenTelemetrySdkWithExporter(mockOtlpGrpcSpanExporter))
           .isInstanceOf(ConfigurationException.class)
           .hasMessageContaining("Credentials file not found");
@@ -448,7 +452,7 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
 
     try {
       OtlpGrpcSpanExporter mockOtlpGrpcSpanExporter = Mockito.mock(OtlpGrpcSpanExporter.class);
-      
+
       try (MockedStatic<ServiceAccountCredentials> serviceAccountCredentialsMockedStatic =
           Mockito.mockStatic(ServiceAccountCredentials.class)) {
         serviceAccountCredentialsMockedStatic
@@ -457,7 +461,8 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
 
         assertThatThrownBy(() -> buildOpenTelemetrySdkWithExporter(mockOtlpGrpcSpanExporter))
             .isInstanceOf(GoogleAuthException.class)
-            .hasMessageContaining(GoogleAuthException.Reason.FAILED_CREDENTIAL_CREATION.getMessage());
+            .hasMessageContaining(
+                GoogleAuthException.Reason.FAILED_CREDENTIAL_CREATION.getMessage());
       }
     } finally {
       System.clearProperty(ConfigurableOption.GOOGLE_CLOUD_PROJECT.getSystemProperty());
