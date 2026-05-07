@@ -270,11 +270,10 @@ public final class PolicyInitConfig {
       if (maybeConfig instanceof DeclarativeConfigProperties) {
         return (DeclarativeConfigProperties) maybeConfig;
       }
-    } catch (NoSuchMethodException
-        | IllegalAccessException
-        | InvocationTargetException
-        | RuntimeException ignored) {
-      // Fall through to backwards-compatible accessor below.
+    } catch (NoSuchMethodException ignored) {
+      // Method doesn't exist in this runtime version — fall through.
+    } catch (IllegalAccessException | InvocationTargetException e) {
+      logger.log(Level.WARNING, "Failed to invoke getGeneralConfig via reflection", e);
     }
     return configProvider.getGeneralInstrumentationConfig();
   }
