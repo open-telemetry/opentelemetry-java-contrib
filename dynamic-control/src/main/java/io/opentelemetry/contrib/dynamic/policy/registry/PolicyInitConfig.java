@@ -198,7 +198,7 @@ public final class PolicyInitConfig {
 
     List<DeclarativeConfigProperties> mappingConfigs =
         sourceConfig.getStructuredList(MAPPINGS_DECLARATIVE_KEY);
-    if (mappingConfigs == null) {
+    if (mappingConfigs == null || mappingConfigs.isEmpty()) {
       throw new IllegalArgumentException("Each source must define a 'mappings' array.");
     }
     List<PolicySourceMappingConfig> mappings = new ArrayList<>();
