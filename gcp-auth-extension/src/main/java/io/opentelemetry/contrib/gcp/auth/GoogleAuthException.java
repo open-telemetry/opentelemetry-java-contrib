@@ -29,7 +29,9 @@ public class GoogleAuthException extends RuntimeException {
     /** Indicates a failure to retrieve Google Application Default Credentials. */
     FAILED_ADC_RETRIEVAL("Unable to retrieve Google Application Default Credentials."),
     /** Indicates a failure to retrieve Google Application Default Credentials. */
-    FAILED_ADC_REFRESH("Unable to refresh Google Application Default Credentials.");
+    FAILED_ADC_REFRESH("Unable to refresh Google Application Default Credentials."),
+    /** Indicates a failure to create credentials from provided source. */
+    FAILED_CREDENTIAL_CREATION("Unable to create credentials from provided source.");
 
     private final String message;
 

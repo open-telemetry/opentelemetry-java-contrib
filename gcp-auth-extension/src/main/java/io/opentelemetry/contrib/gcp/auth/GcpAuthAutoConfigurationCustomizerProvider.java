@@ -11,6 +11,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
 
 import com.google.auth.oauth2.GoogleCredentials;
+import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.auto.service.AutoService;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.contrib.gcp.auth.GoogleAuthException.Reason;
@@ -49,8 +50,9 @@ import javax.annotation.Nonnull;
  * integration.
  *
  * <p>This class is registered as a service provider using {@link AutoService} and is responsible
- * for customizing the OpenTelemetry configuration for GCP specific behavior. It retrieves Google
- * Application Default Credentials (ADC) and adds them as authorization headers to the configured
+ * for customizing the OpenTelemetry configuration for GCP specific behavior. It retrieves
+ * credentials (either explicit service account keys from configuration or falling back to
+ * Application Default Credentials (ADC)) and adds them as authorization headers to the configured
  * {@link SpanExporter}. It also sets default properties and resource attributes for GCP
  * integration.
  *
@@ -83,8 +85,8 @@ public class GcpAuthAutoConfigurationCustomizerProvider
    * Customizes the provided {@link AutoConfigurationCustomizer} such that authenticated exports to
    * GCP Telemetry API are possible from the configured OTLP exporter.
    *
-   * <p>This method attempts to retrieve Google Application Default Credentials (ADC) and performs
-   * the following:
+   * <p>This method attempts to retrieve credentials (either from user-specified configuration or
+   * falling back to ADC) and performs the following:
    *
    * <ul>
    *   <li>Verifies whether the configured OTLP endpoint (base or signal specific) is a known GCP
@@ -135,26 +137,29 @@ public class GcpAuthAutoConfigurationCustomizerProvider
     }
   }
 
-  private static GoogleCredentials loadCredentials(ConfigProperties props) {
+  private static GoogleCredentials loadCredentials(ConfigProperties configProperties) {
     Optional<String> credsPath =
-        ConfigurableOption.GOOGLE_CLOUD_CREDENTIALS_PATH.getConfiguredValueAsOptional(props);
+        ConfigurableOption.GOOGLE_CLOUD_CREDENTIALS_PATH.getConfiguredValueAsOptional(configProperties);
     if (credsPath.isPresent()) {
-      try (FileInputStream fis = new FileInputStream(credsPath.get())) {
-        return GoogleCredentials.fromStream(fis);
+      File file = new File(credsPath.get());
+      if (!file.exists()) {
+        throw new ConfigurationException("Credentials file not found: " + file.getName());
+      }
+      try (FileInputStream fis = new FileInputStream(file)) {
+        return ServiceAccountCredentials.fromStream(fis);
       } catch (IOException e) {
-        throw new ConfigurationException(
-            "Failed to load credentials from file: " + new File(credsPath.get()).getName(), e);
+        throw new GoogleAuthException(Reason.FAILED_CREDENTIAL_CREATION, e);
       }
     }
 
     Optional<String> credsJson =
-        ConfigurableOption.GOOGLE_CLOUD_CREDENTIALS_JSON.getConfiguredValueAsOptional(props);
+        ConfigurableOption.GOOGLE_CLOUD_CREDENTIALS_JSON.getConfiguredValueAsOptional(configProperties);
     if (credsJson.isPresent()) {
       try (ByteArrayInputStream bais =
           new ByteArrayInputStream(credsJson.get().getBytes(StandardCharsets.UTF_8))) {
-        return GoogleCredentials.fromStream(bais);
+        return ServiceAccountCredentials.fromStream(bais);
       } catch (IOException e) {
-        throw new ConfigurationException("Failed to load credentials from JSON string", e);
+        throw new GoogleAuthException(Reason.FAILED_CREDENTIAL_CREATION, e);
       }
     }
 

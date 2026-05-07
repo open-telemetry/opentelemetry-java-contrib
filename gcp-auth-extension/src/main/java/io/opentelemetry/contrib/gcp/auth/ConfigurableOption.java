@@ -55,15 +55,17 @@ enum ConfigurableOption {
   GOOGLE_OTEL_AUTH_TARGET_SIGNALS("Target Signals for Google Authentication Extension"),
 
   /**
-   * Represents the Google Cloud Credentials Path option. Can be configured using the environment
-   * variable `GOOGLE_CLOUD_CREDENTIALS_PATH` or the system property
+   * Specifies the path to a Google Cloud service account JSON key file. The path can be either
+   * absolute or relative to the current working directory. Can be configured using the
+   * environment variable `GOOGLE_CLOUD_CREDENTIALS_PATH` or the system property
    * `google.cloud.credentials.path`.
    */
   GOOGLE_CLOUD_CREDENTIALS_PATH("Google Cloud Credentials Path"),
 
   /**
-   * Represents the Google Cloud Credentials JSON option. Can be configured using the environment
-   * variable `GOOGLE_CLOUD_CREDENTIALS_JSON` or the system property
+   * Specifies the raw JSON content of a Google Cloud service account key. This is useful when
+   * credentials are not stored in a file but are available as a string. Can be configured using
+   * the environment variable `GOOGLE_CLOUD_CREDENTIALS_JSON` or the system property
    * `google.cloud.credentials.json`.
    */
   GOOGLE_CLOUD_CREDENTIALS_JSON("Google Cloud Credentials JSON String");
