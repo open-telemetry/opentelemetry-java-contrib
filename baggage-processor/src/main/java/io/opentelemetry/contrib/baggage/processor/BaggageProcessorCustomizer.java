@@ -40,14 +40,7 @@ public final class BaggageProcessorCustomizer implements AutoConfigurationCustom
     }
 
     // need to add before the batch span processor
-    sdkTracerProviderBuilder.addSpanProcessorFirst(createBaggageSpanProcessor(keys));
-  }
-
-  static BaggageSpanProcessor createBaggageSpanProcessor(List<String> keys) {
-    if (keys.size() == 1 && keys.get(0).equals("*")) {
-      return BaggageSpanProcessor.allowAllBaggageKeys();
-    }
-    return new BaggageSpanProcessor(keys::contains);
+    sdkTracerProviderBuilder.addSpanProcessorFirst(new BaggageSpanProcessor(keys, null));
   }
 
   private static void addLogRecordProcessor(
@@ -60,13 +53,6 @@ public final class BaggageProcessorCustomizer implements AutoConfigurationCustom
     }
 
     // need to add before the batch log processor
-    sdkLoggerProviderBuilder.addLogRecordProcessorFirst(createBaggageLogRecordProcessor(keys));
-  }
-
-  static BaggageLogRecordProcessor createBaggageLogRecordProcessor(List<String> keys) {
-    if (keys.size() == 1 && keys.get(0).equals("*")) {
-      return BaggageLogRecordProcessor.allowAllBaggageKeys();
-    }
-    return new BaggageLogRecordProcessor(keys::contains);
+    sdkLoggerProviderBuilder.addLogRecordProcessorFirst(new BaggageLogRecordProcessor(keys, null));
   }
 }
