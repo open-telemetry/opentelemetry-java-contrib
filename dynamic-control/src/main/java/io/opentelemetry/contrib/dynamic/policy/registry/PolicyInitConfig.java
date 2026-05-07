@@ -248,7 +248,7 @@ public final class PolicyInitConfig {
   }
 
   @Nullable
-  static ConfigProvider getConfigProvider(@Nullable OpenTelemetry openTelemetry) {
+  private static ConfigProvider getConfigProvider(@Nullable OpenTelemetry openTelemetry) {
     return openTelemetry instanceof ExtendedOpenTelemetry
         ? ((ExtendedOpenTelemetry) openTelemetry).getConfigProvider()
         : null;
