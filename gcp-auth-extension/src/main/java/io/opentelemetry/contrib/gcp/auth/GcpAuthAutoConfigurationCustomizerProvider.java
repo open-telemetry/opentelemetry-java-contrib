@@ -148,7 +148,8 @@ public class GcpAuthAutoConfigurationCustomizerProvider
       }
       try (FileInputStream fis = new FileInputStream(file)) {
         return ServiceAccountCredentials.fromStream(fis)
-            .createScoped(Collections.singletonList("https://www.googleapis.com/auth/cloud-platform"));
+            .createScoped(
+                Collections.singletonList("https://www.googleapis.com/auth/cloud-platform"));
       } catch (IOException e) {
         throw new GoogleAuthException(Reason.FAILED_CREDENTIAL_CREATION, e);
       }
@@ -161,7 +162,8 @@ public class GcpAuthAutoConfigurationCustomizerProvider
       try (ByteArrayInputStream bais =
           new ByteArrayInputStream(credsJson.get().getBytes(StandardCharsets.UTF_8))) {
         return ServiceAccountCredentials.fromStream(bais)
-            .createScoped(Collections.singletonList("https://www.googleapis.com/auth/cloud-platform"));
+            .createScoped(
+                Collections.singletonList("https://www.googleapis.com/auth/cloud-platform"));
       } catch (IOException e) {
         throw new GoogleAuthException(Reason.FAILED_CREDENTIAL_CREATION, e);
       }
