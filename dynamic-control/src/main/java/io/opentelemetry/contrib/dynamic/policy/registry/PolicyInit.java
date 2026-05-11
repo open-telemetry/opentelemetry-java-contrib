@@ -267,11 +267,10 @@ public final class PolicyInit {
         updatePoliciesForSource(provider, initialPolicies);
       } catch (Exception e) {
         logger.log(
-             Level.WARNING,
-             "Failed to fetch initial policies for provider source ''"
-                 + source.getLocation()
-                 + "''",
-             e);      }
+            Level.WARNING,
+            "Failed to fetch initial policies for provider source ''" + source.getLocation() + "''",
+            e);
+      }
       Closeable watch =
           provider.startWatching(
               policies -> {
