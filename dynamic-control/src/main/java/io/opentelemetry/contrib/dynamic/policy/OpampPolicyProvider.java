@@ -337,6 +337,7 @@ public final class OpampPolicyProvider implements PolicyProvider {
   }
 
   /** Resets shared provider test state, including polling interval and active provider tracking. */
+  // TODO: refactor/rescope to make this not public at some point
   public static void resetForTest() {
     setGlobalPollingInterval(DEFAULT_POLLING_INTERVAL);
     ACTIVE_PROVIDERS.clear();

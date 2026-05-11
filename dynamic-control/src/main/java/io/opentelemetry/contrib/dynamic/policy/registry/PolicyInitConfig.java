@@ -118,6 +118,9 @@ public final class PolicyInitConfig {
    *       - sourceKey: ...
    *         policyType: ...
    * }</pre>
+   *
+   * @throws IllegalArgumentException if telemetry_policy is present but invalid (for example,
+   *     missing or empty sources)
    */
   @Nullable
   public static PolicyInitConfig readFromTelemetryPolicyDeclarativeConfig(
@@ -126,7 +129,7 @@ public final class PolicyInitConfig {
     List<DeclarativeConfigProperties> sourceConfigs =
         telemetryPolicyConfig.getStructuredList(SOURCES_DECLARATIVE_KEY);
     if (sourceConfigs == null || sourceConfigs.isEmpty()) {
-      return null;
+      throw new IllegalArgumentException("Config must contain a non-empty 'sources' array.");
     }
     List<PolicySourceConfig> sources = new ArrayList<>();
     for (DeclarativeConfigProperties sourceConfig : sourceConfigs) {

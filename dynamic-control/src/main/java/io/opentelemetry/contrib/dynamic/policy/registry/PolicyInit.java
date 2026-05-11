@@ -226,6 +226,7 @@ public final class PolicyInit {
     try {
       PolicyImplementer implementer = policyTypeInitializer.initialize(autoConfiguration);
       initializedImplementers.put(policyClass, implementer);
+      // TODO: register implementer with policyStore, not yet implemented
       // policyStore.registerImplementer(implementer);
       logger.log(Level.INFO, "Initialized policy class ''{0}''", policyClass.getName());
     } catch (RuntimeException e) {
@@ -266,10 +267,11 @@ public final class PolicyInit {
         updatePoliciesForSource(provider, initialPolicies);
       } catch (Exception e) {
         logger.log(
-            Level.INFO,
-            "Failed to fetch initial policies for provider source ''{0}''",
-            source.getLocation());
-      }
+             Level.WARNING,
+             "Failed to fetch initial policies for provider source ''"
+                 + source.getLocation()
+                 + "''",
+             e);      }
       Closeable watch =
           provider.startWatching(
               policies -> {
@@ -352,10 +354,14 @@ public final class PolicyInit {
   }
 
   /**
-   * Shuts down active policy sources and clears runtime registry state.
+   * Shuts down active policy sources and clears source-activation runtime state.
    *
    * <p>This closes all currently active source watches and allows a subsequent {@link #init}
    * invocation to activate sources again.
+   *
+   * <p>This does <strong>not</strong> clear global policy type registrations ({@link
+   * #registerPolicyType(String, Class, PolicyTypeInitializer)}) and does not replace the static
+   * {@link PolicyStore} instance.
    */
   public static void shutdown() {
     for (Closeable watch : activeSourceWatches) {
@@ -372,7 +378,7 @@ public final class PolicyInit {
   }
 
   /**
-   * Resets static registry state used by tests.
+   * Resets source-activation runtime state used by tests.
    *
    * <p>Example usage:
    *
