@@ -282,8 +282,8 @@ public final class PolicyInit {
       activeSourceWatches.add(watch);
       logger.log(
           Level.INFO,
-          "Activated OpAMP policy source with location key ''{0}''",
-          source.getLocation());
+          "Activated {0} policy source with location ''{1}''",
+          new Object[] {source.getKind().configValue(), source.getLocation()});
     }
   }
 
