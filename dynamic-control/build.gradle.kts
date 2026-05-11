@@ -1,7 +1,6 @@
 plugins {
   id("otel.java-conventions")
   id("otel.publish-conventions")
-  id("otel.animalsniffer-conventions")
 }
 
 description = "Dynamic control of some specific features of the agent"
