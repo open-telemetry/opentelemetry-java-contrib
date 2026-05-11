@@ -104,6 +104,38 @@ public final class PolicyInitConfig {
   }
 
   /**
+   * Reads policy-init configuration from a declarative block that already points at {@code
+   * telemetry_policy}.
+   *
+   * <p>Expected shape is:
+   *
+   * <pre>{@code
+   * sources:
+   *   - kind: ...
+   *     format: ...
+   *     location: ...
+   *     mappings:
+   *       - sourceKey: ...
+   *         policyType: ...
+   * }</pre>
+   */
+  @Nullable
+  public static PolicyInitConfig readFromTelemetryPolicyDeclarativeConfig(
+      DeclarativeConfigProperties telemetryPolicyConfig) {
+    Objects.requireNonNull(telemetryPolicyConfig, "telemetryPolicyConfig cannot be null");
+    List<DeclarativeConfigProperties> sourceConfigs =
+        telemetryPolicyConfig.getStructuredList(SOURCES_DECLARATIVE_KEY);
+    if (sourceConfigs == null || sourceConfigs.isEmpty()) {
+      return null;
+    }
+    List<PolicySourceConfig> sources = new ArrayList<>();
+    for (DeclarativeConfigProperties sourceConfig : sourceConfigs) {
+      sources.add(parseDeclarativeSource(sourceConfig));
+    }
+    return new PolicyInitConfig(sources);
+  }
+
+  /**
    * Reads policy-init configuration with declarative-first fallback.
    *
    * <p>When declarative config contains {@code telemetry_policy.sources}, that configuration is
