@@ -13,6 +13,7 @@ import io.opentelemetry.contrib.dynamic.policy.PolicyStore;
 import io.opentelemetry.contrib.dynamic.policy.PolicyTypeInitializer;
 import io.opentelemetry.contrib.dynamic.policy.PolicyValidator;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
+import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingRatePolicy;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import java.io.Closeable;
@@ -65,9 +66,7 @@ public final class PolicyInit {
   private static final PolicyStore policyStore = new PolicyStore();
 
   static {
-    // For now, policies will be registered here.
-    // TODO: register TraceSamplingRatePolicy when registerPolicyType implemented
-    // TraceSamplingRatePolicy.registerPolicyType();
+    TraceSamplingRatePolicy.registerPolicyType();
   }
 
   /**
