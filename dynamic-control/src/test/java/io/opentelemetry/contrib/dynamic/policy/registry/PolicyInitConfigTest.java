@@ -209,6 +209,42 @@ class PolicyInitConfigTest {
   }
 
   @Test
+  void readFromTelemetryPolicyDeclarativeConfigThrowsWhenSourcesMissing() {
+    DeclarativeConfigProperties telemetryPolicy = mock(DeclarativeConfigProperties.class);
+    when(telemetryPolicy.getStructuredList(PolicyInitConfig.SOURCES_DECLARATIVE_KEY))
+        .thenReturn(null);
+
+    assertThatThrownBy(
+            () -> PolicyInitConfig.readFromTelemetryPolicyDeclarativeConfig(telemetryPolicy))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("sources");
+  }
+
+  @Test
+  void readFromTelemetryPolicyDeclarativeConfigThrowsWhenSourcesEmpty() {
+    DeclarativeConfigProperties telemetryPolicy = mock(DeclarativeConfigProperties.class);
+    when(telemetryPolicy.getStructuredList(PolicyInitConfig.SOURCES_DECLARATIVE_KEY))
+        .thenReturn(Collections.emptyList());
+
+    assertThatThrownBy(
+            () -> PolicyInitConfig.readFromTelemetryPolicyDeclarativeConfig(telemetryPolicy))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("sources");
+  }
+
+  @Test
+  void readFromTelemetryPolicyDeclarativeConfigReadsSources() {
+    DeclarativeConfigProperties telemetryPolicy = telemetryPolicyConfig("from-declarative");
+
+    PolicyInitConfig config =
+        PolicyInitConfig.readFromTelemetryPolicyDeclarativeConfig(telemetryPolicy);
+
+    assertThat(config).isNotNull();
+    assertThat(config.getSources()).hasSize(1);
+    assertThat(config.getSources().get(0).getLocation()).isEqualTo("from-declarative");
+  }
+
+  @Test
   void readFromDeclarativeOrConfigPropertiesPrefersDeclarativeWhenPresent() throws Exception {
     Path jsonPath = tempDir.resolve("policy-init.json");
     Files.write(jsonPath, jsonWithLocation("from-file").getBytes(StandardCharsets.UTF_8));

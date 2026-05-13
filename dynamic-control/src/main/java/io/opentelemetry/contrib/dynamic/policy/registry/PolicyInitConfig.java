@@ -104,6 +104,41 @@ public final class PolicyInitConfig {
   }
 
   /**
+   * Reads policy-init configuration from a declarative block that already points at {@code
+   * telemetry_policy}.
+   *
+   * <p>Expected shape is:
+   *
+   * <pre>{@code
+   * sources:
+   *   - kind: ...
+   *     format: ...
+   *     location: ...
+   *     mappings:
+   *       - sourceKey: ...
+   *         policyType: ...
+   * }</pre>
+   *
+   * @throws IllegalArgumentException if telemetry_policy is present but invalid (for example,
+   *     missing or empty sources)
+   */
+  @Nullable
+  public static PolicyInitConfig readFromTelemetryPolicyDeclarativeConfig(
+      DeclarativeConfigProperties telemetryPolicyConfig) {
+    Objects.requireNonNull(telemetryPolicyConfig, "telemetryPolicyConfig cannot be null");
+    List<DeclarativeConfigProperties> sourceConfigs =
+        telemetryPolicyConfig.getStructuredList(SOURCES_DECLARATIVE_KEY);
+    if (sourceConfigs == null || sourceConfigs.isEmpty()) {
+      throw new IllegalArgumentException("Config must contain a non-empty 'sources' array.");
+    }
+    List<PolicySourceConfig> sources = new ArrayList<>();
+    for (DeclarativeConfigProperties sourceConfig : sourceConfigs) {
+      sources.add(parseDeclarativeSource(sourceConfig));
+    }
+    return new PolicyInitConfig(sources);
+  }
+
+  /**
    * Reads policy-init configuration with declarative-first fallback.
    *
    * <p>When declarative config contains {@code telemetry_policy.sources}, that configuration is
