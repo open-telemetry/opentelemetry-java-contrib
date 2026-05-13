@@ -74,7 +74,6 @@ components:
     - jkwatson
   resource-providers:
     - breedx-splk
-    - mateuszrzeszutek
     - laurit
   runtime-attach:
     - jeanbisutti
