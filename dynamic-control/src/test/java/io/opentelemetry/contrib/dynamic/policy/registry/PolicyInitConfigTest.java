@@ -89,7 +89,7 @@ class PolicyInitConfigTest {
     assertThat(source.getLocation()).isEqualTo("vendor");
     assertThat(source.getMappings()).hasSize(1);
     assertThat(source.getMappings().get(0).getSourceKey()).isEqualTo("sampling_rate");
-    assertThat(source.getMappings().get(0).getPolicyType()).isEqualTo("trace_sampling_rate_policy");
+    assertThat(source.getMappings().get(0).getPolicyType()).isEqualTo("trace-sampling");
   }
 
   @Test
@@ -191,7 +191,7 @@ class PolicyInitConfigTest {
     assertThat(source.getLocation()).isEqualTo("from-declarative");
     assertThat(source.getMappings()).hasSize(1);
     assertThat(source.getMappings().get(0).getSourceKey()).isEqualTo("sampling_rate");
-    assertThat(source.getMappings().get(0).getPolicyType()).isEqualTo("trace_sampling_rate_policy");
+    assertThat(source.getMappings().get(0).getPolicyType()).isEqualTo("trace-sampling");
   }
 
   @Test
@@ -428,7 +428,7 @@ class PolicyInitConfigTest {
     when(mapping.getString(PolicyInitConfig.SOURCE_KEY_DECLARATIVE_KEY))
         .thenReturn("sampling_rate");
     when(mapping.getString(PolicyInitConfig.POLICY_TYPE_DECLARATIVE_KEY))
-        .thenReturn("trace_sampling_rate_policy");
+        .thenReturn("trace-sampling");
     return mapping;
   }
 
@@ -453,13 +453,13 @@ class PolicyInitConfigTest {
 
   private static String minimalJsonConfig() {
     return "{\"sources\":[{\"kind\":\"opamp\",\"format\":\"jsonkeyvalue\",\"location\":\"vendor\","
-        + "\"mappings\":[{\"sourceKey\":\"sampling_rate\",\"policyType\":\"trace_sampling_rate_policy\"}]}]}";
+        + "\"mappings\":[{\"sourceKey\":\"sampling_rate\",\"policyType\":\"trace-sampling\"}]}]}";
   }
 
   private static String jsonWithLocation(String location) {
     return "{\"sources\":[{\"kind\":\"opamp\",\"format\":\"jsonkeyvalue\",\"location\":\""
         + location
-        + "\",\"mappings\":[{\"sourceKey\":\"sampling_rate\",\"policyType\":\"trace_sampling_rate_policy\"}]}]}";
+        + "\",\"mappings\":[{\"sourceKey\":\"sampling_rate\",\"policyType\":\"trace-sampling\"}]}]}";
   }
 
   private static String minimalYamlConfig() {
@@ -469,7 +469,7 @@ class PolicyInitConfigTest {
         + "    location: vendor\n"
         + "    mappings:\n"
         + "      - sourceKey: sampling_rate\n"
-        + "        policyType: trace_sampling_rate_policy\n";
+        + "        policyType: trace-sampling\n";
   }
 
   private static String yamlWithLocation(String location) {
@@ -481,6 +481,6 @@ class PolicyInitConfigTest {
         + "\n"
         + "    mappings:\n"
         + "      - sourceKey: sampling_rate\n"
-        + "        policyType: trace_sampling_rate_policy\n";
+        + "        policyType: trace-sampling\n";
   }
 }
