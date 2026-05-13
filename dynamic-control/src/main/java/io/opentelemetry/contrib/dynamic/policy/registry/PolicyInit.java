@@ -66,6 +66,7 @@ public final class PolicyInit {
   private static final PolicyStore policyStore = new PolicyStore();
 
   static {
+    // For now, policies will be registered here. TODO: move to a more dynamic way.
     TraceSamplingRatePolicy.registerPolicyType();
   }
 
