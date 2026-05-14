@@ -57,10 +57,18 @@ class QueueManagerMetricsCollectorTest {
     classUnderTest = new QueueManagerMetricsCollector(producer);
     classUnderTest.accept(context);
     List<String> metricsList = new ArrayList<>(singletonList("ibm.mq.manager.status"));
+    metricsList.add("ibm.mq.queue_manager.uptime");
 
     for (MetricData metric : producer.produce(Resource.empty())) {
       if (metricsList.remove(metric.getName())) {
-        assertThat(metric.getLongGaugeData().getPoints().iterator().next().getValue()).isEqualTo(2);
+        if ("ibm.mq.manager.status".equals(metric.getName())) {
+          assertThat(metric.getLongGaugeData().getPoints().iterator().next().getValue())
+              .isEqualTo(2);
+        }
+        if ("ibm.mq.queue_manager.uptime".equals(metric.getName())) {
+          assertThat(metric.getLongSumData().getPoints().iterator().next().getValue())
+              .isGreaterThan(0);
+        }
       }
     }
     assertThat(metricsList).isEmpty();
@@ -113,6 +121,8 @@ class QueueManagerMetricsCollectorTest {
     response1.addParameter(CMQCFC.MQIACF_RESTART_LOG_SIZE, 42);
     response1.addParameter(CMQCFC.MQIACF_REUSABLE_LOG_SIZE, 42);
     response1.addParameter(CMQCFC.MQIACF_ARCHIVE_LOG_SIZE, 42);
+    response1.addParameter(CMQCFC.MQCACF_Q_MGR_START_DATE, "2024-01-01");
+    response1.addParameter(CMQCFC.MQCACF_Q_MGR_START_TIME, "12.00.00");
 
     return new PCFMessage[] {response1};
   }

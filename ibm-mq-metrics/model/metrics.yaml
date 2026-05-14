@@ -528,8 +528,21 @@ groups:
     metric_name: ibm.mq.heartbeat
     stability: development
     brief: "Queue manager heartbeat"
+    description: |
+      Deprecated. Use ibm.mq.queue_manager.uptime instead.
     instrument: gauge
     unit: "1"
+    attributes:
+      - ref: ibm.mq.queue.manager
+        requirement_level: required
+  - id: ibm.mq.queue_manager.uptime
+    type: metric
+    metric_name: ibm.mq.queue_manager.uptime
+    stability: development
+    brief: "Queue manager uptime"
+    description: "Cumulative time the Queue Manager has been up"
+    instrument: gauge
+    unit: "s"
     attributes:
       - ref: ibm.mq.queue.manager
         requirement_level: required
