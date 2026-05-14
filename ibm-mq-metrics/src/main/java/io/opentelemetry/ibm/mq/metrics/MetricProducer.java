@@ -5,9 +5,16 @@
 
 package io.opentelemetry.ibm.mq.metrics;
 
-import static io.opentelemetry.ibm.mq.metrics.MetricData.createMetricData;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import io.opentelemetry.api.common.Attributes;
+import static io.opentelemetry.ibm.mq.metrics.MetricData.createMetricData;
 import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
@@ -17,13 +24,6 @@ import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.data.MetricDataType;
 import io.opentelemetry.sdk.metrics.data.SumData;
 import io.opentelemetry.sdk.resources.Resource;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingDeque;
 
 // This file is generated using weaver. Do not edit manually.
 

@@ -12,7 +12,7 @@ import com.ibm.mq.headers.pcf.PCFException;
 import com.ibm.mq.headers.pcf.PCFMessage;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 
 public final class MessageBuddy {
 
@@ -79,24 +79,21 @@ public final class MessageBuddy {
    * Calculate the queue manager uptime in seconds.
    *
    * <p>Fetches the queue manager start date and time from the PCF response, parses them, and
-   * calculates the difference from the current system time. The start time is assumed to be in the
-   * system's default timezone.
+   * calculates the difference from the current system time.
    *
    * @param message the PCF response message containing queue manager information
    * @return uptime in seconds since the queue manager started
    * @throws PCFException if the required attributes cannot be retrieved from the PCF message
    */
   public static long queueManagerUptime(PCFMessage message) throws PCFException {
-    // Note: MQCA_Q_MGR_START_DATE (3175) and MQCA_Q_MGR_START_TIME (3176) may not have
-    // constant definitions in all IBM MQ client versions, so we use raw parameter IDs
-    String date = message.getStringParameterValue(3175).trim();
-    String time = message.getStringParameterValue(3176).trim();
+    String date = message.getStringParameterValue(CMQCFC.MQCACF_Q_MGR_START_DATE).trim();
+    String time = message.getStringParameterValue(CMQCFC.MQCACF_Q_MGR_START_TIME).trim();
 
     // Parse the date (format: yyyy-MM-dd) and time (format: HH.mm.ss)
-    // Assumes the QM start time is in the system's default timezone (typically where the
-    // collector is running)
+    // The queue manager start timestamp does not include timezone information in this PCF response,
+    // so we normalize to UTC for a stable and predictable baseline across regions.
     LocalDateTime qmgrStartLocal = LocalDateTime.parse(date + "T" + time.replaceAll("\\.", ":"));
-    Instant qmgrStartInstant = qmgrStartLocal.atZone(ZoneId.systemDefault()).toInstant();
+    Instant qmgrStartInstant = qmgrStartLocal.toInstant(ZoneOffset.UTC);
     Instant now = Instant.now();
 
     // Calculate uptime in seconds
