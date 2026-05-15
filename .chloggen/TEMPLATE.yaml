@@ -5,7 +5,7 @@
 # - enhancement
 # - bug_fix
 change_type:
-component: jmx-metrics
+component:
 note:
 issues: []
 subtext:

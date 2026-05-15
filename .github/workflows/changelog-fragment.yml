@@ -17,7 +17,6 @@ permissions:
 
 jobs:
   generate-fragment:
-    if: ${{ github.actor != 'dependabot[bot]' && github.actor != 'renovate[bot]' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,15 +26,25 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
+      - name: Install yq
+        run: |
+          go install github.com/mikefarah/yq/v4@v4.44.3
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+
       - name: Check skip conditions
         id: skip
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_LABELS: ${{ toJson(github.event.pull_request.labels.*.name) }}
+          PR_ACTOR: ${{ github.actor }}
         run: |
           skip=false
 
-          if [[ $PR_TITLE == \[chore\]* ]]; then
+          if [[ "$PR_ACTOR" == "dependabot[bot]" || "$PR_ACTOR" == "renovate[bot]" ]]; then
+            skip=true
+          fi
+
+          if [[ "$PR_TITLE" == \[chore\]* ]]; then
             skip=true
           fi
 
@@ -58,18 +67,12 @@ jobs:
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Install yq
-        if: ${{ steps.skip.outputs.skip != 'true' && steps.fragment.outputs.exists != 'true' && github.event.pull_request.head.repo.full_name == github.repository }}
-        run: |
-          go install github.com/mikefarah/yq/v4@latest
-          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
-
       - name: Fetch base branch
         if: ${{ steps.skip.outputs.skip != 'true' && steps.fragment.outputs.exists != 'true' && github.event.pull_request.head.repo.full_name == github.repository }}
         run: |
           git fetch origin "${{ github.event.pull_request.base.ref }}:refs/remotes/origin/${{ github.event.pull_request.base.ref }}" --depth=1
 
-      - name: Generate changelog fragment from GitHub Models
+      - name: Generate fragment
         if: ${{ steps.skip.outputs.skip != 'true' && steps.fragment.outputs.exists != 'true' && github.event.pull_request.head.repo.full_name == github.repository }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -90,7 +93,7 @@ jobs:
               messages: [
                 {
                   role: "system",
-                  content: "Generate a single JSON object for a changelog fragment. Return only valid JSON with these keys: change_type, component, note, issues, subtext, change_logs. change_type must be one of breaking, deprecation, new_component, enhancement, bug_fix. component must be a concise repository component or area such as jmx-metrics. note must be a brief end-user facing summary. issues must be an array of issue numbers without #. subtext is optional and may be null or omitted. change_logs must be [\"user\"]. Do not add markdown or extra keys."
+                  content: "Generate a single JSON object for a changelog fragment. Return only valid JSON with these keys: change_type, component, note, issues, subtext, change_logs. change_type must be one of breaking, deprecation, new_component, enhancement, bug_fix. component must be blank if the PR does not clearly map to one component. note must be a brief end-user facing summary. issues must be an array of issue numbers without #. subtext is optional and may be null or omitted. change_logs must be [\"user\"]. Do not add markdown or extra keys."
                 },
                 {
                   role: "user",
@@ -99,14 +102,30 @@ jobs:
               ]
             }')"
 
-          response="$(curl --fail-with-body --silent --show-error https://models.inference.ai.azure.com/chat/completions \
+          response="$(curl --fail-with-body --silent --show-error https://models.github.ai/inference/chat/completions \
+            -H "Accept: application/vnd.github+json" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ${GITHUB_TOKEN}" \
             -d "$request_payload")"
 
           jq -r '.choices[0].message.content | fromjson' <<<"$response" | yq -P - > ".chloggen/pr-${PR_NUMBER}.yaml"
 
-      - name: Commit changelog fragment
+      - name: Validate AI Output
+        if: ${{ steps.skip.outputs.skip != 'true' && steps.fragment.outputs.exists != 'true' && github.event.pull_request.head.repo.full_name == github.repository }}
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          fragment=".chloggen/pr-${PR_NUMBER}.yaml"
+
+          go install go.opentelemetry.io/build-tools/chloggen@v0.15.0
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+
+          if ! chloggen validate --config .chloggen/config.yaml; then
+            rm -f "$fragment"
+            exit 1
+          fi
+
+      - name: Commit
         if: ${{ steps.skip.outputs.skip != 'true' && steps.fragment.outputs.exists != 'true' && github.event.pull_request.head.repo.full_name == github.repository }}
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -118,7 +137,7 @@ jobs:
           git commit -m "Add changelog fragment for PR #${PR_NUMBER}"
           git push origin HEAD:"${PR_BRANCH}"
 
-      - name: Ask fork contributors to add a fragment manually
+      - name: Fork comment fallback
         if: ${{ steps.skip.outputs.skip != 'true' && steps.fragment.outputs.exists != 'true' && github.event.pull_request.head.repo.full_name != github.repository }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -138,7 +157,7 @@ jobs:
               '# - enhancement' \
               '# - bug_fix' \
               'change_type:' \
-              'component: jmx-metrics' \
+              'component:' \
               'note:' \
               'issues: []' \
               'subtext:' \
@@ -146,7 +165,7 @@ jobs:
             echo '```'
           } > /tmp/changelog-comment.md
 
-          gh pr comment "${PR_NUMBER}" --body-file /tmp/changelog-comment.md
+          gh pr comment --repo "${{ github.repository }}" "${PR_NUMBER}" --body-file /tmp/changelog-comment.md
 
   validate-fragment:
     needs: generate-fragment
@@ -165,10 +184,15 @@ jobs:
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_LABELS: ${{ toJson(github.event.pull_request.labels.*.name) }}
+          PR_ACTOR: ${{ github.actor }}
         run: |
           skip=false
 
-          if [[ $PR_TITLE == \[chore\]* ]]; then
+          if [[ "$PR_ACTOR" == "dependabot[bot]" || "$PR_ACTOR" == "renovate[bot]" ]]; then
+            skip=true
+          fi
+
+          if [[ "$PR_TITLE" == \[chore\]* ]]; then
             skip=true
           fi
 
@@ -178,13 +202,11 @@ jobs:
 
           echo "skip=$skip" >> "$GITHUB_OUTPUT"
 
-      - name: Install chloggen
-        if: ${{ steps.skip.outputs.skip != 'true' }}
-        run: |
-          go install go.opentelemetry.io/build-tools/chloggen@latest
-          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+      - name: Exit if skipped
+        if: ${{ steps.skip.outputs.skip == 'true' }}
+        run: exit 0
 
-      - name: Verify changelog fragment
+      - name: Validate fragment
         if: ${{ steps.skip.outputs.skip != 'true' }}
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -196,4 +218,6 @@ jobs:
             exit 1
           fi
 
+          go install go.opentelemetry.io/build-tools/chloggen@v0.15.0
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
           chloggen validate --config .chloggen/config.yaml
