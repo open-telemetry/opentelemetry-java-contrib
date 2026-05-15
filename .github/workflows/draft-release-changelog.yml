@@ -1,0 +1,46 @@
+name: Draft Release Changelog
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to compile into the changelog
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  compile-changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install chloggen
+        run: |
+          go install go.opentelemetry.io/build-tools/chloggen@latest
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+
+      - name: Preview changelog update
+        run: |
+          chloggen update --config .chloggen/config.yaml --dry
+
+      - name: Compile changelog fragments
+        run: |
+          chloggen update --config .chloggen/config.yaml --version "${{ inputs.version }}"
+
+      - uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.OPENTELEMETRYBOT_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          branch: chore/changelog-${{ inputs.version }}
+          commit-message: "Update changelog for ${{ inputs.version }}"
+          title: "chore: update changelog for ${{ inputs.version }}"
+          body: |
+            Compile changelog fragments for version ${{ inputs.version }}.
+          author: opentelemetrybot <107717825+opentelemetrybot@users.noreply.github.com>
+          committer: opentelemetrybot <107717825+opentelemetrybot@users.noreply.github.com>
+          delete-branch: true

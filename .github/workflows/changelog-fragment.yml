@@ -1,0 +1,199 @@
+name: Changelog Fragments
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - labeled
+      - unlabeled
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  models: read
+
+jobs:
+  generate-fragment:
+    if: ${{ github.actor != 'dependabot[bot]' && github.actor != 'renovate[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Check skip conditions
+        id: skip
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_LABELS: ${{ toJson(github.event.pull_request.labels.*.name) }}
+        run: |
+          skip=false
+
+          if [[ $PR_TITLE == \[chore\]* ]]; then
+            skip=true
+          fi
+
+          if jq -e 'index("Skip Changelog")' <<<"$PR_LABELS" >/dev/null; then
+            skip=true
+          fi
+
+          echo "skip=$skip" >> "$GITHUB_OUTPUT"
+
+      - name: Check existing fragment
+        id: fragment
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          fragment=".chloggen/pr-${PR_NUMBER}.yaml"
+
+          if [[ -f "$fragment" ]]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install yq
+        if: ${{ steps.skip.outputs.skip != 'true' && steps.fragment.outputs.exists != 'true' && github.event.pull_request.head.repo.full_name == github.repository }}
+        run: |
+          go install github.com/mikefarah/yq/v4@latest
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+
+      - name: Fetch base branch
+        if: ${{ steps.skip.outputs.skip != 'true' && steps.fragment.outputs.exists != 'true' && github.event.pull_request.head.repo.full_name == github.repository }}
+        run: |
+          git fetch origin "${{ github.event.pull_request.base.ref }}:refs/remotes/origin/${{ github.event.pull_request.base.ref }}" --depth=1
+
+      - name: Generate changelog fragment from GitHub Models
+        if: ${{ steps.skip.outputs.skip != 'true' && steps.fragment.outputs.exists != 'true' && github.event.pull_request.head.repo.full_name == github.repository }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+        run: |
+          changed_files="$(git diff --name-only "origin/${BASE_REF}"...HEAD)"
+
+          request_payload="$(jq -n \
+            --arg title "$PR_TITLE" \
+            --arg body "$PR_BODY" \
+            --arg changed_files "$changed_files" \
+            '{
+              model: "gpt-4o-mini",
+              response_format: {type: "json_object"},
+              messages: [
+                {
+                  role: "system",
+                  content: "Generate a single JSON object for a changelog fragment. Return only valid JSON with these keys: change_type, component, note, issues, subtext, change_logs. change_type must be one of breaking, deprecation, new_component, enhancement, bug_fix. component must be a concise repository component or area such as jmx-metrics. note must be a brief end-user facing summary. issues must be an array of issue numbers without #. subtext is optional and may be null or omitted. change_logs must be [\"user\"]. Do not add markdown or extra keys."
+                },
+                {
+                  role: "user",
+                  content: "PR title: \($title)\n\nPR body:\n\($body)\n\nChanged files:\n\($changed_files)"
+                }
+              ]
+            }')"
+
+          response="$(curl --fail-with-body --silent --show-error https://models.inference.ai.azure.com/chat/completions \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -d "$request_payload")"
+
+          jq -r '.choices[0].message.content | fromjson' <<<"$response" | yq -P - > ".chloggen/pr-${PR_NUMBER}.yaml"
+
+      - name: Commit changelog fragment
+        if: ${{ steps.skip.outputs.skip != 'true' && steps.fragment.outputs.exists != 'true' && github.event.pull_request.head.repo.full_name == github.repository }}
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_BRANCH: ${{ github.head_ref }}
+        run: |
+          git config user.name opentelemetrybot
+          git config user.email 107717825+opentelemetrybot@users.noreply.github.com
+          git add ".chloggen/pr-${PR_NUMBER}.yaml"
+          git commit -m "Add changelog fragment for PR #${PR_NUMBER}"
+          git push origin HEAD:"${PR_BRANCH}"
+
+      - name: Ask fork contributors to add a fragment manually
+        if: ${{ steps.skip.outputs.skip != 'true' && steps.fragment.outputs.exists != 'true' && github.event.pull_request.head.repo.full_name != github.repository }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          {
+            echo "I could not generate a changelog fragment automatically because this pull request comes from a fork."
+            echo
+            echo "Please add the following file manually at .chloggen/pr-${PR_NUMBER}.yaml:"
+            echo
+            echo '```yaml'
+            printf '%s\n' \
+              '# Valid change types:' \
+              '# - breaking' \
+              '# - deprecation' \
+              '# - new_component' \
+              '# - enhancement' \
+              '# - bug_fix' \
+              'change_type:' \
+              'component: jmx-metrics' \
+              'note:' \
+              'issues: []' \
+              'subtext:' \
+              'change_logs: [user]'
+            echo '```'
+          } > /tmp/changelog-comment.md
+
+          gh pr comment "${PR_NUMBER}" --body-file /tmp/changelog-comment.md
+
+  validate-fragment:
+    needs: generate-fragment
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Check skip conditions
+        id: skip
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_LABELS: ${{ toJson(github.event.pull_request.labels.*.name) }}
+        run: |
+          skip=false
+
+          if [[ $PR_TITLE == \[chore\]* ]]; then
+            skip=true
+          fi
+
+          if jq -e 'index("Skip Changelog")' <<<"$PR_LABELS" >/dev/null; then
+            skip=true
+          fi
+
+          echo "skip=$skip" >> "$GITHUB_OUTPUT"
+
+      - name: Install chloggen
+        if: ${{ steps.skip.outputs.skip != 'true' }}
+        run: |
+          go install go.opentelemetry.io/build-tools/chloggen@latest
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+
+      - name: Verify changelog fragment
+        if: ${{ steps.skip.outputs.skip != 'true' }}
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          fragment=".chloggen/pr-${PR_NUMBER}.yaml"
+
+          if [[ ! -f "$fragment" ]]; then
+            echo "missing changelog fragment: $fragment"
+            exit 1
+          fi
+
+          chloggen validate --config .chloggen/config.yaml

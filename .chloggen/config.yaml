@@ -1,0 +1,12 @@
+change_types:
+  - breaking
+  - deprecation
+  - new_component
+  - enhancement
+  - bug_fix
+entries_dir: .chloggen
+changelog_md: CHANGELOG.md
+template_yaml: .chloggen/TEMPLATE.yaml
+change_logs:
+  user: CHANGELOG.md
+default_change_logs: [user]
