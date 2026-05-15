@@ -15,32 +15,29 @@ import com.ibm.mq.constants.CMQC;
 import com.ibm.mq.constants.CMQCFC;
 import com.ibm.mq.headers.pcf.PCFMessage;
 import com.ibm.mq.headers.pcf.PCFMessageAgent;
-import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.ibm.mq.config.QueueManager;
+import io.opentelemetry.ibm.mq.metrics.MetricProducer;
 import io.opentelemetry.ibm.mq.metrics.MetricsConfig;
 import io.opentelemetry.ibm.mq.opentelemetry.ConfigWrapper;
+import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.metrics.data.LongPointData;
 import io.opentelemetry.sdk.metrics.data.MetricData;
-import io.opentelemetry.sdk.testing.junit5.OpenTelemetryExtension;
+import io.opentelemetry.sdk.resources.Resource;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class QueueCollectionBuddyTest {
-  @RegisterExtension
-  static final OpenTelemetryExtension otelTesting = OpenTelemetryExtension.create();
 
   QueueCollectionBuddy classUnderTest;
   QueueManager queueManager;
   MetricsCollectorContext collectorContext;
-  Meter meter;
   @Mock private PCFMessageAgent pcfMessageAgent;
 
   @BeforeEach
@@ -48,7 +45,6 @@ class QueueCollectionBuddyTest {
     ConfigWrapper config = ConfigWrapper.parse("src/test/resources/conf/config.yml");
     ObjectMapper mapper = new ObjectMapper();
     queueManager = mapper.convertValue(config.getQueueManagers().get(0), QueueManager.class);
-    meter = otelTesting.getOpenTelemetry().getMeter("opentelemetry.io/mq");
     collectorContext =
         new MetricsCollectorContext(queueManager, pcfMessageAgent, null, new MetricsConfig(config));
   }
@@ -61,8 +57,9 @@ class QueueCollectionBuddyTest {
     sharedState.putQueueType("DEV.QUEUE.1", "local-transmission");
     PCFMessage request = createPCFRequestForInquireQStatusCmd();
     when(pcfMessageAgent.send(request)).thenReturn(createPCFResponseForInquireQStatusCmd());
-
-    classUnderTest = new QueueCollectionBuddy(meter, sharedState);
+    MetricProducer producer =
+        new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
+    classUnderTest = new QueueCollectionBuddy(producer, sharedState);
     classUnderTest.processPcfRequestAndPublishQMetrics(
         collectorContext, request, "*", InquireQStatusCmdCollector.ATTRIBUTES);
 
@@ -88,7 +85,7 @@ class QueueCollectionBuddyTest {
                         "ibm.mq.onqtime.long_period", -1L,
                         "ibm.mq.queue.depth", 1L))));
 
-    for (MetricData metric : otelTesting.getMetrics()) {
+    for (MetricData metric : producer.produce(Resource.empty())) {
       for (LongPointData d : metric.getLongGaugeData().getPoints()) {
         String queueName = d.getAttributes().get(MESSAGING_DESTINATION_NAME);
         Long expectedValue = expectedValues.get(queueName).remove(metric.getName());
@@ -105,7 +102,9 @@ class QueueCollectionBuddyTest {
   void testProcessPcfRequestAndPublishQMetricsForInquireQCmd() throws Exception {
     PCFMessage request = createPCFRequestForInquireQCmd();
     when(pcfMessageAgent.send(request)).thenReturn(createPCFResponseForInquireQCmd());
-    classUnderTest = new QueueCollectionBuddy(meter, new QueueCollectorSharedState());
+    MetricProducer producer =
+        new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
+    classUnderTest = new QueueCollectionBuddy(producer, new QueueCollectorSharedState());
     classUnderTest.processPcfRequestAndPublishQMetrics(
         collectorContext, request, "*", InquireQCmdCollector.ATTRIBUTES);
 
@@ -127,7 +126,7 @@ class QueueCollectionBuddyTest {
                         "ibm.mq.open.input.count", 3L,
                         "ibm.mq.open.output.count", 3L))));
 
-    for (MetricData metric : otelTesting.getMetrics()) {
+    for (MetricData metric : producer.produce(Resource.empty())) {
       for (LongPointData d : metric.getLongGaugeData().getPoints()) {
         String queueName = d.getAttributes().get(MESSAGING_DESTINATION_NAME);
         Long expectedValue = expectedValues.get(queueName).remove(metric.getName());
@@ -148,11 +147,13 @@ class QueueCollectionBuddyTest {
     sharedState.putQueueType("DEV.QUEUE.1", "local-transmission");
     PCFMessage request = createPCFRequestForResetQStatsCmd();
     when(pcfMessageAgent.send(request)).thenReturn(createPCFResponseForResetQStatsCmd());
-    classUnderTest = new QueueCollectionBuddy(meter, sharedState);
+    MetricProducer producer =
+        new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
+    classUnderTest = new QueueCollectionBuddy(producer, sharedState);
     classUnderTest.processPcfRequestAndPublishQMetrics(
         collectorContext, request, "*", ResetQStatsCmdCollector.ATTRIBUTES);
 
-    for (MetricData metric : otelTesting.getMetrics()) {
+    for (MetricData metric : producer.produce(Resource.empty())) {
       Iterator<LongPointData> iterator = metric.getLongGaugeData().getPoints().iterator();
       if (metric.getName().equals("ibm.mq.high.queue.depth")) {
         assertThat(iterator.next().getValue()).isEqualTo(10);

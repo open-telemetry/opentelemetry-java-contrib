@@ -24,14 +24,13 @@ import com.ibm.mq.headers.pcf.PCFException;
 import com.ibm.mq.headers.pcf.PCFMessage;
 import com.ibm.mq.headers.pcf.PCFParameter;
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.metrics.LongGauge;
-import io.opentelemetry.api.metrics.Meter;
-import io.opentelemetry.ibm.mq.metrics.Metrics;
+import io.opentelemetry.ibm.mq.metrics.MetricProducer;
 import io.opentelemetry.ibm.mq.metrics.MetricsConfig;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import javax.annotation.Nullable;
 import org.slf4j.Logger;
@@ -46,8 +45,7 @@ final class QueueCollectionBuddy {
   private final Map<Integer, AllowedGauge> gauges = new HashMap<>();
 
   private final QueueCollectorSharedState sharedState;
-  private final LongGauge onqtimeShort;
-  private final LongGauge onqtimeLong;
+  private final MetricProducer producer;
 
   @FunctionalInterface
   private interface AllowedGauge {
@@ -55,93 +53,86 @@ final class QueueCollectionBuddy {
   }
 
   private static AllowedGauge createAllowedGauge(
-      LongGauge gauge, Function<MetricsConfig, Boolean> allowed) {
-    return createAllowedGauge(gauge, allowed, Integer::longValue /*identity*/);
+      BiConsumer<Long, Attributes> recorder, Function<MetricsConfig, Boolean> allowed) {
+    return createAllowedGauge(recorder, allowed, Integer::longValue /*identity*/);
   }
 
   private static AllowedGauge createAllowedGauge(
-      LongGauge gauge,
+      BiConsumer<Long, Attributes> recorder,
       Function<MetricsConfig, Boolean> allowed,
       Function<Integer, Long> unitMangler) {
     return (context, val, attributes) -> {
       if (allowed.apply(context.getMetricsConfig())) {
-        gauge.set(unitMangler.apply(val), attributes);
+        recorder.accept(unitMangler.apply(val), attributes);
       }
     };
   }
 
-  QueueCollectionBuddy(Meter meter, QueueCollectorSharedState sharedState) {
+  QueueCollectionBuddy(MetricProducer producer, QueueCollectorSharedState sharedState) {
     this.sharedState = sharedState;
+    this.producer = producer;
     gauges.put(
         CMQC.MQIA_CURRENT_Q_DEPTH,
         createAllowedGauge(
-            Metrics.createIbmMqQueueDepth(meter), MetricsConfig::isIbmMqQueueDepthEnabled));
+            producer::recordIbmMqQueueDepth, MetricsConfig::isIbmMqQueueDepthEnabled));
     gauges.put(
         CMQC.MQIA_MAX_Q_DEPTH,
         createAllowedGauge(
-            Metrics.createIbmMqMaxQueueDepth(meter), MetricsConfig::isIbmMqMaxQueueDepthEnabled));
+            producer::recordIbmMqMaxQueueDepth, MetricsConfig::isIbmMqMaxQueueDepthEnabled));
     gauges.put(
         CMQC.MQIA_OPEN_INPUT_COUNT,
         createAllowedGauge(
-            Metrics.createIbmMqOpenInputCount(meter), MetricsConfig::isIbmMqOpenInputCountEnabled));
+            producer::recordIbmMqOpenInputCount, MetricsConfig::isIbmMqOpenInputCountEnabled));
     gauges.put(
         CMQC.MQIA_OPEN_OUTPUT_COUNT,
         createAllowedGauge(
-            Metrics.createIbmMqOpenOutputCount(meter),
-            MetricsConfig::isIbmMqOpenOutputCountEnabled));
+            producer::recordIbmMqOpenOutputCount, MetricsConfig::isIbmMqOpenOutputCountEnabled));
     gauges.put(
         CMQC.MQIA_Q_SERVICE_INTERVAL,
         createAllowedGauge(
-            Metrics.createIbmMqServiceInterval(meter),
-            MetricsConfig::isIbmMqServiceIntervalEnabled));
+            producer::recordIbmMqServiceInterval, MetricsConfig::isIbmMqServiceIntervalEnabled));
     gauges.put(
         CMQC.MQIA_Q_SERVICE_INTERVAL_EVENT,
         createAllowedGauge(
-            Metrics.createIbmMqServiceIntervalEvent(meter),
+            producer::recordIbmMqServiceIntervalEvent,
             MetricsConfig::isIbmMqServiceIntervalEventEnabled));
     gauges.put(
         CMQCFC.MQIACF_OLDEST_MSG_AGE,
         createAllowedGauge(
-            Metrics.createIbmMqOldestMsgAge(meter), MetricsConfig::isIbmMqOldestMsgAgeEnabled));
+            producer::recordIbmMqOldestMsgAge, MetricsConfig::isIbmMqOldestMsgAgeEnabled));
     gauges.put(
         CMQCFC.MQIACF_UNCOMMITTED_MSGS,
         createAllowedGauge(
-            Metrics.createIbmMqUncommittedMessages(meter),
+            producer::recordIbmMqUncommittedMessages,
             MetricsConfig::isIbmMqUncommittedMessagesEnabled));
     gauges.put(
         CMQCFC.MQIACF_EXPIRY_Q_COUNT,
         createAllowedGauge(
-            Metrics.createIbmMqExpiredMessages(meter),
-            MetricsConfig::isIbmMqExpiredMessagesEnabled));
+            producer::recordIbmMqExpiredMessages, MetricsConfig::isIbmMqExpiredMessagesEnabled));
     gauges.put(
         CMQC.MQIA_MSG_DEQ_COUNT,
         createAllowedGauge(
-            Metrics.createIbmMqMessageDeqCount(meter),
-            MetricsConfig::isIbmMqMessageDeqCountEnabled));
+            producer::recordIbmMqMessageDeqCount, MetricsConfig::isIbmMqMessageDeqCountEnabled));
     gauges.put(
         CMQC.MQIA_MSG_ENQ_COUNT,
         createAllowedGauge(
-            Metrics.createIbmMqMessageEnqCount(meter),
-            MetricsConfig::isIbmMqMessageEnqCountEnabled));
+            producer::recordIbmMqMessageEnqCount, MetricsConfig::isIbmMqMessageEnqCountEnabled));
     gauges.put(
         CMQC.MQIA_HIGH_Q_DEPTH,
         createAllowedGauge(
-            Metrics.createIbmMqHighQueueDepth(meter), MetricsConfig::isIbmMqHighQueueDepthEnabled));
+            producer::recordIbmMqHighQueueDepth, MetricsConfig::isIbmMqHighQueueDepthEnabled));
     gauges.put(
         CMQCFC.MQIACF_CUR_Q_FILE_SIZE,
         createAllowedGauge(
-            Metrics.createIbmMqCurrentQueueFilesize(meter),
+            producer::recordIbmMqCurrentQueueFilesize,
             MetricsConfig::isIbmMqCurrentQueueFilesizeEnabled,
             MIBY_TO_BYTES));
     gauges.put(
         CMQCFC.MQIACF_CUR_MAX_FILE_SIZE,
         createAllowedGauge(
-            Metrics.createIbmMqCurrentMaxQueueFilesize(meter),
+            producer::recordIbmMqCurrentMaxQueueFilesize,
             MetricsConfig::isIbmMqCurrentMaxQueueFilesizeEnabled,
             MIBY_TO_BYTES));
-
-    this.onqtimeShort = Metrics.createIbmMqOnqtimeShortPeriod(meter);
-    this.onqtimeLong = Metrics.createIbmMqOnqtimeLongPeriod(meter);
   }
 
   /**
@@ -306,10 +297,10 @@ final class QueueCollectionBuddy {
     if (pcfParam instanceof MQCFIL) {
       int[] metricVals = pcfMessage.getIntListParameterValue(constantValue);
       if (context.getMetricsConfig().isIbmMqOnqtimeShortPeriodEnabled()) {
-        onqtimeShort.set(metricVals[0], attributes);
+        this.producer.recordIbmMqOnqtimeShortPeriod(metricVals[0], attributes);
       }
       if (context.getMetricsConfig().isIbmMqOnqtimeLongPeriodEnabled()) {
-        onqtimeLong.set(metricVals[1], attributes);
+        this.producer.recordIbmMqOnqtimeLongPeriod(metricVals[1], attributes);
       }
     }
   }

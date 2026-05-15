@@ -1,0 +1,63 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+package io.opentelemetry.ibm.mq.metrics;
+
+import static io.opentelemetry.ibm.mq.metrics.MetricData.createMetricData;
+
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.sdk.common.Clock;
+import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
+import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
+import io.opentelemetry.sdk.metrics.data.GaugeData;
+import io.opentelemetry.sdk.metrics.data.LongPointData;
+import io.opentelemetry.sdk.metrics.data.MetricData;
+import io.opentelemetry.sdk.metrics.data.MetricDataType;
+import io.opentelemetry.sdk.metrics.data.SumData;
+import io.opentelemetry.sdk.resources.Resource;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+
+// This file is generated using weaver. Do not edit manually.
+
+/** Metric definitions generated from a Weaver model. Do not edit manually. */
+public final class MetricProducer implements io.opentelemetry.sdk.metrics.export.MetricProducer {
+  private final Resource resource;
+  private final InstrumentationScopeInfo instrumentationScopeInfo;
+  private final List<MetricData> metricData;
+  private long currentEpochNanos;
+
+  public MetricProducer(Resource resource, InstrumentationScopeInfo info){
+    this.resource = resource;
+    this.instrumentationScopeInfo = info;
+    this.metricData = Collections.synchronizedList(new ArrayList<>());
+    this.currentEpochNanos = Clock.getDefault().now();
+  }
+{% for metric in ctx %}
+
+
+  public void record{{ metric.metric_name.replace("_", ".")|split('.')|map('capitalize')|join }}(long value, Attributes attributes) {
+    this.metricData.add(createMetricData(this.resource, this.instrumentationScopeInfo, "{{ metric.metric_name }}", "{{ metric.brief }}", "{{ metric.unit }}",
+    {% if metric.instrument == "gauge" %}
+    MetricDataType.LONG_GAUGE,
+    GaugeData.createLongGaugeData(Collections.singletonList(LongPointData.create(
+                    this.currentEpochNanos, Clock.getDefault().now(), attributes, value)))));
+    {% elif metric.instrument == "counter" %}
+    MetricDataType.LONG_SUM,
+    SumData.createLongSumData(/* isMonotonic= */true, AggregationTemporality.CUMULATIVE, Collections.singletonList(LongPointData.create(
+                        this.currentEpochNanos, Clock.getDefault().now(), attributes, value)))));
+    {% endif %}
+  }
+{% endfor %}
+
+  @Override
+  public List<MetricData> produce(Resource resource) {
+    List<MetricData> collectedPoints = new ArrayList<>(this.metricData);
+    this.metricData.clear();
+    this.currentEpochNanos = Clock.getDefault().nanoTime();
+    return collectedPoints;
+  }
+}

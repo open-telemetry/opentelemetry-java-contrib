@@ -15,28 +15,21 @@ import com.ibm.mq.constants.CMQCFC;
 import com.ibm.mq.headers.pcf.PCFMessage;
 import com.ibm.mq.headers.pcf.PCFMessageAgent;
 import io.opentelemetry.ibm.mq.config.QueueManager;
+import io.opentelemetry.ibm.mq.metrics.MetricProducer;
 import io.opentelemetry.ibm.mq.metrics.MetricsConfig;
 import io.opentelemetry.ibm.mq.opentelemetry.ConfigWrapper;
-import io.opentelemetry.sdk.metrics.data.LongPointData;
+import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.metrics.data.MetricData;
-import io.opentelemetry.sdk.testing.junit5.OpenTelemetryExtension;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
+import io.opentelemetry.sdk.resources.Resource;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class TopicMetricsCollectorTest {
-  @RegisterExtension
-  static final OpenTelemetryExtension otelTesting = OpenTelemetryExtension.create();
 
   TopicMetricsCollector classUnderTest;
   QueueManager queueManager;
@@ -54,42 +47,32 @@ class TopicMetricsCollectorTest {
   void testPublishMetrics() throws Exception {
     MetricsCollectorContext context =
         new MetricsCollectorContext(queueManager, pcfMessageAgent, null, new MetricsConfig(config));
-    classUnderTest =
-        new TopicMetricsCollector(otelTesting.getOpenTelemetry().getMeter("opentelemetry.io/mq"));
+    MetricProducer producer =
+        new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
+    classUnderTest = new TopicMetricsCollector(producer);
 
     when(pcfMessageAgent.send(any(PCFMessage.class)))
         .thenReturn(createPCFResponseForInquireTopicStatusCmd());
 
     classUnderTest.accept(context);
 
-    List<String> metricsList =
-        new ArrayList<>(Arrays.asList("ibm.mq.publish.count", "ibm.mq.subscription.count"));
+    List<MetricData> result = producer.produce(Resource.empty());
+    assertThat(result.size()).isEqualTo(4);
+    assertThat(result.get(0).getName()).isEqualTo("ibm.mq.publish.count");
+    assertThat(result.get(0).getLongGaugeData().getPoints().iterator().next().getValue())
+        .isEqualTo(2L);
 
-    for (MetricData metric : otelTesting.getMetrics()) {
-      if (metricsList.remove(metric.getName())) {
-        if (metric.getName().equals("ibm.mq.publish.count")) {
-          Set<Long> values = new HashSet<>();
-          values.add(2L);
-          values.add(3L);
-          assertThat(
-                  metric.getLongGaugeData().getPoints().stream()
-                      .map(LongPointData::getValue)
-                      .collect(Collectors.toSet()))
-              .isEqualTo(values);
-        }
-        if (metric.getName().equals("ibm.mq.subscription.count")) {
-          Set<Long> values = new HashSet<>();
-          values.add(3L);
-          values.add(4L);
-          assertThat(
-                  metric.getLongGaugeData().getPoints().stream()
-                      .map(LongPointData::getValue)
-                      .collect(Collectors.toSet()))
-              .isEqualTo(values);
-        }
-      }
-    }
-    assertThat(metricsList).isEmpty();
+    assertThat(result.get(1).getName()).isEqualTo("ibm.mq.subscription.count");
+    assertThat(result.get(1).getLongGaugeData().getPoints().iterator().next().getValue())
+        .isEqualTo(3L);
+
+    assertThat(result.get(2).getName()).isEqualTo("ibm.mq.publish.count");
+    assertThat(result.get(2).getLongGaugeData().getPoints().iterator().next().getValue())
+        .isEqualTo(3L);
+
+    assertThat(result.get(3).getName()).isEqualTo("ibm.mq.subscription.count");
+    assertThat(result.get(3).getLongGaugeData().getPoints().iterator().next().getValue())
+        .isEqualTo(4L);
   }
 
   private static PCFMessage[] createPCFResponseForInquireTopicStatusCmd() {

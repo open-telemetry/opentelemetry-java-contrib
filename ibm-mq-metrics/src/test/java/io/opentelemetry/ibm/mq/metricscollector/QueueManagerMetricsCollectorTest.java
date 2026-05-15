@@ -16,24 +16,22 @@ import com.ibm.mq.constants.CMQCFC;
 import com.ibm.mq.headers.pcf.PCFMessage;
 import com.ibm.mq.headers.pcf.PCFMessageAgent;
 import io.opentelemetry.ibm.mq.config.QueueManager;
+import io.opentelemetry.ibm.mq.metrics.MetricProducer;
 import io.opentelemetry.ibm.mq.metrics.MetricsConfig;
 import io.opentelemetry.ibm.mq.opentelemetry.ConfigWrapper;
+import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.metrics.data.MetricData;
-import io.opentelemetry.sdk.testing.junit5.OpenTelemetryExtension;
+import io.opentelemetry.sdk.resources.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class QueueManagerMetricsCollectorTest {
-
-  @RegisterExtension
-  static final OpenTelemetryExtension otelTesting = OpenTelemetryExtension.create();
 
   QueueManagerMetricsCollector classUnderTest;
   QueueManager queueManager;
@@ -54,13 +52,13 @@ class QueueManagerMetricsCollectorTest {
   void testProcessPCFRequestAndPublishQMetricsForInquireQStatusCmd() throws Exception {
     when(pcfMessageAgent.send(any(PCFMessage.class)))
         .thenReturn(createPCFResponseForInquireQMgrStatusCmd());
-    classUnderTest =
-        new QueueManagerMetricsCollector(
-            otelTesting.getOpenTelemetry().getMeter("opentelemetry.io/mq"));
+    MetricProducer producer =
+        new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
+    classUnderTest = new QueueManagerMetricsCollector(producer);
     classUnderTest.accept(context);
     List<String> metricsList = new ArrayList<>(singletonList("ibm.mq.manager.status"));
 
-    for (MetricData metric : otelTesting.getMetrics()) {
+    for (MetricData metric : producer.produce(Resource.empty())) {
       if (metricsList.remove(metric.getName())) {
         assertThat(metric.getLongGaugeData().getPoints().iterator().next().getValue()).isEqualTo(2);
       }

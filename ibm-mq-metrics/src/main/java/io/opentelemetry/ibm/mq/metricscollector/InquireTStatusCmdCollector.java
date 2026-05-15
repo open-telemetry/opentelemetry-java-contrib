@@ -14,9 +14,7 @@ import com.ibm.mq.headers.MQDataException;
 import com.ibm.mq.headers.pcf.PCFException;
 import com.ibm.mq.headers.pcf.PCFMessage;
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.metrics.LongGauge;
-import io.opentelemetry.api.metrics.Meter;
-import io.opentelemetry.ibm.mq.metrics.Metrics;
+import io.opentelemetry.ibm.mq.metrics.MetricProducer;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
@@ -27,13 +25,10 @@ import org.slf4j.LoggerFactory;
 final class InquireTStatusCmdCollector implements Consumer<MetricsCollectorContext> {
 
   private static final Logger logger = LoggerFactory.getLogger(InquireTStatusCmdCollector.class);
+  private final MetricProducer producer;
 
-  private final LongGauge publishCountGauge;
-  private final LongGauge subscriptionCountGauge;
-
-  public InquireTStatusCmdCollector(Meter meter) {
-    this.publishCountGauge = Metrics.createIbmMqPublishCount(meter);
-    this.subscriptionCountGauge = Metrics.createIbmMqSubscriptionCount(meter);
+  public InquireTStatusCmdCollector(MetricProducer producer) {
+    this.producer = producer;
   }
 
   @Override
@@ -123,14 +118,14 @@ final class InquireTStatusCmdCollector implements Consumer<MetricsCollectorConte
       if (pcfMessage.getParameter(CMQC.MQIA_PUB_COUNT) != null) {
         publisherCount = pcfMessage.getIntParameterValue(CMQC.MQIA_PUB_COUNT);
       }
-      publishCountGauge.set(publisherCount, attributes);
+      this.producer.recordIbmMqPublishCount(publisherCount, attributes);
     }
     if (context.getMetricsConfig().isIbmMqSubscriptionCountEnabled()) {
       int subscriberCount = 0;
       if (pcfMessage.getParameter(CMQC.MQIA_SUB_COUNT) != null) {
         subscriberCount = pcfMessage.getIntParameterValue(CMQC.MQIA_SUB_COUNT);
       }
-      subscriptionCountGauge.set(subscriberCount, attributes);
+      this.producer.recordIbmMqSubscriptionCount(subscriberCount, attributes);
     }
   }
 }

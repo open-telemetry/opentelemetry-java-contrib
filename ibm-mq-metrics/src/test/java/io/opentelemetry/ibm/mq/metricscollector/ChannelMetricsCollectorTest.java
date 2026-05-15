@@ -18,12 +18,13 @@ import com.ibm.mq.constants.CMQCFC;
 import com.ibm.mq.headers.pcf.PCFException;
 import com.ibm.mq.headers.pcf.PCFMessage;
 import com.ibm.mq.headers.pcf.PCFMessageAgent;
-import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.ibm.mq.config.QueueManager;
+import io.opentelemetry.ibm.mq.metrics.MetricProducer;
 import io.opentelemetry.ibm.mq.metrics.MetricsConfig;
 import io.opentelemetry.ibm.mq.opentelemetry.ConfigWrapper;
+import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.metrics.data.MetricData;
-import io.opentelemetry.sdk.testing.junit5.OpenTelemetryExtension;
+import io.opentelemetry.sdk.resources.Resource;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -31,7 +32,6 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -41,13 +41,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ChannelMetricsCollectorTest {
 
-  @RegisterExtension
-  static final OpenTelemetryExtension otelTesting = OpenTelemetryExtension.create();
-
   ChannelMetricsCollector classUnderTest;
   QueueManager queueManager;
   MetricsCollectorContext context;
-  Meter meter;
   @Mock PCFMessageAgent pcfMessageAgent;
 
   @BeforeEach
@@ -55,7 +51,6 @@ class ChannelMetricsCollectorTest {
     ConfigWrapper config = ConfigWrapper.parse("src/test/resources/conf/config.yml");
     ObjectMapper mapper = new ObjectMapper();
     queueManager = mapper.convertValue(config.getQueueManagers().get(0), QueueManager.class);
-    meter = otelTesting.getOpenTelemetry().getMeter("opentelemetry.io/mq");
     context =
         new MetricsCollectorContext(queueManager, pcfMessageAgent, null, new MetricsConfig(config));
   }
@@ -64,7 +59,9 @@ class ChannelMetricsCollectorTest {
   void testPublishMetrics() throws Exception {
     when(pcfMessageAgent.send(any(PCFMessage.class)))
         .thenReturn(createPCFResponseForInquireChannelStatusCmd());
-    classUnderTest = new ChannelMetricsCollector(meter);
+    MetricProducer producer =
+        new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
+    classUnderTest = new ChannelMetricsCollector(producer);
 
     classUnderTest.accept(context);
 
@@ -78,7 +75,7 @@ class ChannelMetricsCollectorTest {
                 "ibm.mq.buffers.sent",
                 "ibm.mq.buffers.received"));
 
-    for (MetricData metric : otelTesting.getMetrics()) {
+    for (MetricData metric : producer.produce(Resource.empty())) {
       if (metricsList.remove(metric.getName())) {
         if (metric.getName().equals("ibm.mq.message.count")) {
           assertThat(metric.getLongGaugeData().getPoints().iterator().next().getValue())
@@ -188,31 +185,37 @@ class ChannelMetricsCollectorTest {
 
   @Test
   void testPublishMetrics_nullResponse() throws Exception {
+    MetricProducer producer =
+        new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
     when(pcfMessageAgent.send(any(PCFMessage.class))).thenReturn(null);
-    classUnderTest = new ChannelMetricsCollector(meter);
+    classUnderTest = new ChannelMetricsCollector(producer);
 
     classUnderTest.accept(context);
-    assertThat(otelTesting.getMetrics()).isEmpty();
+    assertThat(producer.produce(Resource.empty())).isEmpty();
   }
 
   @Test
   void testPublishMetrics_emptyResponse() throws Exception {
+    MetricProducer producer =
+        new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
     when(pcfMessageAgent.send(any(PCFMessage.class))).thenReturn(new PCFMessage[] {});
-    classUnderTest = new ChannelMetricsCollector(meter);
+    classUnderTest = new ChannelMetricsCollector(producer);
 
     classUnderTest.accept(context);
-    assertThat(otelTesting.getMetrics()).isEmpty();
+    assertThat(producer.produce(Resource.empty())).isEmpty();
   }
 
   @ParameterizedTest
   @MethodSource("exceptionsToThrow")
   void testPublishMetrics_pfException(Exception exceptionToThrow) throws Exception {
+    MetricProducer producer =
+        new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
     when(pcfMessageAgent.send(any(PCFMessage.class))).thenThrow(exceptionToThrow);
-    classUnderTest = new ChannelMetricsCollector(meter);
+    classUnderTest = new ChannelMetricsCollector(producer);
 
     classUnderTest.accept(context);
 
-    List<MetricData> exported = otelTesting.getMetrics();
+    List<MetricData> exported = producer.produce(Resource.empty());
     assertThat(exported.get(0).getLongGaugeData().getPoints()).hasSize(1);
     assertThatMetric(exported.get(0), 0).hasName("ibm.mq.manager.active.channels").hasValue(0);
   }

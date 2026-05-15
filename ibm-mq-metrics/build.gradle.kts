@@ -20,6 +20,7 @@ val ibmClientJar: Configuration by configurations.creating {
 }
 
 dependencies {
+  api("com.google.auto.value:auto-value-annotations:1.11.1")
   api("com.google.code.findbugs:jsr305:3.0.2")
   api("io.swagger:swagger-annotations:1.6.16")
   api("org.jetbrains:annotations:26.1.0")
@@ -33,6 +34,7 @@ dependencies {
   implementation("org.slf4j:slf4j-simple:2.0.17")
   testImplementation("com.google.guava:guava")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
+  annotationProcessor("com.google.auto.value:auto-value:1.11.1")
   ibmClientJar("com.ibm.mq:com.ibm.mq.allclient:9.4.5.1") {
     artifact {
       name = "com.ibm.mq.allclient"

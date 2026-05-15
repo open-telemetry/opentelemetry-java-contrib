@@ -15,9 +15,7 @@ import com.ibm.mq.headers.pcf.MQCFIL;
 import com.ibm.mq.headers.pcf.PCFException;
 import com.ibm.mq.headers.pcf.PCFMessage;
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.metrics.LongGauge;
-import io.opentelemetry.api.metrics.Meter;
-import io.opentelemetry.ibm.mq.metrics.Metrics;
+import io.opentelemetry.ibm.mq.metrics.MetricProducer;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -28,18 +26,10 @@ import org.slf4j.LoggerFactory;
 public final class InquireChannelCmdCollector implements Consumer<MetricsCollectorContext> {
 
   public static final Logger logger = LoggerFactory.getLogger(InquireChannelCmdCollector.class);
-  private final LongGauge maxClientsGauge;
-  private final LongGauge instancesPerClientGauge;
-  private final LongGauge messageRetryCountGauge;
-  private final LongGauge messageReceivedCountGauge;
-  private final LongGauge messageSentCountGauge;
+  private final MetricProducer producer;
 
-  public InquireChannelCmdCollector(Meter meter) {
-    this.maxClientsGauge = Metrics.createIbmMqMaxInstances(meter);
-    this.instancesPerClientGauge = Metrics.createIbmMqInstancesPerClient(meter);
-    this.messageRetryCountGauge = Metrics.createIbmMqMessageRetryCount(meter);
-    this.messageReceivedCountGauge = Metrics.createIbmMqMessageReceivedCount(meter);
-    this.messageSentCountGauge = Metrics.createIbmMqMessageSentCount(meter);
+  public InquireChannelCmdCollector(MetricProducer producer) {
+    this.producer = producer;
   }
 
   @Override
@@ -116,12 +106,12 @@ public final class InquireChannelCmdCollector implements Consumer<MetricsCollect
             .build();
     if (context.getMetricsConfig().isIbmMqMaxInstancesEnabled()
         && message.getParameter(CMQCFC.MQIACH_MAX_INSTANCES) != null) {
-      this.maxClientsGauge.set(
+      this.producer.recordIbmMqMaxInstances(
           message.getIntParameterValue(CMQCFC.MQIACH_MAX_INSTANCES), attributes);
     }
     if (context.getMetricsConfig().isIbmMqInstancesPerClientEnabled()
         && message.getParameter(CMQCFC.MQIACH_MAX_INSTS_PER_CLIENT) != null) {
-      this.instancesPerClientGauge.set(
+      this.producer.recordIbmMqInstancesPerClient(
           message.getIntParameterValue(CMQCFC.MQIACH_MAX_INSTS_PER_CLIENT), attributes);
     }
     if (context.getMetricsConfig().isIbmMqMessageRetryCountEnabled()) {
@@ -129,21 +119,21 @@ public final class InquireChannelCmdCollector implements Consumer<MetricsCollect
       if (message.getParameter(CMQCFC.MQIACH_MR_COUNT) != null) {
         count = message.getIntParameterValue(CMQCFC.MQIACH_MR_COUNT);
       }
-      this.messageRetryCountGauge.set(count, attributes);
+      this.producer.recordIbmMqMessageRetryCount(count, attributes);
     }
     if (context.getMetricsConfig().isIbmMqInstancesPerClientEnabled()) {
       int received = 0;
       if (message.getParameter(CMQCFC.MQIACH_MSGS_RECEIVED) != null) {
         received = message.getIntParameterValue(CMQCFC.MQIACH_MSGS_RECEIVED);
       }
-      this.messageReceivedCountGauge.set(received, attributes);
+      this.producer.recordIbmMqMessageReceivedCount(received, attributes);
     }
     if (context.getMetricsConfig().isIbmMqMessageSentCountEnabled()) {
       int sent = 0;
       if (message.getParameter(CMQCFC.MQIACH_MSGS_SENT) != null) {
         sent = message.getIntParameterValue(CMQCFC.MQIACH_MSGS_SENT);
       }
-      this.messageSentCountGauge.set(sent, attributes);
+      this.producer.recordIbmMqMessageSentCount(sent, attributes);
     }
   }
 }

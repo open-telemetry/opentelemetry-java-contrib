@@ -17,9 +17,7 @@ import com.ibm.mq.constants.MQConstants;
 import com.ibm.mq.headers.pcf.PCFException;
 import com.ibm.mq.headers.pcf.PCFMessage;
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.metrics.LongCounter;
-import io.opentelemetry.api.metrics.Meter;
-import io.opentelemetry.ibm.mq.metrics.Metrics;
+import io.opentelemetry.ibm.mq.metrics.MetricProducer;
 import java.io.IOException;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
@@ -30,14 +28,10 @@ public final class PerformanceEventQueueCollector implements Consumer<MetricsCol
 
   private static final Logger logger =
       LoggerFactory.getLogger(PerformanceEventQueueCollector.class);
-  private final LongCounter fullQueueDepthCounter;
-  private final LongCounter highQueueDepthCounter;
-  private final LongCounter lowQueueDepthCounter;
+  private final MetricProducer producer;
 
-  public PerformanceEventQueueCollector(Meter meter) {
-    this.fullQueueDepthCounter = Metrics.createIbmMqQueueDepthFullEvent(meter);
-    this.highQueueDepthCounter = Metrics.createIbmMqQueueDepthHighEvent(meter);
-    this.lowQueueDepthCounter = Metrics.createIbmMqQueueDepthLowEvent(meter);
+  public PerformanceEventQueueCollector(MetricProducer producer) {
+    this.producer = producer;
   }
 
   private void readEvents(MetricsCollectorContext context, String performanceEventsQueueName)
@@ -91,17 +85,17 @@ public final class PerformanceEventQueueCollector implements Consumer<MetricsCol
     switch (receivedMsg.getReason()) {
       case CMQC.MQRC_Q_FULL:
         if (context.getMetricsConfig().isIbmMqQueueDepthFullEventEnabled()) {
-          fullQueueDepthCounter.add(1, attributes);
+          this.producer.recordIbmMqQueueDepthFullEvent(1, attributes);
         }
         break;
       case CMQC.MQRC_Q_DEPTH_HIGH:
         if (context.getMetricsConfig().isIbmMqQueueDepthHighEventEnabled()) {
-          highQueueDepthCounter.add(1, attributes);
+          this.producer.recordIbmMqQueueDepthHighEvent(1, attributes);
         }
         break;
       case CMQC.MQRC_Q_DEPTH_LOW:
         if (context.getMetricsConfig().isIbmMqQueueDepthLowEventEnabled()) {
-          lowQueueDepthCounter.add(1, attributes);
+          this.producer.recordIbmMqQueueDepthLowEvent(1, attributes);
         }
         break;
       default:

@@ -5,10 +5,10 @@
 
 package io.opentelemetry.ibm.mq.opentelemetry;
 
-import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.ibm.mq.WmqMonitor;
-import io.opentelemetry.sdk.OpenTelemetrySdk;
+import io.opentelemetry.ibm.mq.metrics.MetricProducer;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
+import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.resources.Resource;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -56,27 +56,22 @@ public final class Main {
 
     Config.configureSecurity(config);
     Config.setUpSslConnection(config.getSslConnection());
-
-    run(config, service);
-  }
-
-  public static void run(ConfigWrapper config, ScheduledExecutorService service) {
-
-    AutoConfiguredOpenTelemetrySdk sdk =
-        AutoConfiguredOpenTelemetrySdk.builder()
-            .addMeterProviderCustomizer(
-                (builder, configProps) -> builder.setResource(Resource.empty()))
-            .build();
-
-    OpenTelemetrySdk otel = sdk.getOpenTelemetrySdk();
-
-    run(config, service, otel);
+    MetricProducer producer =
+        new MetricProducer(Resource.empty(), InstrumentationScopeInfo.create("websphere/mq"));
+    run(config, service, producer);
   }
 
   @VisibleForTesting
   public static void run(
-      ConfigWrapper config, ScheduledExecutorService service, OpenTelemetry otel) {
-    WmqMonitor monitor = new WmqMonitor(config, service, otel.getMeter("websphere/mq"));
+      ConfigWrapper config, ScheduledExecutorService service, MetricProducer producer) {
+
+    AutoConfiguredOpenTelemetrySdk.builder()
+        .addMeterProviderCustomizer(
+            (builder, configProps) ->
+                builder.setResource(Resource.empty()).registerMetricProducer(producer))
+        .build();
+
+    WmqMonitor monitor = new WmqMonitor(config, service, producer);
     ScheduledFuture<?> unused =
         service.scheduleAtFixedRate(
             monitor::run,

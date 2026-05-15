@@ -18,9 +18,7 @@ import com.ibm.mq.constants.CMQCFC;
 import com.ibm.mq.constants.MQConstants;
 import com.ibm.mq.headers.pcf.PCFMessage;
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.metrics.LongCounter;
-import io.opentelemetry.api.metrics.Meter;
-import io.opentelemetry.ibm.mq.metrics.Metrics;
+import io.opentelemetry.ibm.mq.metrics.MetricProducer;
 import java.io.IOException;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
@@ -30,10 +28,10 @@ import org.slf4j.LoggerFactory;
 public final class QueueManagerEventCollector implements Consumer<MetricsCollectorContext> {
 
   private static final Logger logger = LoggerFactory.getLogger(QueueManagerEventCollector.class);
-  private final LongCounter authorityEventCounter;
+  private final MetricProducer producer;
 
-  public QueueManagerEventCollector(Meter meter) {
-    this.authorityEventCounter = Metrics.createIbmMqUnauthorizedEvent(meter);
+  public QueueManagerEventCollector(MetricProducer producer) {
+    this.producer = producer;
   }
 
   private void readEvents(MetricsCollectorContext context, String queueManagerEventsQueueName)
@@ -58,7 +56,7 @@ public final class QueueManagerEventCollector implements Consumer<MetricsCollect
             if (context.getMetricsConfig().isIbmMqUnauthorizedEventEnabled()) {
               String username = received.getStringParameterValue(CMQCFC.MQCACF_USER_IDENTIFIER);
               String applicationName = received.getStringParameterValue(CMQCFC.MQCACF_APPL_NAME);
-              authorityEventCounter.add(
+              this.producer.recordIbmMqUnauthorizedEvent(
                   1,
                   Attributes.of(
                       IBM_MQ_QUEUE_MANAGER,

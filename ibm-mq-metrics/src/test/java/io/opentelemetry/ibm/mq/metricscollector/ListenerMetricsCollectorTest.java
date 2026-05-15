@@ -14,25 +14,21 @@ import com.ibm.mq.constants.CMQCFC;
 import com.ibm.mq.headers.pcf.PCFMessage;
 import com.ibm.mq.headers.pcf.PCFMessageAgent;
 import io.opentelemetry.ibm.mq.config.QueueManager;
+import io.opentelemetry.ibm.mq.metrics.MetricProducer;
 import io.opentelemetry.ibm.mq.metrics.MetricsConfig;
 import io.opentelemetry.ibm.mq.opentelemetry.ConfigWrapper;
-import io.opentelemetry.sdk.metrics.data.LongPointData;
+import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.metrics.data.MetricData;
-import io.opentelemetry.sdk.testing.junit5.OpenTelemetryExtension;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
+import io.opentelemetry.sdk.resources.Resource;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class ListenerMetricsCollectorTest {
-  @RegisterExtension
-  static final OpenTelemetryExtension otelTesting = OpenTelemetryExtension.create();
 
   ListenerMetricsCollector classUnderTest;
   QueueManager queueManager;
@@ -53,21 +49,20 @@ class ListenerMetricsCollectorTest {
 
     MetricsCollectorContext context =
         new MetricsCollectorContext(queueManager, pcfMessageAgent, null, new MetricsConfig(config));
-    classUnderTest =
-        new ListenerMetricsCollector(
-            otelTesting.getOpenTelemetry().getMeter("opentelemetry.io/mq"));
+    MetricProducer producer =
+        new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
+    classUnderTest = new ListenerMetricsCollector(producer);
     classUnderTest.accept(context);
 
-    MetricData metric = otelTesting.getMetrics().get(0);
-    assertThat(metric.getName()).isEqualTo("ibm.mq.listener.status");
-    Set<Long> values = new HashSet<>();
-    values.add(2L);
-    values.add(3L);
-    assertThat(
-            metric.getLongGaugeData().getPoints().stream()
-                .map(LongPointData::getValue)
-                .collect(Collectors.toSet()))
-        .isEqualTo(values);
+    List<MetricData> result = producer.produce(Resource.empty());
+    assertThat(result.size()).isEqualTo(2);
+    assertThat(result.get(0).getName()).isEqualTo("ibm.mq.listener.status");
+    assertThat(result.get(0).getLongGaugeData().getPoints().iterator().next().getValue())
+        .isEqualTo(2L);
+
+    assertThat(result.get(1).getName()).isEqualTo("ibm.mq.listener.status");
+    assertThat(result.get(1).getLongGaugeData().getPoints().iterator().next().getValue())
+        .isEqualTo(3L);
   }
 
   /*

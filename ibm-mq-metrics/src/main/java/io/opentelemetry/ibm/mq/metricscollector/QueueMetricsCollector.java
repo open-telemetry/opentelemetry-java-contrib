@@ -5,7 +5,7 @@
 
 package io.opentelemetry.ibm.mq.metricscollector;
 
-import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.ibm.mq.metrics.MetricProducer;
 import io.opentelemetry.ibm.mq.opentelemetry.ConfigWrapper;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,11 +25,12 @@ public final class QueueMetricsCollector implements Consumer<MetricsCollectorCon
   private final ExecutorService threadPool;
   private final ConfigWrapper config;
 
-  public QueueMetricsCollector(Meter meter, ExecutorService threadPool, ConfigWrapper config) {
+  public QueueMetricsCollector(
+      MetricProducer producer, ExecutorService threadPool, ConfigWrapper config) {
     this.threadPool = threadPool;
     this.config = config;
     QueueCollectionBuddy queueBuddy =
-        new QueueCollectionBuddy(meter, new QueueCollectorSharedState());
+        new QueueCollectionBuddy(producer, new QueueCollectorSharedState());
     this.inquireQueueCmd = new InquireQCmdCollector(queueBuddy);
     publishers.add(new InquireQStatusCmdCollector(queueBuddy));
     publishers.add(new ResetQStatsCmdCollector(queueBuddy));
