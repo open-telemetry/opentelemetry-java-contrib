@@ -4,22 +4,22 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: Version to compile into the changelog
+        description: 'Release version (e.g. 1.57.0)'
         required: true
         type: string
 
-permissions:
-  contents: write
-  pull-requests: write
-
 jobs:
-  compile-changelog:
+  draft-changelog:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
+          
       - name: Validate version input
         run: |
           if [[ ! "${{ inputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
@@ -28,26 +28,26 @@ jobs:
           fi
 
       - name: Install chloggen
-        run: |
-          go install go.opentelemetry.io/build-tools/chloggen@v0.15.0
-          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+        run: go install go.opentelemetry.io/build-tools/chloggen@v0.15.0
 
-      - name: Preview changelog update
-        run: |
-          chloggen update --config .chloggen/config.yaml --dry
+      - name: Dry run (preview)
+        run: $(go env GOPATH)/bin/chloggen update --dry
 
-      - name: Compile changelog fragments
-        run: |
-          chloggen update --config .chloggen/config.yaml --version "${{ inputs.version }}"
+      - name: Compile changelog
+        run: $(go env GOPATH)/bin/chloggen update --version ${{ inputs.version }}
 
-      - uses: peter-evans/create-pull-request@v6
+      - name: Create PR for Release Captain review
+        uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.OPENTELEMETRYBOT_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
-          branch: chore/changelog-${{ inputs.version }}
-          commit-message: "Update changelog for ${{ inputs.version }}"
-          title: "chore: update changelog for ${{ inputs.version }}"
+          # Strictly require the bot token for EasyCLA compliance
+          token: ${{ secrets.OPENTELEMETRYBOT_GITHUB_TOKEN }}
+          commit-message: "[chore] update changelog for release ${{ inputs.version }}"
+          committer: "opentelemetrybot <107717825+opentelemetrybot@users.noreply.github.com>"
+          author: "opentelemetrybot <107717825+opentelemetrybot@users.noreply.github.com>"
+          title: "[chore] update changelog for release ${{ inputs.version }}"
           body: |
-            Compile changelog fragments for version ${{ inputs.version }}.
-          author: opentelemetrybot <107717825+opentelemetrybot@users.noreply.github.com>
-          committer: opentelemetrybot <107717825+opentelemetrybot@users.noreply.github.com>
-          delete-branch: true
+            Automated changelog compilation for release `${{ inputs.version }}`.
+            
+            **Release Captain:** Review the entries below, make any manual corrections, then merge.
+          branch: "chore/changelog-${{ inputs.version }}"
+          base: main
