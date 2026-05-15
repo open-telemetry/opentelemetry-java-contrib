@@ -34,7 +34,9 @@ jobs:
         run: $(go env GOPATH)/bin/chloggen update --dry
 
       - name: Compile changelog
-        run: $(go env GOPATH)/bin/chloggen update --version ${{ inputs.version }}
+        env:
+          VERSION: ${{ inputs.version }}
+        run: $(go env GOPATH)/bin/chloggen update --version "$VERSION"
 
       - name: Create PR for Release Captain review
         uses: peter-evans/create-pull-request@v6
