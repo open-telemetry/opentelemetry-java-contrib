@@ -29,8 +29,8 @@ dependencies {
   api("io.opentelemetry:opentelemetry-sdk")
   api("io.opentelemetry:opentelemetry-exporter-otlp")
   api("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
-  api("org.slf4j:slf4j-api:2.0.17")
-  implementation("org.slf4j:slf4j-simple:2.0.17")
+  api("org.slf4j:slf4j-api:2.0.18")
+  implementation("org.slf4j:slf4j-simple:2.0.18")
   testImplementation("com.google.guava:guava")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   ibmClientJar("com.ibm.mq:com.ibm.mq.allclient:9.4.5.1") {
