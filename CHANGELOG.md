@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 1.57.0 (2026-05-19)
+
 ### Baggage processor
 
 - Delegate baggage filtering to IncludeExcludePredicate and allow wildcards in auto-configuration
