@@ -23,6 +23,7 @@ dependencies {
 
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
+  compileOnly("io.opentelemetry:opentelemetry-sdk-extension-declarative-config")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-incubator")
 
   testCompileOnly("com.google.auto.service:auto-service-annotations")
@@ -32,6 +33,7 @@ dependencies {
 
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-declarative-config")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-incubator")
   testImplementation("org.assertj:assertj-core")
   testImplementation("org.mockito:mockito-inline")
