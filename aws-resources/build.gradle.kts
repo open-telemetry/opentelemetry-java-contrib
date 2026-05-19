@@ -21,7 +21,7 @@ dependencies {
   implementation("com.squareup.okhttp3:okhttp")
 
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
-  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-incubator")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-declarative-config")
   testImplementation("io.opentelemetry:opentelemetry-api-incubator")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation("io.opentelemetry:opentelemetry-exporter-logging")

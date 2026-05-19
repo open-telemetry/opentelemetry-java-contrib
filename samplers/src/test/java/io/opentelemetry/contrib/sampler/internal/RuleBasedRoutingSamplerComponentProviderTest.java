@@ -16,7 +16,7 @@ import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.contrib.sampler.RuleBasedRoutingSampler;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
-import io.opentelemetry.sdk.extension.incubator.fileconfig.DeclarativeConfiguration;
+import io.opentelemetry.sdk.autoconfigure.declarativeconfig.DeclarativeConfiguration;
 import io.opentelemetry.sdk.trace.IdGenerator;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
