@@ -6,7 +6,7 @@
 package io.opentelemetry.ibm.mq.metricscollector;
 
 import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.IBM_MQ_QUEUE_MANAGER;
-import static io.opentelemetry.ibm.mq.metrics.Metrics.MIBY_TO_BYTES;
+import static io.opentelemetry.ibm.mq.util.MetricsUtil.MIBY_TO_BYTES;
 
 import com.ibm.mq.constants.CMQCFC;
 import com.ibm.mq.headers.pcf.PCFMessage;
