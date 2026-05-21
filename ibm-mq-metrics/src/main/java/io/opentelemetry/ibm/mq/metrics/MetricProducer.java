@@ -756,7 +756,7 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   public List<MetricData> produce(Resource resource) {
     List<MetricData> collectedPoints = new ArrayList<>(this.metricData);
     this.metricData.clear();
-    this.currentEpochNanos = Clock.getDefault().nanoTime();
+    this.currentEpochNanos = Clock.getDefault().now();
     return collectedPoints;
   }
 }
