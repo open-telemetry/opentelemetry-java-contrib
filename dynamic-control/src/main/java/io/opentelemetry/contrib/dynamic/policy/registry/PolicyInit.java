@@ -226,8 +226,7 @@ public final class PolicyInit {
     try {
       PolicyImplementer implementer = policyTypeInitializer.initialize(autoConfiguration);
       initializedImplementers.put(policyClass, implementer);
-      // TODO: register implementer with policyStore, not yet implemented
-      // policyStore.registerImplementer(implementer);
+      policyStore.registerImplementer(implementer);
       logger.log(Level.INFO, "Initialized policy class ''{0}''", policyClass.getName());
     } catch (RuntimeException e) {
       throw new IllegalStateException(
@@ -318,6 +317,11 @@ public final class PolicyInit {
    * <p>Each source contributes an immutable snapshot; the store receives the flattened union. eg
    * OpAMPPolicyProvider and FilePolicyProvider both produce a new TraceSamplingRatePolicy, this
    * will combine them all into a single list.
+   *
+   * <p>TODO: implement spec-compliant merge semantics: matching policies' keep values must be
+   * combined using the most restrictive result; overlapping policy effects must be commutative,
+   * idempotent, and deterministic; duplicate policy IDs across providers must be resolved by
+   * provider priority.
    */
   private static void updatePoliciesForSource(
       PolicyProvider provider, List<TelemetryPolicy> policiesFromSource) {
@@ -374,6 +378,7 @@ public final class PolicyInit {
     sourcePolicies.clear();
     sourcesActivated.set(false);
     initializedImplementers.clear();
+    policyStore.clear();
   }
 
   /**
