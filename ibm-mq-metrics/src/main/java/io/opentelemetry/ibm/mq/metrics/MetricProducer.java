@@ -17,8 +17,8 @@ import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.data.MetricDataType;
 import io.opentelemetry.sdk.metrics.data.SumData;
 import io.opentelemetry.sdk.resources.Resource;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -835,7 +835,7 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
 
   @Override
   public List<MetricData> produce(Resource resource) {
-    LinkedList<MetricData> collectedPoints = new LinkedList<>();
+    List<MetricData> collectedPoints = new ArrayList<>();
     this.metricData.drainTo(collectedPoints);
     this.currentEpochNanos = Clock.getDefault().now();
     return collectedPoints;
