@@ -11,15 +11,19 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Holds the latest validated policy snapshot and reports whether an update changed effective
  * configuration.
  */
 public final class PolicyStore {
+  private static final Logger logger = Logger.getLogger(PolicyStore.class.getName());
 
   private List<TelemetryPolicy> policies = Collections.emptyList();
-  private final List<PolicyImplementer> implementers = new ArrayList<>();
+  private final List<RegisteredImplementer> implementers = new ArrayList<>();
+  private long policyVersion;
 
   /**
    * Replaces the stored policies when the new snapshot is not equal to the current one.
@@ -37,29 +41,35 @@ public final class PolicyStore {
     Objects.requireNonNull(newPolicies, "newPolicies cannot be null");
     LinkedHashSet<TelemetryPolicy> newPolicySet = new LinkedHashSet<>(newPolicies);
     List<TelemetryPolicy> policiesSnapshot;
-    List<PolicyImplementer> implementersSnapshot;
+    List<RegisteredImplementer> implementersSnapshot;
+    long snapshotVersion;
     synchronized (this) {
       if (new LinkedHashSet<>(policies).equals(newPolicySet)) {
         return false;
       }
       policies = new ArrayList<>(newPolicySet);
+      policyVersion++;
+      snapshotVersion = policyVersion;
       policiesSnapshot = new ArrayList<>(policies);
       implementersSnapshot = new ArrayList<>(implementers);
     }
-    for (PolicyImplementer implementer : implementersSnapshot) {
-      implementer.onPoliciesChanged(relevantPoliciesFor(implementer, policiesSnapshot));
+    for (RegisteredImplementer implementer : implementersSnapshot) {
+      notifyImplementer(implementer, policiesSnapshot, snapshotVersion);
     }
     return true;
   }
 
   public void registerImplementer(PolicyImplementer implementer) {
     Objects.requireNonNull(implementer, "implementer cannot be null");
+    RegisteredImplementer registeredImplementer = new RegisteredImplementer(implementer);
     List<TelemetryPolicy> policiesSnapshot;
+    long snapshotVersion;
     synchronized (this) {
-      implementers.add(implementer);
+      implementers.add(registeredImplementer);
+      snapshotVersion = policyVersion;
       policiesSnapshot = new ArrayList<>(policies);
     }
-    implementer.onPoliciesChanged(relevantPoliciesFor(implementer, policiesSnapshot));
+    notifyImplementer(registeredImplementer, policiesSnapshot, snapshotVersion);
   }
 
   public synchronized List<TelemetryPolicy> getPolicies() {
@@ -69,6 +79,7 @@ public final class PolicyStore {
   public synchronized void clear() {
     policies = Collections.emptyList();
     implementers.clear();
+    policyVersion = 0;
   }
 
   private static List<TelemetryPolicy> relevantPoliciesFor(
@@ -86,5 +97,31 @@ public final class PolicyStore {
       }
     }
     return Collections.unmodifiableList(relevant);
+  }
+
+  private static void notifyImplementer(
+      RegisteredImplementer registration, List<TelemetryPolicy> policiesSnapshot, long version) {
+    synchronized (registration) {
+      if (version <= registration.lastDeliveredVersion) {
+        return;
+      }
+      try {
+        registration.implementer.onPoliciesChanged(
+            relevantPoliciesFor(registration.implementer, policiesSnapshot));
+      } catch (RuntimeException e) {
+        logger.log(Level.WARNING, "Policy implementer failed to apply policy update", e);
+      } finally {
+        registration.lastDeliveredVersion = version;
+      }
+    }
+  }
+
+  private static final class RegisteredImplementer {
+    private final PolicyImplementer implementer;
+    private long lastDeliveredVersion = -1;
+
+    private RegisteredImplementer(PolicyImplementer implementer) {
+      this.implementer = implementer;
+    }
   }
 }
