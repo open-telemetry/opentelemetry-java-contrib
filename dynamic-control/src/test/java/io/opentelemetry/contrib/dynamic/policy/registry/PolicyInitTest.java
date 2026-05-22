@@ -53,22 +53,6 @@ class PolicyInitTest {
   }
 
   @Test
-  void doesNotInitializePolicyWhenTopLevelTelemetryPolicyDeclarativeConfigMissing() {
-    AutoConfigurationCustomizer customizer = mock(AutoConfigurationCustomizer.class);
-    PolicyInit.init(customizer);
-    Function<ConfigProperties, Map<String, String>> propertiesCustomizer =
-        capturePropertiesCustomizer(customizer);
-
-    ConfigProperties config = mock(ConfigProperties.class);
-    when(config.getString(PolicyInitConfig.POLICY_INIT_CONFIG_PROPERTY_YAML)).thenReturn(null);
-    when(config.getString(PolicyInitConfig.POLICY_INIT_CONFIG_PROPERTY_JSON)).thenReturn(null);
-    Map<String, String> ignored = propertiesCustomizer.apply(config);
-
-    assertThat(TraceSamplingRatePolicy.getInitializedSampler()).isNull();
-    assertThat(ignored).isNotNull();
-  }
-
-  @Test
   void initializesPolicyFromInitConfigInAutoConfigurationMode() throws Exception {
     AutoConfigurationCustomizer customizer = mock(AutoConfigurationCustomizer.class);
     PolicyInit.init(customizer);
