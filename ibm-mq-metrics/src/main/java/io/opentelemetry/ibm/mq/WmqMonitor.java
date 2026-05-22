@@ -109,7 +109,7 @@ public final class WmqMonitor {
       if (e.getCause() instanceof MQException) {
         MQException mqe = (MQException) e.getCause();
         String errorCode = String.valueOf(mqe.getReason());
-        producer.recordIbmMqConnectionErrors(
+        producer.addIbmMqConnectionErrors(
             1, Attributes.of(IBM_MQ_QUEUE_MANAGER, queueManagerName, ERROR_CODE, errorCode));
       }
     } finally {

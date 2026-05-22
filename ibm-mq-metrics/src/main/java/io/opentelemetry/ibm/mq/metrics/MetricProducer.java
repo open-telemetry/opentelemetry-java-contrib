@@ -53,7 +53,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqMessageRetryCount(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -72,7 +71,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqStatus(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -91,7 +89,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqMaxSharingConversations(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -110,7 +107,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqCurrentSharingConversations(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -129,7 +125,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqByteReceived(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -148,7 +143,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqByteSent(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -167,7 +161,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqBuffersReceived(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -186,7 +179,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqBuffersSent(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -205,7 +197,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqMessageCount(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -224,7 +215,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqOpenInputCount(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -243,7 +233,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqOpenOutputCount(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -262,7 +251,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqHighQueueDepth(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -281,7 +269,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqServiceInterval(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -299,8 +286,7 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
     }
   }
 
-  public void recordIbmMqQueueDepthFullEvent(long value, Attributes attributes) {
-
+  public void addIbmMqQueueDepthFullEvent(long value, Attributes attributes) {
     long cumulativeValue =
         this.counterIbmMqQueueDepthFullEvent.compute(
             attributes,
@@ -333,8 +319,7 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
     }
   }
 
-  public void recordIbmMqQueueDepthHighEvent(long value, Attributes attributes) {
-
+  public void addIbmMqQueueDepthHighEvent(long value, Attributes attributes) {
     long cumulativeValue =
         this.counterIbmMqQueueDepthHighEvent.compute(
             attributes,
@@ -367,8 +352,7 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
     }
   }
 
-  public void recordIbmMqQueueDepthLowEvent(long value, Attributes attributes) {
-
+  public void addIbmMqQueueDepthLowEvent(long value, Attributes attributes) {
     long cumulativeValue =
         this.counterIbmMqQueueDepthLowEvent.compute(
             attributes,
@@ -402,7 +386,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqExpiredMessages(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -421,7 +404,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqUncommittedMessages(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -440,7 +422,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqOldestMsgAge(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -459,7 +440,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqCurrentMaxQueueFilesize(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -478,7 +458,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqCurrentQueueFilesize(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -497,7 +476,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqInstancesPerClient(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -516,7 +494,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqMessageDeqCount(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -535,7 +512,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqMessageEnqCount(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -554,7 +530,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqQueueDepth(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -573,7 +548,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqServiceIntervalEvent(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -592,7 +566,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqReusableLogSize(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -611,7 +584,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqManagerActiveChannels(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -630,7 +602,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqRestartLogSize(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -649,7 +620,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqMaxQueueDepth(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -668,7 +638,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqOnqtimeShortPeriod(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -687,7 +656,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqOnqtimeLongPeriod(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -706,7 +674,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqMessageReceivedCount(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -725,7 +692,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqMessageSentCount(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -744,7 +710,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqMaxInstances(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -763,7 +728,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqConnectionCount(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -782,7 +746,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqManagerStatus(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -801,7 +764,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqHeartbeat(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -820,7 +782,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqArchiveLogSize(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -839,7 +800,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqManagerMaxActiveChannels(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -858,7 +818,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqManagerStatisticsInterval(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -877,7 +836,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqPublishCount(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -896,7 +854,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqSubscriptionCount(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -915,7 +872,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqListenerStatus(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -933,8 +889,7 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
     }
   }
 
-  public void recordIbmMqUnauthorizedEvent(long value, Attributes attributes) {
-
+  public void addIbmMqUnauthorizedEvent(long value, Attributes attributes) {
     long cumulativeValue =
         this.counterIbmMqUnauthorizedEvent.compute(
             attributes,
@@ -968,7 +923,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   }
 
   public void recordIbmMqManagerMaxHandles(long value, Attributes attributes) {
-
     List<MetricData> currentMetrics = this.metricData.get();
     if (currentMetrics != null) {
       currentMetrics.add(
@@ -986,8 +940,7 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
     }
   }
 
-  public void recordIbmMqConnectionErrors(long value, Attributes attributes) {
-
+  public void addIbmMqConnectionErrors(long value, Attributes attributes) {
     long cumulativeValue =
         this.counterIbmMqConnectionErrors.compute(
             attributes,

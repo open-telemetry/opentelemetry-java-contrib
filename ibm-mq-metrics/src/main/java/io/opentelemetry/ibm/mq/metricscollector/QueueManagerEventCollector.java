@@ -56,7 +56,7 @@ public final class QueueManagerEventCollector implements Consumer<MetricsCollect
             if (context.getMetricsConfig().isIbmMqUnauthorizedEventEnabled()) {
               String username = received.getStringParameterValue(CMQCFC.MQCACF_USER_IDENTIFIER);
               String applicationName = received.getStringParameterValue(CMQCFC.MQCACF_APPL_NAME);
-              this.producer.recordIbmMqUnauthorizedEvent(
+              this.producer.addIbmMqUnauthorizedEvent(
                   1,
                   Attributes.of(
                       IBM_MQ_QUEUE_MANAGER,

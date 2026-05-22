@@ -85,17 +85,17 @@ public final class PerformanceEventQueueCollector implements Consumer<MetricsCol
     switch (receivedMsg.getReason()) {
       case CMQC.MQRC_Q_FULL:
         if (context.getMetricsConfig().isIbmMqQueueDepthFullEventEnabled()) {
-          this.producer.recordIbmMqQueueDepthFullEvent(1, attributes);
+          this.producer.addIbmMqQueueDepthFullEvent(1, attributes);
         }
         break;
       case CMQC.MQRC_Q_DEPTH_HIGH:
         if (context.getMetricsConfig().isIbmMqQueueDepthHighEventEnabled()) {
-          this.producer.recordIbmMqQueueDepthHighEvent(1, attributes);
+          this.producer.addIbmMqQueueDepthHighEvent(1, attributes);
         }
         break;
       case CMQC.MQRC_Q_DEPTH_LOW:
         if (context.getMetricsConfig().isIbmMqQueueDepthLowEventEnabled()) {
-          this.producer.recordIbmMqQueueDepthLowEvent(1, attributes);
+          this.producer.addIbmMqQueueDepthLowEvent(1, attributes);
         }
         break;
       default:
