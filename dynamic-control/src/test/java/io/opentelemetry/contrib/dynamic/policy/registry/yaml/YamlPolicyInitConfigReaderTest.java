@@ -34,8 +34,7 @@ class YamlPolicyInitConfigReaderTest {
       assertThat(source.getLocation()).isEqualTo("vendor-specific");
       assertThat(source.getMappings()).hasSize(4);
       assertThat(source.getMappings().get(0).getSourceKey()).isEqualTo("sampling_rate");
-      assertThat(source.getMappings().get(0).getPolicyType())
-          .isEqualTo("trace_sampling_rate_policy");
+      assertThat(source.getMappings().get(0).getPolicyType()).isEqualTo("trace-sampling");
     }
   }
 
