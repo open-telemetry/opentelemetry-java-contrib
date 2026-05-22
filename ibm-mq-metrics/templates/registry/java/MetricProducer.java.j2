@@ -19,6 +19,9 @@ import io.opentelemetry.sdk.resources.Resource;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 
 // This file is generated using weaver. Do not edit manually.
@@ -27,36 +30,53 @@ import java.util.List;
 public final class MetricProducer implements io.opentelemetry.sdk.metrics.export.MetricProducer {
   private final Resource resource;
   private final InstrumentationScopeInfo instrumentationScopeInfo;
-  private final List<MetricData> metricData;
+  private final AtomicReference<List<MetricData>> metricData;
+
+{% for metric in ctx %}{% if metric.instrument == "counter" %}private final Map<Attributes, Long> counter{{ metric.metric_name.replace("_", ".")|split('.')|map('capitalize')|join }};{% endif %}{% endfor %}
+
   private long currentEpochNanos;
 
   public MetricProducer(Resource resource, InstrumentationScopeInfo info){
     this.resource = resource;
     this.instrumentationScopeInfo = info;
-    this.metricData = Collections.synchronizedList(new ArrayList<>());
+    this.metricData = new AtomicReference<>(new ArrayList<>());
     this.currentEpochNanos = Clock.getDefault().now();
+    {% for metric in ctx %}{% if metric.instrument == "counter" %}this.counter{{ metric.metric_name.replace("_", ".")|split('.')|map('capitalize')|join }} = new ConcurrentHashMap<>();{% endif %}{% endfor %}
   }
 {% for metric in ctx %}
 
 
   public void record{{ metric.metric_name.replace("_", ".")|split('.')|map('capitalize')|join }}(long value, Attributes attributes) {
-    this.metricData.add(createMetricData(this.resource, this.instrumentationScopeInfo, "{{ metric.metric_name }}", "{{ metric.brief }}", "{{ metric.unit }}",
     {% if metric.instrument == "gauge" %}
+    List<MetricData> currentMetrics = this.metricData.get();
+    if (currentMetrics != null) {
+      currentMetrics.add(createMetricData(this.resource, this.instrumentationScopeInfo, "{{ metric.metric_name }}", "{{ metric.brief }}", "{{ metric.unit }}",
     MetricDataType.LONG_GAUGE,
     GaugeData.createLongGaugeData(Collections.singletonList(LongPointData.create(
                     this.currentEpochNanos, Clock.getDefault().now(), attributes, value)))));
+    }
     {% elif metric.instrument == "counter" %}
+    long cumulativeValue = this.counter{{ metric.metric_name.replace("_", ".")|split('.')|map('capitalize')|join }}.compute(attributes, (k, v) -> {
+                                                                                                  if (v == null) {
+                                                                                                    return value;
+                                                                                                  } else {
+                                                                                                    return v + value;
+                                                                                                  }
+                                                                                                });
+    List<MetricData> currentMetrics = this.metricData.get();
+    if (currentMetrics != null) {
+      currentMetrics.add(createMetricData(this.resource, this.instrumentationScopeInfo, "{{ metric.metric_name }}", "{{ metric.brief }}", "{{ metric.unit }}",
     MetricDataType.LONG_SUM,
     SumData.createLongSumData(/* isMonotonic= */true, AggregationTemporality.CUMULATIVE, Collections.singletonList(LongPointData.create(
-                        this.currentEpochNanos, Clock.getDefault().now(), attributes, value)))));
+                        this.currentEpochNanos, Clock.getDefault().now(), attributes, cumulativeValue)))));
+    }
     {% endif %}
   }
 {% endfor %}
 
   @Override
   public List<MetricData> produce(Resource resource) {
-    List<MetricData> collectedPoints = new ArrayList<>(this.metricData);
-    this.metricData.clear();
+    List<MetricData> collectedPoints = this.metricData.getAndSet(new ArrayList<>());
     this.currentEpochNanos = Clock.getDefault().now();
     return collectedPoints;
   }
