@@ -12,9 +12,7 @@ import com.ibm.mq.constants.CMQCFC;
 import com.ibm.mq.headers.pcf.PCFException;
 import com.ibm.mq.headers.pcf.PCFMessage;
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.metrics.LongGauge;
-import io.opentelemetry.api.metrics.Meter;
-import io.opentelemetry.ibm.mq.metrics.Metrics;
+import io.opentelemetry.ibm.mq.metrics.MetricProducer;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -40,10 +38,10 @@ import org.slf4j.LoggerFactory;
 public final class ListenerMetricsCollector implements Consumer<MetricsCollectorContext> {
 
   private static final Logger logger = LoggerFactory.getLogger(ListenerMetricsCollector.class);
-  private final LongGauge listenerStatusGauge;
+  private final MetricProducer producer;
 
-  public ListenerMetricsCollector(Meter meter) {
-    this.listenerStatusGauge = Metrics.createIbmMqListenerStatus(meter);
+  public ListenerMetricsCollector(MetricProducer producer) {
+    this.producer = producer;
   }
 
   @Override
@@ -101,7 +99,7 @@ public final class ListenerMetricsCollector implements Consumer<MetricsCollector
       throws PCFException {
     if (context.getMetricsConfig().isIbmMqListenerStatusEnabled()) {
       int status = message.getIntParameterValue(CMQCFC.MQIACH_LISTENER_STATUS);
-      listenerStatusGauge.set(
+      this.producer.recordIbmMqListenerStatus(
           status,
           Attributes.of(
               IBM_MQ_LISTENER_NAME,

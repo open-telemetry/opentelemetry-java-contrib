@@ -1,5 +1,5 @@
 templates:
-  - template: Metrics.java.j2
+  - template: MetricProducer.java.j2
     filter: '.groups | map(select(.type == "metric"))'
     application_mode: single
   - template: MetricsConfig.java.j2

@@ -20,13 +20,14 @@ import com.ibm.mq.headers.pcf.PCFMessage;
 import com.ibm.mq.headers.pcf.PCFMessageAgent;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.ibm.mq.config.QueueManager;
+import io.opentelemetry.ibm.mq.metrics.MetricProducer;
 import io.opentelemetry.ibm.mq.opentelemetry.ConfigWrapper;
 import io.opentelemetry.ibm.mq.opentelemetry.Main;
 import io.opentelemetry.ibm.mq.util.WmqUtil;
+import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.metrics.data.MetricData;
-import io.opentelemetry.sdk.testing.junit5.OpenTelemetryExtension;
+import io.opentelemetry.sdk.resources.Resource;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -50,7 +51,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,9 +59,6 @@ import org.slf4j.LoggerFactory;
 class WMQMonitorIntegrationTest {
 
   private static final Logger logger = LoggerFactory.getLogger(WMQMonitorIntegrationTest.class);
-
-  @RegisterExtension
-  static final OpenTelemetryExtension otelTesting = OpenTelemetryExtension.create();
 
   private static final ExecutorService service =
       Executors.newFixedThreadPool(
@@ -183,11 +180,13 @@ class WMQMonitorIntegrationTest {
     String configFile = getConfigFile("conf/test-config.yml");
 
     ConfigWrapper config = ConfigWrapper.parse(configFile);
-    Meter meter = otelTesting.getOpenTelemetry().getMeter("opentelemetry.io/mq");
-    TestWMQMonitor monitor = new TestWMQMonitor(config, meter, service);
+    MetricProducer producer =
+        new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
+
+    TestWMQMonitor monitor = new TestWMQMonitor(config, producer, service);
     monitor.runTest();
 
-    List<MetricData> data = otelTesting.getMetrics();
+    List<MetricData> data = producer.produce(Resource.empty());
     Map<String, MetricData> metrics = new HashMap<>();
     for (MetricData metricData : data) {
       metrics.put(metricData.getName(), metricData);
@@ -244,9 +243,9 @@ class WMQMonitorIntegrationTest {
   void test_wmqmonitor() throws Exception {
     String configFile = getConfigFile("conf/test-queuemgr-config.yml");
     ConfigWrapper config = ConfigWrapper.parse(configFile);
-    Meter meter = otelTesting.getOpenTelemetry().getMeter("opentelemetry.io/mq");
-
-    TestWMQMonitor monitor = new TestWMQMonitor(config, meter, service);
+    MetricProducer producer =
+        new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
+    TestWMQMonitor monitor = new TestWMQMonitor(config, producer, service);
     monitor.runTest();
     // TODO: Wait why are there no asserts here?
   }
@@ -257,14 +256,17 @@ class WMQMonitorIntegrationTest {
         ConfigWrapper.parse(WMQMonitorIntegrationTest.getConfigFile("conf/test-config.yml"));
     ScheduledExecutorService service =
         Executors.newScheduledThreadPool(config.getNumberOfThreads());
-    Main.run(config, service, otelTesting.getOpenTelemetry());
+    MetricProducer producer =
+        new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
+
+    Main.run(config, service, producer);
     CountDownLatch latch = new CountDownLatch(1);
     Future<?> ignored = service.submit(latch::countDown);
     Thread.sleep(5000); // TODO: This is fragile and time consuming and should be made better
     service.shutdown();
     assertTrue(service.awaitTermination(30, TimeUnit.SECONDS));
 
-    List<MetricData> data = otelTesting.getMetrics();
+    List<MetricData> data = producer.produce(Resource.empty());
     Set<String> metricNames = new HashSet<>();
     for (MetricData metricData : data) {
       metricNames.add(metricData.getName());
@@ -290,11 +292,12 @@ class WMQMonitorIntegrationTest {
     String configFile = getConfigFile("conf/test-bad-config.yml");
 
     ConfigWrapper config = ConfigWrapper.parse(configFile);
-    Meter meter = otelTesting.getOpenTelemetry().getMeter("opentelemetry.io/mq");
-    TestWMQMonitor monitor = new TestWMQMonitor(config, meter, service);
+    MetricProducer producer =
+        new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
+    TestWMQMonitor monitor = new TestWMQMonitor(config, producer, service);
     monitor.runTest();
 
-    List<MetricData> data = otelTesting.getMetrics();
+    List<MetricData> data = producer.produce(Resource.empty());
 
     assertThat(data).isNotEmpty();
     assertThat(data).hasSize(2);

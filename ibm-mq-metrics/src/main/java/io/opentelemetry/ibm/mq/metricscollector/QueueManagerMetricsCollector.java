@@ -6,14 +6,12 @@
 package io.opentelemetry.ibm.mq.metricscollector;
 
 import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.IBM_MQ_QUEUE_MANAGER;
-import static io.opentelemetry.ibm.mq.metrics.Metrics.MIBY_TO_BYTES;
+import static io.opentelemetry.ibm.mq.util.MetricsUtil.MIBY_TO_BYTES;
 
 import com.ibm.mq.constants.CMQCFC;
 import com.ibm.mq.headers.pcf.PCFMessage;
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.metrics.LongGauge;
-import io.opentelemetry.api.metrics.Meter;
-import io.opentelemetry.ibm.mq.metrics.Metrics;
+import io.opentelemetry.ibm.mq.metrics.MetricProducer;
 import java.util.List;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
@@ -24,20 +22,10 @@ public final class QueueManagerMetricsCollector implements Consumer<MetricsColle
 
   private static final Logger logger = LoggerFactory.getLogger(QueueManagerMetricsCollector.class);
 
-  private final LongGauge statusGauge;
-  private final LongGauge connectionCountGauge;
-  private final LongGauge restartLogSizeGauge;
-  private final LongGauge reuseLogSizeGauge;
-  private final LongGauge archiveLogSizeGauge;
-  private final LongGauge maxActiveChannelsGauge;
+  private final MetricProducer producer;
 
-  public QueueManagerMetricsCollector(Meter meter) {
-    this.statusGauge = Metrics.createIbmMqManagerStatus(meter);
-    this.connectionCountGauge = Metrics.createIbmMqConnectionCount(meter);
-    this.restartLogSizeGauge = Metrics.createIbmMqRestartLogSize(meter);
-    this.reuseLogSizeGauge = Metrics.createIbmMqReusableLogSize(meter);
-    this.archiveLogSizeGauge = Metrics.createIbmMqArchiveLogSize(meter);
-    this.maxActiveChannelsGauge = Metrics.createIbmMqManagerMaxActiveChannels(meter);
+  public QueueManagerMetricsCollector(MetricProducer producer) {
+    this.producer = producer;
   }
 
   @Override
@@ -69,27 +57,27 @@ public final class QueueManagerMetricsCollector implements Consumer<MetricsColle
       Attributes attributes = Attributes.of(IBM_MQ_QUEUE_MANAGER, context.getQueueManagerName());
       if (context.getMetricsConfig().isIbmMqManagerStatusEnabled()) {
         int status = responses.get(0).getIntParameterValue(CMQCFC.MQIACF_Q_MGR_STATUS);
-        statusGauge.set(status, attributes);
+        producer.recordIbmMqManagerStatus(status, attributes);
       }
       if (context.getMetricsConfig().isIbmMqConnectionCountEnabled()) {
         int count = responses.get(0).getIntParameterValue(CMQCFC.MQIACF_CONNECTION_COUNT);
-        connectionCountGauge.set(count, attributes);
+        producer.recordIbmMqConnectionCount(count, attributes);
       }
       if (context.getMetricsConfig().isIbmMqRestartLogSizeEnabled()) {
         int logSize = responses.get(0).getIntParameterValue(CMQCFC.MQIACF_RESTART_LOG_SIZE);
-        restartLogSizeGauge.set(MIBY_TO_BYTES.apply(logSize), attributes);
+        producer.recordIbmMqRestartLogSize(MIBY_TO_BYTES.apply(logSize), attributes);
       }
       if (context.getMetricsConfig().isIbmMqReusableLogSizeEnabled()) {
         int logSize = responses.get(0).getIntParameterValue(CMQCFC.MQIACF_REUSABLE_LOG_SIZE);
-        reuseLogSizeGauge.set(MIBY_TO_BYTES.apply(logSize), attributes);
+        producer.recordIbmMqReusableLogSize(MIBY_TO_BYTES.apply(logSize), attributes);
       }
       if (context.getMetricsConfig().isIbmMqArchiveLogSizeEnabled()) {
         int logSize = responses.get(0).getIntParameterValue(CMQCFC.MQIACF_ARCHIVE_LOG_SIZE);
-        archiveLogSizeGauge.set(MIBY_TO_BYTES.apply(logSize), attributes);
+        producer.recordIbmMqArchiveLogSize(MIBY_TO_BYTES.apply(logSize), attributes);
       }
       if (context.getMetricsConfig().isIbmMqManagerMaxActiveChannelsEnabled()) {
         int maxActiveChannels = context.getQueueManager().getMaxActiveChannels();
-        maxActiveChannelsGauge.set(maxActiveChannels, attributes);
+        producer.recordIbmMqManagerMaxActiveChannels(maxActiveChannels, attributes);
       }
     } catch (Exception e) {
       logger.error(e.getMessage());

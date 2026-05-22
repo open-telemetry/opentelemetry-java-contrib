@@ -13,11 +13,8 @@ import com.ibm.mq.MQException;
 import com.ibm.mq.MQQueueManager;
 import com.ibm.mq.headers.pcf.PCFMessageAgent;
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.metrics.LongCounter;
-import io.opentelemetry.api.metrics.LongGauge;
-import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.ibm.mq.config.QueueManager;
-import io.opentelemetry.ibm.mq.metrics.Metrics;
+import io.opentelemetry.ibm.mq.metrics.MetricProducer;
 import io.opentelemetry.ibm.mq.metrics.MetricsConfig;
 import io.opentelemetry.ibm.mq.metricscollector.ChannelMetricsCollector;
 import io.opentelemetry.ibm.mq.metricscollector.InquireChannelCmdCollector;
@@ -49,15 +46,15 @@ public final class WmqMonitor {
 
   private final List<QueueManager> queueManagers;
   private final List<Consumer<MetricsCollectorContext>> jobs = new ArrayList<>();
-  private final LongCounter errorCodesCounter;
-  private final LongGauge heartbeatGauge;
   private final ExecutorService threadPool;
   private final MetricsConfig metricsConfig;
+  private final MetricProducer producer;
 
-  public WmqMonitor(ConfigWrapper config, ExecutorService threadPool, Meter meter) {
+  public WmqMonitor(ConfigWrapper config, ExecutorService threadPool, MetricProducer producer) {
     List<Map<String, ?>> queueManagers = getQueueManagers(config);
     ObjectMapper mapper = new ObjectMapper();
 
+    this.producer = producer;
     this.queueManagers = new ArrayList<>();
 
     for (Map<String, ?> queueManager : queueManagers) {
@@ -70,21 +67,18 @@ public final class WmqMonitor {
     }
 
     this.metricsConfig = new MetricsConfig(config);
-
-    this.heartbeatGauge = Metrics.createIbmMqHeartbeat(meter);
-    this.errorCodesCounter = Metrics.createIbmMqConnectionErrors(meter);
     this.threadPool = threadPool;
 
-    jobs.add(new QueueManagerMetricsCollector(meter));
-    jobs.add(new InquireQueueManagerCmdCollector(meter));
-    jobs.add(new ChannelMetricsCollector(meter));
-    jobs.add(new InquireChannelCmdCollector(meter));
-    jobs.add(new QueueMetricsCollector(meter, threadPool, config));
-    jobs.add(new ListenerMetricsCollector(meter));
-    jobs.add(new TopicMetricsCollector(meter));
-    jobs.add(new ReadConfigurationEventQueueCollector(meter));
-    jobs.add(new PerformanceEventQueueCollector(meter));
-    jobs.add(new QueueManagerEventCollector(meter));
+    jobs.add(new QueueManagerMetricsCollector(producer));
+    jobs.add(new InquireQueueManagerCmdCollector(producer));
+    jobs.add(new ChannelMetricsCollector(producer));
+    jobs.add(new InquireChannelCmdCollector(producer));
+    jobs.add(new QueueMetricsCollector(producer, threadPool, config));
+    jobs.add(new ListenerMetricsCollector(producer));
+    jobs.add(new TopicMetricsCollector(producer));
+    jobs.add(new ReadConfigurationEventQueueCollector(producer));
+    jobs.add(new PerformanceEventQueueCollector(producer));
+    jobs.add(new QueueManagerEventCollector(producer));
   }
 
   public void run() {
@@ -115,12 +109,12 @@ public final class WmqMonitor {
       if (e.getCause() instanceof MQException) {
         MQException mqe = (MQException) e.getCause();
         String errorCode = String.valueOf(mqe.getReason());
-        errorCodesCounter.add(
+        producer.addIbmMqConnectionErrors(
             1, Attributes.of(IBM_MQ_QUEUE_MANAGER, queueManagerName, ERROR_CODE, errorCode));
       }
     } finally {
       if (this.metricsConfig.isIbmMqHeartbeatEnabled()) {
-        heartbeatGauge.set(
+        producer.recordIbmMqHeartbeat(
             heartBeatMetricValue, Attributes.of(IBM_MQ_QUEUE_MANAGER, queueManagerName));
       }
       cleanUp(ibmQueueManager, agent);

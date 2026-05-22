@@ -13,9 +13,7 @@ import com.ibm.mq.constants.MQConstants;
 import com.ibm.mq.headers.pcf.MQCFIL;
 import com.ibm.mq.headers.pcf.PCFMessage;
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.metrics.LongGauge;
-import io.opentelemetry.api.metrics.Meter;
-import io.opentelemetry.ibm.mq.metrics.Metrics;
+import io.opentelemetry.ibm.mq.metrics.MetricProducer;
 import java.util.List;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
@@ -26,10 +24,10 @@ public final class InquireQueueManagerCmdCollector implements Consumer<MetricsCo
 
   private static final Logger logger =
       LoggerFactory.getLogger(InquireQueueManagerCmdCollector.class);
-  private final LongGauge statisticsIntervalGauge;
+  private final MetricProducer producer;
 
-  public InquireQueueManagerCmdCollector(Meter meter) {
-    this.statisticsIntervalGauge = Metrics.createIbmMqManagerStatisticsInterval(meter);
+  public InquireQueueManagerCmdCollector(MetricProducer producer) {
+    this.producer = producer;
   }
 
   @Override
@@ -62,7 +60,7 @@ public final class InquireQueueManagerCmdCollector implements Consumer<MetricsCo
       }
       if (context.getMetricsConfig().isIbmMqManagerStatisticsIntervalEnabled()) {
         int interval = responses.get(0).getIntParameterValue(CMQC.MQIA_STATISTICS_INTERVAL);
-        statisticsIntervalGauge.set(
+        producer.recordIbmMqManagerStatisticsInterval(
             interval, Attributes.of(IBM_MQ_QUEUE_MANAGER, context.getQueueManagerName()));
       }
     } catch (Exception e) {

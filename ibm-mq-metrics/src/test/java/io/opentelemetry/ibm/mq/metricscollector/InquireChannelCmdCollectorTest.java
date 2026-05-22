@@ -14,32 +14,28 @@ import com.ibm.mq.constants.CMQCFC;
 import com.ibm.mq.constants.CMQXC;
 import com.ibm.mq.headers.pcf.PCFMessage;
 import com.ibm.mq.headers.pcf.PCFMessageAgent;
-import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.ibm.mq.config.QueueManager;
+import io.opentelemetry.ibm.mq.metrics.MetricProducer;
 import io.opentelemetry.ibm.mq.metrics.MetricsConfig;
 import io.opentelemetry.ibm.mq.opentelemetry.ConfigWrapper;
+import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.metrics.data.MetricData;
-import io.opentelemetry.sdk.testing.junit5.OpenTelemetryExtension;
+import io.opentelemetry.sdk.resources.Resource;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class InquireChannelCmdCollectorTest {
 
-  @RegisterExtension
-  static final OpenTelemetryExtension otelTesting = OpenTelemetryExtension.create();
-
   InquireChannelCmdCollector classUnderTest;
 
   MetricsCollectorContext context;
-  Meter meter;
   @Mock PCFMessageAgent pcfMessageAgent;
 
   @BeforeEach
@@ -48,7 +44,6 @@ class InquireChannelCmdCollectorTest {
     ObjectMapper mapper = new ObjectMapper();
     QueueManager queueManager =
         mapper.convertValue(config.getQueueManagers().get(0), QueueManager.class);
-    meter = otelTesting.getOpenTelemetry().getMeter("opentelemetry.io/mq");
     context =
         new MetricsCollectorContext(queueManager, pcfMessageAgent, null, new MetricsConfig(config));
   }
@@ -57,7 +52,9 @@ class InquireChannelCmdCollectorTest {
   void testProcessPCFRequestAndPublishQMetricsForInquireQStatusCmd() throws Exception {
     when(pcfMessageAgent.send(any(PCFMessage.class)))
         .thenReturn(createPCFResponseForInquireChannelCmd());
-    classUnderTest = new InquireChannelCmdCollector(meter);
+    MetricProducer producer =
+        new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
+    classUnderTest = new InquireChannelCmdCollector(producer);
     classUnderTest.accept(context);
     List<String> metricsList =
         new ArrayList<>(
@@ -65,7 +62,7 @@ class InquireChannelCmdCollectorTest {
                 "ibm.mq.message.retry.count",
                 "ibm.mq.message.received.count",
                 "ibm.mq.message.sent.count"));
-    for (MetricData metric : otelTesting.getMetrics()) {
+    for (MetricData metric : producer.produce(Resource.empty())) {
       if (metricsList.remove(metric.getName())) {
         if (metric.getName().equals("ibm.mq.message.retry.count")) {
           assertThat(metric.getLongGaugeData().getPoints().iterator().next().getValue())
