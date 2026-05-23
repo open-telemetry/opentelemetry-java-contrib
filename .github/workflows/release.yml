@@ -17,6 +17,7 @@ jobs:
       DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
 
   release:
+    environment: protected
     permissions:
       contents: write # for creating the release
       id-token: write # for signing artifacts with Sigstore
