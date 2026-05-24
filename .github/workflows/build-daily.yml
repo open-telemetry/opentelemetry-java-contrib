@@ -21,6 +21,7 @@ jobs:
     uses: ./.github/workflows/reusable-lint.yml
 
   publish-snapshots:
+    environment: protected
     needs:
       - common
     runs-on: ubuntu-latest
