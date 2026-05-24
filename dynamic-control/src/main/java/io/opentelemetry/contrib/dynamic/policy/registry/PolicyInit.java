@@ -204,8 +204,9 @@ public final class PolicyInit {
   }
 
   /**
-   * Initializes one policy class exactly once for this init pass. eg run {@code
-   * TraceSamplingRatePolicy::initialize} and cache the returned implementer.
+   * Initializes one policy class exactly once until shutdown. eg run {@code
+   * TraceSamplingRatePolicy::initialize}, cache the returned implementer, and register it with the
+   * policy store.
    *
    * @param policyClass policy class to initialize
    * @param autoConfiguration OpenTelemetry auto-configuration customizer
@@ -218,20 +219,32 @@ public final class PolicyInit {
     if (!initializedPolicyClasses.add(policyClass)) {
       return;
     }
-    PolicyTypeInitializer policyTypeInitializer = POLICY_TYPE_INITIALIZERS.get(policyClass);
-    if (policyTypeInitializer == null) {
-      throw new IllegalStateException(
-          "No policyTypeInitializer registered for policy class '" + policyClass.getName() + "'");
-    }
+    PolicyImplementer implementer;
     try {
-      PolicyImplementer implementer = policyTypeInitializer.initialize(autoConfiguration);
-      initializedImplementers.put(policyClass, implementer);
-      policyStore.registerImplementer(implementer);
-      logger.log(Level.INFO, "Initialized policy class ''{0}''", policyClass.getName());
+      synchronized (initializedImplementers) {
+        PolicyImplementer existing = initializedImplementers.get(policyClass);
+        if (existing != null) {
+          return;
+        }
+        PolicyTypeInitializer policyTypeInitializer = POLICY_TYPE_INITIALIZERS.get(policyClass);
+        if (policyTypeInitializer == null) {
+          throw new IllegalStateException(
+              "No policyTypeInitializer registered for policy class '"
+                  + policyClass.getName()
+                  + "'");
+        }
+        implementer =
+            Objects.requireNonNull(
+                policyTypeInitializer.initialize(autoConfiguration),
+                "policyTypeInitializer returned null");
+        initializedImplementers.put(policyClass, implementer);
+      }
     } catch (RuntimeException e) {
       throw new IllegalStateException(
           "Policy initializer failed for class '" + policyClass.getName() + "'", e);
     }
+    policyStore.registerImplementer(implementer);
+    logger.log(Level.INFO, "Initialized policy class ''{0}''", policyClass.getName());
   }
 
   /**
