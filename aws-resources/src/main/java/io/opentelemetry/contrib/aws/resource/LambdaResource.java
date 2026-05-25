@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -76,13 +77,15 @@ public final class LambdaResource {
       builder.put(FAAS_VERSION, functionVersion);
     }
 
-    try {
-      String accountId = Files.readSymbolicLink(accountIdSymlink).toString();
-      if (!accountId.isEmpty()) {
-        builder.put(CLOUD_ACCOUNT_ID, accountId);
+    if (isLinux() && Files.isSymbolicLink(accountIdSymlink)) {
+      try {
+        String accountId = Files.readSymbolicLink(accountIdSymlink).toString();
+        if (!accountId.isEmpty()) {
+          builder.put(CLOUD_ACCOUNT_ID, accountId);
+        }
+      } catch (IOException e) {
+        logger.log(FINE, "cloud.account.id not available via symlink", e);
       }
-    } catch (IOException | UnsupportedOperationException e) {
-      logger.log(FINE, "cloud.account.id not available via symlink", e);
     }
 
     return Resource.create(builder.build(), SchemaUrls.V1_25_0);
@@ -90,6 +93,10 @@ public final class LambdaResource {
 
   private static boolean isLambda(String... envVariables) {
     return Stream.of(envVariables).anyMatch(v -> !v.isEmpty());
+  }
+
+  private static boolean isLinux() {
+    return System.getProperty("os.name", "").toLowerCase(Locale.ROOT).contains("linux");
   }
 
   private LambdaResource() {}

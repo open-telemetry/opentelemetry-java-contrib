@@ -27,6 +27,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ServiceLoader;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 
 class LambdaResourceTest {
@@ -71,6 +73,7 @@ class LambdaResourceTest {
   }
 
   @Test
+  @EnabledOnOs(OS.LINUX)
   void shouldReadCloudAccountIdFromSymlink(@TempDir Path tempDir) throws Exception {
     Path symlink = tempDir.resolve(".otel-aws-account-id");
     Files.createSymbolicLink(symlink, Paths.get("123456789012"));
@@ -89,6 +92,7 @@ class LambdaResourceTest {
   }
 
   @Test
+  @EnabledOnOs(OS.LINUX)
   void shouldSkipCloudAccountIdWhenSymlinkMissing(@TempDir Path tempDir) {
     Path symlink = tempDir.resolve(".otel-aws-account-id");
 
@@ -105,6 +109,7 @@ class LambdaResourceTest {
   }
 
   @Test
+  @EnabledOnOs(OS.LINUX)
   void shouldPreserveLeadingZerosInAccountId(@TempDir Path tempDir) throws Exception {
     Path symlink = tempDir.resolve(".otel-aws-account-id");
     Files.createSymbolicLink(symlink, Paths.get("012345678901"));
