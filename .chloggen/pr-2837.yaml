@@ -1,6 +1,0 @@
-change_type: enhancement
-component: 
-note: Automate changelog generation using fragment pattern
-issues: [2787]
-subtext: 
-change_logs: [user]
