@@ -10,7 +10,7 @@ Respond with a single JSON object matching exactly this schema and
 nothing else (no prose). A surrounding `json` code fence is tolerated
 by the parser but discouraged — prefer a bare JSON object:
 
-```
+```text
 {
   "decision": "include" | "omit",
   "section": "breaking" | "deprecations" | "new-javaagent" | "new-library" | "enhancements" | "bug-fixes" | null,
@@ -34,9 +34,9 @@ Removes or changes the signature of a non-private method, class, or
 interface in a non-stable (`-alpha`) module or in `javaagent-extension-api`
 / `*/internal/**`. Includes:
 
-- removal of a non-`@Deprecated` method,
-- removal of a `default` method from an internal interface,
-- signature change even when the method never carried `@Deprecated`.
+* removal of a non-`@Deprecated` method,
+* removal of a `default` method from an internal interface,
+* signature change even when the method never carried `@Deprecated`.
 
 Treat non-private `Experimental*` helpers in published `:library`
 artifacts as incubating public API even when their package name
@@ -61,9 +61,9 @@ flat property; include the YAML key when relevant.
 Configuration property renames always go here, never in Enhancements.
 Stability policy:
 
-- Stable property/API: may be deprecated in any minor; removable only in
+* Stable property/API: may be deprecated in any minor; removable only in
   a major.
-- Experimental property (name contains `experimental` or YAML key ends
+* Experimental property (name contains `experimental` or YAML key ends
   with `/development`): may be deprecated in one release and removed in
   the next.
 
@@ -109,12 +109,12 @@ property whose only diff evidence is a metadata.yaml entry.
 Omit only when the PR's `src/main` runtime changes are entirely limited
 to one or more of:
 
-- pure refactor, style, or naming cleanup of non-API surfaces,
-- test-only changes, cross-testing, moving tests out of default packages,
-- CI/build-tooling with no runtime effect,
-- renames of internal (not extension-API) fields, packages, or helpers,
-- new package-private, `internal`-package, or test-only methods,
-- `metadata.yaml` documentation (see section above).
+* pure refactor, style, or naming cleanup of non-API surfaces,
+* test-only changes, cross-testing, moving tests out of default packages,
+* CI/build-tooling with no runtime effect,
+* renames of internal (not extension-API) fields, packages, or helpers,
+* new package-private, `internal`-package, or test-only methods,
+* `metadata.yaml` documentation (see section above).
 
 Do not use the internal-helper omit rule for non-private `Experimental*`
 classes in published artifacts; classify their
@@ -132,34 +132,34 @@ keep the PR.
 
 ## Bias toward keeping when the diff touches
 
-- Emitted telemetry: new attributes, gated-behavior changes, schema URL
+* Emitted telemetry: new attributes, gated-behavior changes, schema URL
   changes, new `SemconvStability.emitStable…` branches.
-- Startup, context propagation, class loading, or lifecycle behavior
+* Startup, context propagation, class loading, or lifecycle behavior
   that can disable telemetry, leak memory, deadlock, or otherwise break
   normal operation (removal of an early `GlobalOpenTelemetry.get()`
   call; closing bridged callbacks on GC; fixing an agent deadlock).
-- Agent transformation correctness: `@Advice` inline vs indy, advice
+* Agent transformation correctness: `@Advice` inline vs indy, advice
   scope, helper-class exposure to the application class loader.
-- Any public or extension-facing API, builder method, config key, or
+* Any public or extension-facing API, builder method, config key, or
   semconv surface, even when the diff also includes plumbing.
 
 ## Bullet style
 
-- One sentence per bullet.
-- Name concrete user-facing surfaces: flag names, property names, class
+* One sentence per bullet.
+* Name concrete user-facing surfaces: flag names, property names, class
   names, attribute names. Use backticks for config keys, property names,
   attributes, and class/method names.
-- For `v3-preview`-gated changes, cite the user-facing property name
+* For `v3-preview`-gated changes, cite the user-facing property name
   `otel.instrumentation.common.v3-preview`, not the internal
   `v3_preview` key.
-- Do not describe implementation details ("refactored", "moved",
+* Do not describe implementation details ("refactored", "moved",
   "simplified") unless that is the user-visible change.
-- Do not credit authors.
+* Do not credit authors.
 
 The merger renders bullets with the PR link on the second line, indented
 two spaces:
 
-```
+```text
 - Short user-facing description
   ([#NNNN](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/NNNN))
 ```
