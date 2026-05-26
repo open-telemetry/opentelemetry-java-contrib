@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 class HealthAppenderTest {
 
   @Test
-  void appendTo_withHealth_setsHealthField() {
+  void shouldAppendProvidedHealth() {
     ComponentHealth health =
         new ComponentHealth.Builder()
             .healthy(true)
@@ -32,7 +32,7 @@ class HealthAppenderTest {
   }
 
   @Test
-  void appendTo_withNoHealth_leavesHealthFieldUnset() {
+  void shouldNotAppendHealthIfNotProvided() {
     HealthAppender appender = HealthAppender.create(new AtomicReference<ComponentHealth>()::get);
 
     AgentToServer.Builder builder = new AgentToServer.Builder();
