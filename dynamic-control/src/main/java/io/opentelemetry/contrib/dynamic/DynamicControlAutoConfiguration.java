@@ -27,7 +27,14 @@ public class DynamicControlAutoConfiguration implements AutoConfigurationCustomi
   @Override
   public void customize(AutoConfigurationCustomizer autoConfiguration) {
     logger.log(Level.INFO, "Dynamic control extension has been loaded by the agent");
-    PolicyInit.init(autoConfiguration);
+    try {
+      PolicyInit.init(autoConfiguration);
+    } catch (RuntimeException e) {
+      logger.log(
+          Level.SEVERE,
+          "Dynamic control policy initialization failed; continuing without dynamic control",
+          e);
+    }
   }
 
   @Override
