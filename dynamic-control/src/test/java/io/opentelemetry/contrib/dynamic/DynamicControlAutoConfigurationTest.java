@@ -6,7 +6,9 @@
 package io.opentelemetry.contrib.dynamic;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import org.junit.jupiter.api.Test;
@@ -20,8 +22,7 @@ class DynamicControlAutoConfigurationTest {
 
     config.customize(customizer);
 
-    // The customize method should not throw and should be callable
-    // Logging is tested manually or via integration tests
+    verify(customizer).addPropertiesCustomizer(any());
   }
 
   @Test

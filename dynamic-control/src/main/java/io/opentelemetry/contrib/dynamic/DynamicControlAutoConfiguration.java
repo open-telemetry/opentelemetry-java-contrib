@@ -6,6 +6,7 @@
 package io.opentelemetry.contrib.dynamic;
 
 import com.google.auto.service.AutoService;
+import io.opentelemetry.contrib.dynamic.policy.registry.PolicyInit;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
 import java.util.logging.Level;
@@ -26,6 +27,7 @@ public class DynamicControlAutoConfiguration implements AutoConfigurationCustomi
   @Override
   public void customize(AutoConfigurationCustomizer autoConfiguration) {
     logger.log(Level.INFO, "Dynamic control extension has been loaded by the agent");
+    PolicyInit.init(autoConfiguration);
   }
 
   @Override
