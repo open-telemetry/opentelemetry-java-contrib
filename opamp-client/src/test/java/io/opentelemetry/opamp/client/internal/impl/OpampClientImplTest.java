@@ -37,6 +37,7 @@ import mockwebserver3.RecordedRequest;
 import mockwebserver3.junit5.StartStop;
 import okio.Buffer;
 import okio.ByteString;
+import opamp.proto.AgentCapabilities;
 import opamp.proto.AgentConfigFile;
 import opamp.proto.AgentConfigMap;
 import opamp.proto.AgentDescription;
@@ -45,6 +46,7 @@ import opamp.proto.AgentRemoteConfig;
 import opamp.proto.AgentToServer;
 import opamp.proto.AgentToServerFlags;
 import opamp.proto.AnyValue;
+import opamp.proto.ComponentHealth;
 import opamp.proto.EffectiveConfig;
 import opamp.proto.KeyValue;
 import opamp.proto.RemoteConfigStatus;
@@ -65,6 +67,7 @@ class OpampClientImplTest {
   private OpampClientState state;
   private OpampClientImpl client;
   private TestEffectiveConfig effectiveConfig;
+  private ComponentHealth initialHealth;
   private TestCallbacks callbacks;
   @StartStop private final MockWebServer server = new MockWebServer();
 
@@ -75,13 +78,22 @@ class OpampClientImplTest {
             new EffectiveConfig.Builder()
                 .config_map(createAgentConfigMap("first", "first content"))
                 .build());
+    initialHealth =
+        new ComponentHealth.Builder()
+            .healthy(true)
+            .start_time_unix_nano(123L)
+            .status("running")
+            .status_time_unix_nano(456L)
+            .build();
     state =
         new OpampClientState(
             new State.RemoteConfigStatus(
                 getRemoteConfigStatus(RemoteConfigStatuses.RemoteConfigStatuses_UNSET)),
             new State.SequenceNum(1L),
             new State.AgentDescription(new AgentDescription.Builder().build()),
-            new State.Capabilities(5L),
+            new State.Capabilities(
+                5L | AgentCapabilities.AgentCapabilities_ReportsHealth.getValue()),
+            new State.Health(initialHealth),
             new State.InstanceUid(new byte[] {1, 2, 3}),
             new State.Flags((long) AgentToServerFlags.AgentToServerFlags_Unspecified.getValue()),
             effectiveConfig);
@@ -105,6 +117,7 @@ class OpampClientImplTest {
     assertThat(firstMessage.sequence_num).isEqualTo(1);
     assertThat(firstMessage.capabilities).isEqualTo(state.capabilities.get());
     assertThat(firstMessage.agent_description).isEqualTo(state.agentDescription.get());
+    assertThat(firstMessage.health).isEqualTo(initialHealth);
     assertThat(firstMessage.effective_config).isEqualTo(state.effectiveConfig.get());
     assertThat(firstMessage.remote_config_status).isEqualTo(state.remoteConfigStatus.get());
 
@@ -124,6 +137,7 @@ class OpampClientImplTest {
     assertThat(secondMessage.sequence_num).isEqualTo(2);
     assertThat(firstMessage.capabilities).isEqualTo(state.capabilities.get());
     assertThat(secondMessage.agent_description).isNull();
+    assertThat(secondMessage.health).isNull();
     assertThat(secondMessage.effective_config).isNull();
     assertThat(secondMessage.remote_config_status).isEqualTo(remoteConfigStatus);
 
@@ -144,6 +158,7 @@ class OpampClientImplTest {
     assertThat(thirdMessage.sequence_num).isEqualTo(3);
     assertThat(firstMessage.capabilities).isEqualTo(state.capabilities.get());
     assertThat(thirdMessage.agent_description).isNull();
+    assertThat(thirdMessage.health).isNull();
     assertThat(thirdMessage.remote_config_status).isNull();
     assertThat(thirdMessage.effective_config)
         .isEqualTo(otherConfig); // it was changed via observable state
@@ -169,6 +184,7 @@ class OpampClientImplTest {
     assertThat(fullRequestedMessage.sequence_num).isEqualTo(5);
     assertThat(fullRequestedMessage.capabilities).isEqualTo(state.capabilities.get());
     assertThat(fullRequestedMessage.agent_description).isEqualTo(state.agentDescription.get());
+    assertThat(fullRequestedMessage.health).isEqualTo(state.health.get());
     assertThat(fullRequestedMessage.effective_config).isEqualTo(state.effectiveConfig.get());
     assertThat(fullRequestedMessage.remote_config_status).isEqualTo(state.remoteConfigStatus.get());
   }
@@ -251,6 +267,47 @@ class OpampClientImplTest {
     enqueueServerToAgentResponse(new ServerToAgent.Builder().build());
     client.setRemoteConfigStatus(remoteConfigStatus);
     assertThat(takeRequest()).isNull();
+  }
+
+  @Test
+  void verifyHealthSetter() {
+    initializeClient();
+    ComponentHealth health =
+        new ComponentHealth.Builder()
+            .healthy(false)
+            .start_time_unix_nano(0L)
+            .last_error("failed")
+            .status("failed")
+            .status_time_unix_nano(789L)
+            .build();
+
+    // Update when changed
+    enqueueServerToAgentResponse(new ServerToAgent.Builder().build());
+    client.setHealth(health);
+    assertThat(getAgentToServerMessage(takeRequest()).health).isEqualTo(health);
+
+    // Ignore when the provided value is the same as the current one
+    enqueueServerToAgentResponse(new ServerToAgent.Builder().build());
+    client.setHealth(health);
+    assertThat(takeRequest()).isNull();
+  }
+
+  @Test
+  void verifyHealthStateUpdate() {
+    initializeClient();
+    ComponentHealth health =
+        new ComponentHealth.Builder()
+            .healthy(false)
+            .last_error("failed")
+            .status("failed")
+            .status_time_unix_nano(789L)
+            .build();
+
+    enqueueServerToAgentResponse(new ServerToAgent.Builder().build());
+    state.health.set(health);
+    state.health.notifyUpdate();
+
+    assertThat(getAgentToServerMessage(takeRequest()).health).isEqualTo(health);
   }
 
   @Test

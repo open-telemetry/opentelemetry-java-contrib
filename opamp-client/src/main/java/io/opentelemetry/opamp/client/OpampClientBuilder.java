@@ -37,6 +37,7 @@ public final class OpampClientBuilder {
       HttpRequestService.create(OkHttpSender.create("http://localhost:4320/v1/opamp"));
   @Nullable private byte[] instanceUid;
   @Nullable private State.EffectiveConfig effectiveConfigState;
+  @Nullable private State.Health healthState;
 
   OpampClientBuilder() {}
 
@@ -363,6 +364,19 @@ public final class OpampClientBuilder {
   }
 
   /**
+   * Adds the ReportsHealth capability to the Client so that the Server expects the Client's health
+   * status report, as explained <a
+   * href="https://github.com/open-telemetry/opamp-spec/blob/main/specification.md#agenttoserverhealth">here</a>.
+   *
+   * @return this
+   */
+  @CanIgnoreReturnValue
+  public OpampClientBuilder enableHealthReporting() {
+    capabilities = capabilities | AgentCapabilities.AgentCapabilities_ReportsHealth.getValue();
+    return this;
+  }
+
+  /**
    * Sets the effective config state implementation. It should call {@link
    * State.EffectiveConfig#notifyUpdate()} whenever it has changes that have not been sent to the
    * server.
@@ -373,6 +387,20 @@ public final class OpampClientBuilder {
   @CanIgnoreReturnValue
   public OpampClientBuilder setEffectiveConfigState(State.EffectiveConfig effectiveConfigState) {
     this.effectiveConfigState = effectiveConfigState;
+    return this;
+  }
+
+  /**
+   * Sets the health state implementation. It should call {@link State.Health#notifyUpdate()}
+   * whenever it has changes that have not been sent to the server. Use {@link
+   * #enableHealthReporting()} to add the ReportsHealth capability.
+   *
+   * @param healthState The state implementation.
+   * @return this
+   */
+  @CanIgnoreReturnValue
+  public OpampClientBuilder setHealthState(State.Health healthState) {
+    this.healthState = healthState;
     return this;
   }
 
@@ -389,6 +417,9 @@ public final class OpampClientBuilder {
     if (effectiveConfigState == null) {
       effectiveConfigState = createEffectiveConfigNoop();
     }
+    if (healthState == null) {
+      healthState = createHealthNoop();
+    }
     OpampClientState state =
         new OpampClientState(
             new State.RemoteConfigStatus(new RemoteConfigStatus.Builder().build()),
@@ -399,6 +430,7 @@ public final class OpampClientBuilder {
                     .non_identifying_attributes(protoNonIdentifyingAttributes)
                     .build()),
             new State.Capabilities(capabilities),
+            healthState,
             new State.InstanceUid(instanceUid),
             new State.Flags(0L),
             effectiveConfigState);
@@ -413,6 +445,10 @@ public final class OpampClientBuilder {
         return null;
       }
     };
+  }
+
+  private static State.Health createHealthNoop() {
+    return new State.Health() {};
   }
 
   private static AnyValue createStringValue(String value) {

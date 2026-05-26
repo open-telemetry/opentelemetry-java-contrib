@@ -14,6 +14,7 @@ import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.AgentDisconn
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.CapabilitiesAppender;
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.EffectiveConfigAppender;
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.FlagsAppender;
+import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.HealthAppender;
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.InstanceUidAppender;
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.RemoteConfigStatusAppender;
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.SequenceNumberAppender;
@@ -28,12 +29,14 @@ import io.opentelemetry.opamp.client.request.service.RequestService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 import okio.ByteString;
 import opamp.proto.AgentDescription;
 import opamp.proto.AgentToServer;
+import opamp.proto.ComponentHealth;
 import opamp.proto.RemoteConfigStatus;
 import opamp.proto.ServerErrorResponse;
 import opamp.proto.ServerToAgent;
@@ -76,6 +79,7 @@ public final class OpampClientImpl
     // Compressable fields init
     List<Field> compressableFields = new ArrayList<>();
     compressableFields.add(Field.AGENT_DESCRIPTION);
+    compressableFields.add(Field.HEALTH);
     compressableFields.add(Field.EFFECTIVE_CONFIG);
     compressableFields.add(Field.REMOTE_CONFIG_STATUS);
     COMPRESSABLE_FIELDS = Collections.unmodifiableList(compressableFields);
@@ -90,6 +94,7 @@ public final class OpampClientImpl
             RemoteConfigStatusAppender.create(state.remoteConfigStatus),
             SequenceNumberAppender.create(state.sequenceNum),
             CapabilitiesAppender.create(state.capabilities),
+            HealthAppender.create(state.health),
             InstanceUidAppender.create(state.instanceUid),
             FlagsAppender.create(state.flags),
             AgentDisconnectAppender.create());
@@ -141,6 +146,14 @@ public final class OpampClientImpl
     if (!state.remoteConfigStatus.get().equals(remoteConfigStatus)) {
       state.remoteConfigStatus.set(remoteConfigStatus);
       addFieldAndSend(Field.REMOTE_CONFIG_STATUS);
+    }
+  }
+
+  @Override
+  public void setHealth(@Nonnull ComponentHealth health) {
+    if (!Objects.equals(state.health.get(), health)) {
+      state.health.set(health);
+      addFieldAndSend(Field.HEALTH);
     }
   }
 
