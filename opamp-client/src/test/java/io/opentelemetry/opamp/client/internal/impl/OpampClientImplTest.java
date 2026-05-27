@@ -92,7 +92,9 @@ class OpampClientImplTest {
             new State.SequenceNum(1L),
             new State.AgentDescription(new AgentDescription.Builder().build()),
             new State.Capabilities(
-                5L | AgentCapabilities.AgentCapabilities_ReportsHealth.getValue()),
+                (long) (AgentCapabilities.AgentCapabilities_ReportsStatus.getValue()
+                                | AgentCapabilities.AgentCapabilities_ReportsEffectiveConfig.getValue()
+                                | AgentCapabilities.AgentCapabilities_ReportsHealth.getValue())),
             new State.Health(initialHealth),
             new State.InstanceUid(new byte[] {1, 2, 3}),
             new State.Flags((long) AgentToServerFlags.AgentToServerFlags_Unspecified.getValue()),
