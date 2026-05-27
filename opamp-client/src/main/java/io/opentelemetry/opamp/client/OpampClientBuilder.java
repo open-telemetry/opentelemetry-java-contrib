@@ -449,8 +449,9 @@ public final class OpampClientBuilder {
   }
 
   private static ComponentHealth createInitialHealth() {
+    Instant instant = Instant.now();
     return new ComponentHealth.Builder()
-        .start_time_unix_nano(Instant.now().toEpochMilli() * 1_000_000L)
+        .start_time_unix_nano(instant.getEpochSecond() * 1_000_000_000L + instant.getNano())
         .build();
   }
 
