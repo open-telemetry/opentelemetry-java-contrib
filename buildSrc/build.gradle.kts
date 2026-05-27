@@ -7,7 +7,9 @@ plugins {
 repositories {
   mavenCentral()
   gradlePluginPortal()
-  mavenLocal()
+  if (providers.gradleProperty("useLocalMaven").isPresent) {
+    mavenLocal()
+  }
 }
 
 dependencies {
