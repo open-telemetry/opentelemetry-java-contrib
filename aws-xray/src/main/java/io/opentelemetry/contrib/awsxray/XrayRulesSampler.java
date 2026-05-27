@@ -381,8 +381,7 @@ final class XrayRulesSampler implements Sampler {
         // Check if any anomalyConditions detect an anomaly either through error code or latency
         boolean isAnomaly = false;
 
-        Pattern errorCodePattern =
-            (errorCodePatterns != null) ? errorCodePatterns.get(i) : null;
+        Pattern errorCodePattern = (errorCodePatterns != null) ? errorCodePatterns.get(i) : null;
         if (statusCode != null && errorCodePattern != null) {
           isAnomaly = errorCodePattern.matcher(statusCode.toString()).matches();
         }
