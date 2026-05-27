@@ -57,6 +57,7 @@ import io.opentelemetry.sdk.autoconfigure.spi.internal.ConditionalResourceProvid
 import io.opentelemetry.sdk.resources.Resource;
 import java.util.Map;
 import java.util.Optional;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @SuppressWarnings("MemberName")
@@ -244,10 +245,15 @@ public class GCPResourceProvider implements ConditionalResourceProvider {
                 attrBuilder.put(IncubatingAttributes.GCP_CLOUD_RUN_JOB_EXECUTION, jobExecutionKey));
     Optional.ofNullable(attributesMap.get(GCR_JOB_TASK_INDEX))
         .ifPresent(
-            jobTaskIndex ->
+            jobTaskIndex -> {
+              try {
                 attrBuilder.put(
                     IncubatingAttributes.GCP_CLOUD_RUN_JOB_TASK_INDEX,
-                    Integer.parseInt(jobTaskIndex)));
+                    Integer.parseInt(jobTaskIndex));
+              } catch (NumberFormatException e) {
+                LOGGER.log(Level.WARNING, "Can't parse GCP Cloud Run job task index", e);
+              }
+            });
   }
 
   /**

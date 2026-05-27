@@ -53,7 +53,10 @@ import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_
 import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_TYPE;
 import static io.opentelemetry.semconv.incubating.K8sIncubatingAttributes.K8S_CLUSTER_NAME;
 import static org.assertj.core.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableMap;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
@@ -64,11 +67,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ServiceLoader;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 class GCPResourceProviderTest {
   private static final String DUMMY_PROJECT_ID = "google-pid";
-  private final ConfigProperties mockConfigProps = Mockito.mock(ConfigProperties.class);
+  private final ConfigProperties mockConfigProps = mock(ConfigProperties.class);
   private final Map<String, String> mockGKECommonAttributes =
       new HashMap<>(
           ImmutableMap.of(
@@ -86,11 +88,11 @@ class GCPResourceProviderTest {
                 GCE_INSTANCE_NAME, "instance-name",
                 GCE_MACHINE_TYPE, "gce-m2",
                 GCE_INSTANCE_HOSTNAME, "instance-hostname"));
-    DetectedPlatform mockGCEPlatform = Mockito.mock(DetectedPlatform.class);
-    Mockito.when(mockGCEPlatform.getSupportedPlatform())
+    DetectedPlatform mockGCEPlatform = mock(DetectedPlatform.class);
+    when(mockGCEPlatform.getSupportedPlatform())
         .thenReturn(GcpPlatformDetector.SupportedPlatform.GOOGLE_COMPUTE_ENGINE);
-    Mockito.when(mockGCEPlatform.getAttributes()).thenReturn(mockAttributes);
-    Mockito.when(mockGCEPlatform.getProjectId()).thenReturn(DUMMY_PROJECT_ID);
+    when(mockGCEPlatform.getAttributes()).thenReturn(mockAttributes);
+    when(mockGCEPlatform.getProjectId()).thenReturn(DUMMY_PROJECT_ID);
     return mockGCEPlatform;
   }
 
@@ -103,11 +105,11 @@ class GCPResourceProviderTest {
     }
     mockAttributes.put(GKE_CLUSTER_LOCATION_TYPE, gkeClusterLocationType);
 
-    DetectedPlatform mockGKEPlatform = Mockito.mock(DetectedPlatform.class);
-    Mockito.when(mockGKEPlatform.getSupportedPlatform())
+    DetectedPlatform mockGKEPlatform = mock(DetectedPlatform.class);
+    when(mockGKEPlatform.getSupportedPlatform())
         .thenReturn(GcpPlatformDetector.SupportedPlatform.GOOGLE_KUBERNETES_ENGINE);
-    Mockito.when(mockGKEPlatform.getAttributes()).thenReturn(mockAttributes);
-    Mockito.when(mockGKEPlatform.getProjectId()).thenReturn(DUMMY_PROJECT_ID);
+    when(mockGKEPlatform.getAttributes()).thenReturn(mockAttributes);
+    when(mockGKEPlatform.getProjectId()).thenReturn(DUMMY_PROJECT_ID);
     return mockGKEPlatform;
   }
 
@@ -128,10 +130,10 @@ class GCPResourceProviderTest {
                 SERVERLESS_COMPUTE_INSTANCE_ID, "serverless-instance-id",
                 SERVERLESS_COMPUTE_CLOUD_REGION, "us-central1",
                 SERVERLESS_COMPUTE_AVAILABILITY_ZONE, "us-central1-b"));
-    DetectedPlatform mockServerlessPlatform = Mockito.mock(DetectedPlatform.class);
-    Mockito.when(mockServerlessPlatform.getSupportedPlatform()).thenReturn(platform);
-    Mockito.when(mockServerlessPlatform.getAttributes()).thenReturn(mockAttributes);
-    Mockito.when(mockServerlessPlatform.getProjectId()).thenReturn(DUMMY_PROJECT_ID);
+    DetectedPlatform mockServerlessPlatform = mock(DetectedPlatform.class);
+    when(mockServerlessPlatform.getSupportedPlatform()).thenReturn(platform);
+    when(mockServerlessPlatform.getAttributes()).thenReturn(mockAttributes);
+    when(mockServerlessPlatform.getProjectId()).thenReturn(DUMMY_PROJECT_ID);
     return mockServerlessPlatform;
   }
 
@@ -144,11 +146,11 @@ class GCPResourceProviderTest {
                 SERVERLESS_COMPUTE_CLOUD_REGION, "us-central1",
                 GCR_JOB_TASK_INDEX, "1",
                 GCR_JOB_EXECUTION_KEY, "serverless-job-a1b2c3"));
-    DetectedPlatform mockServerlessPlatform = Mockito.mock(DetectedPlatform.class);
-    Mockito.when(mockServerlessPlatform.getSupportedPlatform())
+    DetectedPlatform mockServerlessPlatform = mock(DetectedPlatform.class);
+    when(mockServerlessPlatform.getSupportedPlatform())
         .thenReturn(GcpPlatformDetector.SupportedPlatform.GOOGLE_CLOUD_RUN_JOB);
-    Mockito.when(mockServerlessPlatform.getAttributes()).thenReturn(mockAttributes);
-    Mockito.when(mockServerlessPlatform.getProjectId()).thenReturn(DUMMY_PROJECT_ID);
+    when(mockServerlessPlatform.getAttributes()).thenReturn(mockAttributes);
+    when(mockServerlessPlatform.getProjectId()).thenReturn(DUMMY_PROJECT_ID);
     return mockServerlessPlatform;
   }
 
@@ -161,11 +163,11 @@ class GCPResourceProviderTest {
                 GAE_INSTANCE_ID, "gae-instance-id",
                 GAE_CLOUD_REGION, "us-central1",
                 GAE_AVAILABILITY_ZONE, "us-central1-b"));
-    DetectedPlatform mockGAEPlatform = Mockito.mock(DetectedPlatform.class);
-    Mockito.when(mockGAEPlatform.getSupportedPlatform())
+    DetectedPlatform mockGAEPlatform = mock(DetectedPlatform.class);
+    when(mockGAEPlatform.getSupportedPlatform())
         .thenReturn(GcpPlatformDetector.SupportedPlatform.GOOGLE_APP_ENGINE);
-    Mockito.when(mockGAEPlatform.getAttributes()).thenReturn(mockAttributes);
-    Mockito.when(mockGAEPlatform.getProjectId()).thenReturn(DUMMY_PROJECT_ID);
+    when(mockGAEPlatform.getAttributes()).thenReturn(mockAttributes);
+    when(mockGAEPlatform.getProjectId()).thenReturn(DUMMY_PROJECT_ID);
     return mockGAEPlatform;
   }
 
@@ -176,22 +178,22 @@ class GCPResourceProviderTest {
                 GCE_INSTANCE_ID, "instance-id",
                 GCE_CLOUD_REGION, "australia-southeast1"));
 
-    DetectedPlatform mockUnknownPlatform = Mockito.mock(DetectedPlatform.class);
-    Mockito.when(mockUnknownPlatform.getSupportedPlatform())
+    DetectedPlatform mockUnknownPlatform = mock(DetectedPlatform.class);
+    when(mockUnknownPlatform.getSupportedPlatform())
         .thenReturn(GcpPlatformDetector.SupportedPlatform.UNKNOWN_PLATFORM);
-    Mockito.when(mockUnknownPlatform.getAttributes()).thenReturn(mockAttributes);
+    when(mockUnknownPlatform.getAttributes()).thenReturn(mockAttributes);
     return mockUnknownPlatform;
   }
 
   @Test
   void testGceResourceAttributesMapping() {
-    GcpPlatformDetector mockDetector = Mockito.mock(GcpPlatformDetector.class);
+    GcpPlatformDetector mockDetector = mock(GcpPlatformDetector.class);
     DetectedPlatform mockPlatform = generateMockGcePlatform();
-    Mockito.when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
+    when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
     Map<String, String> detectedAttributes = mockPlatform.getAttributes();
 
     Resource gotResource = new GCPResourceProvider(mockDetector).createResource(mockConfigProps);
-    verify(mockPlatform, Mockito.times(1)).getProjectId();
+    verify(mockPlatform, times(1)).getProjectId();
 
     assertThat(gotResource.getAttributes())
         .hasSize(10)
@@ -209,12 +211,12 @@ class GCPResourceProviderTest {
 
   @Test
   void testGkeResourceAttributesMapping_LocationTypeRegion() {
-    GcpPlatformDetector mockDetector = Mockito.mock(GcpPlatformDetector.class);
+    GcpPlatformDetector mockDetector = mock(GcpPlatformDetector.class);
     DetectedPlatform mockPlatform = generateMockGkePlatform(GKE_LOCATION_TYPE_REGION);
-    Mockito.when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
+    when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
 
     Resource gotResource = new GCPResourceProvider(mockDetector).createResource(mockConfigProps);
-    verify(mockPlatform, Mockito.times(1)).getProjectId();
+    verify(mockPlatform, times(1)).getProjectId();
 
     verifyGkeMapping(gotResource, mockPlatform);
     assertThat(gotResource.getAttributes())
@@ -226,12 +228,12 @@ class GCPResourceProviderTest {
 
   @Test
   void testGkeResourceAttributesMapping_LocationTypeZone() {
-    GcpPlatformDetector mockDetector = Mockito.mock(GcpPlatformDetector.class);
+    GcpPlatformDetector mockDetector = mock(GcpPlatformDetector.class);
     DetectedPlatform mockPlatform = generateMockGkePlatform(GKE_LOCATION_TYPE_ZONE);
-    Mockito.when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
+    when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
 
     Resource gotResource = new GCPResourceProvider(mockDetector).createResource(mockConfigProps);
-    verify(mockPlatform, Mockito.times(1)).getProjectId();
+    verify(mockPlatform, times(1)).getProjectId();
 
     verifyGkeMapping(gotResource, mockPlatform);
     assertThat(gotResource.getAttributes())
@@ -248,18 +250,18 @@ class GCPResourceProviderTest {
     mockGKEAttributes.put(GKE_CLUSTER_LOCATION_TYPE, "INVALID");
     mockGKEAttributes.put(GKE_CLUSTER_LOCATION, "some-location");
 
-    GcpPlatformDetector mockDetector = Mockito.mock(GcpPlatformDetector.class);
-    DetectedPlatform mockPlatform = Mockito.mock(DetectedPlatform.class);
-    Mockito.when(mockPlatform.getSupportedPlatform())
+    GcpPlatformDetector mockDetector = mock(GcpPlatformDetector.class);
+    DetectedPlatform mockPlatform = mock(DetectedPlatform.class);
+    when(mockPlatform.getSupportedPlatform())
         .thenReturn(GcpPlatformDetector.SupportedPlatform.GOOGLE_KUBERNETES_ENGINE);
-    Mockito.when(mockPlatform.getProjectId()).thenReturn(DUMMY_PROJECT_ID);
-    Mockito.when(mockPlatform.getAttributes()).thenReturn(mockGKEAttributes);
-    Mockito.when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
+    when(mockPlatform.getProjectId()).thenReturn(DUMMY_PROJECT_ID);
+    when(mockPlatform.getAttributes()).thenReturn(mockGKEAttributes);
+    when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
 
     Resource gotResource = new GCPResourceProvider(mockDetector).createResource(mockConfigProps);
 
     verifyGkeMapping(gotResource, mockPlatform);
-    verify(mockPlatform, Mockito.times(1)).getProjectId();
+    verify(mockPlatform, times(1)).getProjectId();
     assertThat(gotResource.getAttributes())
         .hasSize(5)
         .containsEntry(CLOUD_ACCOUNT_ID, DUMMY_PROJECT_ID)
@@ -269,12 +271,12 @@ class GCPResourceProviderTest {
 
   @Test
   void testGkeResourceAttributesMapping_LocationMissing() {
-    GcpPlatformDetector mockDetector = Mockito.mock(GcpPlatformDetector.class);
+    GcpPlatformDetector mockDetector = mock(GcpPlatformDetector.class);
     DetectedPlatform mockPlatform = generateMockGkePlatform("");
-    Mockito.when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
+    when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
 
     Resource gotResource = new GCPResourceProvider(mockDetector).createResource(mockConfigProps);
-    verify(mockPlatform, Mockito.times(1)).getProjectId();
+    verify(mockPlatform, times(1)).getProjectId();
     verifyGkeMapping(gotResource, mockPlatform);
     assertThat(gotResource.getAttributes())
         .hasSize(5)
@@ -294,13 +296,13 @@ class GCPResourceProviderTest {
 
   @Test
   void testGcrServiceResourceAttributesMapping() {
-    GcpPlatformDetector mockDetector = Mockito.mock(GcpPlatformDetector.class);
+    GcpPlatformDetector mockDetector = mock(GcpPlatformDetector.class);
     DetectedPlatform mockPlatform =
         generateMockServerlessPlatform(GcpPlatformDetector.SupportedPlatform.GOOGLE_CLOUD_RUN);
-    Mockito.when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
+    when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
 
     Resource gotResource = new GCPResourceProvider(mockDetector).createResource(mockConfigProps);
-    verify(mockPlatform, Mockito.times(1)).getProjectId();
+    verify(mockPlatform, times(1)).getProjectId();
 
     verifyServerlessMapping(gotResource, mockPlatform);
     assertThat(gotResource.getAttributes())
@@ -311,14 +313,14 @@ class GCPResourceProviderTest {
 
   @Test
   void testGcfResourceAttributeMapping() {
-    GcpPlatformDetector mockDetector = Mockito.mock(GcpPlatformDetector.class);
+    GcpPlatformDetector mockDetector = mock(GcpPlatformDetector.class);
     DetectedPlatform mockPlatform =
         generateMockServerlessPlatform(
             GcpPlatformDetector.SupportedPlatform.GOOGLE_CLOUD_FUNCTIONS);
-    Mockito.when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
+    when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
 
     Resource gotResource = new GCPResourceProvider(mockDetector).createResource(mockConfigProps);
-    verify(mockPlatform, Mockito.times(1)).getProjectId();
+    verify(mockPlatform, times(1)).getProjectId();
 
     verifyServerlessMapping(gotResource, mockPlatform);
     assertThat(gotResource.getAttributes())
@@ -342,13 +344,13 @@ class GCPResourceProviderTest {
 
   @Test
   void testGcrJobResourceAttributesMapping() {
-    GcpPlatformDetector mockDetector = Mockito.mock(GcpPlatformDetector.class);
+    GcpPlatformDetector mockDetector = mock(GcpPlatformDetector.class);
     DetectedPlatform mockPlatform = generateMockGcrJobPlatform();
-    Mockito.when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
+    when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
     Map<String, String> detectedAttributes = mockPlatform.getAttributes();
 
     Resource gotResource = new GCPResourceProvider(mockDetector).createResource(mockConfigProps);
-    verify(mockPlatform, Mockito.times(1)).getProjectId();
+    verify(mockPlatform, times(1)).getProjectId();
 
     assertThat(gotResource.getAttributes())
         .hasSize(8)
@@ -366,14 +368,28 @@ class GCPResourceProviderTest {
   }
 
   @Test
+  void testGcrJobResourceAttributesMappingWithMalformedTaskIndex() {
+    GcpPlatformDetector mockDetector = mock(GcpPlatformDetector.class);
+    DetectedPlatform mockPlatform = generateMockGcrJobPlatform();
+    mockPlatform.getAttributes().put(GCR_JOB_TASK_INDEX, "not-a-number");
+    when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
+
+    Resource gotResource = new GCPResourceProvider(mockDetector).createResource(mockConfigProps);
+
+    assertThat(gotResource.getAttributes())
+        .doesNotContainKey(GCP_CLOUD_RUN_JOB_TASK_INDEX)
+        .containsEntry(CLOUD_PROVIDER, GCP);
+  }
+
+  @Test
   void testGaeResourceAttributeMapping() {
-    GcpPlatformDetector mockDetector = Mockito.mock(GcpPlatformDetector.class);
+    GcpPlatformDetector mockDetector = mock(GcpPlatformDetector.class);
     DetectedPlatform mockPlatform = generateMockGaePlatform();
-    Mockito.when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
+    when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
     Map<String, String> detectedAttributes = mockPlatform.getAttributes();
 
     Resource gotResource = new GCPResourceProvider(mockDetector).createResource(mockConfigProps);
-    verify(mockPlatform, Mockito.times(1)).getProjectId();
+    verify(mockPlatform, times(1)).getProjectId();
 
     assertThat(gotResource.getAttributes())
         .hasSize(8)
@@ -389,9 +405,9 @@ class GCPResourceProviderTest {
 
   @Test
   void testUnknownPlatformResourceAttributesMapping() {
-    GcpPlatformDetector mockDetector = Mockito.mock(GcpPlatformDetector.class);
+    GcpPlatformDetector mockDetector = mock(GcpPlatformDetector.class);
     DetectedPlatform mockPlatform = generateMockUnknownPlatform();
-    Mockito.when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
+    when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
 
     Resource gotResource = new GCPResourceProvider(mockDetector).createResource(mockConfigProps);
     assertThat(gotResource.getAttributes()).isEmpty();
