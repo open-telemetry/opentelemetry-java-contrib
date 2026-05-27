@@ -135,7 +135,7 @@ class OpampClientImplTest {
     // Verify only changed and required fields are present
     assertThat(secondMessage.instance_uid).isNotNull();
     assertThat(secondMessage.sequence_num).isEqualTo(2);
-    assertThat(firstMessage.capabilities).isEqualTo(state.capabilities.get());
+    assertThat(secondMessage.capabilities).isEqualTo(state.capabilities.get());
     assertThat(secondMessage.agent_description).isNull();
     assertThat(secondMessage.health).isNull();
     assertThat(secondMessage.effective_config).isNull();
@@ -156,7 +156,7 @@ class OpampClientImplTest {
 
     assertThat(thirdMessage.instance_uid).isNotNull();
     assertThat(thirdMessage.sequence_num).isEqualTo(3);
-    assertThat(firstMessage.capabilities).isEqualTo(state.capabilities.get());
+    assertThat(thirdMessage.capabilities).isEqualTo(state.capabilities.get());
     assertThat(thirdMessage.agent_description).isNull();
     assertThat(thirdMessage.health).isNull();
     assertThat(thirdMessage.remote_config_status).isNull();
