@@ -17,7 +17,9 @@ plugins {
 dependencyResolutionManagement {
   repositories {
     mavenCentral()
-    mavenLocal()
+    if (providers.gradleProperty("useLocalMaven").isPresent) {
+      mavenLocal()
+    }
     // for otel snapshots
     maven {
       url = uri("https://central.sonatype.com/repository/maven-snapshots/")
