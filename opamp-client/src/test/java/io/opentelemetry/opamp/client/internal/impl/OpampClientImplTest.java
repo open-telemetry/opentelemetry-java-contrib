@@ -293,24 +293,6 @@ class OpampClientImplTest {
   }
 
   @Test
-  void verifyHealthStateUpdate() {
-    initializeClient();
-    ComponentHealth health =
-        new ComponentHealth.Builder()
-            .healthy(false)
-            .last_error("failed")
-            .status("failed")
-            .status_time_unix_nano(789L)
-            .build();
-
-    enqueueServerToAgentResponse(new ServerToAgent.Builder().build());
-    state.health.set(health);
-    state.health.notifyUpdate();
-
-    assertThat(getAgentToServerMessage(takeRequest()).health).isEqualTo(health);
-  }
-
-  @Test
   void onConnectionSuccessful_notifyCallback() {
     initializeClient();
 

@@ -15,6 +15,7 @@ import io.opentelemetry.opamp.client.internal.request.service.WebSocketRequestSe
 import io.opentelemetry.opamp.client.internal.state.State;
 import io.opentelemetry.opamp.client.request.service.RequestService;
 import java.nio.ByteBuffer;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +26,7 @@ import opamp.proto.AgentCapabilities;
 import opamp.proto.AgentDescription;
 import opamp.proto.AnyValue;
 import opamp.proto.ArrayValue;
+import opamp.proto.ComponentHealth;
 import opamp.proto.KeyValue;
 import opamp.proto.RemoteConfigStatus;
 
@@ -37,7 +39,7 @@ public final class OpampClientBuilder {
       HttpRequestService.create(OkHttpSender.create("http://localhost:4320/v1/opamp"));
   @Nullable private byte[] instanceUid;
   @Nullable private State.EffectiveConfig effectiveConfigState;
-  @Nullable private State.Health healthState;
+  @Nullable private ComponentHealth health;
 
   OpampClientBuilder() {}
 
@@ -391,16 +393,15 @@ public final class OpampClientBuilder {
   }
 
   /**
-   * Sets the health state implementation. It should call {@link State.Health#notifyUpdate()}
-   * whenever it has changes that have not been sent to the server. Use {@link
-   * #enableHealthReporting()} to add the ReportsHealth capability.
+   * Sets the health object that is then passed to the corresponding state implementation. Use
+   * {@link #enableHealthReporting()} to add the ReportsHealth capability.
    *
-   * @param healthState The state implementation.
+   * @param health The component health
    * @return this
    */
   @CanIgnoreReturnValue
-  public OpampClientBuilder setHealthState(State.Health healthState) {
-    this.healthState = healthState;
+  public OpampClientBuilder setHealth(ComponentHealth health) {
+    this.health = health;
     return this;
   }
 
@@ -417,8 +418,8 @@ public final class OpampClientBuilder {
     if (effectiveConfigState == null) {
       effectiveConfigState = createEffectiveConfigNoop();
     }
-    if (healthState == null) {
-      healthState = createHealthNoop();
+    if (health == null) {
+      health = createInitialHealth();
     }
     OpampClientState state =
         new OpampClientState(
@@ -430,7 +431,7 @@ public final class OpampClientBuilder {
                     .non_identifying_attributes(protoNonIdentifyingAttributes)
                     .build()),
             new State.Capabilities(capabilities),
-            healthState,
+            new State.Health(health),
             new State.InstanceUid(instanceUid),
             new State.Flags(0L),
             effectiveConfigState);
@@ -447,8 +448,10 @@ public final class OpampClientBuilder {
     };
   }
 
-  private static State.Health createHealthNoop() {
-    return new State.Health() {};
+  private static ComponentHealth createInitialHealth() {
+    return new ComponentHealth.Builder()
+        .start_time_unix_nano(Instant.now().toEpochMilli() * 1_000_000L)
+        .build();
   }
 
   private static AnyValue createStringValue(String value) {

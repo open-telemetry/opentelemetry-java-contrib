@@ -7,10 +7,8 @@ package io.opentelemetry.opamp.client.internal.state;
 
 import io.opentelemetry.opamp.client.internal.request.Field;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import opamp.proto.ComponentHealth;
 
 /**
@@ -78,27 +76,13 @@ public interface State<T> extends Supplier<T> {
     }
   }
 
-  class Health extends ObservableState<ComponentHealth> {
-    private final AtomicReference<ComponentHealth> state = new AtomicReference<>();
-
-    protected Health() {}
-
+  final class Health extends InMemoryState<ComponentHealth> {
     public Health(@Nonnull ComponentHealth initialValue) {
-      state.set(Objects.requireNonNull(initialValue));
-    }
-
-    public void set(@Nonnull ComponentHealth value) {
-      state.set(Objects.requireNonNull(value));
-    }
-
-    @Nullable
-    @Override
-    public ComponentHealth get() {
-      return state.get();
+      super(initialValue);
     }
 
     @Override
-    public final Field getFieldType() {
+    public Field getFieldType() {
       return Field.HEALTH;
     }
   }
