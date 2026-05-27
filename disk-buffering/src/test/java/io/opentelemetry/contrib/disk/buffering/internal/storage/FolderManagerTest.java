@@ -281,7 +281,7 @@ class FolderManagerTest {
 
   @Test
   void clear_throwsIOException_whenFolderIsUnreadable() {
-    rootDir.delete();
+    assertThat(rootDir.delete()).isTrue();
 
     assertThatThrownBy(() -> folderManager.clear())
         .isInstanceOf(IOException.class)
