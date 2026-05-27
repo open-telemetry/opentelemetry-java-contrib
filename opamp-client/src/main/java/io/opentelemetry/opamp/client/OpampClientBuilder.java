@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import opamp.proto.AgentCapabilities;
 import opamp.proto.AgentDescription;
@@ -400,7 +401,7 @@ public final class OpampClientBuilder {
    * @return this
    */
   @CanIgnoreReturnValue
-  public OpampClientBuilder setHealth(ComponentHealth health) {
+  public OpampClientBuilder setHealth(@Nonnull ComponentHealth health) {
     this.health = health;
     return this;
   }
