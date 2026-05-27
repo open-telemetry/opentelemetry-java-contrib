@@ -8,10 +8,13 @@ package io.opentelemetry.contrib.dynamic.policy.registry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
+import io.opentelemetry.contrib.dynamic.policy.PolicyImplementer;
+import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
 import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingRatePolicy;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
@@ -21,6 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -95,6 +99,28 @@ class PolicyInitTest {
         .hasMessageContaining("Unknown policyType");
   }
 
+  @Test
+  void initializesPolicyClassOnlyOnceAcrossRepeatedInitCalls() {
+    String policyType = "test-policy-idempotent";
+    AtomicInteger initializeCount = new AtomicInteger();
+    PolicyImplementer implementer = mock(PolicyImplementer.class);
+    when(implementer.getValidators()).thenReturn(Collections.emptyList());
+    PolicyInit.registerPolicyType(
+        policyType,
+        IdempotentTestPolicy.class,
+        autoConfiguration -> {
+          initializeCount.incrementAndGet();
+          return implementer;
+        });
+    ConfigProperties config = mock(ConfigProperties.class);
+
+    PolicyInit.initFromDeclarativeConfig(telemetryPolicyNodeConfig(policyType), config);
+    PolicyInit.initFromDeclarativeConfig(telemetryPolicyNodeConfig(policyType), config);
+
+    assertThat(initializeCount.get()).isEqualTo(1);
+    verify(implementer, times(1)).onPoliciesChanged(Collections.emptyList());
+  }
+
   private static Function<ConfigProperties, Map<String, String>> capturePropertiesCustomizer(
       AutoConfigurationCustomizer customizer) {
     @SuppressWarnings("unchecked")
@@ -133,5 +159,11 @@ class PolicyInitTest {
         + "\"mappings\":[{\"sourceKey\":\"sampling_rate\",\"policyType\":\""
         + TraceSamplingRatePolicy.POLICY_TYPE
         + "\"}]}]}";
+  }
+
+  private static final class IdempotentTestPolicy extends TelemetryPolicy {
+    private IdempotentTestPolicy() {
+      super("test-policy-idempotent");
+    }
   }
 }

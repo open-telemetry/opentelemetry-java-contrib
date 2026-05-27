@@ -204,8 +204,9 @@ public final class PolicyInit {
   }
 
   /**
-   * Initializes one policy class exactly once for this init pass. eg run {@code
-   * TraceSamplingRatePolicy::initialize} and cache the returned implementer.
+   * Initializes one policy class exactly once until shutdown. eg run {@code
+   * TraceSamplingRatePolicy::initialize}, cache the returned implementer, and register it with the
+   * policy store.
    *
    * @param policyClass policy class to initialize
    * @param autoConfiguration OpenTelemetry auto-configuration customizer
@@ -218,21 +219,32 @@ public final class PolicyInit {
     if (!initializedPolicyClasses.add(policyClass)) {
       return;
     }
-    PolicyTypeInitializer policyTypeInitializer = POLICY_TYPE_INITIALIZERS.get(policyClass);
-    if (policyTypeInitializer == null) {
-      throw new IllegalStateException(
-          "No policyTypeInitializer registered for policy class '" + policyClass.getName() + "'");
-    }
+    PolicyImplementer implementer;
     try {
-      PolicyImplementer implementer = policyTypeInitializer.initialize(autoConfiguration);
-      initializedImplementers.put(policyClass, implementer);
-      // TODO: register implementer with policyStore, not yet implemented
-      // policyStore.registerImplementer(implementer);
-      logger.log(Level.INFO, "Initialized policy class ''{0}''", policyClass.getName());
+      synchronized (initializedImplementers) {
+        PolicyImplementer existing = initializedImplementers.get(policyClass);
+        if (existing != null) {
+          return;
+        }
+        PolicyTypeInitializer policyTypeInitializer = POLICY_TYPE_INITIALIZERS.get(policyClass);
+        if (policyTypeInitializer == null) {
+          throw new IllegalStateException(
+              "No policyTypeInitializer registered for policy class '"
+                  + policyClass.getName()
+                  + "'");
+        }
+        implementer =
+            Objects.requireNonNull(
+                policyTypeInitializer.initialize(autoConfiguration),
+                "policyTypeInitializer returned null");
+        initializedImplementers.put(policyClass, implementer);
+      }
     } catch (RuntimeException e) {
       throw new IllegalStateException(
           "Policy initializer failed for class '" + policyClass.getName() + "'", e);
     }
+    policyStore.registerImplementer(implementer);
+    logger.log(Level.INFO, "Initialized policy class ''{0}''", policyClass.getName());
   }
 
   /**
@@ -318,6 +330,11 @@ public final class PolicyInit {
    * <p>Each source contributes an immutable snapshot; the store receives the flattened union. eg
    * OpAMPPolicyProvider and FilePolicyProvider both produce a new TraceSamplingRatePolicy, this
    * will combine them all into a single list.
+   *
+   * <p>TODO: implement spec-compliant merge semantics: matching policies' keep values must be
+   * combined using the most restrictive result; overlapping policy effects must be commutative,
+   * idempotent, and deterministic; duplicate policy IDs across providers must be resolved by
+   * provider priority.
    */
   private static void updatePoliciesForSource(
       PolicyProvider provider, List<TelemetryPolicy> policiesFromSource) {
@@ -374,6 +391,7 @@ public final class PolicyInit {
     sourcePolicies.clear();
     sourcesActivated.set(false);
     initializedImplementers.clear();
+    policyStore.clear();
   }
 
   /**
