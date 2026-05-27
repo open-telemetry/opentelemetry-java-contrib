@@ -61,7 +61,7 @@ class JmxScraperConfigTest {
     assertThat(config.getTargetSystems()).containsExactlyInAnyOrder("tomcat", "activemq");
     assertThat(config.getSamplingInterval()).isEqualTo(Duration.ofSeconds(10));
     assertThat(config.getUsername()).isEqualTo("some-user");
-    assertThat(config.getPassword()).isEqualTo("some-password");
+    assertThat(config.getPassword()).isEqualTo("some-password".toCharArray());
     assertThat(config.getRemoteProfile()).isEqualTo("some-profile");
     assertThat(config.getRealm()).isEqualTo("some-realm");
   }

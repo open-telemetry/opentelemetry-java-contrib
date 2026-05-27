@@ -10,6 +10,7 @@ import java.net.MalformedURLException;
 import java.security.Provider;
 import java.security.Security;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -27,7 +28,7 @@ public class JmxClient {
 
   private final JMXServiceURL url;
   private final String username;
-  private final String password;
+  private final char[] password;
   private final String realm;
   private final String remoteProfile;
   private final boolean registrySsl;
@@ -36,7 +37,8 @@ public class JmxClient {
   JmxClient(JmxConfig config) throws MalformedURLException {
     this.url = new JMXServiceURL(config.serviceUrl);
     this.username = config.username;
-    this.password = config.password;
+    this.password =
+        config.password != null ? Arrays.copyOf(config.password, config.password.length) : null;
     this.realm = config.realm;
     this.remoteProfile = config.remoteProfile;
     this.registrySsl = config.registrySsl;
@@ -53,7 +55,9 @@ public class JmxClient {
     try {
       Map<String, Object> env = new HashMap<>();
       if (!JmxConfig.isBlank(username)) {
-        env.put(JMXConnector.CREDENTIALS, new String[] {this.username, this.password});
+        env.put(
+            JMXConnector.CREDENTIALS,
+            new String[] {this.username, this.password != null ? new String(this.password) : null});
       }
       try {
         // Not all supported versions of Java contain this Provider
@@ -70,6 +74,11 @@ public class JmxClient {
       }
 
       jmxConn = JmxConnectorHelper.connect(url, env, registrySsl);
+      // Null out the String[] credentials now that the connection is established
+      Object creds = env.get(JMXConnector.CREDENTIALS);
+      if (creds instanceof String[]) {
+        Arrays.fill((String[]) creds, null);
+      }
       return jmxConn.getMBeanServerConnection();
     } catch (IOException e) {
       logger.log(Level.WARNING, "Could not connect to remote JMX server: ", e);

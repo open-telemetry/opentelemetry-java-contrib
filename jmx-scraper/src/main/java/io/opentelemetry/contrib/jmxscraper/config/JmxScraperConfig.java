@@ -16,6 +16,7 @@ import io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException;
 import java.io.InputStream;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -63,7 +64,7 @@ public final class JmxScraperConfig {
 
   @Nullable private String username;
 
-  @Nullable private String password;
+  @Nullable private char[] password;
 
   @Nullable private String realm;
 
@@ -159,8 +160,8 @@ public final class JmxScraperConfig {
   }
 
   @Nullable
-  public String getPassword() {
-    return password;
+  public char[] getPassword() {
+    return password == null ? null : Arrays.copyOf(password, password.length);
   }
 
   @Nullable
@@ -225,7 +226,8 @@ public final class JmxScraperConfig {
     scraperConfig.targetSystems = unmodifiableSet(new HashSet<>(targetSystem));
 
     scraperConfig.username = config.getString("otel.jmx.username");
-    scraperConfig.password = config.getString("otel.jmx.password");
+    String passwordStr = config.getString("otel.jmx.password");
+    scraperConfig.password = passwordStr != null ? passwordStr.toCharArray() : null;
     scraperConfig.remoteProfile = config.getString("otel.jmx.remote.profile");
     scraperConfig.realm = config.getString("otel.jmx.realm");
     scraperConfig.registrySsl = config.getBoolean("otel.jmx.remote.registry.ssl", false);

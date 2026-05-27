@@ -85,7 +85,7 @@ class JmxConfigTest {
     assertThat(config.prometheusExporterHost).isEqualTo("myPrometheusHost");
     assertThat(config.prometheusExporterPort).isEqualTo(234);
     assertThat(config.username).isEqualTo("myUsername");
-    assertThat(config.password).isEqualTo("myPassword");
+    assertThat(config.password).isEqualTo("myPassword".toCharArray());
     assertThat(config.remoteProfile).isEqualTo("myRemoteProfile");
     assertThat(config.realm).isEqualTo("myRealm");
     assertThat(config.aggregateAcrossMBeans).isFalse();
@@ -108,7 +108,7 @@ class JmxConfigTest {
     assertThat(config.prometheusExporterHost).isEqualTo("host123.domain.com");
     assertThat(config.prometheusExporterPort).isEqualTo(67890);
     assertThat(config.username).isEqualTo("myUser\nname");
-    assertThat(config.password).isEqualTo("myPassw\\ord");
+    assertThat(config.password).isEqualTo("myPassw\\ord".toCharArray());
     assertThat(config.remoteProfile).isEqualTo("SASL/DIGEST-MD5");
     assertThat(config.realm).isEqualTo("myRealm");
     assertThat(config.aggregateAcrossMBeans).isTrue();
@@ -143,7 +143,7 @@ class JmxConfigTest {
     assertThat(config.prometheusExporterHost).isEqualTo("host123.domain.com");
     assertThat(config.prometheusExporterPort).isEqualTo(67890);
     assertThat(config.username).isEqualTo("myUser\nname");
-    assertThat(config.password).isEqualTo("myPassw\\ord");
+    assertThat(config.password).isEqualTo("myPassw\\ord".toCharArray());
     assertThat(config.remoteProfile).isEqualTo("SASL/DIGEST-MD5");
     assertThat(config.realm).isEqualTo("myRealm");
 

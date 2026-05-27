@@ -72,7 +72,7 @@ class JmxConfig {
   final int prometheusExporterPort;
 
   final String username;
-  final String password;
+  final char[] password;
   final String realm;
   final String remoteProfile;
   final boolean registrySsl;
@@ -109,7 +109,8 @@ class JmxConfig {
     prometheusExporterPort = getAndSetProperty(PROMETHEUS_PORT, 9464);
 
     username = properties.getProperty(JMX_USERNAME);
-    password = properties.getProperty(JMX_PASSWORD);
+    String passwordStr = properties.getProperty(JMX_PASSWORD);
+    password = passwordStr != null ? passwordStr.toCharArray() : null;
 
     remoteProfile = properties.getProperty(JMX_REMOTE_PROFILE);
     realm = properties.getProperty(JMX_REALM);

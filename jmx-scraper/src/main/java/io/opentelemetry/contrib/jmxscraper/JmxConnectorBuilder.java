@@ -16,6 +16,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.security.Provider;
 import java.security.Security;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -40,7 +41,8 @@ public final class JmxConnectorBuilder {
 
   private final JMXServiceURL url;
   @Nullable private String user;
-  @Nullable private String password;
+  // stored as char[] so the array can be zeroed after connect() returns
+  @Nullable private char[] password;
   @Nullable private String profile;
   @Nullable private String realm;
   private boolean sslRegistry;
@@ -68,8 +70,8 @@ public final class JmxConnectorBuilder {
   }
 
   @CanIgnoreReturnValue
-  public JmxConnectorBuilder withPassword(String password) {
-    this.password = password;
+  public JmxConnectorBuilder withPassword(char[] password) {
+    this.password = Arrays.copyOf(password, password.length);
     return this;
   }
 
@@ -109,13 +111,22 @@ public final class JmxConnectorBuilder {
 
     } catch (IOException e) {
       throw new IOException("Unable to connect to " + url.getHost() + ":" + url.getPort(), e);
+    } finally {
+      // Zero out credentials now that the connection attempt has completed
+      if (password != null) {
+        Arrays.fill(password, '\0');
+      }
+      Object creds = env.get(JMXConnector.CREDENTIALS);
+      if (creds instanceof String[]) {
+        Arrays.fill((String[]) creds, null);
+      }
     }
   }
 
   private Map<String, Object> buildEnv() {
     Map<String, Object> env = new HashMap<>();
     if (user != null && password != null) {
-      env.put(JMXConnector.CREDENTIALS, new String[] {user, password});
+      env.put(JMXConnector.CREDENTIALS, new String[] {user, new String(password)});
     }
 
     if (profile != null) {
@@ -137,8 +148,9 @@ public final class JmxConnectorBuilder {
                   if (callback instanceof NameCallback) {
                     ((NameCallback) callback).setName(user);
                   } else if (callback instanceof PasswordCallback) {
-                    char[] pwd = password == null ? null : password.toCharArray();
-                    ((PasswordCallback) callback).setPassword(pwd);
+                    ((PasswordCallback) callback)
+                        .setPassword(
+                            password == null ? null : Arrays.copyOf(password, password.length));
                   } else if (callback instanceof RealmCallback) {
                     ((RealmCallback) callback).setText(realm);
                   } else {

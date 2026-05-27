@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.jmxmetrics;
 
+import java.util.Arrays;
 import javax.annotation.Nullable;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
@@ -26,9 +27,9 @@ public class ClientCallbackHandler implements CallbackHandler {
    * @param password - authenticating password (plaintext)
    * @param realm - authenticating realm
    */
-  public ClientCallbackHandler(String username, String password, String realm) {
+  public ClientCallbackHandler(String username, char[] password, String realm) {
     this.username = username;
-    this.password = password != null ? password.toCharArray() : null;
+    this.password = password != null ? Arrays.copyOf(password, password.length) : null;
     this.realm = realm;
   }
 
