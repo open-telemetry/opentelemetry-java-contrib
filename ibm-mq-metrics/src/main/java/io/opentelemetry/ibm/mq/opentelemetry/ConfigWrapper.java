@@ -19,7 +19,8 @@ import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.Yaml;
+import org.snakeyaml.engine.v2.api.Load;
+import org.snakeyaml.engine.v2.api.LoadSettings;
 
 /** Low-fi domain-specific yaml wrapper. */
 public final class ConfigWrapper {
@@ -36,10 +37,14 @@ public final class ConfigWrapper {
     this.config = config;
   }
 
+  @SuppressWarnings(
+      "unchecked") // snakeyaml-engine returns Object; a valid config file is always a map
   public static ConfigWrapper parse(String configFile) throws IOException {
-    Yaml yaml = new Yaml();
+    Load load = new Load(LoadSettings.builder().build());
     Map<String, ?> config =
-        yaml.load(Files.newBufferedReader(Paths.get(configFile), Charset.defaultCharset()));
+        (Map<String, ?>)
+            load.loadFromReader(
+                Files.newBufferedReader(Paths.get(configFile), Charset.defaultCharset()));
     return new ConfigWrapper(config);
   }
 

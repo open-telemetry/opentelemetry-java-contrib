@@ -6,12 +6,19 @@
 package io.opentelemetry.ibm.mq.opentelemetry;
 
 import static java.util.Collections.singletonList;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.snakeyaml.engine.v2.exceptions.YamlEngineException;
 
 class ConfigWrapperTest {
 
@@ -47,5 +54,13 @@ class ConfigWrapperTest {
   void testTaskInitialDelay() throws Exception {
     ConfigWrapper config = ConfigWrapper.parse(file);
     assertThat(config.getTaskInitialDelaySeconds()).isEqualTo(0);
+  }
+
+  @Test
+  void testYamlTagDeserialisationRejected(@TempDir Path tempDir) throws IOException {
+    Path tempFile = tempDir.resolve("gadget.yml");
+    Files.write(tempFile, "!!java.lang.Runtime {}".getBytes(StandardCharsets.UTF_8));
+    assertThatThrownBy(() -> ConfigWrapper.parse(tempFile.toString()))
+        .isInstanceOf(YamlEngineException.class);
   }
 }
