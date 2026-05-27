@@ -57,7 +57,7 @@ class ConfigWrapperTest {
   }
 
   @Test
-  void testYamlTagDeserialisationRejected(@TempDir Path tempDir) throws IOException {
+  void testYamlTagDeserializationRejected(@TempDir Path tempDir) throws IOException {
     Path tempFile = tempDir.resolve("gadget.yml");
     Files.write(tempFile, "!!java.lang.Runtime {}".getBytes(StandardCharsets.UTF_8));
     assertThatThrownBy(() -> ConfigWrapper.parse(tempFile.toString()))
