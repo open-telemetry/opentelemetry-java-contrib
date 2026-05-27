@@ -65,7 +65,8 @@ public final class PolicyInit {
   private static final Map<PolicyProvider, List<TelemetryPolicy>> sourcePolicies =
       new ConcurrentHashMap<>();
   private static final PolicyStore policyStore = new PolicyStore();
-  private static final AtomicReference<PolicyInitConfig> declarativeInitConfig = new AtomicReference<>();
+  private static final AtomicReference<PolicyInitConfig> declarativeInitConfig =
+      new AtomicReference<>();
 
   static {
     // For now, policies will be registered here. TODO: move to a more dynamic way.
@@ -145,7 +146,9 @@ public final class PolicyInit {
         });
   }
 
-  /** Stores parsed top-level declarative telemetry policy config for auto-configuration bootstrap. */
+  /**
+   * Stores parsed top-level declarative telemetry policy config for auto-configuration bootstrap.
+   */
   public static void setDeclarativeInitConfig(PolicyInitConfig initConfig) {
     declarativeInitConfig.set(Objects.requireNonNull(initConfig, "initConfig cannot be null"));
   }
