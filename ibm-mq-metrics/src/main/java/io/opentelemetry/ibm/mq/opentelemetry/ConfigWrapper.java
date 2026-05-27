@@ -7,6 +7,7 @@ package io.opentelemetry.ibm.mq.opentelemetry;
 
 import static java.util.Collections.emptyList;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -37,15 +38,19 @@ public final class ConfigWrapper {
     this.config = config;
   }
 
-  @SuppressWarnings(
-      "unchecked") // snakeyaml-engine returns Object; a valid config file is always a map
   public static ConfigWrapper parse(String configFile) throws IOException {
     Load load = new Load(LoadSettings.builder().build());
-    Map<String, ?> config =
-        (Map<String, ?>)
-            load.loadFromReader(
-                Files.newBufferedReader(Paths.get(configFile), Charset.defaultCharset()));
-    return new ConfigWrapper(config);
+    try (BufferedReader reader =
+        Files.newBufferedReader(Paths.get(configFile), Charset.defaultCharset())) {
+      Object loaded = load.loadFromReader(reader);
+      if (!(loaded instanceof Map)) {
+        throw new IllegalArgumentException(
+            "Config file does not contain a YAML map: " + configFile);
+      }
+      @SuppressWarnings("unchecked") // Verified above
+      Map<String, ?> config = (Map<String, ?>) loaded;
+      return new ConfigWrapper(config);
+    }
   }
 
   public int getNumberOfThreads() {
