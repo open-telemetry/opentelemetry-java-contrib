@@ -2,7 +2,7 @@ plugins {
   `java-platform`
 }
 
-val otelInstrumentationVersion = "2.28.0-alpha"
+val otelInstrumentationVersion = "2.28.1-alpha"
 val semconvVersion = "1.41.1"
 
 javaPlatform {
@@ -16,7 +16,7 @@ dependencies {
   // as runtime dependencies if they are actually used as runtime dependencies)
   api(platform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${otelInstrumentationVersion}"))
   api(platform("com.fasterxml.jackson:jackson-bom:2.21.3"))
-  api(platform("com.google.protobuf:protobuf-bom:4.34.1"))
+  api(platform("com.google.protobuf:protobuf-bom:4.35.0"))
   api(platform("com.squareup.okhttp3:okhttp-bom:5.3.2"))
 
   constraints {
@@ -54,7 +54,7 @@ dependencies {
     api("org.bouncycastle:bcprov-jdk18on:1.84")
     api("org.junit-pioneer:junit-pioneer:1.9.1")
     api("org.skyscreamer:jsonassert:1.5.3")
-    api("org.apache.kafka:kafka-clients:4.2.0")
+    api("org.apache.kafka:kafka-clients:4.3.0")
     api("org.testcontainers:testcontainers-kafka:2.0.5")
     api("org.jctools:jctools-core:4.0.6")
     api("tools.profiler:async-profiler:4.4")
