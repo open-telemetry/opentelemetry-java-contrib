@@ -33,12 +33,14 @@ public class JfcFileConfiguration implements RecordingConfiguration {
   }
 
   private static String readConfigurationFile(InputStream inputStream) {
-    if (inputStream != null) {
-      return new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
-          .lines()
-          .collect(Collectors.joining());
-    } else {
+    if (inputStream == null) {
       throw new IllegalArgumentException("Null configuration provided");
+    }
+    try (BufferedReader reader =
+        new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+      return reader.lines().collect(Collectors.joining());
+    } catch (IOException e) {
+      throw new IllegalStateException("Failed to read JFC configuration file", e);
     }
   }
 
