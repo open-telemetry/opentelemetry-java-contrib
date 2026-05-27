@@ -102,7 +102,11 @@ public final class FolderManager implements Closeable {
     closeCurrentFiles();
     List<File> undeletedFiles = new ArrayList<>();
 
-    for (File file : Objects.requireNonNull(folder.listFiles())) {
+    File[] files = folder.listFiles();
+    if (files == null) {
+      throw new IOException("Could not list files in " + folder);
+    }
+    for (File file : files) {
       if (!file.delete()) {
         undeletedFiles.add(file);
       }
@@ -172,7 +176,12 @@ public final class FolderManager implements Closeable {
       throws IOException {
     int filesDeleted = 0;
     for (File existingFile : existingFiles) {
-      if (hasExpiredForReading(currentTimeMillis, Long.parseLong(existingFile.getName()))) {
+      String fileName = existingFile.getName();
+      if (!NUMBER_PATTERN.matcher(fileName).matches()) {
+        logger.finer(String.format("Skipping non-cache file: '%s'", fileName));
+        continue;
+      }
+      if (hasExpiredForReading(currentTimeMillis, Long.parseLong(fileName))) {
         if (currentReadableFile != null && existingFile.equals(currentReadableFile.getFile())) {
           currentReadableFile.close();
         }
