@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
@@ -89,8 +90,9 @@ public final class FolderManager implements Closeable {
     long systemCurrentTimeMillis = nowMillis(clock);
     File[] existingFiles = folder.listFiles();
     if (existingFiles != null) {
-      if (purgeExpiredFilesIfAny(existingFiles, systemCurrentTimeMillis) == 0) {
-        removeOldestFileIfSpaceIsNeeded(existingFiles);
+      File[] cacheFiles = listNumericFiles(existingFiles);
+      if (purgeExpiredFilesIfAny(cacheFiles, systemCurrentTimeMillis) == 0) {
+        removeOldestFileIfSpaceIsNeeded(cacheFiles);
       }
     }
     File file = new File(folder, String.valueOf(systemCurrentTimeMillis));
@@ -132,11 +134,25 @@ public final class FolderManager implements Closeable {
     return Collections.unmodifiableList(files);
   }
 
+  private File[] listNumericFiles(File[] files) {
+    List<File> cacheFiles = new ArrayList<>();
+    for (File file : files) {
+      if (NUMBER_PATTERN.matcher(file.getName()).matches()) {
+        cacheFiles.add(file);
+      } else if (logger.isLoggable(Level.FINER)) {
+        logger.finer("Skipping non-cache file: '" + file.getName() + "'");
+      }
+    }
+    return cacheFiles.toArray(new File[0]);
+  }
+
   @Nullable
   private CacheFile fileToCacheFile(File file) {
     String fileName = file.getName();
     if (!NUMBER_PATTERN.matcher(fileName).matches()) {
-      logger.finer(String.format("Invalid cache file name: '%s'", fileName));
+      if (logger.isLoggable(Level.FINER)) {
+        logger.finer("Invalid cache file name: '" + fileName + "'");
+      }
       return null;
     }
     return new CacheFile(file, Long.parseLong(fileName));
@@ -177,10 +193,6 @@ public final class FolderManager implements Closeable {
     int filesDeleted = 0;
     for (File existingFile : existingFiles) {
       String fileName = existingFile.getName();
-      if (!NUMBER_PATTERN.matcher(fileName).matches()) {
-        logger.finer(String.format("Skipping non-cache file: '%s'", fileName));
-        continue;
-      }
       if (hasExpiredForReading(currentTimeMillis, Long.parseLong(fileName))) {
         if (currentReadableFile != null && existingFile.equals(currentReadableFile.getFile())) {
           currentReadableFile.close();
