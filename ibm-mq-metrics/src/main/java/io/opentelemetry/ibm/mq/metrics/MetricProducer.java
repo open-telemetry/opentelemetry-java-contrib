@@ -5,16 +5,9 @@
 
 package io.opentelemetry.ibm.mq.metrics;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingDeque;
+import static io.opentelemetry.ibm.mq.metrics.MetricData.createMetricData;
 
 import io.opentelemetry.api.common.Attributes;
-import static io.opentelemetry.ibm.mq.metrics.MetricData.createMetricData;
 import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
@@ -24,6 +17,13 @@ import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.data.MetricDataType;
 import io.opentelemetry.sdk.metrics.data.SumData;
 import io.opentelemetry.sdk.resources.Resource;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingDeque;
 
 // This file is generated using weaver. Do not edit manually.
 
@@ -37,7 +37,7 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   private final Map<Attributes, Long> counterIbmMqQueueDepthHighEvent;
   private final Map<Attributes, Long> counterIbmMqQueueDepthLowEvent;
   private final Map<Attributes, Long> counterIbmMqUnauthorizedEvent;
-    private final Map<Attributes, Long> counterIbmMqQueueManagerUptime;
+  private final Map<Attributes, Long> counterIbmMqQueueManagerUptime;
   private final Map<Attributes, Long> counterIbmMqConnectionErrors;
 
   private long currentEpochNanos;
@@ -670,35 +670,35 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
                         this.currentEpochNanos, Clock.getDefault().now(), attributes, value)))));
   }
 
-    public void addIbmMqQueueManagerUptime(long value, Attributes attributes) {
-        long cumulativeValue =
-                this.counterIbmMqQueueManagerUptime.compute(
+  public void addIbmMqQueueManagerUptime(long value, Attributes attributes) {
+    long cumulativeValue =
+        this.counterIbmMqQueueManagerUptime.compute(
+            attributes,
+            (k, v) -> {
+              if (v == null) {
+                return value;
+              } else {
+                return v + value;
+              }
+            });
+    metricData.add(
+        createMetricData(
+            this.resource,
+            this.instrumentationScopeInfo,
+            "ibm.mq.queue_manager.uptime",
+            "Queue manager uptime",
+            "s",
+            MetricDataType.LONG_SUM,
+            SumData.createLongSumData(
+                /* isMonotonic= */ true,
+                AggregationTemporality.CUMULATIVE,
+                Collections.singletonList(
+                    LongPointData.create(
+                        this.currentEpochNanos,
+                        Clock.getDefault().now(),
                         attributes,
-                        (k, v) -> {
-                            if (v == null) {
-                                return value;
-                            } else {
-                                return v + value;
-                            }
-                        });
-        metricData.add(
-                createMetricData(
-                        this.resource,
-                        this.instrumentationScopeInfo,
-                        "ibm.mq.queue_manager.uptime",
-                        "Queue manager uptime",
-                        "s",
-                        MetricDataType.LONG_SUM,
-                        SumData.createLongSumData(
-                                /* isMonotonic= */ true,
-                                AggregationTemporality.CUMULATIVE,
-                                Collections.singletonList(
-                                        LongPointData.create(
-                                                this.currentEpochNanos,
-                                                Clock.getDefault().now(),
-                                                attributes,
-                                                cumulativeValue)))));
-    }
+                        cumulativeValue)))));
+  }
 
   public void recordIbmMqArchiveLogSize(long value, Attributes attributes) {
     metricData.add(

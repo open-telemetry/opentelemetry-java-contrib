@@ -5,28 +5,15 @@
 
 package io.opentelemetry.ibm.mq;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.function.Consumer;
-
-import javax.annotation.Nullable;
-
-import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.ERROR_CODE;
+import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.IBM_MQ_QUEUE_MANAGER;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ibm.mq.MQException;
 import com.ibm.mq.MQQueueManager;
 import com.ibm.mq.headers.pcf.PCFMessageAgent;
-
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.ibm.mq.config.QueueManager;
-import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.ERROR_CODE;
-import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.IBM_MQ_QUEUE_MANAGER;
 import io.opentelemetry.ibm.mq.metrics.MetricProducer;
 import io.opentelemetry.ibm.mq.metrics.MetricsConfig;
 import io.opentelemetry.ibm.mq.metricscollector.ChannelMetricsCollector;
@@ -42,6 +29,16 @@ import io.opentelemetry.ibm.mq.metricscollector.ReadConfigurationEventQueueColle
 import io.opentelemetry.ibm.mq.metricscollector.TopicMetricsCollector;
 import io.opentelemetry.ibm.mq.opentelemetry.ConfigWrapper;
 import io.opentelemetry.ibm.mq.util.WmqUtil;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.function.Consumer;
+import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class WmqMonitor {
 
