@@ -87,7 +87,7 @@ public final class FolderManager implements Closeable {
   @NotNull
   public synchronized WritableFile createWritableFile() throws IOException {
     long systemCurrentTimeMillis = nowMillis(clock);
-    File[] existingFiles = folder.listFiles();
+    File[] existingFiles = folder.listFiles(FolderManager::isNumericCacheFile);
     if (existingFiles != null) {
       if (purgeExpiredFilesIfAny(existingFiles, systemCurrentTimeMillis) == 0) {
         removeOldestFileIfSpaceIsNeeded(existingFiles);
@@ -218,6 +218,10 @@ public final class FolderManager implements Closeable {
 
   private boolean isReadyToBeRead(long currentTimeMillis, long createdTimeInMillis) {
     return currentTimeMillis >= (createdTimeInMillis + configuration.getMinFileAgeForReadMillis());
+  }
+
+  private static boolean isNumericCacheFile(File file) {
+    return NUMBER_PATTERN.matcher(file.getName()).matches();
   }
 
   private boolean hasExpiredForReading(long systemCurrentTimeMillis, long createdTimeInMillis) {

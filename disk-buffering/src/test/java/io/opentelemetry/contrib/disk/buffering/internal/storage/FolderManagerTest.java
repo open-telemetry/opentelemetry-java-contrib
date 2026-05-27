@@ -88,6 +88,29 @@ class FolderManagerTest {
   }
 
   @Test
+  void createWritableFile_ignoresNonNumericFiles_whenRemovingOldestOne() throws IOException {
+    File existingFile1 = new File(rootDir, "1000");
+    File existingFile2 = new File(rootDir, "1400");
+    File existingFile3 = new File(rootDir, "1100");
+    File nonNumericFile = new File(rootDir, ".nomedia");
+    createFiles(existingFile3, existingFile2, existingFile1, nonNumericFile);
+    fillWithBytes(existingFile1, MAX_FILE_SIZE);
+    fillWithBytes(existingFile2, MAX_FILE_SIZE);
+    fillWithBytes(existingFile3, MAX_FILE_SIZE);
+    when(clock.now()).thenReturn(1500L);
+
+    WritableFile file = folderManager.createWritableFile();
+
+    assertThat(file.getFile()).isNotEqualTo(existingFile1);
+    assertThat(file.getFile()).isNotEqualTo(existingFile2);
+    assertThat(file.getFile()).isNotEqualTo(existingFile3);
+    assertThat(nonNumericFile.exists()).isTrue();
+    assertThat(existingFile2.exists()).isTrue();
+    assertThat(existingFile3.exists()).isTrue();
+    assertThat(existingFile1.exists()).isFalse();
+  }
+
+  @Test
   void closeCurrentlyWritableFile_whenItIsReadyToBeRead_andNoOtherReadableFilesAreAvailable()
       throws IOException {
     long createdFileTime = 1000L;
