@@ -123,7 +123,7 @@ The config tree starts with `sources`. You can configure multiple sources.
 Each source must specify:
 
 - `kind`: where policy updates come from. Supported values: `opamp`, `file`, `http` and `custom` (currently only `opamp` creates an active provider, the others are no-op providers)
-   - `opamp`: the implemented OpAMP provider expects to read the OpAMP config map, findg the value at the key given by `location`. The contents of that value are parseable by the capability given in `format`
+   - `opamp`: the implemented OpAMP provider expects to read the OpAMP config map, finding the value at the key given by `location`. The contents of that value are parseable by the capability given in `format`
 - `format`: how the source payload is parsed. Supported values currently are `jsonkeyvalue` and `keyvalue`
    - `jsonkeyvalue`: expects the contents to be convertable as a string into a single or a array of simple json objects that are key and value, eg '{ "key": value}' or '[{ "key1": value1}, { "key2": value2}]'
    - `keyvalue`: expects the contents to be convertable as a string into one or more line separated 'key=value' pairs (eg a properties file)
@@ -147,6 +147,36 @@ sources:
         policyType: trace-sampling
 
 ```
+
+### Config example
+
+Working through the following example may be helpful (it assumes the `file` source has been implemented, this is not yet the case).
+
+```
+sources:
+  - kind: opamp
+    format: jsonkeyvalue
+    location: vendor
+    mappings:
+      - sourceKey: sampling_rate
+        policyType: trace-sampling
+  - kind: file
+    format: keyvalue
+    location: /path/to/here.conf
+    mappings:
+      - sourceKey: trace_rate
+        policyType: trace-sampling
+      - sourceKey: traceid_ratio
+        policyType: trace-sampling
+
+```
+
+There are two sources. The first expects a message from an OpAMP server (`kind: opamp`), from which it will access the config map and extact the value at key "vendor" (`location: vendor`). The value is expected to be this json style key-value (`format: jsonkeyvalue`) object string (ignoring whitespace and numeric diffs) {"sampling_rate": 0.5} (key defined by `sourceKey: sampling_rate`). On receipt of this, the message is converted to a trace-sampling policy (`policyType: trace-sampling`) and the new sampling rate applied to the sampler.
+
+The second source expects a file (`kind: file`) at file path /path/to/here.conf (`location: /path/to/here.conf`) which when changed will be re-read. The contents are expected to be key=value entries, one per line (`format: keyvalue`). The only keys recognized are 'trace_rate' (`sourceKey: trace_rate`) and `traceid_ratio` (`sourceKey: traceid_ratio`). When the value changes, the message is converted to a trace-sampling policy (`policyType: trace-sampling`) and the new sampling rate applied to the sampler.
+
+Because `opamp` source has higher priority than `file` source, no change to the file would be applied if an opamp change has previously been applied
+
 
 
 ## Component owners
