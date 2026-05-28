@@ -36,7 +36,7 @@ A concrete example helps to understand this flow:
 
 The following would test an agent-enabled app configured to use OpAMP to receive messages that would dynamically change the trace sampling rate:
 
-```
+```bash
 git clone https://github.com/open-telemetry/opentelemetry-java-contrib.git
 cd opentelemetry-java-contrib
 ./gradlew dynamic-control:shadowJar
@@ -59,7 +59,7 @@ Building consists of executing `gradlew`, and producing a jar in the `dynamic-co
 
 You can execute gradlew either from the repo root, or the project root, eg
 
-```
+```bash
 git clone https://github.com/open-telemetry/opentelemetry-java-contrib.git
 cd opentelemetry-java-contrib
 #/REM Unix or windows, execute the gradlew from this directory
@@ -69,7 +69,7 @@ cd opentelemetry-java-contrib
 
 or
 
-```
+```bash
 git clone https://github.com/open-telemetry/opentelemetry-java-contrib.git
 cd opentelemetry-java-contrib
 cd dynamic-control
@@ -90,7 +90,7 @@ Simply including the extension will not enable anything by default. You also nee
 ### Using as a declarative config extension
 
 The declarative config file should include a top level `telemetry_policy/development` node which then uses the config defined below starting at `sources` for its content config, eg
-```
+```yaml
 telemetry_policy/development:
   sources:
     - kind: opamp
@@ -105,7 +105,8 @@ telemetry_policy/development:
 ### Using as an auto-configured extension
 
 You can use either `otel.java.experimental.telemetry.policy.init.yaml` (or OTEL_JAVA_EXPERIMENTAL_TELEMETRY_POLICY_INIT_YAML environment variable) to specify the file containing a YAML configuration of the policies, or `otel.java.experimental.telemetry.policy.init.json` (or OTEL_JAVA_EXPERIMENTAL_TELEMETRY_POLICY_INIT_JSON environment variable) to specify the file containing a JSON configuration of the policies. For example `java -Dotel.javaagent.extensions=/path/to/jar -Dotel.java.experimental.telemetry.policy.init.yaml=/path/to/yaml ...` where /path/to/yaml is a file containing the config. eg
-```
+
+```yaml
 sources:
   - kind: opamp
     format: jsonkeyvalue
@@ -123,10 +124,10 @@ The config tree starts with `sources`. You can configure multiple sources.
 Each source must specify:
 
 * `kind`: where policy updates come from. Supported values: `opamp`, `file`, `http` and `custom` (currently only `opamp` creates an active provider, the others are no-op providers)
-   * `opamp`: the implemented OpAMP provider expects to read the OpAMP config map, finding the value at the key given by `location`. The contents of that value are parseable by the capability given in `format`
+  * `opamp`: the implemented OpAMP provider expects to read the OpAMP config map, finding the value at the key given by `location`. The contents of that value are parseable by the capability given in `format`
 * `format`: how the source payload is parsed. Supported values currently are `jsonkeyvalue` and `keyvalue`
-   * `jsonkeyvalue`: expects the contents to be convertible as a string into a single or an array of simple json objects that are key and value, eg '{ "key": value}' or '[{ "key1": value1}, { "key2": value2}]'
-   * `keyvalue`: expects the contents to be convertible as a string into one or more line separated 'key=value' pairs (eg a properties file)
+  * `jsonkeyvalue`: expects the contents to be convertible as a string into a single or an array of simple json objects that are key and value, eg '{ "key": value}' or '[{ "key1": value1}, { "key2": value2}]'
+  * `keyvalue`: expects the contents to be convertible as a string into one or more line separated 'key=value' pairs (eg a properties file)
 * `mappings`: one or more mappings from source-specific keys to dynamic-control policy types
 * `location`: optional source-specific selector. For `opamp`, this is the OpAMP config map key, for example `vendor`
 
@@ -137,7 +138,7 @@ Each mapping must specify:
 
 Currently supported values in summary
 
-```
+```yaml
 sources:
   - kind: opamp|file|http|custom
     format: jsonkeyvalue|keyvalue
@@ -151,14 +152,14 @@ sources:
 ### Policies supported
 
 * `trace-sampling`
-   * IMPORTANT: if this policy is included in the config, then the sampler installed is overridden and a consistent sampling sampler is installed (technically the ComposableSampler.parentThreshold(ComposableSampler.probability()) sampler)
-   * Expects a value between 0.0 and 1.0 (including both end values), and will apply that sampling rate to the agent's sampler where 0.0 is 0% head sampling and 1.0 is 100% sampling
+  * IMPORTANT: if this policy is included in the config, then the sampler installed is overridden and a consistent sampling sampler is installed (technically the ComposableSampler.parentThreshold(ComposableSampler.probability()) sampler)
+  * Expects a value between 0.0 and 1.0 (including both end values), and will apply that sampling rate to the agent's sampler where 0.0 is 0% head sampling and 1.0 is 100% sampling
 
 ### Config example
 
 Working through the following example may be helpful (it assumes the `file` source has been implemented, this is not yet the case).
 
-```
+```yaml
 sources:
   - kind: opamp
     format: jsonkeyvalue
