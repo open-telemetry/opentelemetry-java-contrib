@@ -16,7 +16,7 @@ This project has now reached a stage where it is usable but subject to change in
 
 ## Telemetry Policy
 
-The dynamic control is implemented using Telemetry Policy. An abstract outline of dynamic control using telemetry policies is that there is a flow consisting of
+The dynamic control is implemented using Telemetry Policy protoype. An abstract outline of dynamic control using telemetry policies is that there is a flow consisting of
 
 ```
 Message -> Provider -> Policy -> Policy aggregator -> Implementer
@@ -175,8 +175,7 @@ There are two sources. The first expects a message from an OpAMP server (`kind: 
 
 The second source expects a file (`kind: file`) at file path /path/to/here.conf (`location: /path/to/here.conf`) which when changed will be re-read. The contents are expected to be key=value entries, one per line (`format: keyvalue`). The only keys recognized are `trace_rate` (`sourceKey: trace_rate`) and `traceid_ratio` (`sourceKey: traceid_ratio`). When the value changes, the message is converted to a trace-sampling policy (`policyType: trace-sampling`) and the new sampling rate applied to the sampler.
 
-Because `opamp` source has higher priority than `file` source, no change to the file would be applied if an opamp change has previously been applied.
-
+Because `opamp` source has higher priority than `file` source, if both sources generate a change at the same time, the opamp change would be applied and the file change dropped.
 
 
 ## Component owners
