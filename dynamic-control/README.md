@@ -78,7 +78,7 @@ cd dynamic-control
 ..\gradlew <TARGET>
 ```
 
-Useful values for <TARGET> are `jar` for the jar containing the classes from this project, and `shadowJar` to create a jar containing the classes from this project plus all dependencies. The latter target will produce a `*-all.jar` jar.
+Useful values for `<TARGET>` are `jar` for the jar containing the classes from this project, and `shadowJar` to create a jar containing the classes from this project plus all dependencies. The latter target will produce a `*-all.jar` jar.
 
 ## Using as an extension
 
