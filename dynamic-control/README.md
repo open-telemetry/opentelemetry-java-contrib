@@ -89,7 +89,7 @@ Simply including the extension will not enable anything by default. You also nee
 
 ### Using as a declarative config extension
 
-The declarative config file should include a top level `telemetry_policy/development` node which then uses the config defined below starting at `sources` for it's content config, eg
+The declarative config file should include a top level `telemetry_policy/development` node which then uses the config defined below starting at `sources` for its content config, eg
 ```
 telemetry_policy/development:
   sources:
@@ -171,11 +171,11 @@ sources:
 
 ```
 
-There are two sources. The first expects a message from an OpAMP server (`kind: opamp`), from which it will access the config map and extact the value at key "vendor" (`location: vendor`). The value is expected to be this json style key-value (`format: jsonkeyvalue`) object string (ignoring whitespace and numeric diffs) {"sampling_rate": 0.5} (key defined by `sourceKey: sampling_rate`). On receipt of this, the message is converted to a trace-sampling policy (`policyType: trace-sampling`) and the new sampling rate applied to the sampler.
+There are two sources. The first expects a message from an OpAMP server (`kind: opamp`), from which it will access the config map and extract the value at key `vendor` (`location: vendor`). The value is expected to be this json style key-value (`format: jsonkeyvalue`) object string (ignoring whitespace and numeric diffs) {"sampling_rate": 0.5} (key defined by `sourceKey: sampling_rate`). On receipt of this, the message is converted to a trace-sampling policy (`policyType: trace-sampling`) and the new sampling rate applied to the sampler.
 
-The second source expects a file (`kind: file`) at file path /path/to/here.conf (`location: /path/to/here.conf`) which when changed will be re-read. The contents are expected to be key=value entries, one per line (`format: keyvalue`). The only keys recognized are 'trace_rate' (`sourceKey: trace_rate`) and `traceid_ratio` (`sourceKey: traceid_ratio`). When the value changes, the message is converted to a trace-sampling policy (`policyType: trace-sampling`) and the new sampling rate applied to the sampler.
+The second source expects a file (`kind: file`) at file path /path/to/here.conf (`location: /path/to/here.conf`) which when changed will be re-read. The contents are expected to be key=value entries, one per line (`format: keyvalue`). The only keys recognized are `trace_rate` (`sourceKey: trace_rate`) and `traceid_ratio` (`sourceKey: traceid_ratio`). When the value changes, the message is converted to a trace-sampling policy (`policyType: trace-sampling`) and the new sampling rate applied to the sampler.
 
-Because `opamp` source has higher priority than `file` source, no change to the file would be applied if an opamp change has previously been applied
+Because `opamp` source has higher priority than `file` source, no change to the file would be applied if an opamp change has previously been applied.
 
 
 
