@@ -135,7 +135,7 @@ public final class OpampClientImpl
 
   @Override
   public void setAgentDescription(@Nonnull AgentDescription agentDescription) {
-    if (!state.agentDescription.get().equals(agentDescription)) {
+    if (!state.agentDescription.mustGet().equals(agentDescription)) {
       state.agentDescription.set(agentDescription);
       addFieldAndSend(Field.AGENT_DESCRIPTION);
     }
@@ -143,7 +143,7 @@ public final class OpampClientImpl
 
   @Override
   public void setRemoteConfigStatus(@Nonnull RemoteConfigStatus remoteConfigStatus) {
-    if (!state.remoteConfigStatus.get().equals(remoteConfigStatus)) {
+    if (!state.remoteConfigStatus.mustGet().equals(remoteConfigStatus)) {
       state.remoteConfigStatus.set(remoteConfigStatus);
       addFieldAndSend(Field.REMOTE_CONFIG_STATUS);
     }

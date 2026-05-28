@@ -9,6 +9,7 @@ import io.opentelemetry.opamp.client.internal.request.Field;
 import java.util.Objects;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import opamp.proto.ComponentHealth;
 
 /**
@@ -77,7 +78,7 @@ public interface State<T> extends Supplier<T> {
   }
 
   final class Health extends InMemoryState<ComponentHealth> {
-    public Health(@Nonnull ComponentHealth initialValue) {
+    public Health(@Nullable ComponentHealth initialValue) {
       super(initialValue);
     }
 
