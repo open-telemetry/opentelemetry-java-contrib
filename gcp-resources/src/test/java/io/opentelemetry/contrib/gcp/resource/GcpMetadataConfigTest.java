@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.gcp.resource;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
@@ -137,5 +138,13 @@ class GcpMetadataConfigTest {
   @Test
   void testGetInstanceName() {
     assertEquals(mockInstanceName, mockMetadataConfig.getInstanceName());
+  }
+
+  @Test
+  void testOversizedResponseIsTruncatedTo4096Chars() {
+    String oversized = new String(new char[8192]).replace('\0', 'x');
+    TestUtils.stubEndpoint("/project/project-id", oversized);
+    String result = new GcpMetadataConfig("http://localhost:8090/").getProjectId();
+    assertThat(result).hasSize(4096).isEqualTo(new String(new char[4096]).replace('\0', 'x'));
   }
 }

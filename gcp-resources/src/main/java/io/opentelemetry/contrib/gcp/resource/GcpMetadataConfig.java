@@ -27,6 +27,12 @@ final class GcpMetadataConfig {
   static final GcpMetadataConfig DEFAULT_INSTANCE = new GcpMetadataConfig();
 
   private static final String DEFAULT_URL = "http://metadata.google.internal/computeMetadata/v1/";
+  // google-auth-library-java uses 500 ms connect timeout (with up to 3 retries) for its metadata
+  // ping and sets no read timeout; 1 s is generous for an attribute fetch on the link-local
+  // metadata server.
+  private static final int CONNECT_TIMEOUT_MS = 1_000;
+  private static final int READ_TIMEOUT_MS = 1_000;
+  private static final int MAX_METADATA_VALUE_CHARS = 4096;
   private final String url;
   private final Map<String, String> cachedAttributes = new ConcurrentHashMap<>();
 
@@ -146,13 +152,17 @@ final class GcpMetadataConfig {
     try {
       URL url = URI.create(this.url + attributeName).toURL();
       HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+      connection.setConnectTimeout(CONNECT_TIMEOUT_MS);
+      connection.setReadTimeout(READ_TIMEOUT_MS);
       connection.setRequestProperty("Metadata-Flavor", "Google");
       if (connection.getResponseCode() == 200
           && "Google".equals(connection.getHeaderField("Metadata-Flavor"))) {
         InputStream input = connection.getInputStream();
         try (BufferedReader reader =
             new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8))) {
-          return reader.readLine();
+          char[] buffer = new char[MAX_METADATA_VALUE_CHARS];
+          int n = reader.read(buffer, 0, buffer.length);
+          return n > 0 ? new String(buffer, 0, n) : null;
         }
       }
     } catch (IOException ignore) {
