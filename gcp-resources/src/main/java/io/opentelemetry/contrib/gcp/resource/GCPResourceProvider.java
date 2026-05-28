@@ -251,7 +251,12 @@ public class GCPResourceProvider implements ConditionalResourceProvider {
                     IncubatingAttributes.GCP_CLOUD_RUN_JOB_TASK_INDEX,
                     Integer.parseInt(jobTaskIndex));
               } catch (NumberFormatException e) {
-                LOGGER.log(Level.WARNING, "Can't parse GCP Cloud Run job task index", e);
+                LOGGER.log(
+                    Level.WARNING,
+                    "Can't parse GCP Cloud Run job task index (CLOUD_RUN_TASK_INDEX): '"
+                        + jobTaskIndex
+                        + "'",
+                    e);
               }
             });
   }

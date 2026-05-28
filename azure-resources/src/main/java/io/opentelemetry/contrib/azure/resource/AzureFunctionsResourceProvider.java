@@ -68,7 +68,10 @@ public final class AzureFunctionsResourceProvider extends CloudResourceProvider 
       try {
         builder.put(FAAS_MAX_MEMORY, Long.parseLong(limit));
       } catch (NumberFormatException e) {
-        logger.log(Level.WARNING, "Can't parse Azure Functions memory limit", e);
+        logger.log(
+            Level.WARNING,
+            "Can't parse Azure Functions memory limit (WEBSITE_MEMORY_LIMIT_MB): '" + limit + "'",
+            e);
       }
     }
 
