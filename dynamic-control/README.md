@@ -122,18 +122,18 @@ The config tree starts with `sources`. You can configure multiple sources.
 
 Each source must specify:
 
-- `kind`: where policy updates come from. Supported values: `opamp`, `file`, `http` and `custom` (currently only `opamp` creates an active provider, the others are no-op providers)
-   - `opamp`: the implemented OpAMP provider expects to read the OpAMP config map, finding the value at the key given by `location`. The contents of that value are parseable by the capability given in `format`
-- `format`: how the source payload is parsed. Supported values currently are `jsonkeyvalue` and `keyvalue`
-   - `jsonkeyvalue`: expects the contents to be convertible as a string into a single or an array of simple json objects that are key and value, eg '{ "key": value}' or '[{ "key1": value1}, { "key2": value2}]'
-   - `keyvalue`: expects the contents to be convertible as a string into one or more line separated 'key=value' pairs (eg a properties file)
-- `mappings`: one or more mappings from source-specific keys to dynamic-control policy types
-- `location`: optional source-specific selector. For `opamp`, this is the OpAMP config map key, for example `vendor`
+* `kind`: where policy updates come from. Supported values: `opamp`, `file`, `http` and `custom` (currently only `opamp` creates an active provider, the others are no-op providers)
+   * `opamp`: the implemented OpAMP provider expects to read the OpAMP config map, finding the value at the key given by `location`. The contents of that value are parseable by the capability given in `format`
+* `format`: how the source payload is parsed. Supported values currently are `jsonkeyvalue` and `keyvalue`
+   * `jsonkeyvalue`: expects the contents to be convertible as a string into a single or an array of simple json objects that are key and value, eg '{ "key": value}' or '[{ "key1": value1}, { "key2": value2}]'
+   * `keyvalue`: expects the contents to be convertible as a string into one or more line separated 'key=value' pairs (eg a properties file)
+* `mappings`: one or more mappings from source-specific keys to dynamic-control policy types
+* `location`: optional source-specific selector. For `opamp`, this is the OpAMP config map key, for example `vendor`
 
 Each mapping must specify:
 
-- `sourceKey`: the key in the source payload, for example `sampling_rate` (this is an arbitrary string defined by the user or already being used/sent from some source)
-- `policyType`: the dynamic-control policy type to update, currently only `trace-sampling` is valid
+* `sourceKey`: the key in the source payload, for example `sampling_rate` (this is an arbitrary string defined by the user or already being used/sent from some source)
+* `policyType`: the dynamic-control policy type to update, currently only `trace-sampling` is valid
 
 Currently supported values in summary
 
@@ -150,9 +150,9 @@ sources:
 
 ### Policies supported
 
-- `trace-sampling`
-   - IMPORTANT: if this policy is included in the config, then the sampler installed is overridden and a consistent sampling sampler is installed (technically the ComposableSampler.parentThreshold(ComposableSampler.probability()) sampler)
-   - Expects a value between 0.0 and 1.0 (including both end values), and will apply that sampling rate to the agent's sampler where 0.0 is 0% head sampling and 1.0 is 100% sampling
+* `trace-sampling`
+   * IMPORTANT: if this policy is included in the config, then the sampler installed is overridden and a consistent sampling sampler is installed (technically the ComposableSampler.parentThreshold(ComposableSampler.probability()) sampler)
+   * Expects a value between 0.0 and 1.0 (including both end values), and will apply that sampling rate to the agent's sampler where 0.0 is 0% head sampling and 1.0 is 100% sampling
 
 ### Config example
 
