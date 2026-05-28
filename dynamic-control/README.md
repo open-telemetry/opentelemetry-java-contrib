@@ -19,7 +19,7 @@ This project has now reached a stage where it is usable but subject to change in
 The dynamic control is implemented using Telemetry Policy prototype.
 An abstract outline of dynamic control using telemetry policies is that there is a flow consisting of
 
-```
+```text
 Message -> Provider -> Policy -> Policy aggregator -> Implementer
 
 ```
@@ -71,6 +71,7 @@ cd opentelemetry-java-contrib
 ./gradlew dynamic-control:<TARGET>
 .\gradlew dynamic-control:<TARGET>
 ```
+
 or
 
 ```bash
@@ -81,6 +82,7 @@ cd dynamic-control
 ../gradlew <TARGET>
 ..\gradlew <TARGET>
 ```
+
 Useful values for `<TARGET>` are `jar` for the jar containing the classes from this project,
 and `shadowJar` to create a jar containing the classes from this project plus all dependencies.
 The latter target will produce a `*-all.jar` jar.
@@ -101,6 +103,7 @@ First the general config idea is covered, then a more detailed explanation of th
 
 The declarative config file should include a top level `telemetry_policy/development` node which then
 uses the config defined below starting at `sources` for its content config, eg
+
 ```yaml
 telemetry_policy/development:
   sources:
@@ -112,6 +115,7 @@ telemetry_policy/development:
           policyType: trace-sampling
 
 ```
+
 ### Using as an auto-configured extension
 
 You can use either `otel.java.experimental.telemetry.policy.init.yaml`
