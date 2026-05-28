@@ -180,7 +180,7 @@ sources:
 
 * `trace-sampling`
   * IMPORTANT: if this policy is included in the config, then the sampler installed is overridden
-and a consistent sampling sampler is installed 
+and a consistent sampling sampler is installed
 (technically the ComposableSampler.parentThreshold(ComposableSampler.probability()) sampler)
   * Expects a value between 0.0 and 1.0 (including both end values), and will apply that sampling rate
 to the agent's sampler where 0.0 is 0% head sampling and 1.0 is 100% sampling
