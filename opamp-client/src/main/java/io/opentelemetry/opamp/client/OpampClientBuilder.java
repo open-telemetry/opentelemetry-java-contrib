@@ -380,7 +380,6 @@ public final class OpampClientBuilder {
   /**
    * Enables health reporting and sets the initial health object that is then passed to the
    * corresponding state implementation.
-   * This method automatically enables health reporting capability.
    *
    * @param initialHealth The component health
    * @return this
