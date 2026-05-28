@@ -28,7 +28,7 @@ A concrete example helps to understand this flow:
 1. Message: A message is added (to OpAMP data structure) to specify a change to the trace "sampling rate"
 2. Provider: The OpampPolicyProvider reads the message from the OpAMP data structure received via OpAMP protocol
 3. Policy: The message is converted into a TraceSamplingRatePolicy, ie the policy that changes the sampling rate, with the target "traceid rate"
-4. Policy aggregator: The policy is combined with any other policy changes applied or in pending, handling source priority and potential merges of policies
+4. Policy aggregator: The policy is combined with any other policy changes already applied or pending, handling source priority and potential merges of policies
 5. Implementer: TraceSamplingRatePolicyImplementer takes the policy with the new traceid sampling rate and applies it to the sampler
 
 
@@ -40,7 +40,7 @@ The following would test an agent-enabled app configured to use OpAMP to receive
 git clone https://github.com/open-telemetry/opentelemetry-java-contrib.git
 cd opentelemetry-java-contrib
 ./gradlew dynamic-control:shadowJar
-cp dynamic-control/build/libs/opentelemetry-dynamic-control-*-alpha-SNAPSHOT-all.jar ./opentelemetry-dynamic-control-all.jar 
+cp dynamic-control/build/libs/opentelemetry-dynamic-control-*-alpha-SNAPSHOT-all.jar ./opentelemetry-dynamic-control-all.jar
 echo "sources:" > config.yaml
 echo "  - kind: opamp" >> config.yaml
 echo "    format: jsonkeyvalue" >> config.yaml
@@ -74,7 +74,7 @@ git clone https://github.com/open-telemetry/opentelemetry-java-contrib.git
 cd opentelemetry-java-contrib
 cd dynamic-control
 #/REM Unix or windows, execute the gradlew from the directory above
-../gradlew <TARGET> 
+../gradlew <TARGET>
 ..\gradlew <TARGET>
 ```
 
@@ -125,8 +125,8 @@ Each source must specify:
 - `kind`: where policy updates come from. Supported values: `opamp`, `file`, `http` and `custom` (currently only `opamp` creates an active provider, the others are no-op providers)
    - `opamp`: the implemented OpAMP provider expects to read the OpAMP config map, finding the value at the key given by `location`. The contents of that value are parseable by the capability given in `format`
 - `format`: how the source payload is parsed. Supported values currently are `jsonkeyvalue` and `keyvalue`
-   - `jsonkeyvalue`: expects the contents to be convertable as a string into a single or a array of simple json objects that are key and value, eg '{ "key": value}' or '[{ "key1": value1}, { "key2": value2}]'
-   - `keyvalue`: expects the contents to be convertable as a string into one or more line separated 'key=value' pairs (eg a properties file)
+   - `jsonkeyvalue`: expects the contents to be convertible as a string into a single or an array of simple json objects that are key and value, eg '{ "key": value}' or '[{ "key1": value1}, { "key2": value2}]'
+   - `keyvalue`: expects the contents to be convertible as a string into one or more line separated 'key=value' pairs (eg a properties file)
 - `mappings`: one or more mappings from source-specific keys to dynamic-control policy types
 - `location`: optional source-specific selector. For `opamp`, this is the OpAMP config map key, for example `vendor`
 
@@ -141,7 +141,7 @@ Currently supported values in summary
 sources:
   - kind: opamp|file|http|custom
     format: jsonkeyvalue|keyvalue
-    location: 'opamp config map key'|'file path'|'http url'|no row
+    location: 'opamp config map key'|'file path'|'http url'|omit row
     mappings:
       - sourceKey: user-defined-string
         policyType: trace-sampling
@@ -152,7 +152,7 @@ sources:
 
 - `trace-sampling`
    - IMPORTANT: if this policy is included in the config, then the sampler installed is overridden and a consistent sampling sampler is installed (technically the ComposableSampler.parentThreshold(ComposableSampler.probability()) sampler)
-   - Expects a value between 0.0 an 1.0 (including both end values), and will apply that sampling rate to the agent's sampler where 0.0 is 0% head sampling and 1.0 is 100% sampling
+   - Expects a value between 0.0 and 1.0 (including both end values), and will apply that sampling rate to the agent's sampler where 0.0 is 0% head sampling and 1.0 is 100% sampling
 
 ### Config example
 
