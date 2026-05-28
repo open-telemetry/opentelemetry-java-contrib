@@ -10,7 +10,7 @@ Adding dynamic control of some specific features of the Java agent.
 
 Current plans and progress is tracked in this [meta issue](https://github.com/open-telemetry/opentelemetry-java-contrib/issues/2416)
 
-# Using this project
+## Using this project
 
 This project has now reached a stage where it is usable but subject to change in any part including the API.
 
@@ -30,7 +30,6 @@ A concrete example helps to understand this flow:
 3. Policy: The message is converted into a TraceSamplingRatePolicy, ie the policy that changes the sampling rate, with the target "traceid rate"
 4. Policy aggregator: The policy is combined with any other policy changes already applied or pending, handling source priority and potential merges of policies
 5. Implementer: TraceSamplingRatePolicyImplementer takes the policy with the new traceid sampling rate and applies it to the sampler
-
 
 ## Quick Unix example
 
@@ -66,7 +65,6 @@ cd opentelemetry-java-contrib
 ./gradlew dynamic-control:<TARGET>
 .\gradlew dynamic-control:<TARGET>
 ```
-
 or
 
 ```bash
@@ -77,15 +75,17 @@ cd dynamic-control
 ../gradlew <TARGET>
 ..\gradlew <TARGET>
 ```
-
-Useful values for `<TARGET>` are `jar` for the jar containing the classes from this project, and `shadowJar` to create a jar containing the classes from this project plus all dependencies. The latter target will produce a `*-all.jar` jar.
+Useful values for `<TARGET>` are `jar` for the jar containing the classes from this project, and `shadowJar` to create a jar containing the classes from this project plus all dependencies.
+The latter target will produce a `*-all.jar` jar.
 
 ## Using as an extension
 
-The jar from the build needs to be accessible by the agent during startup. Assume you have put the jar at /path/to/jar (or \path\to\jar) then you need to use the  option `otel.javaagent.extensions` (or OTEL_JAVAAGENT_EXTENSIONS environment variable) to specify where the jar is, eg `java -Dotel.javaagent.extensions=/path/to/jar ...` when starting the application with the agent, for the agent to include the extension.
+The jar from the build needs to be accessible by the agent during startup. Assume you have put the jar at /path/to/jar (or \path\to\jar) then you need to use
+the option `otel.javaagent.extensions` (or OTEL_JAVAAGENT_EXTENSIONS environment variable) to specify where the jar is,
+eg `java -Dotel.javaagent.extensions=/path/to/jar ...` when starting the application with the agent, for the agent to include the extension.
 
-Simply including the extension will not enable anything by default. You also need to configure the extension. The next sections explain that. First the general config idea is covered, then a more detailed explanation of the config that can be used.
-
+Simply including the extension will not enable anything by default. You also need to configure the extension. The next sections explain that.
+First the general config idea is covered, then a more detailed explanation of the config that can be used.
 
 ### Using as a declarative config extension
 
@@ -101,10 +101,13 @@ telemetry_policy/development:
           policyType: trace-sampling
 
 ```
-
 ### Using as an auto-configured extension
 
-You can use either `otel.java.experimental.telemetry.policy.init.yaml` (or OTEL_JAVA_EXPERIMENTAL_TELEMETRY_POLICY_INIT_YAML environment variable) to specify the file containing a YAML configuration of the policies, or `otel.java.experimental.telemetry.policy.init.json` (or OTEL_JAVA_EXPERIMENTAL_TELEMETRY_POLICY_INIT_JSON environment variable) to specify the file containing a JSON configuration of the policies. For example `java -Dotel.javaagent.extensions=/path/to/jar -Dotel.java.experimental.telemetry.policy.init.yaml=/path/to/yaml ...` where /path/to/yaml is a file containing the config. eg
+You can use either `otel.java.experimental.telemetry.policy.init.yaml` (or OTEL_JAVA_EXPERIMENTAL_TELEMETRY_POLICY_INIT_YAML environment variable)
+to specify the file containing a YAML configuration of the policies, or `otel.java.experimental.telemetry.policy.init.json`
+(or OTEL_JAVA_EXPERIMENTAL_TELEMETRY_POLICY_INIT_JSON environment variable) to specify the file containing a JSON configuration of the policies.
+For example `java -Dotel.javaagent.extensions=/path/to/jar -Dotel.java.experimental.telemetry.policy.init.yaml=/path/to/yaml ...`
+where /path/to/yaml is a file containing the config. eg
 
 ```yaml
 sources:
@@ -178,12 +181,17 @@ sources:
 
 ```
 
-There are two sources. The first expects a message from an OpAMP server (`kind: opamp`), from which it will access the config map and extract the value at key `vendor` (`location: vendor`). The value is expected to be this json style key-value (`format: jsonkeyvalue`) object string (ignoring whitespace and numeric diffs) {"sampling_rate": 0.5} (key defined by `sourceKey: sampling_rate`). On receipt of this, the message is converted to a trace-sampling policy (`policyType: trace-sampling`) and the new sampling rate applied to the sampler.
+There are two sources. The first expects a message from an OpAMP server (`kind: opamp`), from which it will access the config map
+and extract the value at key `vendor` (`location: vendor`). The value is expected to be this json style key-value (`format: jsonkeyvalue`)
+object string (ignoring whitespace and numeric diffs) {"sampling_rate": 0.5} (key defined by `sourceKey: sampling_rate`).
+On receipt of this, the message is converted to a trace-sampling policy (`policyType: trace-sampling`) and the new sampling rate applied to the sampler.
 
-The second source expects a file (`kind: file`) at file path /path/to/here.conf (`location: /path/to/here.conf`) which when changed will be re-read. The contents are expected to be key=value entries, one per line (`format: keyvalue`). The only keys recognized are `trace_rate` (`sourceKey: trace_rate`) and `traceid_ratio` (`sourceKey: traceid_ratio`). When the value changes, the message is converted to a trace-sampling policy (`policyType: trace-sampling`) and the new sampling rate applied to the sampler.
+The second source expects a file (`kind: file`) at file path /path/to/here.conf (`location: /path/to/here.conf`) which when changed will be re-read.
+The contents are expected to be key=value entries, one per line (`format: keyvalue`). The only keys recognized are `trace_rate` (`sourceKey: trace_rate`)
+and `traceid_ratio` (`sourceKey: traceid_ratio`). When the value changes, the message is converted to a trace-sampling policy (`policyType: trace-sampling`)
+and the new sampling rate applied to the sampler.
 
 Because `opamp` source has higher priority than `file` source, if both sources generate a change at the same time, the opamp change would be applied and the file change dropped.
-
 
 ## Component owners
 
