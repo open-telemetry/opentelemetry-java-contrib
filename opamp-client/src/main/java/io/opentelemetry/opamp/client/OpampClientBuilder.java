@@ -37,6 +37,7 @@ public final class OpampClientBuilder {
       HttpRequestService.create(OkHttpSender.create("http://localhost:4320/v1/opamp"));
   @Nullable private byte[] instanceUid;
   @Nullable private State.EffectiveConfig effectiveConfigState;
+  @Nullable private OpampClient.CommandProcessor commandProcessor;
 
   OpampClientBuilder() {}
 
@@ -376,6 +377,20 @@ public final class OpampClientBuilder {
     return this;
   }
 
+  /**
+   * Sets the command processor. This command processor will be called for every ServerToAgent
+   * message that contains a non-null command.
+   *
+   * @param commandProcessor The command processor.
+   * @return this
+   */
+  @CanIgnoreReturnValue
+  public OpampClientBuilder setCommandProcessor(
+      @Nullable OpampClient.CommandProcessor commandProcessor) {
+    this.commandProcessor = commandProcessor;
+    return this;
+  }
+
   public OpampClient build(OpampClient.Callbacks callbacks) {
     List<KeyValue> protoIdentifyingAttributes = new ArrayList<>();
     List<KeyValue> protoNonIdentifyingAttributes = new ArrayList<>();
@@ -402,7 +417,7 @@ public final class OpampClientBuilder {
             new State.InstanceUid(instanceUid),
             new State.Flags(0L),
             effectiveConfigState);
-    return OpampClientImpl.create(service, state, callbacks);
+    return OpampClientImpl.create(service, state, callbacks, commandProcessor);
   }
 
   private static State.EffectiveConfig createEffectiveConfigNoop() {

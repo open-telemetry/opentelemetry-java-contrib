@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 import opamp.proto.AgentDescription;
 import opamp.proto.RemoteConfigStatus;
 import opamp.proto.ServerErrorResponse;
+import opamp.proto.ServerToAgentCommand;
 
 public interface OpampClient extends Closeable {
 
@@ -78,5 +79,15 @@ public interface OpampClient extends Closeable {
      * @param messageData The server response data that needs processing.
      */
     void onMessage(OpampClient client, MessageData messageData);
+  }
+
+  @FunctionalInterface
+  interface CommandProcessor {
+    /**
+     * Called when the Agent receives a command from the Server.
+     *
+     * @param command The command requested by the Server.
+     */
+    void onCommand(ServerToAgentCommand command);
   }
 }

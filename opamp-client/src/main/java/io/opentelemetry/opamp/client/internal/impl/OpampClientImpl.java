@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import okio.ByteString;
 import opamp.proto.AgentDescription;
 import opamp.proto.AgentToServer;
@@ -45,12 +46,16 @@ import opamp.proto.ServerToAgentFlags;
  */
 public final class OpampClientImpl
     implements OpampClient, ObservableState.Listener, RequestService.Callback, Supplier<Request> {
+
+  private static final CommandProcessor NOOP_COMMAND_PROCESSOR = command -> {};
+
   private final RequestService requestService;
   private final AgentToServerAppenders appenders;
   private final OpampClientState state;
   private final RecipeManager recipeManager;
   private final AtomicBoolean hasStopped = new AtomicBoolean(false);
   private final Callbacks callbacks;
+  private final CommandProcessor commandProcessor;
 
   /** Fields that must always be sent. */
   private static final List<Field> REQUIRED_FIELDS;
@@ -83,6 +88,16 @@ public final class OpampClientImpl
 
   public static OpampClientImpl create(
       RequestService requestService, OpampClientState state, Callbacks callbacks) {
+    return create(requestService, state, callbacks, NOOP_COMMAND_PROCESSOR);
+  }
+
+  public static OpampClientImpl create(
+      RequestService requestService,
+      OpampClientState state,
+      Callbacks callbacks,
+      @Nullable CommandProcessor commandProcessor) {
+    CommandProcessor nonNullCommandProcessor =
+        commandProcessor == null ? NOOP_COMMAND_PROCESSOR : commandProcessor;
     AgentToServerAppenders appenders =
         new AgentToServerAppenders(
             AgentDescriptionAppender.create(state.agentDescription),
@@ -95,7 +110,12 @@ public final class OpampClientImpl
             AgentDisconnectAppender.create());
     OpampClientImpl client =
         new OpampClientImpl(
-            requestService, appenders, state, RecipeManager.create(REQUIRED_FIELDS), callbacks);
+            requestService,
+            appenders,
+            state,
+            RecipeManager.create(REQUIRED_FIELDS),
+            callbacks,
+            nonNullCommandProcessor);
 
     // Start
     requestService.start(client, client);
@@ -111,12 +131,14 @@ public final class OpampClientImpl
       AgentToServerAppenders appenders,
       OpampClientState state,
       RecipeManager recipeManager,
-      Callbacks callbacks) {
+      Callbacks callbacks,
+      CommandProcessor commandProcessor) {
     this.requestService = requestService;
     this.appenders = appenders;
     this.state = state;
     this.recipeManager = recipeManager;
     this.callbacks = callbacks;
+    this.commandProcessor = commandProcessor;
   }
 
   @Override
@@ -186,16 +208,15 @@ public final class OpampClientImpl
     }
     handleAgentIdentification(response);
 
-    boolean notifyOnMessage = false;
     MessageData.Builder messageBuilder = MessageData.builder();
 
     if (response.remote_config != null) {
-      notifyOnMessage = true;
       messageBuilder.setRemoteConfig(response.remote_config);
+      callbacks.onMessage(this, messageBuilder.build());
     }
 
-    if (notifyOnMessage) {
-      callbacks.onMessage(this, messageBuilder.build());
+    if (response.command != null) {
+      commandProcessor.onCommand(response.command);
     }
   }
 

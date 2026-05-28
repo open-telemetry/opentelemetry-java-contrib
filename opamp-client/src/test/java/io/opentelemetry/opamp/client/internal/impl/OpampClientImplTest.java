@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 import mockwebserver3.MockResponse;
@@ -51,6 +52,7 @@ import opamp.proto.RemoteConfigStatus;
 import opamp.proto.RemoteConfigStatuses;
 import opamp.proto.ServerErrorResponse;
 import opamp.proto.ServerToAgent;
+import opamp.proto.ServerToAgentCommand;
 import opamp.proto.ServerToAgentFlags;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
@@ -217,6 +219,36 @@ class OpampClientImplTest {
     await().during(Duration.ofSeconds(1));
 
     verify(callbacks, never()).onMessage(eq(client), any());
+  }
+
+  @Test
+  void onSuccess_withCommand_notifyCommandProcessor() {
+    TestCommandProcessor commandProcessor = new TestCommandProcessor();
+    initializeClient(new ServerToAgent.Builder().build(), commandProcessor);
+    ServerToAgentCommand command = new ServerToAgentCommand.Builder().build();
+    enqueueServerToAgentResponse(new ServerToAgent.Builder().command(command).build());
+
+    // Force request
+    requestService.sendRequest();
+
+    await().atMost(Duration.ofSeconds(5)).until(() -> commandProcessor.onCommandCalls.get() == 1);
+
+    assertThat(commandProcessor.latestCommand.get()).isEqualTo(command);
+    verify(callbacks, never()).onMessage(eq(client), any());
+  }
+
+  @Test
+  void onSuccess_withNoCommand_doNotNotifyCommandProcessor() {
+    TestCommandProcessor commandProcessor = new TestCommandProcessor();
+    initializeClient(new ServerToAgent.Builder().build(), commandProcessor);
+    enqueueServerToAgentResponse(new ServerToAgent.Builder().build());
+
+    // Force request
+    requestService.sendRequest();
+
+    await().atMost(Duration.ofSeconds(5)).until(() -> callbacks.onConnectCalls.get() == 2);
+
+    assertThat(commandProcessor.onCommandCalls.get()).isZero();
   }
 
   @Test
@@ -402,6 +434,17 @@ class OpampClientImplTest {
     return takeRequest();
   }
 
+  private RecordedRequest initializeClient(
+      ServerToAgent initialResponse, OpampClient.CommandProcessor commandProcessor) {
+    // Prepare first request on start
+    enqueueServerToAgentResponse(initialResponse);
+
+    callbacks = spy(new TestCallbacks());
+    client = OpampClientImpl.create(requestService, state, callbacks, commandProcessor);
+
+    return takeRequest();
+  }
+
   private static class TestEffectiveConfig extends State.EffectiveConfig {
     private opamp.proto.EffectiveConfig config;
 
@@ -469,6 +512,17 @@ class OpampClientImplTest {
     @Override
     public void onMessage(OpampClient client, MessageData messageData) {
       onMessageCalls.incrementAndGet();
+    }
+  }
+
+  private static class TestCommandProcessor implements OpampClient.CommandProcessor {
+    private final AtomicInteger onCommandCalls = new AtomicInteger();
+    private final AtomicReference<ServerToAgentCommand> latestCommand = new AtomicReference<>();
+
+    @Override
+    public void onCommand(ServerToAgentCommand command) {
+      latestCommand.set(command);
+      onCommandCalls.incrementAndGet();
     }
   }
 }
