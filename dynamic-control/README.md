@@ -16,7 +16,7 @@ This project has now reached a stage where it is usable but subject to change in
 
 ## Telemetry Policy
 
-The dynamic control is implemented using Telemetry Policy prototype.
+The dynamic control is implemented using [Telemetry Policy](https://github.com/open-telemetry/opentelemetry-specification/pull/4738) prototype.
 An abstract outline of dynamic control using telemetry policies is that there is a flow consisting of
 
 ```text
