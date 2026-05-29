@@ -5,6 +5,7 @@
 
 package io.opentelemetry.opamp.client.internal.state;
 
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nullable;
 
@@ -19,11 +20,19 @@ abstract class InMemoryState<T> implements State<T> {
     state.set(initialValue);
   }
 
-  public void set(T value) {
+  /**
+   * Set a new state's value in a thread safe way.
+   *
+   * @param value a new value stored in the state
+   * @return <code>true</code> if new value is different that the previous one, <code>false</code>
+   *     otherwise.
+   */
+  public boolean set(T value) {
     if (value == null) {
       throw new IllegalArgumentException("The value must not be null");
     }
-    state.set(value);
+    T previousValue = state.getAndSet(value);
+    return !Objects.equals(previousValue, value);
   }
 
   @Nullable

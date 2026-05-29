@@ -29,7 +29,6 @@ import io.opentelemetry.opamp.client.request.service.RequestService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
@@ -135,24 +134,21 @@ public final class OpampClientImpl
 
   @Override
   public void setAgentDescription(@Nonnull AgentDescription agentDescription) {
-    if (!state.agentDescription.mustGet().equals(agentDescription)) {
-      state.agentDescription.set(agentDescription);
+    if (state.agentDescription.set(agentDescription)) {
       addFieldAndSend(Field.AGENT_DESCRIPTION);
     }
   }
 
   @Override
   public void setRemoteConfigStatus(@Nonnull RemoteConfigStatus remoteConfigStatus) {
-    if (!state.remoteConfigStatus.mustGet().equals(remoteConfigStatus)) {
-      state.remoteConfigStatus.set(remoteConfigStatus);
+    if (state.remoteConfigStatus.set(remoteConfigStatus)) {
       addFieldAndSend(Field.REMOTE_CONFIG_STATUS);
     }
   }
 
   @Override
   public void setHealth(@Nonnull ComponentHealth health) {
-    if (!Objects.equals(state.health.get(), health)) {
-      state.health.set(health);
+    if (state.health.set(health)) {
       addFieldAndSend(Field.HEALTH);
     }
   }
