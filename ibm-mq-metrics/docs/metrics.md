@@ -342,7 +342,7 @@
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.oldest.msg.age` | Gauge | `microseconds` | Queue message oldest age | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.oldest.msg.age` | Gauge | `us` | Queue message oldest age | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 ### `ibm.mq.oldest.msg.age` Attributes
@@ -558,7 +558,7 @@
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.onqtime.short_period` | Gauge | `microseconds` | Amount of time, in microseconds, that a message spent on the queue, over a short period | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.onqtime.short_period` | Gauge | `us` | Amount of time, in microseconds, that a message spent on the queue, over a short period | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 ### `ibm.mq.onqtime.short_period` Attributes
@@ -577,7 +577,7 @@
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.onqtime.long_period` | Gauge | `microseconds` | Amount of time, in microseconds, that a message spent on the queue, over a longer period | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.onqtime.long_period` | Gauge | `us` | Amount of time, in microseconds, that a message spent on the queue, over a longer period | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 ### `ibm.mq.onqtime.long_period` Attributes
