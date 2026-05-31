@@ -342,7 +342,7 @@
 
 | Name     | Instrument Type | Unit (UCUM) | Description    | Stability |
 | -------- | --------------- | ----------- | -------------- | --------- |
-| `ibm.mq.oldest.msg.age` | Gauge | `us` | Queue message oldest age | ![Development](https://img.shields.io/badge/-development-blue) |
+| `ibm.mq.oldest.msg.age` | Gauge | `s` | Queue message oldest age | ![Development](https://img.shields.io/badge/-development-blue) |
 
 
 ### `ibm.mq.oldest.msg.age` Attributes

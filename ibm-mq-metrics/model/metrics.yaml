@@ -283,7 +283,7 @@ groups:
     stability: development
     brief: "Queue message oldest age"
     instrument: gauge
-    unit: "us"
+    unit: "s"
     attributes:
       - ref: ibm.mq.queue.manager
         requirement_level: required
