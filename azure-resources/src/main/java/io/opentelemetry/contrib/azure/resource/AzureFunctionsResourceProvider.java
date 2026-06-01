@@ -18,8 +18,13 @@ import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.sdk.resources.Resource;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public final class AzureFunctionsResourceProvider extends CloudResourceProvider {
+
+  private static final Logger logger =
+      Logger.getLogger(AzureFunctionsResourceProvider.class.getName());
 
   static final String FUNCTIONS_VERSION = "FUNCTIONS_EXTENSION_VERSION";
   private static final String FUNCTIONS_MEM_LIMIT = "WEBSITE_MEMORY_LIMIT_MB";
@@ -60,7 +65,14 @@ public final class AzureFunctionsResourceProvider extends CloudResourceProvider 
 
     String limit = env.get(FUNCTIONS_MEM_LIMIT);
     if (limit != null) {
-      builder.put(FAAS_MAX_MEMORY, Long.parseLong(limit));
+      try {
+        builder.put(FAAS_MAX_MEMORY, Long.parseLong(limit));
+      } catch (NumberFormatException e) {
+        logger.log(
+            Level.WARNING,
+            "Can't parse Azure Functions memory limit (WEBSITE_MEMORY_LIMIT_MB): '" + limit + "'",
+            e);
+      }
     }
 
     AzureEnvVarPlatform.addAttributesFromEnv(ENV_VAR_MAPPING, env, builder);
