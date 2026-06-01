@@ -85,7 +85,11 @@ cd dynamic-control
 
 Useful values for `<TARGET>` are `jar` for the jar containing the classes from this project,
 and `shadowJar` to create a jar containing the classes from this project plus all dependencies.
-The latter target will produce a `*-all.jar` jar.
+The latter target will produce a `*-all.jar` jar. The extension is loaded in a separate classloader
+so there are unlikely to be classloading conflicts, but it's not impossible. The `jar` target
+requires you to ensure you have all required dependencies in the JVM classpath. Using the `shadowJar`
+is usually easier and more useful, but has a larger jar size and may bring in classes you won't need.
+I'd start with `shadowJar` then switch to `jar` and explicit dependency management if that's needed.
 
 ## Using as an extension
 
