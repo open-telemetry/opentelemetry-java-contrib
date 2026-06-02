@@ -26,7 +26,10 @@ It is capable of detecting common scenarios among the popular application server
 * IBM Websphere Liberty
 * Wildfly
 
-## Usage with Declarative configuration
+## Usage with declarative configuration
+
+You can configure the app server resource detector using declarative YAML configuration with the
+OpenTelemetry SDK. For example:
 
 ```yaml
 file_format: "1.0"
