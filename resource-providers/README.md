@@ -42,9 +42,10 @@ resource:
       - service:
 ```
 
-The `app_server` detector needs to be listed before the `service` detector to give priority over
-the `service.name` value set by the `service` detector. Also, the `detection/development` resource
-detection has lower priority than the explicit configuration of `service.name` resource attribute.
+The `app_server` detector needs to be listed before the `service` detector to allow overriding
+the `service.name` attribute with the `OTEL_SERVICE_NAME` environment variable. Also, the resource
+detectors in `detection/development` have lower priority over the explicit `resource.attributes`
+configuration.
 
 ## Component owners
 
