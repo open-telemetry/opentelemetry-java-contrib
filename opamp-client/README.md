@@ -59,5 +59,6 @@ client.close();
 
 * [Cesar Munoz](https://github.com/LikeTheSalad), Elastic
 * [Jack Shirazi](https://github.com/jackshirazi), Elastic
+* [Jason Plumb](https://github.com/breedx-splk), Splunk
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).
