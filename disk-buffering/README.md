@@ -33,8 +33,10 @@ The available configuration parameters are the following:
 * Max folder size, defaults to 10MB.
 * Max age for file writing. It sets the time window where a file can get signals appended to it.
   Defaults to 30 seconds.
-* Min age for file reading. It sets the time to wait before starting to read from a file after
-  its creation. Defaults to 33 seconds. It must be greater that the max age for file writing.
+* Min age for file reading. Optional delay applied before a finalized file becomes eligible for
+  reading. Defaults to `0`. With the rename-on-close design the writer and reader are already
+  synchronized via atomic file rename, so this knob is no longer required for correctness; set it
+  if you want to give writers more time to accumulate larger batches before they're consumed.
 * Max age for file reading. After that time passes, the file will be considered stale and will be
   removed when new files are created. No more data will be read from a file past this time. Defaults
   to 18 hours.
@@ -179,13 +181,18 @@ age, so stale files are automatically purged when there's not enough space avail
 
 ### More details on the writing and reading processes
 
-Both the writing and reading processes can run in parallel as they won't overlap
-because each is supposed to happen in different files. We ensure that reader and writer don't
-accidentally meet in the same file by using the configurable parameters. These parameters set
-non-overlapping time frames for each action to be done on a single file at a time. On top of that,
-there's a mechanism in place to avoid overlapping on edge cases where the time frames ended but the
-resources haven't been released. For that mechanism to work properly, this tool assumes that both
-the reading and the writing actions are executed within the same application process.
+The writing and reading processes can run in parallel because they target disjoint files: the
+writer appends to `<timestamp>.tmp` and only files whose name is *entirely* numeric are visible to
+the reader (the reader applies `Matcher.matches()` on `\d+`, so the trailing `.tmp` excludes
+in-flight files). Each rollover atomically renames the temp file to its final name via
+`rename(2)`, so the reader can never observe a partially-written file. If the reader is invoked
+while the active writer has already exceeded its `maxFileAgeForWriteMillis` window but no other
+ready file is available, the reader force-closes the writer (triggering the rename) so its data
+becomes immediately readable.
+
+Temporary files left behind by an unclean JVM shutdown are recovered the next time the storage is
+re-opened: any `*.tmp` files whose target name doesn't already exist are promoted back to their
+final form so that no buffered data is silently dropped.
 
 ## Component owners
 

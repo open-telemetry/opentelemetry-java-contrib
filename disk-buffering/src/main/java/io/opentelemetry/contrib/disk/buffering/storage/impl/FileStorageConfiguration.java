@@ -18,9 +18,12 @@ public abstract class FileStorageConfiguration {
   public abstract long getMaxFileAgeForWriteMillis();
 
   /**
-   * The min amount of time needed to pass before reading from a file. This value MUST be greater
-   * than getMaxFileAgeForWriteMillis() to make sure the selected file to read is not being written
-   * to.
+   * The min amount of time needed to pass before reading from a file. Historically this was the
+   * mechanism that prevented the reader from observing a file the writer was still appending to. As
+   * of the rename-on-close design, finalized files are made visible to the reader atomically once
+   * they are rolled, so this value is no longer required for correctness and defaults to {@code 0}.
+   * The setting is kept for callers that still want to delay reads of newly-rolled files (e.g. to
+   * encourage larger batches before iteration).
    */
   public abstract long getMinFileAgeForReadMillis();
 
@@ -59,7 +62,7 @@ public abstract class FileStorageConfiguration {
         .setMaxFileSize(1024 * 1024) // 1MB
         .setMaxFolderSize(10 * 1024 * 1024) // 10MB
         .setMaxFileAgeForWriteMillis(SECONDS.toMillis(30))
-        .setMinFileAgeForReadMillis(SECONDS.toMillis(33))
+        .setMinFileAgeForReadMillis(0)
         .setMaxFileAgeForReadMillis(HOURS.toMillis(18))
         .setDeleteItemsOnIteration(true);
   }
@@ -81,13 +84,7 @@ public abstract class FileStorageConfiguration {
     abstract FileStorageConfiguration autoBuild();
 
     public final FileStorageConfiguration build() {
-      FileStorageConfiguration configuration = autoBuild();
-      if (configuration.getMinFileAgeForReadMillis()
-          <= configuration.getMaxFileAgeForWriteMillis()) {
-        throw new IllegalArgumentException(
-            "The configured max file age for writing must be lower than the configured min file age for reading");
-      }
-      return configuration;
+      return autoBuild();
     }
   }
 }

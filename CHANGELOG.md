@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Disk buffering
+
+- Replace the read-after-write delay with atomic rename: the writer now appends to
+  `<timestamp>.tmp` and atomically renames to its final numeric name on close, so finalized files
+  become visible to the reader immediately. Orphan `*.tmp` files left behind by an unclean
+  shutdown are recovered on the next storage open. The `minFileAgeForReadMillis` default changes
+  from `33s` to `0` and is no longer required to be greater than `maxFileAgeForWriteMillis`.
+
 ## Version 1.57.0 (2026-05-20)
 
 ### Baggage processor

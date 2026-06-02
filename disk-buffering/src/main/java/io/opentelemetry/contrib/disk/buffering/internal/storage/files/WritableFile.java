@@ -17,34 +17,40 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * Writes signal data to a staging file and atomically renames it to its destination on {@link
+ * #close()}. Until close, readers in the same directory cannot observe the destination path.
+ */
 public final class WritableFile implements FileOperations {
 
-  private final File file;
-
+  private final File destination;
+  private final File staging;
+  private final OutputStream out;
   private final FileStorageConfiguration configuration;
   private final Clock clock;
   private final long expireTimeMillis;
-  private final OutputStream out;
   private final AtomicBoolean isClosed = new AtomicBoolean(false);
   private int size;
 
   public WritableFile(
-      File file, long createdTimeMillis, FileStorageConfiguration configuration, Clock clock)
+      File destination,
+      File staging,
+      long createdTimeMillis,
+      FileStorageConfiguration configuration,
+      Clock clock)
       throws IOException {
-    this.file = file;
+    this.destination = destination;
+    this.staging = staging;
+    this.out = new FileOutputStream(staging);
     this.configuration = configuration;
     this.clock = clock;
-    expireTimeMillis = createdTimeMillis + configuration.getMaxFileAgeForWriteMillis();
-    size = (int) file.length();
-    out = new FileOutputStream(file);
+    this.expireTimeMillis = createdTimeMillis + configuration.getMaxFileAgeForWriteMillis();
   }
 
   /**
-   * Adds a new line to the file. If it fails due to expired write time or because the file has
-   * reached the configured max size, the file stream is closed with the contents available in the
-   * buffer before attempting to append the new data.
-   *
-   * @param marshaler - The new data line to add.
+   * Appends a new entry. Closes the file (which atomically promotes its staging file to its final
+   * name) and returns {@link WritableResult#FAILED} when the write window has expired or the file
+   * is full.
    */
   public synchronized WritableResult append(SignalSerializer<?> marshaler) throws IOException {
     if (isClosed.get()) {
@@ -80,19 +86,22 @@ public final class WritableFile implements FileOperations {
 
   @Override
   public File getFile() {
-    return file;
+    return destination;
   }
 
   @Override
   public synchronized void close() throws IOException {
     if (isClosed.compareAndSet(false, true)) {
       out.close();
+      if (!staging.renameTo(destination)) {
+        throw new IOException("Could not rename " + staging + " to " + destination);
+      }
     }
   }
 
   @Override
   public String toString() {
-    return "WritableFile{" + "file=" + file + '}';
+    return "WritableFile{" + "file=" + destination + '}';
   }
 
   public void flush() throws IOException {
