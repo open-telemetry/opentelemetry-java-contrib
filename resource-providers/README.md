@@ -26,6 +26,23 @@ It is capable of detecting common scenarios among the popular application server
 * IBM Websphere Liberty
 * Wildfly
 
+## Usage with Declarative configuration
+
+```yaml
+file_format: "1.0"
+resource:
+  detection/development:
+    detectors:
+      # Provides 'service.name' from the application server
+      - app_server:
+      # Provides 'service.name' and 'service.instance.id'
+      - service:
+```
+
+The `app_server` detector needs to be listed before the `service` detector to give priority over
+the `service.name` value set by the `service` detector. Also, the `detection/development` resource
+detection has lower priority than the explicit configuration of `service.name` resource attribute.
+
 ## Component owners
 
 * [Jason Plumb](https://github.com/breedx-splk), Splunk
