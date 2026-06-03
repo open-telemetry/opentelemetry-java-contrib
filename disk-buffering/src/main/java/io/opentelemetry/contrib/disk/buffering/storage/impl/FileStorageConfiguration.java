@@ -84,7 +84,19 @@ public abstract class FileStorageConfiguration {
     abstract FileStorageConfiguration autoBuild();
 
     public final FileStorageConfiguration build() {
-      return autoBuild();
+      FileStorageConfiguration config = autoBuild();
+      checkNonNegative("maxFileAgeForWriteMillis", config.getMaxFileAgeForWriteMillis());
+      checkNonNegative("minFileAgeForReadMillis", config.getMinFileAgeForReadMillis());
+      checkNonNegative("maxFileAgeForReadMillis", config.getMaxFileAgeForReadMillis());
+      checkNonNegative("maxFileSize", config.getMaxFileSize());
+      checkNonNegative("maxFolderSize", config.getMaxFolderSize());
+      return config;
+    }
+
+    private static void checkNonNegative(String name, long value) {
+      if (value < 0) {
+        throw new IllegalArgumentException(name + " must be >= 0, got " + value);
+      }
     }
   }
 }

@@ -71,7 +71,7 @@ object to delegate signals to as well as an optional callback object to notify i
 The writer and the reader work on disjoint files: the writer always appends to a file with a
 non-numeric name (`<timestamp>.tmp`) while the reader only considers files whose name is *entirely*
 numeric. When the writer rolls a file, the temporary file is atomically promoted to its final
-numeric name with `rename(2)`, which makes the file visible to the reader as
+numeric name with `Files.move(..., ATOMIC_MOVE)`, which makes the file visible to the reader as
 a single, indivisible step. Empty rolled files are deleted instead of being promoted, and `*.tmp`
 files left behind by a crashed prior run are recovered (renamed) the next time a `FolderManager` is
 constructed.

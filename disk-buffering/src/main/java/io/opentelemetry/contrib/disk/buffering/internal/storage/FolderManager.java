@@ -62,7 +62,7 @@ public final class FolderManager implements Closeable {
     }
     for (File file : existingFiles) {
       String name = file.getName();
-      if (!name.endsWith(STAGING_SUFFIX)) {
+      if (!file.isFile() || !name.endsWith(STAGING_SUFFIX)) {
         continue;
       }
       File target = new File(folder, name.substring(0, name.length() - STAGING_SUFFIX.length()));
@@ -123,7 +123,7 @@ public final class FolderManager implements Closeable {
 
   /*
    * If the current writable file has expired, close it and return true.
-   * This allows to have a readeable file without waiting for the next write to trigger the check.
+   * This allows to have a readable file without waiting for the next write to trigger the check.
    */
   private boolean closeFileIfExpired() throws IOException {
     if (currentWritableFile == null || currentWritableFile.isClosed()) {

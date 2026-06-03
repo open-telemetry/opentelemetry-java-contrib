@@ -184,8 +184,9 @@ age, so stale files are automatically purged when there's not enough space avail
 The writing and reading processes can run in parallel because they target disjoint files: the
 writer appends to `<timestamp>.tmp` and only files whose name is *entirely* numeric are visible to
 the reader (the reader applies `Matcher.matches()` on `\d+`, so the trailing `.tmp` excludes
-in-flight files). Each rollover atomically renames the temp file to its final name via
-`rename(2)`, so the reader can never observe a partially-written file. If the reader is invoked
+in-flight files). Each rollover atomically promotes the temp file to its final name via
+`Files.move(..., ATOMIC_MOVE)`, so the reader can never observe a partially-written file. Empty
+rolled files are deleted instead of being promoted. If the reader is invoked
 while the active writer has already exceeded its `maxFileAgeForWriteMillis` window but no other
 ready file is available, the reader force-closes the writer (triggering the rename) so its data
 becomes immediately readable.
