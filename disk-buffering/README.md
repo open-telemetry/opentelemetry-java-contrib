@@ -181,19 +181,15 @@ age, so stale files are automatically purged when there's not enough space avail
 
 ### More details on the writing and reading processes
 
-The writing and reading processes can run in parallel because they target disjoint files: the
-writer appends to `<timestamp>.tmp` and only files whose name is *entirely* numeric are visible to
-the reader (the reader applies `Matcher.matches()` on `\d+`, so the trailing `.tmp` excludes
-in-flight files). Each rollover atomically promotes the temp file to its final name via
-`Files.move(..., ATOMIC_MOVE)`, so the reader can never observe a partially-written file. Empty
-rolled files are deleted instead of being promoted. If the reader is invoked
-while the active writer has already exceeded its `maxFileAgeForWriteMillis` window but no other
-ready file is available, the reader force-closes the writer (triggering the rename) so its data
-becomes immediately readable.
+Writer and reader operate on disjoint files: the writer appends to `<timestamp>.tmp`, and the
+reader only considers files whose name is entirely numeric (matched against `\d+`). On close, the
+writer promotes the temp file via `File.renameTo`, atomic on POSIX, best-effort on Windows,
+so the reader never observes a partial file. Empty files are deleted instead of promoted. If the
+reader runs while the active writer has exceeded `maxFileAgeForWriteMillis` and no other file is
+ready, the reader force-closes the writer to make its data immediately visible.
 
-Temporary files left behind by an unclean JVM shutdown are recovered the next time the storage is
-re-opened: any `*.tmp` files whose target name doesn't already exist are promoted back to their
-final form so that no buffered data is silently dropped.
+On startup any `*.tmp` left over from a crash is promoted to its final name (unless that name
+already exists, in which case the leftover is dropped), so buffered data is preserved.
 
 ## Component owners
 

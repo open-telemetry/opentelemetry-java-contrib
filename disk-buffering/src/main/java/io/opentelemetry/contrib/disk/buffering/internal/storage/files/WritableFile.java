@@ -15,8 +15,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -96,9 +94,11 @@ public final class WritableFile implements FileOperations {
     if (isClosed.compareAndSet(false, true)) {
       out.close();
       if (size == 0) {
-        Files.deleteIfExists(staging.toPath());
-      } else {
-        Files.move(staging.toPath(), destination.toPath(), StandardCopyOption.ATOMIC_MOVE);
+        if (staging.exists() && !staging.delete()) {
+          throw new IOException("Could not delete empty staging file " + staging);
+        }
+      } else if (!staging.renameTo(destination)) {
+        throw new IOException("Could not rename " + staging + " to " + destination);
       }
     }
   }

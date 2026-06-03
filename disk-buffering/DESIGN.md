@@ -68,10 +68,8 @@ object to delegate signals to as well as an optional callback object to notify i
 
 ## Writer/reader synchronization
 
-The writer and the reader work on disjoint files: the writer always appends to a file with a
-non-numeric name (`<timestamp>.tmp`) while the reader only considers files whose name is *entirely*
-numeric. When the writer rolls a file, the temporary file is atomically promoted to its final
-numeric name with `Files.move(..., ATOMIC_MOVE)`, which makes the file visible to the reader as
-a single, indivisible step. Empty rolled files are deleted instead of being promoted, and `*.tmp`
-files left behind by a crashed prior run are recovered (renamed) the next time a `FolderManager` is
-constructed.
+Writer and reader work on disjoint files: the writer appends to `<timestamp>.tmp`, while the
+reader only picks files with a fully numeric name. On rollover the temp file is promoted via
+`File.renameTo` (atomic on POSIX, best-effort on Windows), so the reader cannot observe a
+partial file. Empty files are deleted instead of promoted. On startup, leftover `*.tmp` files
+from a crashed prior run are recovered by renaming them to their final name when free.
