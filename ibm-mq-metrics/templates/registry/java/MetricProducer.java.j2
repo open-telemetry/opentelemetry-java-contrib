@@ -1,0 +1,80 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+package io.opentelemetry.ibm.mq.metrics;
+
+import static io.opentelemetry.ibm.mq.metrics.MetricData.createMetricData;
+
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.sdk.common.Clock;
+import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
+import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
+import io.opentelemetry.sdk.metrics.data.GaugeData;
+import io.opentelemetry.sdk.metrics.data.LongPointData;
+import io.opentelemetry.sdk.metrics.data.MetricData;
+import io.opentelemetry.sdk.metrics.data.MetricDataType;
+import io.opentelemetry.sdk.metrics.data.SumData;
+import io.opentelemetry.sdk.resources.Resource;
+import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingDeque;
+
+
+// This file is generated using weaver. Do not edit manually.
+
+/** Metric definitions generated from a Weaver model. Do not edit manually. */
+public final class MetricProducer implements io.opentelemetry.sdk.metrics.export.MetricProducer {
+  private final Resource resource;
+  private final InstrumentationScopeInfo instrumentationScopeInfo;
+  private final BlockingQueue<MetricData> metricData;
+
+{% for metric in ctx %}{% if metric.instrument == "counter" %}private final Map<Attributes, Long> counter{{ metric.metric_name.replace("_", ".")|split('.')|map('capitalize')|join }};{% endif %}{% endfor %}
+
+  private long currentEpochNanos;
+
+  public MetricProducer(Resource resource, InstrumentationScopeInfo info){
+    this.resource = resource;
+    this.instrumentationScopeInfo = info;
+    this.metricData = new LinkedBlockingDeque<>();
+    this.currentEpochNanos = Clock.getDefault().now();
+    {% for metric in ctx %}{% if metric.instrument == "counter" %}this.counter{{ metric.metric_name.replace("_", ".")|split('.')|map('capitalize')|join }} = new ConcurrentHashMap<>();{% endif %}{% endfor %}
+  }
+{% for metric in ctx %}
+
+    {% if metric.instrument == "gauge" %}
+  public void record{{ metric.metric_name.replace("_", ".")|split('.')|map('capitalize')|join }}(long value, Attributes attributes) {
+    metricData.add(createMetricData(this.resource, this.instrumentationScopeInfo, "{{ metric.metric_name }}", "{{ metric.brief }}", "{{ metric.unit }}",
+    MetricDataType.LONG_GAUGE,
+    GaugeData.createLongGaugeData(Collections.singletonList(LongPointData.create(
+                    this.currentEpochNanos, Clock.getDefault().now(), attributes, value)))));
+  
+    {% elif metric.instrument == "counter" %}
+  public void add{{ metric.metric_name.replace("_", ".")|split('.')|map('capitalize')|join }}(long value, Attributes attributes) {
+    long cumulativeValue = this.counter{{ metric.metric_name.replace("_", ".")|split('.')|map('capitalize')|join }}.compute(attributes, (k, v) -> {
+                                                                                                  if (v == null) {
+                                                                                                    return value;
+                                                                                                  } else {
+                                                                                                    return v + value;
+                                                                                                  }
+                                                                                                });
+    metricData.add(createMetricData(this.resource, this.instrumentationScopeInfo, "{{ metric.metric_name }}", "{{ metric.brief }}", "{{ metric.unit }}",
+    MetricDataType.LONG_SUM,
+    SumData.createLongSumData(/* isMonotonic= */true, AggregationTemporality.CUMULATIVE, Collections.singletonList(LongPointData.create(
+                        this.currentEpochNanos, Clock.getDefault().now(), attributes, cumulativeValue)))));
+    {% endif %}
+  }
+{% endfor %}
+
+  @Override
+  public List<MetricData> produce(Resource resource) {
+      List<MetricData> collectedPoints = new ArrayList<>();
+      this.metricData.drainTo(collectedPoints);
+      this.currentEpochNanos = Clock.getDefault().now();
+      return collectedPoints;
+  }
+}

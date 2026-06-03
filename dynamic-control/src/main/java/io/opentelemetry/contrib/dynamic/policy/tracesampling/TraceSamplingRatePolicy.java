@@ -5,7 +5,9 @@
 
 package io.opentelemetry.contrib.dynamic.policy.tracesampling;
 
+import io.opentelemetry.contrib.dynamic.policy.PolicyImplementer;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
+import io.opentelemetry.contrib.dynamic.policy.registry.PolicyInit;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.extension.incubator.trace.samplers.ComposableSampler;
 import io.opentelemetry.sdk.extension.incubator.trace.samplers.CompositeSampler;
@@ -35,12 +37,18 @@ public final class TraceSamplingRatePolicy extends TelemetryPolicy {
    * <p>If the extension is configured to use this policy, this installs an opinionated sampler that
    * overrides any other sampler
    */
-  public static void initialize(AutoConfigurationCustomizer autoConfiguration) {
+  public static PolicyImplementer initialize(AutoConfigurationCustomizer autoConfiguration) {
     Objects.requireNonNull(autoConfiguration, "autoConfiguration cannot be null");
     Sampler initialDelegate = createSampler(1.0);
     DelegatingSampler delegatingSampler = new DelegatingSampler(initialDelegate);
     initializedSampler = delegatingSampler;
     autoConfiguration.addSamplerCustomizer((sampler, config) -> delegatingSampler);
+    return new TraceSamplingRatePolicyImplementer(delegatingSampler);
+  }
+
+  public static void registerPolicyType() {
+    PolicyInit.registerPolicyType(
+        POLICY_TYPE, TraceSamplingRatePolicy.class, TraceSamplingRatePolicy::initialize);
   }
 
   /**
@@ -67,6 +75,10 @@ public final class TraceSamplingRatePolicy extends TelemetryPolicy {
   @Nullable
   public static DelegatingSampler getInitializedSampler() {
     return initializedSampler;
+  }
+
+  static void resetForTest() {
+    initializedSampler = null;
   }
 
   @Override

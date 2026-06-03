@@ -12,6 +12,7 @@ import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
+import io.opentelemetry.contrib.inferredspans.InferredSpansProcessor;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdkBuilder;
@@ -49,10 +50,10 @@ class StackTraceSpanProcessorTest {
     // over duration threshold
     checkSpanWithStackTrace("1ms", msToNs(2));
     // under duration threshold
-    checkSpanWithoutStackTrace(YesPredicate.class, "2ms", msToNs(1));
+    checkSpanWithoutStackTrace(YesPredicate.class, "2ms", msToNs(1), "test");
 
     // filtering out span
-    checkSpanWithoutStackTrace(NoPredicate.class, "1ms", msToNs(20));
+    checkSpanWithoutStackTrace(NoPredicate.class, "1ms", msToNs(20), "test");
   }
 
   public static class YesPredicate implements Predicate<ReadableSpan> {
@@ -75,12 +76,12 @@ class StackTraceSpanProcessorTest {
     long expectedDefault = msToNs(5);
     checkSpanWithStackTrace(null, expectedDefault);
     checkSpanWithStackTrace(null, expectedDefault + 1);
-    checkSpanWithoutStackTrace(YesPredicate.class, null, expectedDefault - 1);
+    checkSpanWithoutStackTrace(YesPredicate.class, null, expectedDefault - 1, "test");
   }
 
   @Test
   void disabledConfig() {
-    checkSpanWithoutStackTrace(YesPredicate.class, "-1", 5);
+    checkSpanWithoutStackTrace(YesPredicate.class, "-1", 5, "test");
   }
 
   @Test
@@ -90,7 +91,13 @@ class StackTraceSpanProcessorTest {
         "1ms",
         Duration.ofMillis(1).toNanos(),
         sb -> sb.setAttribute(CodeAttributes.CODE_STACKTRACE, "hello"),
-        stacktrace -> assertThat(stacktrace).isEqualTo("hello"));
+        stacktrace -> assertThat(stacktrace).isEqualTo("hello"),
+        "test");
+  }
+
+  @Test
+  void spanFromInferredSpansIgnored() {
+    checkSpanWithoutStackTrace(null, "1ms", msToNs(1), InferredSpansProcessor.TRACER_NAME);
   }
 
   private static void checkSpanWithStackTrace(String minDurationString, long spanDurationNanos) {
@@ -102,19 +109,22 @@ class StackTraceSpanProcessorTest {
         (stackTrace) ->
             assertThat(stackTrace)
                 .describedAs("span stack trace should contain caller class name")
-                .contains(StackTraceSpanProcessorTest.class.getCanonicalName()));
+                .contains(StackTraceSpanProcessorTest.class.getCanonicalName()),
+        "test");
   }
 
   private static void checkSpanWithoutStackTrace(
       Class<? extends Predicate<?>> predicateClass,
       String minDurationString,
-      long spanDurationNanos) {
+      long spanDurationNanos,
+      String scopeName) {
     checkSpan(
         predicateClass,
         minDurationString,
         spanDurationNanos,
         Function.identity(),
-        (stackTrace) -> assertThat(stackTrace).describedAs("no stack trace expected").isNull());
+        (stackTrace) -> assertThat(stackTrace).describedAs("no stack trace expected").isNull(),
+        scopeName);
   }
 
   private static void checkSpan(
@@ -122,7 +132,8 @@ class StackTraceSpanProcessorTest {
       String minDurationString,
       long spanDurationNanos,
       Function<SpanBuilder, SpanBuilder> customizeSpanBuilder,
-      Consumer<String> stackTraceCheck) {
+      Consumer<String> stackTraceCheck,
+      String scopeName) {
 
     // must be re-created on every test as exporter is shut down on span processor close
     InMemorySpanExporter spansExporter = InMemorySpanExporter.create();
@@ -153,7 +164,7 @@ class StackTraceSpanProcessorTest {
 
     try (OpenTelemetrySdk sdk = sdkBuilder.build().getOpenTelemetrySdk()) {
 
-      Tracer tracer = sdk.getTracer("test");
+      Tracer tracer = sdk.getTracer(scopeName);
 
       Instant start = Instant.now();
       Instant end = start.plusNanos(spanDurationNanos);

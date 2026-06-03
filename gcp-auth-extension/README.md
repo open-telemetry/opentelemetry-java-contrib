@@ -1,7 +1,11 @@
 # Google Cloud Authentication Extension
 
-The Google Cloud Auth Extension allows the users to export telemetry from their applications to Google Cloud using the built-in OTLP exporters.\
-The extension takes care of the necessary configuration required to authenticate to GCP to successfully export telemetry.
+[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-gcp-auth-extension/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-gcp-auth-extension)
+
+The Google Cloud Auth Extension allows users to export telemetry from their
+applications to Google Cloud using the built-in OTLP exporters.
+The extension takes care of the configuration required to authenticate to GCP
+successfully.
 
 ## Prerequisites
 
@@ -13,8 +17,8 @@ gcloud auth application-default login
 
 Executing this command will save your application credentials to default path which will depend on the type of machine -
 
-- Linux, macOS: `$HOME/.config/gcloud/application_default_credentials.json`
-- Windows: `%APPDATA%\gcloud\application_default_credentials.json`
+* Linux, macOS: `$HOME/.config/gcloud/application_default_credentials.json`
+* Windows: `%APPDATA%\gcloud\application_default_credentials.json`
 
 **NOTE: This method of authentication is not recommended for production environments.**
 
@@ -36,29 +40,48 @@ Here is a list of required and optional configuration available for the extensio
 
 #### Optional Config
 
-- `GOOGLE_CLOUD_PROJECT`: Environment variable that represents the Google Cloud Project ID to which the telemetry needs to be exported.
+* `GOOGLE_CLOUD_PROJECT`: Environment variable that represents the Google Cloud
+  Project ID to which the telemetry needs to be exported.
 
-  - Can also be configured using `google.cloud.project` system property.
-  - If neither of these options are set, the extension will attempt to infer the project id from the current credentials as a fallback, however notice that not all credentials implementations will be able to provide a project id, so the inference is only a best-effort attempt.
-  - **Important Note**: The agent configuration will fail if this option is not set and cannot be inferred.
+  * Can also be configured using `google.cloud.project` system property.
+  * If neither of these options are set, the extension will attempt to infer
+    the project id from the current credentials as a fallback.
+    Not all credential implementations can provide a project id, so this
+    inference is only a best-effort attempt.
+  * **Important Note**: The agent configuration will fail if this option is not set and cannot be inferred.
 
-- `GOOGLE_CLOUD_QUOTA_PROJECT`: Environment variable that represents the Google Cloud Quota Project ID which will be charged for the GCP API usage. To learn more about a *quota project*, see the [Quota project overview](https://cloud.google.com/docs/quotas/quota-project) page. Additional details about configuring the *quota project* can be found on the [Set the quota project](https://cloud.google.com/docs/quotas/set-quota-project) page.
+* `GOOGLE_CLOUD_QUOTA_PROJECT`: Environment variable that represents the
+  Google Cloud Quota Project ID that will be charged for the GCP API usage.
+  To learn more about a *quota project*, see the
+  [Quota project overview](https://cloud.google.com/docs/quotas/quota-project)
+  page.
+  Additional details about configuring the *quota project* can be found on the
+  [Set the quota project](https://cloud.google.com/docs/quotas/set-quota-project)
+  page.
 
-  - Can also be configured using `google.cloud.quota.project` system property.
+  * Can also be configured using `google.cloud.quota.project` system property.
 
-- `GOOGLE_OTEL_AUTH_TARGET_SIGNALS`: Environment variable that specifies a comma-separated list of OpenTelemetry signals for which this authentication extension should be active. Valid values contain - `metrics`, `traces` or `all`. If left unspecified, `all` is assumed meaning the extension will attempt to apply authentication to exports for all signals.
+* `GOOGLE_OTEL_AUTH_TARGET_SIGNALS`: Environment variable that specifies a
+  comma-separated list of OpenTelemetry signals for which this authentication
+  extension should be active.
+  Valid values are `metrics`, `traces`, and `all`.
+  If left unspecified, `all` is assumed, meaning the extension will attempt to
+  apply authentication to exports for all signals.
 
-  - Can also be configured using `google.otel.auth.target.signals` system property.
+  * Can also be configured using `google.otel.auth.target.signals` system property.
 
 ## Usage
 
 ### With OpenTelemetry Java agent
 
-The OpenTelemetry Java Agent Extension can be easily added to any Java application by modifying the startup command to the application.
+The OpenTelemetry Java Agent Extension can be easily added to any Java
+application by modifying the application's startup command.
 For more information on Extensions, see the [documentation here](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/examples/extension/README.md).
 
 > [!IMPORTANT]
-> Make sure to download the 'shaded' variant of the Authentication Extension for use with OpenTelemetry Java auto-instrumentation agent. The shaded version is available under the classifier name `shadow`.\
+> Make sure to download the 'shaded' variant of the Authentication Extension
+> for use with the OpenTelemetry Java auto-instrumentation agent.
+> The shaded version is available under the classifier name `shadow`.
 > See instructions for [Downloading Shaded JAR](#downloading-shaded-jar) below.
 
 Below is a snippet showing how to add the extension to a Java application using the Gradle build system.
@@ -110,10 +133,16 @@ variant for `v1.44.0-alpha`, will be found at -
 
 ### Without OpenTelemetry Java agent
 
-This extension can be used without the OpenTelemetry Java agent by leveraging the [OpenTelemetry SDK Autoconfigure](https://github.com/open-telemetry/opentelemetry-java/blob/main/sdk-extensions/autoconfigure/README.md) module.\
-When using the autoconfigured SDK, simply adding this extension as a dependency automatically configures authentication headers and resource attributes for spans, enabling export to Google Cloud.
+This extension can be used without the OpenTelemetry Java agent by leveraging
+the
+[OpenTelemetry SDK Autoconfigure](https://github.com/open-telemetry/opentelemetry-java/blob/main/sdk-extensions/autoconfigure/README.md)
+module.
+When using the autoconfigured SDK, simply adding this extension as a dependency
+automatically configures authentication headers and resource attributes for
+spans, enabling export to Google Cloud.
 
-Below is a snippet showing how to use this extension as a dependency when the application is not instrumented using the OpenTelemetry Java agent.
+Below is a snippet showing how to use this extension as a dependency when the
+application is not instrumented using the OpenTelemetry Java agent.
 
 ```gradle
 dependencies {
@@ -149,7 +178,7 @@ application {
 
 ## Component Owners
 
-- [Josh Suereth](https://github.com/jsuereth), Google
-- [Pranav Sharma](https://github.com/psx95), Google
+* [Josh Suereth](https://github.com/jsuereth), Google
+* [Pranav Sharma](https://github.com/psx95), Google
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).

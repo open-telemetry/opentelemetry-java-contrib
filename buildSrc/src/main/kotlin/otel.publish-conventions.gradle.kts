@@ -42,7 +42,7 @@ publishing {
         licenses {
           license {
             name.set("The Apache License, Version 2.0")
-            url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+            url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
           }
         }
 

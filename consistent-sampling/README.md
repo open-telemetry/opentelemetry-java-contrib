@@ -1,8 +1,11 @@
 # Consistent sampling
 
+[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-consistent-sampling/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-consistent-sampling)
+
 The current version of the specification for consistent probability sampling is described by
 <https://github.com/open-telemetry/oteps/blob/main/text/trace/0235-sampling-threshold-in-trace-state.md>.
-It uses **56** bits for representing _rejection threshold_, which corresponds to a much wider range of sampling probabilities than the original proposal.
+It uses **56** bits for representing _rejection threshold_, which corresponds
+to a much wider range of sampling probabilities than the original proposal.
 
 The implementation is contained by the package `io/opentelemetry/contrib/sampler/consistent` in this repository.
 The OpenTelemetry SDK incubator module provides the composable-samplers building blocks
@@ -25,7 +28,7 @@ contrib-only APIs:
 
 ## Component owners
 
-- [Otmar Ertl](https://github.com/oertl), Dynatrace
-- [Peter Findeisen](https://github.com/PeterF778), Cisco
+* [Otmar Ertl](https://github.com/oertl), Dynatrace
+* [Peter Findeisen](https://github.com/PeterF778), Cisco
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).

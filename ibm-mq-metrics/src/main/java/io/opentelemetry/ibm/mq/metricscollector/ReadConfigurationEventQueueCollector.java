@@ -16,9 +16,7 @@ import com.ibm.mq.constants.CMQCFC;
 import com.ibm.mq.constants.MQConstants;
 import com.ibm.mq.headers.pcf.PCFMessage;
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.metrics.LongGauge;
-import io.opentelemetry.api.metrics.Meter;
-import io.opentelemetry.ibm.mq.metrics.Metrics;
+import io.opentelemetry.ibm.mq.metrics.MetricProducer;
 import java.io.IOException;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
@@ -31,11 +29,11 @@ public final class ReadConfigurationEventQueueCollector
   private static final Logger logger =
       LoggerFactory.getLogger(ReadConfigurationEventQueueCollector.class);
   private final long bootTime;
-  private final LongGauge maxHandlesGauge;
+  private final MetricProducer producer;
 
-  public ReadConfigurationEventQueueCollector(Meter meter) {
+  public ReadConfigurationEventQueueCollector(MetricProducer producer) {
     this.bootTime = System.currentTimeMillis();
-    this.maxHandlesGauge = Metrics.createIbmMqManagerMaxHandles(meter);
+    this.producer = producer;
   }
 
   @Nullable
@@ -124,7 +122,7 @@ public final class ReadConfigurationEventQueueCollector
       if (candidate != null) {
         if (context.getMetricsConfig().isIbmMqManagerMaxHandlesEnabled()) {
           int maxHandles = candidate.getIntParameterValue(CMQC.MQIA_MAX_HANDLES);
-          maxHandlesGauge.set(
+          this.producer.recordIbmMqManagerMaxHandles(
               maxHandles, Attributes.of(IBM_MQ_QUEUE_MANAGER, context.getQueueManager().getName()));
         }
       }

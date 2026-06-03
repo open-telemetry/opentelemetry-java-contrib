@@ -14,6 +14,7 @@ import io.opentelemetry.contrib.dynamic.policy.source.SourceFormat;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nullable;
 
 /** Shared JsonNode-to-model parser for registry init configuration. */
 public final class JsonNodePolicyInitConfigParser {
@@ -45,7 +46,9 @@ public final class JsonNodePolicyInitConfigParser {
 
     JsonNode locationNode = objectNode.get("location");
     String location =
-        locationNode != null && locationNode.isTextual() ? locationNode.asText() : null;
+        locationNode != null && locationNode.isTextual()
+            ? normalizeOptionalText(locationNode.asText())
+            : null;
 
     JsonNode mappingsNode =
         requireArray(objectNode.get("mappings"), "Each source must define a 'mappings' array.");
@@ -90,5 +93,11 @@ public final class JsonNodePolicyInitConfigParser {
       throw new IllegalArgumentException(message);
     }
     return value;
+  }
+
+  @Nullable
+  private static String normalizeOptionalText(String value) {
+    String trimmed = value.trim();
+    return trimmed.isEmpty() ? null : trimmed;
   }
 }

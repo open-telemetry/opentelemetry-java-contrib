@@ -16,7 +16,7 @@ import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.contrib.sampler.RuleBasedRoutingSampler;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
-import io.opentelemetry.sdk.extension.incubator.fileconfig.DeclarativeConfiguration;
+import io.opentelemetry.sdk.autoconfigure.declarativeconfig.DeclarativeConfiguration;
 import io.opentelemetry.sdk.trace.IdGenerator;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
@@ -37,7 +37,7 @@ class RuleBasedRoutingSamplerComponentProviderTest {
   @Test
   void endToEnd() {
     String yaml =
-        "file_format: 1.0-rc.1\n"
+        "file_format: '1.0'\n"
             + "tracer_provider:\n"
             + "  sampler:\n"
             + "    parent_based:\n"

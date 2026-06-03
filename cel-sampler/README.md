@@ -1,5 +1,7 @@
 # CEL-Based Sampler
 
+[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-cel-sampler/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-cel-sampler)
+
 ## Declarative configuration
 
 The `CelBasedSampler` supports [declarative configuration](https://opentelemetry.io/docs/languages/java/configuration/#declarative-configuration).
@@ -15,7 +17,10 @@ Support is now available for the java agent, see an [example here](https://githu
 
 ## Overview
 
-The `CelBasedSampler` uses [Common Expression Language (CEL)](https://github.com/google/cel-spec) to create advanced sampling rules based on span attributes. CEL provides a powerful, yet simple expression language that allows you to create complex matching conditions.
+The `CelBasedSampler` uses [Common Expression Language (CEL)](https://github.com/google/cel-spec)
+to create advanced sampling rules based on span attributes.
+CEL provides a powerful, yet simple expression language that allows you to create
+complex matching conditions.
 
 ## Schema
 

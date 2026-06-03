@@ -35,6 +35,47 @@
   - `ConsistentSampler.probabilityBased(p)` -> `ComposableSampler.probability(p)`
   - `ConsistentSampler.parentBased(root)` -> `ComposableSampler.parentThreshold(root)`
 
+## Version 1.57.0 (2026-05-20)
+
+### Baggage processor
+
+- Delegate baggage filtering to IncludeExcludePredicate and allow wildcards in auto-configuration
+  ([#2802](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2802))
+
+### Dynamic control
+
+- Initialize pipeline configuration from declarative configuration or a fallback file
+  ([#2766](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2766))
+- Add policy pipeline initialization manager
+  ([#2826](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2826))
+
+### IBM MQ metrics
+
+- Add expired message metric for IBM MQ queues
+  ([#2809](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2809))
+
+### JFR events
+
+- Add support for JFR contextual information
+  ([#2739](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2739))
+
+### OpAMP client
+
+- Remove CompletableFuture usage
+  ([#2810](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2810))
+
+### Telemetry processors
+
+- Deprecate EventToSpanEventBridge
+  ([#2822](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2822))
+
+### Span stack traces
+
+- Ignore inferred spans in span stack traces by default
+  ([#2803](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2803))
+
+## Version 1.56.0 (2026-04-28)
+
 ### Dynamic control
 
 - Add SourceFormat string to enum conversion

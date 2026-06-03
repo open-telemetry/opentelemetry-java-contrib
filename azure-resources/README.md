@@ -1,11 +1,13 @@
 # Azure Resource Detectors for OpenTelemetry
 
+[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-azure-resources/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-azure-resources)
+
 This module provides Azure resource detectors for OpenTelemetry.
 
 The following OpenTelemetry semantic conventions will be detected:
 
 | Resource attribute          | VM       | Functions       | App Service       | Containers           |
-|-----------------------------|----------|-----------------|-------------------|----------------------|
+| --------------------------- | -------- | --------------- | ----------------- | -------------------- |
 | cloud.platform              | azure.vm | azure.functions | azure.app_service | azure.container_apps |
 | cloud.provider              | azure    | azure           | azure             | azure                |
 | cloud.resource_id           | auto     |                 | auto              |                      |
@@ -29,7 +31,7 @@ The following OpenTelemetry semantic conventions will be detected:
 
 ## Component Owners
 
-- [Trask Stalnaker](https://github.com/trask), Microsoft
-- [Gregor Zeitlinger](https://github.com/zeitlinger), Grafana
+* [Trask Stalnaker](https://github.com/trask), Microsoft
+* [Gregor Zeitlinger](https://github.com/zeitlinger), Grafana
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).

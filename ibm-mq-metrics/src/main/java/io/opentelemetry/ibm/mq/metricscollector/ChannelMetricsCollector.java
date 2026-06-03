@@ -18,9 +18,7 @@ import com.ibm.mq.constants.CMQCFC;
 import com.ibm.mq.headers.pcf.PCFException;
 import com.ibm.mq.headers.pcf.PCFMessage;
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.metrics.LongGauge;
-import io.opentelemetry.api.metrics.Meter;
-import io.opentelemetry.ibm.mq.metrics.Metrics;
+import io.opentelemetry.ibm.mq.metrics.MetricProducer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -34,29 +32,13 @@ public final class ChannelMetricsCollector implements Consumer<MetricsCollectorC
 
   private static final Logger logger = LoggerFactory.getLogger(ChannelMetricsCollector.class);
 
-  private final LongGauge activeChannelsGauge;
-  private final LongGauge channelStatusGauge;
-  private final LongGauge messageCountGauge;
-  private final LongGauge byteSentGauge;
-  private final LongGauge byteReceivedGauge;
-  private final LongGauge buffersSentGauge;
-  private final LongGauge buffersReceivedGauge;
-  private final LongGauge currentSharingConvsGauge;
-  private final LongGauge maxSharingConvsGauge;
+  private final MetricProducer producer;
 
   /*
    * The Channel Status values are mentioned here http://www.ibm.com/support/knowledgecenter/SSFKSJ_7.5.0/com.ibm.mq.ref.dev.doc/q090880_.htm
    */
-  public ChannelMetricsCollector(Meter meter) {
-    this.activeChannelsGauge = Metrics.createIbmMqManagerActiveChannels(meter);
-    this.channelStatusGauge = Metrics.createIbmMqStatus(meter);
-    this.messageCountGauge = Metrics.createIbmMqMessageCount(meter);
-    this.byteSentGauge = Metrics.createIbmMqByteSent(meter);
-    this.byteReceivedGauge = Metrics.createIbmMqByteReceived(meter);
-    this.buffersSentGauge = Metrics.createIbmMqBuffersSent(meter);
-    this.buffersReceivedGauge = Metrics.createIbmMqBuffersReceived(meter);
-    this.currentSharingConvsGauge = Metrics.createIbmMqCurrentSharingConversations(meter);
-    this.maxSharingConvsGauge = Metrics.createIbmMqMaxSharingConversations(meter);
+  public ChannelMetricsCollector(MetricProducer producer) {
+    this.producer = producer;
   }
 
   @Override
@@ -161,7 +143,7 @@ public final class ChannelMetricsCollector implements Consumer<MetricsCollectorC
 
     logger.info(
         "Active Channels in queueManager {} are {}", context.getQueueManagerName(), activeChannels);
-    activeChannelsGauge.set(
+    this.producer.recordIbmMqManagerActiveChannels(
         activeChannels.size(), Attributes.of(IBM_MQ_QUEUE_MANAGER, context.getQueueManagerName()));
 
     long exitTime = System.currentTimeMillis() - entryTime;
@@ -187,11 +169,11 @@ public final class ChannelMetricsCollector implements Consumer<MetricsCollectorC
             .build();
     if (context.getMetricsConfig().isIbmMqMessageCountEnabled()) {
       int received = message.getIntParameterValue(CMQCFC.MQIACH_MSGS);
-      messageCountGauge.set(received, attributes);
+      this.producer.recordIbmMqMessageCount(received, attributes);
     }
     int status = message.getIntParameterValue(CMQCFC.MQIACH_CHANNEL_STATUS);
     if (context.getMetricsConfig().isIbmMqStatusEnabled()) {
-      channelStatusGauge.set(status, attributes);
+      this.producer.recordIbmMqStatus(status, attributes);
     }
     // We follow the definition of active channel as documented in
     // https://www.ibm.com/docs/en/ibm-mq/9.2.x?topic=states-current-active
@@ -201,16 +183,19 @@ public final class ChannelMetricsCollector implements Consumer<MetricsCollectorC
       activeChannels.add(channelName);
     }
     if (context.getMetricsConfig().isIbmMqByteSentEnabled()) {
-      byteSentGauge.set(message.getIntParameterValue(CMQCFC.MQIACH_BYTES_SENT), attributes);
+      this.producer.recordIbmMqByteSent(
+          message.getIntParameterValue(CMQCFC.MQIACH_BYTES_SENT), attributes);
     }
     if (context.getMetricsConfig().isIbmMqByteReceivedEnabled()) {
-      byteReceivedGauge.set(message.getIntParameterValue(CMQCFC.MQIACH_BYTES_RECEIVED), attributes);
+      this.producer.recordIbmMqByteReceived(
+          message.getIntParameterValue(CMQCFC.MQIACH_BYTES_RECEIVED), attributes);
     }
     if (context.getMetricsConfig().isIbmMqBuffersSentEnabled()) {
-      buffersSentGauge.set(message.getIntParameterValue(CMQCFC.MQIACH_BUFFERS_SENT), attributes);
+      this.producer.recordIbmMqBuffersSent(
+          message.getIntParameterValue(CMQCFC.MQIACH_BUFFERS_SENT), attributes);
     }
     if (context.getMetricsConfig().isIbmMqBuffersReceivedEnabled()) {
-      buffersReceivedGauge.set(
+      this.producer.recordIbmMqBuffersReceived(
           message.getIntParameterValue(CMQCFC.MQIACH_BUFFERS_RECEIVED), attributes);
     }
     if (context.getMetricsConfig().isIbmMqCurrentSharingConversationsEnabled()) {
@@ -218,14 +203,14 @@ public final class ChannelMetricsCollector implements Consumer<MetricsCollectorC
       if (message.getParameter(CMQCFC.MQIACH_CURRENT_SHARING_CONVS) != null) {
         currentSharingConvs = message.getIntParameterValue(CMQCFC.MQIACH_CURRENT_SHARING_CONVS);
       }
-      currentSharingConvsGauge.set(currentSharingConvs, attributes);
+      this.producer.recordIbmMqCurrentSharingConversations(currentSharingConvs, attributes);
     }
     if (context.getMetricsConfig().isIbmMqMaxSharingConversationsEnabled()) {
       int maxSharingConvs = 0;
       if (message.getParameter(CMQCFC.MQIACH_MAX_SHARING_CONVS) != null) {
         maxSharingConvs = message.getIntParameterValue(CMQCFC.MQIACH_MAX_SHARING_CONVS);
       }
-      maxSharingConvsGauge.set(maxSharingConvs, attributes);
+      this.producer.recordIbmMqMaxSharingConversations(maxSharingConvs, attributes);
     }
   }
 }

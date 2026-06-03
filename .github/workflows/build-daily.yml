@@ -21,12 +21,15 @@ jobs:
     uses: ./.github/workflows/reusable-lint.yml
 
   publish-snapshots:
+    environment: protected
     needs:
       - common
     runs-on: ubuntu-latest
     if: github.ref_name == 'main' && github.repository == 'open-telemetry/opentelemetry-java-contrib'
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Set up JDK for running Gradle
         uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0

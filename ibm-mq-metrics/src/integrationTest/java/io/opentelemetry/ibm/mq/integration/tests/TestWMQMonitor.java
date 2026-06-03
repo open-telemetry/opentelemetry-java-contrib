@@ -8,9 +8,9 @@ package io.opentelemetry.ibm.mq.integration.tests;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.ibm.mq.WmqMonitor;
 import io.opentelemetry.ibm.mq.config.QueueManager;
+import io.opentelemetry.ibm.mq.metrics.MetricProducer;
 import io.opentelemetry.ibm.mq.opentelemetry.ConfigWrapper;
 import java.util.List;
 import java.util.Map;
@@ -26,12 +26,12 @@ class TestWMQMonitor {
 
   private final ConfigWrapper config;
   private final ExecutorService threadPool;
-  private final Meter meter;
+  private final MetricProducer producer;
 
-  TestWMQMonitor(ConfigWrapper config, Meter meter, ExecutorService service) {
+  TestWMQMonitor(ConfigWrapper config, MetricProducer producer, ExecutorService service) {
     this.config = config;
     this.threadPool = service;
-    this.meter = meter;
+    this.producer = producer;
   }
 
   /**
@@ -47,7 +47,7 @@ class TestWMQMonitor {
     assertThat(queueManagers).isNotNull();
     ObjectMapper mapper = new ObjectMapper();
 
-    WmqMonitor wmqTask = new WmqMonitor(config, threadPool, meter);
+    WmqMonitor wmqTask = new WmqMonitor(config, threadPool, producer);
 
     // we override this helper to pass in our opentelemetry helper instead.
     for (Map<String, ?> queueManager : queueManagers) {

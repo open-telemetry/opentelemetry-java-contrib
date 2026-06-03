@@ -2,9 +2,9 @@ import org.gradle.kotlin.dsl.maven
 
 pluginManagement {
   plugins {
-    id("com.gradleup.shadow") version "9.4.1"
+    id("com.gradleup.shadow") version "9.4.2"
     id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
-    id("com.gradle.develocity") version "4.4.1"
+    id("com.gradle.develocity") version "4.4.2"
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
   }
 }
@@ -17,7 +17,9 @@ plugins {
 dependencyResolutionManagement {
   repositories {
     mavenCentral()
-    mavenLocal()
+    if (providers.gradleProperty("useLocalMaven").isPresent) {
+      mavenLocal()
+    }
     // for otel snapshots
     maven {
       url = uri("https://central.sonatype.com/repository/maven-snapshots/")

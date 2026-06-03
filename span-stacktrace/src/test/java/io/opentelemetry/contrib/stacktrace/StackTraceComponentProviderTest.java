@@ -8,7 +8,7 @@ package io.opentelemetry.contrib.stacktrace;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.opentelemetry.sdk.OpenTelemetrySdk;
-import io.opentelemetry.sdk.extension.incubator.fileconfig.DeclarativeConfiguration;
+import io.opentelemetry.sdk.autoconfigure.declarativeconfig.DeclarativeConfiguration;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
@@ -19,7 +19,7 @@ class StackTraceComponentProviderTest {
   @Test
   void endToEnd() {
     String yaml =
-        "file_format: 1.0-rc.1\n"
+        "file_format: '1.0'\n"
             + "tracer_provider:\n"
             + "  processors:\n"
             + "    - stacktrace/development: \n"

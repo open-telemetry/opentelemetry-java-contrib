@@ -7,10 +7,13 @@ package io.opentelemetry.contrib.baggage.processor;
 
 import io.opentelemetry.api.baggage.Baggage;
 import io.opentelemetry.context.Context;
+import io.opentelemetry.sdk.common.internal.IncludeExcludePredicate;
 import io.opentelemetry.sdk.trace.ReadWriteSpan;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.sdk.trace.SpanProcessor;
+import java.util.Collection;
 import java.util.function.Predicate;
+import javax.annotation.Nullable;
 
 /**
  * This span processor copies attributes stored in {@link Baggage} into each newly created {@link
@@ -20,19 +23,37 @@ public final class BaggageSpanProcessor implements SpanProcessor {
   private final Predicate<String> baggageKeyPredicate;
 
   /**
-   * Creates a new {@link BaggageSpanProcessor} that copies only baggage entries with keys that pass
-   * the provided filter into the newly created {@link io.opentelemetry.api.trace.Span}.
+   * @deprecated Use {@link #BaggageSpanProcessor(Collection, Collection)} instead. Most usages of
+   *     this method should be replaceable with glob patterns, but not all thus this method is kept
+   *     to preserve compatibility.
    */
+  @Deprecated
   public BaggageSpanProcessor(Predicate<String> baggageKeyPredicate) {
     this.baggageKeyPredicate = baggageKeyPredicate;
   }
 
   /**
+   * Creates a new {@link BaggageSpanProcessor} that copies baggage entries with keys that pass the
+   * provided include/exclude filtering into the newly created {@link
+   * io.opentelemetry.api.trace.Span}, when both arguments are null or empty all baggage are
+   * included.
+   *
+   * @param included list of included baggage key patterns to include
+   * @param excluded list of excluded baggage key patterns to exclude
+   */
+  public BaggageSpanProcessor(
+      @Nullable Collection<String> included, @Nullable Collection<String> excluded) {
+    this.baggageKeyPredicate = IncludeExcludePredicate.createPatternMatching(included, excluded);
+  }
+
+  /**
    * Creates a new {@link BaggageSpanProcessor} that copies all baggage entries into the newly
-   * created {@link io.opentelemetry.api.trace.Span}.
+   * created span.
+   *
+   * @return baggage span processor including all attributes
    */
   public static BaggageSpanProcessor allowAllBaggageKeys() {
-    return new BaggageSpanProcessor(baggageKey -> true);
+    return new BaggageSpanProcessor(null, null);
   }
 
   @Override
@@ -57,5 +78,10 @@ public final class BaggageSpanProcessor implements SpanProcessor {
   @Override
   public boolean isEndRequired() {
     return false;
+  }
+
+  @Override
+  public String toString() {
+    return "BaggageSpanProcessor{baggageKeyPredicate=" + baggageKeyPredicate + '}';
   }
 }

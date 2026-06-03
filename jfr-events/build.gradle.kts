@@ -23,7 +23,7 @@ tasks {
 
     // Disabled due to https://bugs.openjdk.java.net/browse/JDK-8245283
     configure<JacocoTaskExtension> {
-      enabled = false
+      isEnabled = false
     }
   }
 }

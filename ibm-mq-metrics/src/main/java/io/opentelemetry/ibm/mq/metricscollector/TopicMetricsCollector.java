@@ -5,7 +5,7 @@
 
 package io.opentelemetry.ibm.mq.metricscollector;
 
-import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.ibm.mq.metrics.MetricProducer;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,8 +14,8 @@ public final class TopicMetricsCollector implements Consumer<MetricsCollectorCon
   private static final Logger logger = LoggerFactory.getLogger(TopicMetricsCollector.class);
   private final InquireTStatusCmdCollector inquireTStatusCmdCollector;
 
-  public TopicMetricsCollector(Meter meter) {
-    this.inquireTStatusCmdCollector = new InquireTStatusCmdCollector(meter);
+  public TopicMetricsCollector(MetricProducer producer) {
+    this.inquireTStatusCmdCollector = new InquireTStatusCmdCollector(producer);
   }
 
   @Override

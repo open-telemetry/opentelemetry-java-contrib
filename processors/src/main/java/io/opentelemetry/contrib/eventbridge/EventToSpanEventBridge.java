@@ -51,7 +51,12 @@ import java.util.logging.Logger;
  *       LogRecordData#getAttributes()}.size() is mapped to span event attribute with key {@code
  *       log.record.dropped_attributes_count}
  * </ul>
+ *
+ * @deprecated Use {@code io.opentelemetry.sdk.extension.incubator.logs.EventToSpanEventBridge} from
+ *     the {@code opentelemetry-sdk-extension-incubator} artifact instead. Will be removed after the
+ *     1.59.0 release.
  */
+@Deprecated
 public final class EventToSpanEventBridge implements LogRecordProcessor {
 
   private static final Logger logger = Logger.getLogger(EventToSpanEventBridge.class.getName());

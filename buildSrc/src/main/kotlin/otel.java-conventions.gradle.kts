@@ -151,7 +151,7 @@ dependencies {
 
 testing {
   suites.withType(JvmTestSuite::class).configureEach {
-    useJUnitJupiter("5.14.3")
+    useJUnitJupiter("5.14.4")
 
     dependencies {
       implementation(project())
@@ -221,6 +221,7 @@ ossIndexAudit {
   isExcludeCompileOnly = true
   outputFormat = org.sonatype.gradle.plugins.scan.ossindex.OutputFormat.JSON_CYCLONE_DX_1_4
 
-  username = System.getenv("SONATYPE_OSS_INDEX_USER")
-  password = System.getenv("SONATYPE_OSS_INDEX_PASSWORD")
+  // Guide PAT authentication ignores this, but the scan plugin requires it.
+  username = "unused"
+  password = System.getenv("SONATYPE_GUIDE_PAT") ?: ""
 }
