@@ -34,9 +34,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * An AutoConfigurationCustomizerProvider for Google Cloud Platform (GCP) OpenTelemetry (OTLP)
@@ -100,22 +102,32 @@ public class GcpAuthAutoConfigurationCustomizerProvider
    */
   @Override
   public void customize(@Nonnull AutoConfigurationCustomizer autoConfiguration) {
-    GoogleCredentials credentials;
-    try {
-      credentials = GoogleCredentials.getApplicationDefault();
-    } catch (IOException e) {
-      throw new GoogleAuthException(Reason.FAILED_ADC_RETRIEVAL, e);
-    }
+    Supplier<GoogleCredentials> credentialsSupplier =
+        new Supplier<GoogleCredentials>() {
+          @Nullable private GoogleCredentials credentials;
+
+          @Override
+          public synchronized GoogleCredentials get() {
+            if (credentials == null) {
+              try {
+                credentials = GoogleCredentials.getApplicationDefault();
+              } catch (IOException e) {
+                throw new GoogleAuthException(Reason.FAILED_ADC_RETRIEVAL, e);
+              }
+            }
+            return credentials;
+          }
+        };
     autoConfiguration
         .addSpanExporterCustomizer(
             (spanExporter, configProperties) ->
-                customizeSpanExporter(spanExporter, credentials, configProperties))
+                customizeSpanExporter(spanExporter, credentialsSupplier, configProperties))
         .addMetricExporterCustomizer(
             (metricExporter, configProperties) ->
-                customizeMetricExporter(metricExporter, credentials, configProperties))
+                customizeMetricExporter(metricExporter, credentialsSupplier, configProperties))
         .addResourceCustomizer(
             (resource, configProperties) ->
-                customizeResource(resource, credentials, configProperties));
+                customizeResource(resource, credentialsSupplier, configProperties));
   }
 
   @Override
@@ -124,9 +136,11 @@ public class GcpAuthAutoConfigurationCustomizerProvider
   }
 
   private static SpanExporter customizeSpanExporter(
-      SpanExporter exporter, GoogleCredentials credentials, ConfigProperties configProperties) {
+      SpanExporter exporter,
+      Supplier<GoogleCredentials> credentialsSupplier,
+      ConfigProperties configProperties) {
     if (isSignalTargeted(SIGNAL_TYPE_TRACES, configProperties)) {
-      return addAuthorizationHeaders(exporter, credentials, configProperties);
+      return addAuthorizationHeaders(exporter, credentialsSupplier.get(), configProperties);
     } else if (!hasSignal(SIGNAL_TYPE_NONE, configProperties)) {
       String[] params = {SIGNAL_TYPE_TRACES, SIGNAL_TARGET_WARNING_FIX_SUGGESTION};
       logger.log(
@@ -138,9 +152,11 @@ public class GcpAuthAutoConfigurationCustomizerProvider
   }
 
   private static MetricExporter customizeMetricExporter(
-      MetricExporter exporter, GoogleCredentials credentials, ConfigProperties configProperties) {
+      MetricExporter exporter,
+      Supplier<GoogleCredentials> credentialsSupplier,
+      ConfigProperties configProperties) {
     if (isSignalTargeted(SIGNAL_TYPE_METRICS, configProperties)) {
-      return addAuthorizationHeaders(exporter, credentials, configProperties);
+      return addAuthorizationHeaders(exporter, credentialsSupplier.get(), configProperties);
     } else if (!hasSignal(SIGNAL_TYPE_NONE, configProperties)) {
       String[] params = {SIGNAL_TYPE_METRICS, SIGNAL_TARGET_WARNING_FIX_SUGGESTION};
       logger.log(
@@ -238,12 +254,18 @@ public class GcpAuthAutoConfigurationCustomizerProvider
 
   // Updates the current resource with the attributes required for ingesting OTLP data on GCP.
   private static Resource customizeResource(
-      Resource resource, GoogleCredentials credentials, ConfigProperties configProperties) {
+      Resource resource,
+      Supplier<GoogleCredentials> credentialsSupplier,
+      ConfigProperties configProperties) {
+    if (!isSignalTargeted(SIGNAL_TYPE_TRACES, configProperties)
+        && !isSignalTargeted(SIGNAL_TYPE_METRICS, configProperties)) {
+      return resource;
+    }
     String gcpProjectId;
     try {
       gcpProjectId = ConfigurableOption.GOOGLE_CLOUD_PROJECT.getConfiguredValue(configProperties);
     } catch (ConfigurationException e) {
-      gcpProjectId = credentials.getProjectId();
+      gcpProjectId = credentialsSupplier.get().getProjectId();
       if (gcpProjectId == null || gcpProjectId.isEmpty()) {
         throw e;
       }
