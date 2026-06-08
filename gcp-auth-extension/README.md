@@ -64,7 +64,7 @@ Here is a list of required and optional configuration available for the extensio
 * `GOOGLE_OTEL_AUTH_TARGET_SIGNALS`: Environment variable that specifies a
   comma-separated list of OpenTelemetry signals for which this authentication
   extension should be active.
-  Valid values are `metrics`, `traces`, and `all`.
+  Valid values are `metrics`, `traces`, `all`, and `none`.
   If left unspecified, `all` is assumed, meaning the extension will attempt to
   apply authentication to exports for all signals.
 

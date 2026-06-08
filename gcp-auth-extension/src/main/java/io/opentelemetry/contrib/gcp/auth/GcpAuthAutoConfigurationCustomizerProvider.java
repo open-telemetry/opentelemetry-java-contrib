@@ -70,6 +70,7 @@ public class GcpAuthAutoConfigurationCustomizerProvider
   static final String SIGNAL_TYPE_TRACES = "traces";
   static final String SIGNAL_TYPE_METRICS = "metrics";
   static final String SIGNAL_TYPE_ALL = "all";
+  static final String SIGNAL_TYPE_NONE = "none";
 
   /**
    * Customizes the provided {@link AutoConfigurationCustomizer} such that authenticated exports to
@@ -126,7 +127,7 @@ public class GcpAuthAutoConfigurationCustomizerProvider
       SpanExporter exporter, GoogleCredentials credentials, ConfigProperties configProperties) {
     if (isSignalTargeted(SIGNAL_TYPE_TRACES, configProperties)) {
       return addAuthorizationHeaders(exporter, credentials, configProperties);
-    } else {
+    } else if (!hasSignal(SIGNAL_TYPE_NONE, configProperties)) {
       String[] params = {SIGNAL_TYPE_TRACES, SIGNAL_TARGET_WARNING_FIX_SUGGESTION};
       logger.log(
           Level.WARNING,
@@ -140,7 +141,7 @@ public class GcpAuthAutoConfigurationCustomizerProvider
       MetricExporter exporter, GoogleCredentials credentials, ConfigProperties configProperties) {
     if (isSignalTargeted(SIGNAL_TYPE_METRICS, configProperties)) {
       return addAuthorizationHeaders(exporter, credentials, configProperties);
-    } else {
+    } else if (!hasSignal(SIGNAL_TYPE_NONE, configProperties)) {
       String[] params = {SIGNAL_TYPE_METRICS, SIGNAL_TARGET_WARNING_FIX_SUGGESTION};
       logger.log(
           Level.WARNING,
@@ -152,14 +153,19 @@ public class GcpAuthAutoConfigurationCustomizerProvider
 
   // Checks if the auth extension is configured to target the passed signal for authentication.
   private static boolean isSignalTargeted(String checkSignal, ConfigProperties configProperties) {
+    if (hasSignal(SIGNAL_TYPE_NONE, configProperties)) {
+      return false;
+    }
+    return hasSignal(checkSignal, configProperties) || hasSignal(SIGNAL_TYPE_ALL, configProperties);
+  }
+
+  private static boolean hasSignal(String signal, ConfigProperties configProperties) {
     String userSpecifiedTargetedSignals =
         ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getConfiguredValueWithFallback(
             configProperties, () -> SIGNAL_TYPE_ALL);
     return stream(userSpecifiedTargetedSignals.split(","))
         .map(String::trim)
-        .anyMatch(
-            targetedSignal ->
-                targetedSignal.equals(checkSignal) || targetedSignal.equals(SIGNAL_TYPE_ALL));
+        .anyMatch(targetedSignal -> targetedSignal.equals(signal));
   }
 
   // Adds authorization headers to the calls made by the OtlpGrpcSpanExporter and
