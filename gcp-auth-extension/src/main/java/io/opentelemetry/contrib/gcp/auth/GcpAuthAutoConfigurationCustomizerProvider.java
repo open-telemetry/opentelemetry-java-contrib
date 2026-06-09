@@ -38,7 +38,6 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -144,7 +143,9 @@ public class GcpAuthAutoConfigurationCustomizerProvider
     if (isSignalTargeted(SIGNAL_TYPE_TRACES, configProperties)) {
       return addAuthorizationHeaders(exporter, credentialsSupplier.get(), configProperties);
     } else {
-      String[] params = {SIGNAL_TYPE_TRACES, SIGNAL_TYPE_NONE, SIGNAL_TARGET_WARNING_FIX_SUGGESTION};
+      String[] params = {
+        SIGNAL_TYPE_TRACES, SIGNAL_TYPE_NONE, SIGNAL_TARGET_WARNING_FIX_SUGGESTION
+      };
       logger.log(
           Level.WARNING,
           "GCP Authentication Extension is not configured for signal type: {0} or is configured with signal type: {1}. {2}",
@@ -160,7 +161,9 @@ public class GcpAuthAutoConfigurationCustomizerProvider
     if (isSignalTargeted(SIGNAL_TYPE_METRICS, configProperties)) {
       return addAuthorizationHeaders(exporter, credentialsSupplier.get(), configProperties);
     } else {
-      String[] params = {SIGNAL_TYPE_METRICS, SIGNAL_TYPE_NONE, SIGNAL_TARGET_WARNING_FIX_SUGGESTION};
+      String[] params = {
+        SIGNAL_TYPE_METRICS, SIGNAL_TYPE_NONE, SIGNAL_TARGET_WARNING_FIX_SUGGESTION
+      };
       logger.log(
           Level.WARNING,
           "GCP Authentication Extension is not configured for signal type: {0} or is configured with signal type: {1}. {2}",
