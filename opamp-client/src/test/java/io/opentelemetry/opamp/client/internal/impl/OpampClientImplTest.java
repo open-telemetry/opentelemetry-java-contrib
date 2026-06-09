@@ -266,6 +266,19 @@ class OpampClientImplTest {
   }
 
   @Test
+  void verifyRemoteConfigStatusSetter_throwsExceptionWhenCapabilityNotEnabled() {
+    initializeClient();
+    RemoteConfigStatus remoteConfigStatus =
+        getRemoteConfigStatus(RemoteConfigStatuses.RemoteConfigStatuses_APPLYING);
+
+    Exception exception =
+        assertThrows(
+            IllegalStateException.class, () -> client.setRemoteConfigStatus(remoteConfigStatus));
+    assertThat(exception.getMessage())
+        .contains(AgentCapabilities.AgentCapabilities_ReportsRemoteConfig.toString());
+  }
+
+  @Test
   void verifyHealthSetter() {
     initializeClient(AgentCapabilities.AgentCapabilities_ReportsHealth);
     ComponentHealth health =
