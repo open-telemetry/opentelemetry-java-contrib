@@ -761,6 +761,60 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
                         "none"))
                 .setExpectedIsMetricsSignalModified(false)
                 .setExpectedIsTraceSignalModified(false)
+                .build()),
+        Arguments.of(
+            TargetSignalBehavior.builder()
+                .setConfiguredTargetSignals("metrics, trace, none")
+                .setUserSpecifiedOtelProperties(
+                    ImmutableMap.of(
+                        "otel.exporter.otlp.metrics.endpoint",
+                        "https://localhost:4813/v1/metrics",
+                        "otel.exporter.otlp.traces.endpoint",
+                        "https://localhost:4813/v1/traces",
+                        "otel.traces.exporter",
+                        "otlp",
+                        "otel.metrics.exporter",
+                        "otlp",
+                        "otel.logs.exporter",
+                        "none"))
+                .setExpectedIsMetricsSignalModified(false)
+                .setExpectedIsTraceSignalModified(false)
+                .build()),
+        Arguments.of(
+            TargetSignalBehavior.builder()
+                .setConfiguredTargetSignals("all, none")
+                .setUserSpecifiedOtelProperties(
+                    ImmutableMap.of(
+                        "otel.exporter.otlp.metrics.endpoint",
+                        "https://localhost:4813/v1/metrics",
+                        "otel.exporter.otlp.traces.endpoint",
+                        "https://localhost:4813/v1/traces",
+                        "otel.traces.exporter",
+                        "otlp",
+                        "otel.metrics.exporter",
+                        "otlp",
+                        "otel.logs.exporter",
+                        "none"))
+                .setExpectedIsMetricsSignalModified(false)
+                .setExpectedIsTraceSignalModified(false)
+                .build()),
+        Arguments.of(
+            TargetSignalBehavior.builder()
+                .setConfiguredTargetSignals("metrics, none")
+                .setUserSpecifiedOtelProperties(
+                    ImmutableMap.of(
+                        "otel.exporter.otlp.metrics.endpoint",
+                        "https://localhost:4813/v1/metrics",
+                        "otel.exporter.otlp.traces.endpoint",
+                        "https://localhost:4813/v1/traces",
+                        "otel.traces.exporter",
+                        "otlp",
+                        "otel.metrics.exporter",
+                        "otlp",
+                        "otel.logs.exporter",
+                        "none"))
+                .setExpectedIsMetricsSignalModified(false)
+                .setExpectedIsTraceSignalModified(false)
                 .build()));
   }
 

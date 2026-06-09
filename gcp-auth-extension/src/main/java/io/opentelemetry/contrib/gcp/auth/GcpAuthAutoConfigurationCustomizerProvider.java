@@ -8,6 +8,7 @@ package io.opentelemetry.contrib.gcp.auth;
 import static io.opentelemetry.api.common.AttributeKey.stringKey;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 import com.google.auth.oauth2.GoogleCredentials;
@@ -37,6 +38,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -141,11 +143,11 @@ public class GcpAuthAutoConfigurationCustomizerProvider
       ConfigProperties configProperties) {
     if (isSignalTargeted(SIGNAL_TYPE_TRACES, configProperties)) {
       return addAuthorizationHeaders(exporter, credentialsSupplier.get(), configProperties);
-    } else if (!hasSignal(SIGNAL_TYPE_NONE, configProperties)) {
-      String[] params = {SIGNAL_TYPE_TRACES, SIGNAL_TARGET_WARNING_FIX_SUGGESTION};
+    } else {
+      String[] params = {SIGNAL_TYPE_TRACES, SIGNAL_TYPE_NONE, SIGNAL_TARGET_WARNING_FIX_SUGGESTION};
       logger.log(
           Level.WARNING,
-          "GCP Authentication Extension is not configured for signal type: {0}. {1}",
+          "GCP Authentication Extension is not configured for signal type: {0} or is configured with signal type: {1}. {2}",
           params);
     }
     return exporter;
@@ -157,11 +159,11 @@ public class GcpAuthAutoConfigurationCustomizerProvider
       ConfigProperties configProperties) {
     if (isSignalTargeted(SIGNAL_TYPE_METRICS, configProperties)) {
       return addAuthorizationHeaders(exporter, credentialsSupplier.get(), configProperties);
-    } else if (!hasSignal(SIGNAL_TYPE_NONE, configProperties)) {
-      String[] params = {SIGNAL_TYPE_METRICS, SIGNAL_TARGET_WARNING_FIX_SUGGESTION};
+    } else {
+      String[] params = {SIGNAL_TYPE_METRICS, SIGNAL_TYPE_NONE, SIGNAL_TARGET_WARNING_FIX_SUGGESTION};
       logger.log(
           Level.WARNING,
-          "GCP Authentication Extension is not configured for signal type: {0}. {1}",
+          "GCP Authentication Extension is not configured for signal type: {0} or is configured with signal type: {1}. {2}",
           params);
     }
     return exporter;
@@ -169,19 +171,15 @@ public class GcpAuthAutoConfigurationCustomizerProvider
 
   // Checks if the auth extension is configured to target the passed signal for authentication.
   private static boolean isSignalTargeted(String checkSignal, ConfigProperties configProperties) {
-    if (hasSignal(SIGNAL_TYPE_NONE, configProperties)) {
-      return false;
-    }
-    return hasSignal(checkSignal, configProperties) || hasSignal(SIGNAL_TYPE_ALL, configProperties);
-  }
-
-  private static boolean hasSignal(String signal, ConfigProperties configProperties) {
     String userSpecifiedTargetedSignals =
         ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getConfiguredValueWithFallback(
             configProperties, () -> SIGNAL_TYPE_ALL);
-    return stream(userSpecifiedTargetedSignals.split(","))
-        .map(String::trim)
-        .anyMatch(targetedSignal -> targetedSignal.equals(signal));
+    List<String> targetedSignals =
+        stream(userSpecifiedTargetedSignals.split(",")).map(String::trim).collect(toList());
+    if (targetedSignals.contains(SIGNAL_TYPE_NONE)) {
+      return false;
+    }
+    return targetedSignals.contains(checkSignal) || targetedSignals.contains(SIGNAL_TYPE_ALL);
   }
 
   // Adds authorization headers to the calls made by the OtlpGrpcSpanExporter and
