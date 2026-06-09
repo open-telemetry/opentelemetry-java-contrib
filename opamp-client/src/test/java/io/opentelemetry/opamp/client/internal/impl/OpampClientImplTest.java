@@ -7,6 +7,7 @@ package io.opentelemetry.opamp.client.internal.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -54,6 +55,7 @@ import opamp.proto.RemoteConfigStatuses;
 import opamp.proto.ServerErrorResponse;
 import opamp.proto.ServerToAgent;
 import opamp.proto.ServerToAgentFlags;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -85,21 +87,6 @@ class OpampClientImplTest {
             .status("running")
             .status_time_unix_nano(456L)
             .build();
-    state =
-        new OpampClientState(
-            new State.RemoteConfigStatus(
-                getRemoteConfigStatus(RemoteConfigStatuses.RemoteConfigStatuses_UNSET)),
-            new State.SequenceNum(1L),
-            new State.AgentDescription(new AgentDescription.Builder().build()),
-            new State.Capabilities(
-                (long)
-                    (AgentCapabilities.AgentCapabilities_ReportsStatus.getValue()
-                        | AgentCapabilities.AgentCapabilities_ReportsEffectiveConfig.getValue()
-                        | AgentCapabilities.AgentCapabilities_ReportsHealth.getValue())),
-            new State.Health(initialHealth),
-            new State.InstanceUid(new byte[] {1, 2, 3}),
-            new State.Flags((long) AgentToServerFlags.AgentToServerFlags_Unspecified.getValue()),
-            effectiveConfig);
     requestService = createHttpService();
   }
 
@@ -112,7 +99,13 @@ class OpampClientImplTest {
   void verifyFieldsSent() {
     // Check first request
     ServerToAgent response = new ServerToAgent.Builder().build();
-    RecordedRequest firstRequest = initializeClient(response);
+    RecordedRequest firstRequest =
+        initializeClient(
+            response,
+            AgentCapabilities.AgentCapabilities_ReportsStatus,
+            AgentCapabilities.AgentCapabilities_ReportsEffectiveConfig,
+            AgentCapabilities.AgentCapabilities_ReportsRemoteConfig,
+            AgentCapabilities.AgentCapabilities_ReportsHealth);
     AgentToServer firstMessage = getAgentToServerMessage(firstRequest);
 
     // Required first request fields
@@ -257,7 +250,7 @@ class OpampClientImplTest {
 
   @Test
   void verifyRemoteConfigStatusSetter() {
-    initializeClient();
+    initializeClient(AgentCapabilities.AgentCapabilities_ReportsRemoteConfig);
     RemoteConfigStatus remoteConfigStatus =
         getRemoteConfigStatus(RemoteConfigStatuses.RemoteConfigStatuses_APPLYING);
 
@@ -274,7 +267,7 @@ class OpampClientImplTest {
 
   @Test
   void verifyHealthSetter() {
-    initializeClient();
+    initializeClient(AgentCapabilities.AgentCapabilities_ReportsHealth);
     ComponentHealth health =
         new ComponentHealth.Builder()
             .healthy(false)
@@ -293,6 +286,16 @@ class OpampClientImplTest {
     enqueueServerToAgentResponse(new ServerToAgent.Builder().build());
     client.setHealth(health);
     assertThat(takeRequest()).isNull();
+  }
+
+  @Test
+  void verifyHealthSetter_throwsExceptionWhenCapabilityNotEnabled() {
+    initializeClient();
+    ComponentHealth health = new ComponentHealth.Builder().build();
+
+    Exception exception = assertThrows(IllegalStateException.class, () -> client.setHealth(health));
+    assertThat(exception.getMessage())
+        .contains(AgentCapabilities.AgentCapabilities_ReportsHealth.toString());
   }
 
   @Test
@@ -381,6 +384,25 @@ class OpampClientImplTest {
     assertThat(state.instanceUid.get()).isEqualTo(serverProvidedUid);
   }
 
+  @NotNull
+  private OpampClientState createState(AgentCapabilities... enabledCapabilities) {
+    long capabilities = 0;
+    for (AgentCapabilities capability : enabledCapabilities) {
+      capabilities |= capability.getValue();
+    }
+
+    return new OpampClientState(
+        new State.RemoteConfigStatus(
+            getRemoteConfigStatus(RemoteConfigStatuses.RemoteConfigStatuses_UNSET)),
+        new State.SequenceNum(1L),
+        new State.AgentDescription(new AgentDescription.Builder().build()),
+        new State.Capabilities(capabilities),
+        new State.Health(initialHealth),
+        new State.InstanceUid(new byte[] {1, 2, 3}),
+        new State.Flags((long) AgentToServerFlags.AgentToServerFlags_Unspecified.getValue()),
+        effectiveConfig);
+  }
+
   private static AgentToServer getAgentToServerMessage(RecordedRequest request) {
     try {
       return AgentToServer.ADAPTER.decode(Objects.requireNonNull(request.getBody()));
@@ -430,14 +452,16 @@ class OpampClientImplTest {
     return new AgentDescription.Builder().identifying_attributes(keyValues).build();
   }
 
-  private RecordedRequest initializeClient() {
-    return initializeClient(new ServerToAgent.Builder().build());
+  private RecordedRequest initializeClient(AgentCapabilities... enabledCapabilities) {
+    return initializeClient(new ServerToAgent.Builder().build(), enabledCapabilities);
   }
 
-  private RecordedRequest initializeClient(ServerToAgent initialResponse) {
+  private RecordedRequest initializeClient(
+      ServerToAgent initialResponse, AgentCapabilities... enabledCapabilities) {
     // Prepare first request on start
     enqueueServerToAgentResponse(initialResponse);
 
+    state = createState(enabledCapabilities);
     callbacks = spy(new TestCallbacks());
     client = OpampClientImpl.create(requestService, state, callbacks);
 

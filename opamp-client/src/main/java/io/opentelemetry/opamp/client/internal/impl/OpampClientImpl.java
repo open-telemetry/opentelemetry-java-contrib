@@ -33,6 +33,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 import okio.ByteString;
+import opamp.proto.AgentCapabilities;
 import opamp.proto.AgentDescription;
 import opamp.proto.AgentToServer;
 import opamp.proto.ComponentHealth;
@@ -141,6 +142,7 @@ public final class OpampClientImpl
 
   @Override
   public void setRemoteConfigStatus(@Nonnull RemoteConfigStatus remoteConfigStatus) {
+    verifyCapability(AgentCapabilities.AgentCapabilities_ReportsRemoteConfig);
     if (state.remoteConfigStatus.set(remoteConfigStatus)) {
       addFieldAndSend(Field.REMOTE_CONFIG_STATUS);
     }
@@ -148,6 +150,7 @@ public final class OpampClientImpl
 
   @Override
   public void setHealth(@Nonnull ComponentHealth health) {
+    verifyCapability(AgentCapabilities.AgentCapabilities_ReportsHealth);
     if (state.health.set(health)) {
       addFieldAndSend(Field.HEALTH);
     }
@@ -260,5 +263,12 @@ public final class OpampClientImpl
   private void addFieldAndSend(Field field) {
     recipeManager.next().addField(field);
     requestService.sendRequest();
+  }
+
+  private void verifyCapability(AgentCapabilities capabilityToCheck) {
+    if ((state.capabilities.mustGet() & capabilityToCheck.getValue()) == 0) {
+      throw new IllegalStateException(
+          "Required capability " + capabilityToCheck + " is not enabled");
+    }
   }
 }
