@@ -176,7 +176,7 @@ _Note: The following is only needed for versions of Java 8 before 8u161._
    * `-Djavax.net.ssl.keyStorePassword=<PASS>`
 
    b. In `config.yml`, configure `sslConnection.trustStorePassword`.
-      The same applies to the key store configuration.
+   The same applies to the key store configuration.
 
     ```text
     sslConnection:
