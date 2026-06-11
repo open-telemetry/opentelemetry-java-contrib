@@ -62,7 +62,9 @@ tasks {
     // letting them overwrite each other. Without this, the SDK's EnvironmentResourceProvider
     // registration is dropped and OTEL_RESOURCE_ATTRIBUTES / OTEL_SERVICE_NAME are ignored.
     mergeServiceFiles()
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE // required for mergeServiceFiles()
+    filesMatching("META-INF/services/**") {
+      duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    }
   }
 
   assemble {
