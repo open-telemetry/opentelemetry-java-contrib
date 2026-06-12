@@ -7,9 +7,11 @@ package io.opentelemetry.contrib.jmxscraper;
 
 import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_INSTANCE_ID;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.SEVERE;
+import static java.util.logging.Level.WARNING;
 
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.common.Attributes;
@@ -22,6 +24,7 @@ import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException;
 import io.opentelemetry.sdk.resources.Resource;
+import java.io.Closeable;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,23 +37,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.CountDownLatch;
 import java.util.function.BiFunction;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
+import javax.management.remote.JMXConnectionNotification;
 import javax.management.remote.JMXConnector;
 
 public final class JmxScraper {
-
   private static final Logger logger = Logger.getLogger(JmxScraper.class.getName());
+
   private static final String CONFIG_ARG = "-config";
   private static final String TEST_ARG = "-test";
 
   private final JmxConnectorBuilder client;
 
-  private final AtomicBoolean running = new AtomicBoolean(false);
+  private final CountDownLatch stopLatch = new CountDownLatch(1);
   private final JmxTelemetry jmxTelemetry;
 
   /**
@@ -58,7 +62,6 @@ public final class JmxScraper {
    *
    * @param args - must be of the form "-config {jmx_config_path,'-'}"
    */
-  @SuppressWarnings("SystemExitOutsideMain")
   public static void main(String[] args) {
 
     // set log format
@@ -247,7 +250,7 @@ public final class JmxScraper {
       }
     }
 
-    config.getJmxConfig().stream().map(Paths::get).forEach(path -> builder.addRules(path));
+    config.getJmxConfig().stream().map(Paths::get).forEach(builder::addRules);
     return builder.build();
   }
 
@@ -257,23 +260,78 @@ public final class JmxScraper {
             new Thread(
                 () -> {
                   logger.info("JMX scraping stopped");
-                  running.set(false);
+                  stopLatch.countDown();
                 }));
 
-    try (JMXConnector connector = client.build()) {
-      MBeanServerConnection connection = connector.getMBeanServerConnection();
+    try (ConnectionHandler connectionHandler = new ConnectionHandler(client)) {
+      jmxTelemetry.start(
+          () -> {
+            MBeanServerConnection connection = connectionHandler.getMBeanServerConnection();
+            return connection == null ? emptyList() : singletonList(connection);
+          });
 
-      jmxTelemetry.start(() -> singletonList(connection));
-
-      running.set(true);
       logger.info("JMX scraping started");
 
-      while (running.get()) {
-        try {
-          Thread.sleep(100);
-        } catch (InterruptedException e) {
-          // silently ignored
-        }
+      try {
+        stopLatch.await();
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+      }
+    }
+  }
+
+  private static class ConnectionHandler implements Closeable {
+    private final JmxConnectorBuilder client;
+    @Nullable private JMXConnector connector;
+    @Nullable private MBeanServerConnection connection;
+    private volatile boolean connected;
+
+    ConnectionHandler(JmxConnectorBuilder client) {
+      this.client = client;
+    }
+
+    @Nullable
+    synchronized MBeanServerConnection getMBeanServerConnection() {
+      if (!connected) {
+        connect();
+      }
+      return connection;
+    }
+
+    synchronized void connect() {
+      try {
+        connector = client.build();
+        connector.addConnectionNotificationListener(
+            (notification, handback) -> {
+              if (notification.getType().equals(JMXConnectionNotification.CLOSED)
+                  || notification.getType().equals(JMXConnectionNotification.FAILED)) {
+                handleDisconnect();
+              }
+            },
+            null,
+            null);
+        connection = connector.getMBeanServerConnection();
+        connected = true;
+      } catch (IOException e) {
+        logger.log(WARNING, "Failed to establish JMX connection", e);
+      }
+    }
+
+    private synchronized void handleDisconnect() {
+      if (connector != null) {
+        logger.info("JMX connection closed, attempting to reconnect");
+
+        connector = null;
+        connection = null;
+        connected = false;
+      }
+    }
+
+    @Override
+    public synchronized void close() throws IOException {
+      if (connector != null) {
+        connected = false;
+        connector.close();
       }
     }
   }
