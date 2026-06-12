@@ -25,7 +25,7 @@ class ReconnectTest extends BaseTargetSystemIntegrationTest {
     verifyMetrics();
     target.stop();
     otlpServer.reset();
-    Thread.sleep(1_000);
+    Thread.sleep(2_000);
     List<ExportMetricsServiceRequest> receivedMetrics = otlpServer.getMetrics();
     assertThat(receivedMetrics).isEmpty();
     target.start();

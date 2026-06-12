@@ -314,16 +314,21 @@ public final class JmxScraper {
         connected = true;
       } catch (IOException e) {
         logger.log(WARNING, "Failed to establish JMX connection", e);
+        if (connector != null) {
+          closeQuietly(connector);
+          connector = null;
+        }
       }
     }
 
     private synchronized void handleDisconnect() {
-      if (connector != null) {
+      if (connector != null && connected) {
         logger.info("JMX connection closed, attempting to reconnect");
 
+        connected = false;
+        closeQuietly(connector);
         connector = null;
         connection = null;
-        connected = false;
       }
     }
 
@@ -332,6 +337,18 @@ public final class JmxScraper {
       if (connector != null) {
         connected = false;
         connector.close();
+        connector = null;
+        connection = null;
+      }
+    }
+  }
+
+  private static void closeQuietly(AutoCloseable closeable) {
+    if (closeable != null) {
+      try {
+        closeable.close();
+      } catch (Exception e) {
+        // ignore
       }
     }
   }
