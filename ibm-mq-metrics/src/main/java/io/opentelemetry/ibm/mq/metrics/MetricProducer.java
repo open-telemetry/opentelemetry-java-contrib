@@ -37,7 +37,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
   private final Map<Attributes, Long> counterIbmMqQueueDepthHighEvent;
   private final Map<Attributes, Long> counterIbmMqQueueDepthLowEvent;
   private final Map<Attributes, Long> counterIbmMqUnauthorizedEvent;
-  private final Map<Attributes, Long> counterIbmMqQueueManagerUptime;
   private final Map<Attributes, Long> counterIbmMqConnectionErrors;
 
   private long currentEpochNanos;
@@ -51,7 +50,6 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
     this.counterIbmMqQueueDepthHighEvent = new ConcurrentHashMap<>();
     this.counterIbmMqQueueDepthLowEvent = new ConcurrentHashMap<>();
     this.counterIbmMqUnauthorizedEvent = new ConcurrentHashMap<>();
-    this.counterIbmMqQueueManagerUptime = new ConcurrentHashMap<>();
     this.counterIbmMqConnectionErrors = new ConcurrentHashMap<>();
   }
 
@@ -670,17 +668,7 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
                         this.currentEpochNanos, Clock.getDefault().now(), attributes, value)))));
   }
 
-  public void addIbmMqQueueManagerUptime(long value, Attributes attributes) {
-    long cumulativeValue =
-        this.counterIbmMqQueueManagerUptime.compute(
-            attributes,
-            (k, v) -> {
-              if (v == null) {
-                return value;
-              } else {
-                return v + value;
-              }
-            });
+  public void recordIbmMqQueueManagerUptime(long value, Attributes attributes) {
     metricData.add(
         createMetricData(
             this.resource,
@@ -688,16 +676,11 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
             "ibm.mq.queue_manager.uptime",
             "Queue manager uptime",
             "s",
-            MetricDataType.LONG_SUM,
-            SumData.createLongSumData(
-                /* isMonotonic= */ true,
-                AggregationTemporality.CUMULATIVE,
+            MetricDataType.LONG_GAUGE,
+            GaugeData.createLongGaugeData(
                 Collections.singletonList(
                     LongPointData.create(
-                        this.currentEpochNanos,
-                        Clock.getDefault().now(),
-                        attributes,
-                        cumulativeValue)))));
+                        this.currentEpochNanos, Clock.getDefault().now(), attributes, value)))));
   }
 
   public void recordIbmMqArchiveLogSize(long value, Attributes attributes) {

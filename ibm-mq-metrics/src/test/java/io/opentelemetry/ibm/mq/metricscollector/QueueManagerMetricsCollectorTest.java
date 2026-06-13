@@ -5,16 +5,25 @@
 
 package io.opentelemetry.ibm.mq.metricscollector;
 
+import java.util.ArrayList;
 import static java.util.Collections.singletonList;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.any;
+import org.mockito.Mock;
 import static org.mockito.Mockito.when;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ibm.mq.constants.CMQC;
 import com.ibm.mq.constants.CMQCFC;
 import com.ibm.mq.headers.pcf.PCFMessage;
 import com.ibm.mq.headers.pcf.PCFMessageAgent;
+
 import io.opentelemetry.ibm.mq.config.QueueManager;
 import io.opentelemetry.ibm.mq.metrics.MetricProducer;
 import io.opentelemetry.ibm.mq.metrics.MetricsConfig;
@@ -22,13 +31,6 @@ import io.opentelemetry.ibm.mq.opentelemetry.ConfigWrapper;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.resources.Resource;
-import java.util.ArrayList;
-import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class QueueManagerMetricsCollectorTest {
@@ -66,7 +68,7 @@ class QueueManagerMetricsCollectorTest {
               .isEqualTo(2);
         }
         if ("ibm.mq.queue_manager.uptime".equals(metric.getName())) {
-          assertThat(metric.getLongSumData().getPoints().iterator().next().getValue())
+          assertThat(metric.getLongGaugeData().getPoints().iterator().next().getValue())
               .isGreaterThan(0);
         }
       }

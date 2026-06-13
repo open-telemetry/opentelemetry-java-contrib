@@ -538,7 +538,7 @@ groups:
     metric_name: ibm.mq.queue_manager.uptime
     stability: development
     brief: "Queue manager uptime"
-    instrument: counter
+    instrument: gauge
     unit: "s"
     attributes:
       - ref: ibm.mq.queue.manager

@@ -5,17 +5,19 @@
 
 package io.opentelemetry.ibm.mq.metricscollector;
 
-import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.IBM_MQ_QUEUE_MANAGER;
-import static io.opentelemetry.ibm.mq.util.MetricsUtil.MIBY_TO_BYTES;
+import java.util.List;
+import java.util.function.Consumer;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ibm.mq.constants.CMQCFC;
 import com.ibm.mq.headers.pcf.PCFMessage;
+
 import io.opentelemetry.api.common.Attributes;
+import static io.opentelemetry.ibm.mq.metrics.IbmMqAttributes.IBM_MQ_QUEUE_MANAGER;
 import io.opentelemetry.ibm.mq.metrics.MetricProducer;
-import java.util.List;
-import java.util.function.Consumer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static io.opentelemetry.ibm.mq.util.MetricsUtil.MIBY_TO_BYTES;
 
 /** This class is responsible for queue manager metric collection. */
 public final class QueueManagerMetricsCollector implements Consumer<MetricsCollectorContext> {
@@ -82,7 +84,7 @@ public final class QueueManagerMetricsCollector implements Consumer<MetricsColle
       if (context.getMetricsConfig().isIbmMqQueueManagerUptimeEnabled()) {
         try {
           long uptimeSeconds = MessageBuddy.queueManagerUptime(responses.get(0));
-          producer.addIbmMqQueueManagerUptime(uptimeSeconds, attributes);
+          producer.recordIbmMqQueueManagerUptime(uptimeSeconds, attributes);
         } catch (Exception e) {
           logger.debug(
               "Unable to calculate queue manager uptime for {}: {}",
