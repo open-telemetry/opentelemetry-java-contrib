@@ -267,6 +267,10 @@ public final class JmxScraper {
       ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
       jmxTelemetry.start(
           () -> {
+            // JMXConnectorProvider for custom protocol e.g. wildfly remote+http is loaded from
+            // context class loader (alternatively could pass the class loader in environment map
+            // with key JMXConnectorFactory.PROTOCOL_PROVIDER_CLASS_LOADER to
+            // JMXConnectorFactory.connect).
             ClassLoader original = Thread.currentThread().getContextClassLoader();
             Thread.currentThread().setContextClassLoader(contextClassLoader);
             try {
