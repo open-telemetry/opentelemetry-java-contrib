@@ -112,8 +112,7 @@ class CassandraCompactionProgressHandlerTest {
 
   @Test
   void mergesGroupsAcrossMultipleObjectNames() throws Exception {
-    ObjectName objectName2 =
-        new ObjectName("org.apache.cassandra.db:type=CompactionManager,id=2");
+    ObjectName objectName2 = new ObjectName("org.apache.cassandra.db:type=CompactionManager,id=2");
     when(connection.getAttribute(objectName, "Compactions"))
         .thenReturn(
             Collections.singletonList(compactionEntry("COMPACTION", "ks1", "cf1", "100", "200")));

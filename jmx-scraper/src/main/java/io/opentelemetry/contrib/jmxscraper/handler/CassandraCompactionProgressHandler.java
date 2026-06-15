@@ -76,8 +76,7 @@ public final class CassandraCompactionProgressHandler implements ExperimentalJmx
     BatchCallback callback =
         meter.batchCallback(
             () -> {
-              for (Map.Entry<Attributes, long[]> entry :
-                  queryGroups(detectorSupplier).entrySet()) {
+              for (Map.Entry<Attributes, long[]> entry : queryGroups(detectorSupplier).entrySet()) {
                 currentGauge.record(entry.getValue()[0], entry.getKey());
                 totalGauge.record(entry.getValue()[1], entry.getKey());
               }
@@ -99,8 +98,7 @@ public final class CassandraCompactionProgressHandler implements ExperimentalJmx
       queryCompactions(connection, objectName)
           .forEach(
               (attrs, values) ->
-                  groups.merge(
-                      attrs, values, (a, b) -> new long[] {a[0] + b[0], a[1] + b[1]}));
+                  groups.merge(attrs, values, (a, b) -> new long[] {a[0] + b[0], a[1] + b[1]}));
     }
     return groups;
   }
@@ -133,9 +131,7 @@ public final class CassandraCompactionProgressHandler implements ExperimentalJmx
       }
     } catch (Exception e) {
       logger.log(
-          Level.WARNING,
-          "cassandra.compaction.progress: failed to query CompactionManager",
-          e);
+          Level.WARNING, "cassandra.compaction.progress: failed to query CompactionManager", e);
     }
     return groups;
   }
