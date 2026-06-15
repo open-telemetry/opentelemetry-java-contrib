@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.jmxscraper.handler;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
+import io.opentelemetry.api.metrics.BatchCallback;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.metrics.ObservableLongMeasurement;
 import io.opentelemetry.instrumentation.jmx.internal.ExperimentalJmxMetricHandler;
@@ -15,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import javax.management.MBeanServerConnection;
@@ -55,40 +57,35 @@ public final class CassandraCompactionProgressHandler implements ExperimentalJmx
 
   @Override
   public AutoCloseable create(Meter meter, Supplier<Detector> detectorSupplier) {
-    AutoCloseable currentGauge =
+    ObservableLongMeasurement currentGauge =
         meter
             .gaugeBuilder(METRIC_CURRENT)
             .setDescription("Bytes completed for in-flight compactions")
             .setUnit("By")
             .ofLongs()
-            .buildWithCallback(measurement -> recordCurrent(detectorSupplier, measurement));
+            .buildObserver();
 
-    AutoCloseable totalGauge =
+    ObservableLongMeasurement totalGauge =
         meter
             .gaugeBuilder(METRIC_TOTAL)
             .setDescription("Total bytes for in-flight compactions")
             .setUnit("By")
             .ofLongs()
-            .buildWithCallback(measurement -> recordTotal(detectorSupplier, measurement));
+            .buildObserver();
 
-    return () -> {
-      currentGauge.close();
-      totalGauge.close();
-    };
-  }
+    BatchCallback callback =
+        meter.batchCallback(
+            () -> {
+              for (Map.Entry<Attributes, long[]> entry :
+                  queryGroups(detectorSupplier).entrySet()) {
+                currentGauge.record(entry.getValue()[0], entry.getKey());
+                totalGauge.record(entry.getValue()[1], entry.getKey());
+              }
+            },
+            currentGauge,
+            totalGauge);
 
-  private static void recordCurrent(
-      Supplier<Detector> detectorSupplier, ObservableLongMeasurement measurement) {
-    for (Map.Entry<Attributes, long[]> entry : queryGroups(detectorSupplier).entrySet()) {
-      measurement.record(entry.getValue()[0], entry.getKey());
-    }
-  }
-
-  private static void recordTotal(
-      Supplier<Detector> detectorSupplier, ObservableLongMeasurement measurement) {
-    for (Map.Entry<Attributes, long[]> entry : queryGroups(detectorSupplier).entrySet()) {
-      measurement.record(entry.getValue()[1], entry.getKey());
-    }
+    return callback;
   }
 
   private static Map<Attributes, long[]> queryGroups(Supplier<Detector> detectorSupplier) {
@@ -99,7 +96,11 @@ public final class CassandraCompactionProgressHandler implements ExperimentalJmx
     }
     MBeanServerConnection connection = detector.getConnection();
     for (ObjectName objectName : detector.getObjectNames()) {
-      groups.putAll(queryCompactions(connection, objectName));
+      queryCompactions(connection, objectName)
+          .forEach(
+              (attrs, values) ->
+                  groups.merge(
+                      attrs, values, (a, b) -> new long[] {a[0] + b[0], a[1] + b[1]}));
     }
     return groups;
   }
@@ -131,8 +132,10 @@ public final class CassandraCompactionProgressHandler implements ExperimentalJmx
             attrs, new long[] {completed, total}, (a, b) -> new long[] {a[0] + b[0], a[1] + b[1]});
       }
     } catch (Exception e) {
-      logger.warning(
-          "cassandra.compaction.progress: failed to query CompactionManager: " + e.getMessage());
+      logger.log(
+          Level.WARNING,
+          "cassandra.compaction.progress: failed to query CompactionManager",
+          e);
     }
     return groups;
   }

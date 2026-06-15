@@ -110,6 +110,32 @@ class CassandraCompactionProgressHandlerTest {
         .isEqualTo(CassandraCompactionProgressHandler.HANDLER_NAME);
   }
 
+  @Test
+  void mergesGroupsAcrossMultipleObjectNames() throws Exception {
+    ObjectName objectName2 =
+        new ObjectName("org.apache.cassandra.db:type=CompactionManager,id=2");
+    when(connection.getAttribute(objectName, "Compactions"))
+        .thenReturn(
+            Collections.singletonList(compactionEntry("COMPACTION", "ks1", "cf1", "100", "200")));
+    when(connection.getAttribute(objectName2, "Compactions"))
+        .thenReturn(
+            Collections.singletonList(compactionEntry("COMPACTION", "ks1", "cf1", "50", "150")));
+
+    Map<Attributes, long[]> first =
+        CassandraCompactionProgressHandler.queryCompactions(connection, objectName);
+    Map<Attributes, long[]> second =
+        CassandraCompactionProgressHandler.queryCompactions(connection, objectName2);
+
+    // Simulate what queryGroups does: merge across ObjectNames using the same merge function
+    Map<Attributes, long[]> merged = new HashMap<>(first);
+    second.forEach(
+        (attrs, values) ->
+            merged.merge(attrs, values, (a, b) -> new long[] {a[0] + b[0], a[1] + b[1]}));
+
+    assertThat(merged).hasSize(1);
+    assertThat(merged.get(attrs("COMPACTION", "ks1", "cf1"))).containsExactly(150L, 350L);
+  }
+
   private static Map<String, String> compactionEntry(
       String taskType, String keyspace, String columnfamily, String completed, String total) {
     return compactionEntry(taskType, keyspace, columnfamily, completed, total, "bytes");
