@@ -41,7 +41,7 @@ These metrics are sourced from: <https://docs.oracle.com/cd/E11857_01/em.111/e10
 * Name: `tomcat.threads`
 * Description: The number of threads.
 * Unit: `threads`
-* Labels: `proto_handler`, `state` (`idle`, `busy`, `limit`)
+* Labels: `proto_handler`, `state` (`idle` = currentThreadCount, `busy` = currentThreadsBusy, `limit` = maxThreads — the maximum configured threads for the connector)
 * Instrument Type: LongValueCallback
 
 ### tomcat.max_time

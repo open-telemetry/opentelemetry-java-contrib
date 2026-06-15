@@ -83,7 +83,7 @@ rules:
           state: const(busy)
       maxThreads:
         metric: threads
-        desc: The number of threads
+        desc: The maximum number of threads configured for the connector
         type: gauge
         unit: "{thread}"
         metricAttribute:
