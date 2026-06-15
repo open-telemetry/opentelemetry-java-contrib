@@ -264,10 +264,17 @@ public final class JmxScraper {
                 }));
 
     try (ConnectionHandler connectionHandler = new ConnectionHandler(client)) {
+      ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
       jmxTelemetry.start(
           () -> {
-            MBeanServerConnection connection = connectionHandler.getMBeanServerConnection();
-            return connection == null ? emptyList() : singletonList(connection);
+            ClassLoader original = Thread.currentThread().getContextClassLoader();
+            Thread.currentThread().setContextClassLoader(contextClassLoader);
+            try {
+              MBeanServerConnection connection = connectionHandler.getMBeanServerConnection();
+              return connection == null ? emptyList() : singletonList(connection);
+            } finally {
+              Thread.currentThread().setContextClassLoader(original);
+            }
           });
 
       logger.info("JMX scraping started");
