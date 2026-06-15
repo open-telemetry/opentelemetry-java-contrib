@@ -40,7 +40,7 @@ otel.instrument(beantomcatrequestProcessor, "tomcat.traffic",
 def beantomcatconnectors = otel.mbeans("Catalina:type=ThreadPool,name=*")
 otel.instrument(beantomcatconnectors, "tomcat.threads", "The number of threads", "{thread}",
   ["proto_handler" : { mbean -> mbean.name().getKeyProperty("name") }],
-  ["currentThreadCount":["state":{"idle"}],"currentThreadsBusy":["state":{"busy"}]], otel.&longValueCallback)
+  ["currentThreadCount":["state":{"idle"}],"currentThreadsBusy":["state":{"busy"}],"maxThreads":["state":{"limit"}]], otel.&longValueCallback)
 
 def beantomcatnewmanager = otel.mbeans("Tomcat:type=Manager,host=localhost,context=*")
 otel.instrument(beantomcatnewmanager, "tomcat.sessions", "The number of active sessions.", "{session}", "activeSessions", otel.&longValueCallback)
@@ -67,4 +67,4 @@ otel.instrument(beantomcatnewrequestProcessor, "tomcat.traffic",
 def beantomcatnewconnectors = otel.mbeans("Tomcat:type=ThreadPool,name=*")
 otel.instrument(beantomcatnewconnectors, "tomcat.threads", "The number of threads", "{thread}",
     ["proto_handler" : { mbean -> mbean.name().getKeyProperty("name") }],
-    ["currentThreadCount":["state":{"idle"}],"currentThreadsBusy":["state":{"busy"}]], otel.&longValueCallback)
+    ["currentThreadCount":["state":{"idle"}],"currentThreadsBusy":["state":{"busy"}],"maxThreads":["state":{"limit"}]], otel.&longValueCallback)

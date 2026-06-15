@@ -92,7 +92,10 @@ class TomcatIntegrationTest extends AbstractIntegrationTest {
                         entry("proto_handler", "\"http-nio-8080\""), entry("state", "idle")),
                 attrs ->
                     attrs.containsOnly(
-                        entry("proto_handler", "\"http-nio-8080\""), entry("state", "busy"))),
+                        entry("proto_handler", "\"http-nio-8080\""), entry("state", "busy")),
+                attrs ->
+                    attrs.containsOnly(
+                        entry("proto_handler", "\"http-nio-8080\""), entry("state", "limit"))),
         metric ->
             assertGaugeWithAttributes(
                 metric,

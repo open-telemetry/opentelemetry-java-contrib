@@ -99,6 +99,9 @@ class TomcatIntegrationTest extends TargetSystemIntegrationTest {
                             attribute("proto_handler", "\"http-nio-8080\"")),
                         attributeGroup(
                             attribute("state", "busy"),
+                            attribute("proto_handler", "\"http-nio-8080\"")),
+                        attributeGroup(
+                            attribute("state", "limit"),
                             attribute("proto_handler", "\"http-nio-8080\""))))
         .add(
             "tomcat.max_time",

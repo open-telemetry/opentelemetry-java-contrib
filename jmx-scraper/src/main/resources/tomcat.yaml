@@ -81,3 +81,10 @@ rules:
         unit: "{thread}"
         metricAttribute:
           state: const(busy)
+      maxThreads:
+        metric: threads
+        desc: The number of threads
+        type: gauge
+        unit: "{thread}"
+        metricAttribute:
+          state: const(limit)

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### JMX metrics / JMX scraper
+
+- Add `tomcat.threads` `state=limit` data point sourced from `maxThreads` attribute on `ThreadPool` MBean,
+  exposing the maximum number of threads configured per Tomcat connector
+
 ## Version 1.57.0 (2026-05-20)
 
 ### Baggage processor
