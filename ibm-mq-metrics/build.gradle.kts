@@ -25,7 +25,7 @@ dependencies {
   api("io.swagger:swagger-annotations:1.6.16")
   api("org.jetbrains:annotations:26.1.0")
   api("com.ibm.mq:com.ibm.mq.allclient:10.0.0.0")
-  api("org.snakeyaml:snakeyaml-engine:2.10")
+  api("org.snakeyaml:snakeyaml-engine:3.0.1")
   api("com.fasterxml.jackson.core:jackson-databind:2.22.0")
   api("io.opentelemetry:opentelemetry-sdk")
   api("io.opentelemetry:opentelemetry-exporter-otlp")
