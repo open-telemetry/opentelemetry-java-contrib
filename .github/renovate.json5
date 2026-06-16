@@ -132,6 +132,12 @@
         'org.bouncycastle:**',
       ],
     },
+    {
+      groupName: 'ibm mq packages',
+      matchPackageNames: [
+        'com.ibm.mq:**',
+      ],
+    },
 
     // ── Disabled updates (Java version compatibility) ──────────────────
 
