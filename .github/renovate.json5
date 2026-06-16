@@ -234,6 +234,16 @@
       enabled: false,
     },
     {
+      // snakeyaml-engine 3+ requires Java 11+
+      matchUpdateTypes: [
+        'major',
+      ],
+      enabled: false,
+      matchPackageNames: [
+        'org.snakeyaml:snakeyaml-engine'
+      ],
+    },
+    {
       // pinned version for compatibility
       matchFileNames: [
         'micrometer-meter-provider/build.gradle.kts',
