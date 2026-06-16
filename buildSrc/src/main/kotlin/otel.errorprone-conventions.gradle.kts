@@ -79,6 +79,8 @@ tasks {
         disable("AddNullMarkedToClass")
         disable("AddNullMarkedToPackageInfo")
 
+        disable("ReferenceEquality")
+
         if (name.contains("Jmh") || name.contains("Test")) {
           // Allow underscore in test-type method names
           disable("MemberName")
