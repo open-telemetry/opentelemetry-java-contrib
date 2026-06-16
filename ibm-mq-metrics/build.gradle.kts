@@ -50,7 +50,7 @@ testing {
       dependencies {
         implementation("org.assertj:assertj-core")
         implementation("io.opentelemetry:opentelemetry-sdk-testing")
-        implementation("com.ibm.mq:com.ibm.mq.jakarta.client:9.4.5.1")
+        implementation("com.ibm.mq:com.ibm.mq.jakarta.client:10.0.0.0")
         implementation("jakarta.jms:jakarta.jms-api:3.1.0")
       }
 
