@@ -258,19 +258,17 @@ sources:
     format: jsonkeyvalue
     location: vendor
     mappings:
-      - sourceKey: database_span_sampling
-        policyType: trace-sampling-per-span
-      - sourceKey: healthcheck_span_sampling
+      - sourceKey: trace_sampling_policies
         policyType: trace-sampling-per-span
 ```
 
-The source payload would use those source keys. The resulting policies would have the same policyType but
-different ids (note `matching` is defined in the spec, but not yet implemented here, so the `match`
+The source payload would use `trace_sampling_policies`. The resulting policies would have the same policyType but
+different ids (note `matching` is defined in the spec as part of the policy not the pipeline, but is not yet implemented in this repo, so the `match`
 field here is currently for illustrative purposes only):
 
 ```json
 {
-  "database_span_sampling": {
+  "trace_sampling_policies": {
     "id": "sample-database-spans",
     "name": "Sample database spans",
     "match": {
@@ -284,7 +282,7 @@ field here is currently for illustrative purposes only):
 
 ```json
 {
-  "healthcheck_span_sampling": {
+  "trace_sampling_policies": {
     "id": "sample-healthcheck-spans",
     "name": "Sample healthcheck spans",
     "match": {
@@ -295,6 +293,10 @@ field here is currently for illustrative purposes only):
   }
 }
 ```
+
+These can be separate messages or both sent in one message (as a JSON array).
+Because the IDs are different, these would be two different policies. It would be
+the responsibility of the sender/updater to manage the IDs and matchers consistently.
 
 ## Component owners
 
