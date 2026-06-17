@@ -250,7 +250,7 @@ type `trace-sampling-per-span`, but one would have id `sample-database-spans` wh
 would have id `sample-healthcheck-spans`. The id would allow these two different instances to be
 updated separately.
 
-The pipeline initialization could still map multiple source keys to one implementation:
+The pipeline initialization maps a source key to the implementation:
 
 ```yaml
 sources:
