@@ -29,7 +29,7 @@ public final class TelemetryPolicyIdentity {
   private static String requireNonBlank(String value, String fieldName) {
     Objects.requireNonNull(value, fieldName + " cannot be null");
     if (value.trim().isEmpty()) {
-      throw new IllegalArgumentException("Field '" + fieldName + "' must be non-empty.");
+      throw new IllegalArgumentException("Field '" + fieldName + "' must be non-blank.");
     }
     return value;
   }

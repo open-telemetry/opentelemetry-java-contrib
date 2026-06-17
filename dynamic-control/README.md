@@ -1,6 +1,6 @@
 # Dynamic Control
 
-[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-dynamic-control/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-dynamic-control)
+[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-dynamic-control/badge.svg?label=Maven&color=orange)](https://central.sonatype.com/artifact/io.opentelemetry.contrib/opentelemetry-dynamic-control)
 
 Adding dynamic control of some specific features of the Java agent.
 
@@ -232,7 +232,7 @@ at the same time, the opamp change would be applied and the file change dropped.
 
 ## Policy type, id, and name
 
-Telemetry policy uses `type`, `id`, and `name` for different purposes:
+Telemetry policy uses `policyType`, `id`, and `name` for different purposes:
 
 * `policyType` in the pipeline initialization maps a source key to the Java policy implementation.
   For example, `policyType: trace-sampling` tells dynamic control to validate matching source
@@ -264,7 +264,7 @@ sources:
         policyType: trace-sampling-per-span
 ```
 
-The source payload would use those source keys. The resulting policies would have the same type but
+The source payload would use those source keys. The resulting policies would have the same policyType but
 different ids (note `matching` is defined in the spec, but not yet implemented here, so the `match`
 field here is currently for illustrative purposes only):
 
