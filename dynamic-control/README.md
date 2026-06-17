@@ -262,9 +262,11 @@ sources:
         policyType: trace-sampling-per-span
 ```
 
-The source payload would use `trace_sampling_policies`. The resulting policies would have the same policyType but
-different ids (note `matching` is defined in the spec as part of the policy not the pipeline, but is not yet implemented in this repo, so the `match`
-field here is currently for illustrative purposes only):
+The source payload would use `trace_sampling_policies`.
+The resulting policies would have the same policyType but different ids
+(note `matching` is defined in the spec as part of the policy not the pipeline,
+but is not yet implemented in this repo,
+so the `match` field here is currently for illustrative purposes only):
 
 ```json
 {
