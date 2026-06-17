@@ -230,7 +230,7 @@ and the new sampling rate applied to the sampler.
 Because `opamp` source has higher priority than `file` source, if both sources generate a change
 at the same time, the opamp change would be applied and the file change dropped.
 
-## Policy type, id, and name
+## policyType, id, and name
 
 Telemetry policy uses `policyType`, `id`, and `name` for different purposes:
 
