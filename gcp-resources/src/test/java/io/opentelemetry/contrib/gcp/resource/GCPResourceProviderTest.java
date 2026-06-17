@@ -31,6 +31,7 @@ import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.SERVERLESS_COM
 import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.SERVERLESS_COMPUTE_REVISION;
 import static io.opentelemetry.contrib.gcp.resource.IncubatingAttributes.GCP_CLOUD_RUN_JOB_TASK_INDEX;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
+import static io.opentelemetry.semconv.K8sAttributes.K8S_CLUSTER_NAME;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_ACCOUNT_ID;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_AVAILABILITY_ZONE;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PLATFORM;
@@ -51,7 +52,6 @@ import static io.opentelemetry.semconv.incubating.GcpIncubatingAttributes.GCP_GC
 import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_ID;
 import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_NAME;
 import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_TYPE;
-import static io.opentelemetry.semconv.incubating.K8sIncubatingAttributes.K8S_CLUSTER_NAME;
 import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
