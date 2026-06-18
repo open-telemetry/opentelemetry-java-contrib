@@ -132,6 +132,12 @@
         'org.bouncycastle:**',
       ],
     },
+    {
+      groupName: 'ibm mq packages',
+      matchPackageNames: [
+        'com.ibm.mq:**',
+      ],
+    },
 
     // ── Disabled updates (Java version compatibility) ──────────────────
 
@@ -226,6 +232,16 @@
         'minor',
       ],
       enabled: false,
+    },
+    {
+      // snakeyaml-engine 3+ requires Java 11+
+      matchUpdateTypes: [
+        'major',
+      ],
+      enabled: false,
+      matchPackageNames: [
+        'org.snakeyaml:snakeyaml-engine'
+      ],
     },
     {
       // pinned version for compatibility
