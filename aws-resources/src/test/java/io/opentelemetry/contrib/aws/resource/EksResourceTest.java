@@ -9,10 +9,10 @@ import static io.opentelemetry.contrib.aws.resource.EksResource.AUTH_CONFIGMAP_P
 import static io.opentelemetry.contrib.aws.resource.EksResource.CW_CONFIGMAP_PATH;
 import static io.opentelemetry.contrib.aws.resource.EksResource.K8S_SVC_URL;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
+import static io.opentelemetry.semconv.ContainerAttributes.CONTAINER_ID;
+import static io.opentelemetry.semconv.K8sAttributes.K8S_CLUSTER_NAME;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PLATFORM;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PROVIDER;
-import static io.opentelemetry.semconv.incubating.ContainerIncubatingAttributes.CONTAINER_ID;
-import static io.opentelemetry.semconv.incubating.K8sIncubatingAttributes.K8S_CLUSTER_NAME;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.entry;
 import static org.mockito.ArgumentMatchers.any;
