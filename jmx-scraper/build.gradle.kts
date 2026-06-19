@@ -28,6 +28,7 @@ dependencies {
   testImplementation("org.junit-pioneer:junit-pioneer")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation("org.awaitility:awaitility")
+  testImplementation("org.mockito:mockito-core")
 }
 
 testing {

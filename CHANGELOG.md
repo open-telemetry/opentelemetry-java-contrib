@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### JMX Scraper
+
+- Add `cassandra.compaction.progress.bytes` and `cassandra.compaction.progress.total` metrics
+  via a code-based `ExperimentalJmxMetricHandler`, reporting per-compaction byte progress
+  grouped by `taskType`, `keyspace`, and `columnfamily`.
+
 ## Version 1.57.0 (2026-05-20)
 
 ### Baggage processor

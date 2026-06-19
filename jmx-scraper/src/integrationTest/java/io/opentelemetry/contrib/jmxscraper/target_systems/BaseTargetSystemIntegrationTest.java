@@ -149,6 +149,7 @@ public abstract class BaseTargetSystemIntegrationTest {
 
     scraper = customizeScraperContainer(scraper, target, tmpDir);
     scraper.start();
+    afterScraperStarted(scraper, target, tmpDir);
   }
 
   protected void verifyMetrics() {
@@ -186,6 +187,9 @@ public abstract class BaseTargetSystemIntegrationTest {
       JmxScraperContainer scraper, GenericContainer<?> target, Path tempDir) {
     return scraper;
   }
+
+  protected void afterScraperStarted(
+      JmxScraperContainer scraper, GenericContainer<?> target, Path tempDir) {}
 
   protected Collection<GenericContainer<?>> createPrerequisiteContainers() {
     return Collections.emptyList();
