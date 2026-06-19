@@ -2,7 +2,7 @@ plugins {
   `java-platform`
 }
 
-val otelInstrumentationVersion = "2.29.0-alpha-SNAPSHOT"
+val otelInstrumentationVersion = "2.29.0-alpha"
 val semconvVersion = "1.42.0"
 
 javaPlatform {
@@ -16,7 +16,7 @@ dependencies {
   // as runtime dependencies if they are actually used as runtime dependencies)
   api(platform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${otelInstrumentationVersion}"))
   api(platform("com.fasterxml.jackson:jackson-bom:2.22.0"))
-  api(platform("com.google.protobuf:protobuf-bom:4.35.0"))
+  api(platform("com.google.protobuf:protobuf-bom:4.35.1"))
   api(platform("com.squareup.okhttp3:okhttp-bom:5.4.0"))
 
   constraints {

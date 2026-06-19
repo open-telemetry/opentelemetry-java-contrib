@@ -1,6 +1,6 @@
 # Runtime attachment
 
-[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-runtime-attach/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-runtime-attach)
+[![Maven](https://img.shields.io/maven-central/v/io.opentelemetry.contrib/opentelemetry-runtime-attach?label=Maven&color=orange)](https://central.sonatype.com/artifact/io.opentelemetry.contrib/opentelemetry-runtime-attach)
 
 If you can't update the JVM arguments to attach the
 [OpenTelemetry Java agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation)

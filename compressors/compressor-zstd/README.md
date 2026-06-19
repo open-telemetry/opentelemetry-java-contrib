@@ -1,6 +1,6 @@
 # zstd Compressor
 
-[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-compressor-zstd/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-compressor-zstd)
+[![Maven](https://img.shields.io/maven-central/v/io.opentelemetry.contrib/opentelemetry-compressor-zstd?label=Maven&color=orange)](https://central.sonatype.com/artifact/io.opentelemetry.contrib/opentelemetry-compressor-zstd)
 
 A [zstd](https://en.wikipedia.org/wiki/Zstd) implementation of [Compressor](https://github.com/open-telemetry/opentelemetry-java/blob/d9f9812d4375a4229caff43bd681c50b7a45776a/exporters/common/src/main/java/io/opentelemetry/exporter/internal/compression/Compressor.java) and [CompressorProvider](https://github.com/open-telemetry/opentelemetry-java/blob/d9f9812d4375a4229caff43bd681c50b7a45776a/exporters/common/src/main/java/io/opentelemetry/exporter/internal/compression/CompressorProvider.java) based on [luben/zstd-jni](https://github.com/luben/zstd-jni).
 
