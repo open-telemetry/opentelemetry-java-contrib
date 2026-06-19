@@ -1,6 +1,6 @@
 # OpenTelemetry AWS X-Ray Propagator
 
-[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-aws-xray-propagator/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-aws-xray-propagator)
+[![Maven](https://img.shields.io/maven-central/v/io.opentelemetry.contrib/opentelemetry-aws-xray-propagator?label=Maven&color=orange)](https://central.sonatype.com/artifact/io.opentelemetry.contrib/opentelemetry-aws-xray-propagator)
 
 This module contains a `TextMapPropagator` implementation compatible with
 the [AWS X-Ray Trace Header propagation protocol](https://docs.aws.amazon.com/xray/latest/devguide/xray-concepts.html#xray-concepts-tracingheader).
