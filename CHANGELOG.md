@@ -2,6 +2,39 @@
 
 ## Unreleased
 
+### Consistent sampling
+
+- **Breaking change**: the consistent sampling module has been rebuilt on top
+  of the OpenTelemetry SDK incubator composable-samplers API in
+  `opentelemetry-sdk-extension-incubator`. Both the legacy OTEP 4673 implementation in
+  `io.opentelemetry.contrib.sampler.consistent` and the newer `consistent56`
+  package have been collapsed into a single `io.opentelemetry.contrib.sampler.consistent`
+  package that uses the SDK incubator implementations where available.
+  Removed classes (use the SDK incubator equivalents instead):
+  `ConsistentProbabilityBasedSampler`, `ConsistentComposedAndSampler`,
+  `ConsistentComposedOrSampler`, `ConsistentAlwaysOnSampler`,
+  `ConsistentAlwaysOffSampler`, `ConsistentParentBasedSampler`,
+  `ConsistentFixedThresholdSampler`, `ConsistentRuleBasedSampler`,
+  `Composable`, `SamplingIntent`, `RandomValueGenerator`,
+  `RandomValueGenerators`, `Predicate`, `PredicatedSampler`,
+  `RValueGenerator`, `RValueGenerators`. The remaining contrib-only samplers
+  (`ConsistentRateLimitingSampler`, `ConsistentVariableThresholdSampler`,
+  `ConsistentAnyOf`) now implement the SDK incubator
+  `io.opentelemetry.sdk.extension.incubator.trace.samplers.ComposableSampler`
+  interface, and `ConsistentReservoirSamplingSpanProcessor` is unchanged.
+  Use `CompositeSampler.wrap(composable)` to turn a composable sampler into
+  a `Sampler`.
+- The `parentbased_consistent_probability` autoconfigure sampler name is
+  retained; the provider now builds its sampler on top of the SDK incubator
+  `ComposableSampler` / `CompositeSampler` API and produces a sampler
+  equivalent to
+  `CompositeSampler.wrap(ComposableSampler.parentThreshold(ComposableSampler.probability(p)))`.
+- Migration mapping for the removed `ConsistentSampler` factories:
+  - `ConsistentSampler.alwaysOn()` -> `ComposableSampler.alwaysOn()`
+  - `ConsistentSampler.alwaysOff()` -> `ComposableSampler.alwaysOff()`
+  - `ConsistentSampler.probabilityBased(p)` -> `ComposableSampler.probability(p)`
+  - `ConsistentSampler.parentBased(root)` -> `ComposableSampler.parentThreshold(root)`
+
 ## Version 1.57.0 (2026-05-20)
 
 ### Baggage processor

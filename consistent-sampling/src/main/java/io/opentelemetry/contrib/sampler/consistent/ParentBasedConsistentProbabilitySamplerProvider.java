@@ -7,6 +7,8 @@ package io.opentelemetry.contrib.sampler.consistent;
 
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.traces.ConfigurableSamplerProvider;
+import io.opentelemetry.sdk.extension.incubator.trace.samplers.ComposableSampler;
+import io.opentelemetry.sdk.extension.incubator.trace.samplers.CompositeSampler;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 
 public final class ParentBasedConsistentProbabilitySamplerProvider
@@ -15,7 +17,8 @@ public final class ParentBasedConsistentProbabilitySamplerProvider
   @Override
   public Sampler createSampler(ConfigProperties config) {
     double samplingProbability = config.getDouble("otel.traces.sampler.arg", 1.0d);
-    return ConsistentSampler.parentBased(ConsistentSampler.probabilityBased(samplingProbability));
+    return CompositeSampler.wrap(
+        ComposableSampler.parentThreshold(ComposableSampler.probability(samplingProbability)));
   }
 
   @Override

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.sampler.consistent56;
+package io.opentelemetry.contrib.sampler.consistent;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 

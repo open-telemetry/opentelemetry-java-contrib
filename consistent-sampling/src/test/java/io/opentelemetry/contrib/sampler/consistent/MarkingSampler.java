@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.sampler.consistent56;
+package io.opentelemetry.contrib.sampler.consistent;
 
 import static java.util.Objects.requireNonNull;
 
@@ -11,8 +11,9 @@ import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.trace.SpanKind;
-import io.opentelemetry.api.trace.TraceState;
 import io.opentelemetry.context.Context;
+import io.opentelemetry.sdk.extension.incubator.trace.samplers.ComposableSampler;
+import io.opentelemetry.sdk.extension.incubator.trace.samplers.SamplingIntent;
 import io.opentelemetry.sdk.trace.data.LinkData;
 import java.util.List;
 import javax.annotation.concurrent.Immutable;
@@ -23,9 +24,9 @@ import javax.annotation.concurrent.Immutable;
  * could be also offered as a general utility.
  */
 @Immutable
-final class MarkingSampler implements Composable {
+final class MarkingSampler implements ComposableSampler {
 
-  private final Composable delegate;
+  private final ComposableSampler delegate;
   private final AttributeKey<String> attributeKey;
   private final String attributeValue;
 
@@ -38,7 +39,8 @@ final class MarkingSampler implements Composable {
    * @param attributeKey Span attribute key
    * @param attributeValue Span attribute value
    */
-  MarkingSampler(Composable delegate, AttributeKey<String> attributeKey, String attributeValue) {
+  MarkingSampler(
+      ComposableSampler delegate, AttributeKey<String> attributeKey, String attributeValue) {
     this.delegate = requireNonNull(delegate);
     this.attributeKey = requireNonNull(attributeKey);
     this.attributeValue = requireNonNull(attributeValue);
@@ -55,32 +57,23 @@ final class MarkingSampler implements Composable {
   @Override
   public SamplingIntent getSamplingIntent(
       Context parentContext,
+      String traceId,
       String name,
       SpanKind spanKind,
       Attributes attributes,
       List<LinkData> parentLinks) {
 
     SamplingIntent delegateIntent =
-        delegate.getSamplingIntent(parentContext, name, spanKind, attributes, parentLinks);
+        delegate.getSamplingIntent(parentContext, traceId, name, spanKind, attributes, parentLinks);
 
-    return new SamplingIntent() {
-      @Override
-      public long getThreshold() {
-        return delegateIntent.getThreshold();
-      }
+    AttributesBuilder builder = delegateIntent.getAttributes().toBuilder();
+    builder = builder.put(attributeKey, attributeValue);
 
-      @Override
-      public Attributes getAttributes() {
-        AttributesBuilder builder = delegateIntent.getAttributes().toBuilder();
-        builder = builder.put(attributeKey, attributeValue);
-        return builder.build();
-      }
-
-      @Override
-      public TraceState updateTraceState(TraceState previousState) {
-        return delegateIntent.updateTraceState(previousState);
-      }
-    };
+    return SamplingIntent.create(
+        delegateIntent.getThreshold(),
+        delegateIntent.isThresholdReliable(),
+        builder.build(),
+        delegateIntent.getTraceStateUpdater());
   }
 
   @Override

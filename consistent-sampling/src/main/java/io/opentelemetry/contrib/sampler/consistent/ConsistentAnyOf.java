@@ -3,18 +3,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.contrib.sampler.consistent56;
+package io.opentelemetry.contrib.sampler.consistent;
 
-import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.getInvalidThreshold;
-import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.isValidThreshold;
+import static io.opentelemetry.contrib.sampler.consistent.ConsistentSamplingUtil.getInvalidThreshold;
+import static io.opentelemetry.contrib.sampler.consistent.ConsistentSamplingUtil.isValidThreshold;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.TraceState;
 import io.opentelemetry.context.Context;
+import io.opentelemetry.sdk.extension.incubator.trace.samplers.ComposableSampler;
+import io.opentelemetry.sdk.extension.incubator.trace.samplers.SamplingIntent;
 import io.opentelemetry.sdk.trace.data.LinkData;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
@@ -25,9 +28,9 @@ import javax.annotation.concurrent.Immutable;
  * uses the minimum threshold value received.
  */
 @Immutable
-final class ConsistentAnyOf extends ConsistentSampler {
+final class ConsistentAnyOf implements ComposableSampler {
 
-  private final Composable[] delegates;
+  private final ComposableSampler[] delegates;
 
   private final String description;
 
@@ -36,7 +39,7 @@ final class ConsistentAnyOf extends ConsistentSampler {
    *
    * @param delegates the delegate samplers
    */
-  ConsistentAnyOf(@Nullable Composable... delegates) {
+  ConsistentAnyOf(@Nullable ComposableSampler... delegates) {
     if (delegates == null || delegates.length == 0) {
       throw new IllegalArgumentException(
           "At least one delegate must be specified for ConsistentAnyOf");
@@ -53,6 +56,7 @@ final class ConsistentAnyOf extends ConsistentSampler {
   @Override
   public SamplingIntent getSamplingIntent(
       Context parentContext,
+      String traceId,
       String name,
       SpanKind spanKind,
       Attributes attributes,
@@ -65,64 +69,54 @@ final class ConsistentAnyOf extends ConsistentSampler {
     long minimumThreshold = getInvalidThreshold();
 
     // If any of the delegates returning the threshold value equal to T returns true upon calling
-    // its IsAdjustedCountReliable() method, the resulting isAdjustedCountReliable is true,
+    // its isThresholdReliable() method, the resulting isThresholdReliable is true,
     // otherwise it is false.
-    boolean isAdjustedCountCorrect = false;
+    boolean isThresholdReliable = false;
 
     int k = 0;
-    for (Composable delegate : delegates) {
+    for (ComposableSampler delegate : delegates) {
       SamplingIntent delegateIntent =
-          delegate.getSamplingIntent(parentContext, name, spanKind, attributes, parentLinks);
+          delegate.getSamplingIntent(
+              parentContext, traceId, name, spanKind, attributes, parentLinks);
       long delegateThreshold = delegateIntent.getThreshold();
       if (isValidThreshold(delegateThreshold)) {
         if (isValidThreshold(minimumThreshold)) {
           if (delegateThreshold == minimumThreshold) {
-            if (delegateIntent.isAdjustedCountReliable()) {
-              isAdjustedCountCorrect = true;
+            if (delegateIntent.isThresholdReliable()) {
+              isThresholdReliable = true;
             }
           } else if (delegateThreshold < minimumThreshold) {
             minimumThreshold = delegateThreshold;
-            isAdjustedCountCorrect = delegateIntent.isAdjustedCountReliable();
+            isThresholdReliable = delegateIntent.isThresholdReliable();
           }
         } else {
           minimumThreshold = delegateThreshold;
-          isAdjustedCountCorrect = delegateIntent.isAdjustedCountReliable();
+          isThresholdReliable = delegateIntent.isThresholdReliable();
         }
       }
       intents[k++] = delegateIntent;
     }
 
     long resultingThreshold = minimumThreshold;
-    boolean isResultingAdjustedCountCorrect = isAdjustedCountCorrect;
+    boolean resultingThresholdReliable = isThresholdReliable;
 
-    return new SamplingIntent() {
-      @Override
-      public long getThreshold() {
-        return resultingThreshold;
-      }
+    AttributesBuilder builder = Attributes.builder();
+    for (SamplingIntent intent : intents) {
+      builder = builder.putAll(intent.getAttributes());
+    }
+    Attributes mergedAttributes = builder.build();
 
-      @Override
-      public boolean isAdjustedCountReliable() {
-        return isResultingAdjustedCountCorrect;
-      }
+    Function<TraceState, TraceState> composedUpdater =
+        previousState -> {
+          TraceState state = previousState;
+          for (SamplingIntent intent : intents) {
+            state = intent.getTraceStateUpdater().apply(state);
+          }
+          return state;
+        };
 
-      @Override
-      public Attributes getAttributes() {
-        AttributesBuilder builder = Attributes.builder();
-        for (SamplingIntent intent : intents) {
-          builder = builder.putAll(intent.getAttributes());
-        }
-        return builder.build();
-      }
-
-      @Override
-      public TraceState updateTraceState(TraceState previousState) {
-        for (SamplingIntent intent : intents) {
-          previousState = intent.updateTraceState(previousState);
-        }
-        return previousState;
-      }
-    };
+    return SamplingIntent.create(
+        resultingThreshold, resultingThresholdReliable, mergedAttributes, composedUpdater);
   }
 
   @Override
