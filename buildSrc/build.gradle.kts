@@ -17,7 +17,7 @@ dependencies {
   implementation("com.diffplug.spotless:com.diffplug.spotless.gradle.plugin:8.7.0")
   implementation("net.ltgt.errorprone:net.ltgt.errorprone.gradle.plugin:5.1.0")
   implementation("net.ltgt.nullaway:net.ltgt.nullaway.gradle.plugin:3.1.0")
-  implementation("org.sonatype.gradle.plugins:scan-gradle-plugin:3.1.5")
+  implementation("org.sonatype.gradle.plugins:scan-gradle-plugin:3.1.6")
   implementation("ru.vyarus.animalsniffer:ru.vyarus.animalsniffer.gradle.plugin:2.0.1")
   implementation("com.gradle.develocity:com.gradle.develocity.gradle.plugin:4.4.2")
   implementation("me.champeau.gradle.japicmp:me.champeau.gradle.japicmp.gradle.plugin:0.4.6")
