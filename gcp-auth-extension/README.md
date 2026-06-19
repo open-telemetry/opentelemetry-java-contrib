@@ -1,6 +1,6 @@
 # Google Cloud Authentication Extension
 
-[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-gcp-auth-extension/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-gcp-auth-extension)
+[![Maven](https://img.shields.io/maven-central/v/io.opentelemetry.contrib/opentelemetry-gcp-auth-extension?label=Maven&color=orange)](https://central.sonatype.com/artifact/io.opentelemetry.contrib/opentelemetry-gcp-auth-extension)
 
 The Google Cloud Auth Extension allows users to export telemetry from their
 applications to Google Cloud using the built-in OTLP exporters.

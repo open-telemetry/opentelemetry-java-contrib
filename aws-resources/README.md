@@ -1,6 +1,6 @@
 # OpenTelemetry AWS Resource Support
 
-[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-aws-resources/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-aws-resources)
+[![Maven](https://img.shields.io/maven-central/v/io.opentelemetry.contrib/opentelemetry-aws-resources?label=Maven&color=orange)](https://central.sonatype.com/artifact/io.opentelemetry.contrib/opentelemetry-aws-resources)
 
 This module contains AWS resource detectors including Beanstalk, EC2, ECS, EKS, and Lambda.
 
