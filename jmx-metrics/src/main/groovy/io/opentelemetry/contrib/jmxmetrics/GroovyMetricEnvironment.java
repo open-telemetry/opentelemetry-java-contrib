@@ -213,7 +213,7 @@ public class GroovyMetricEnvironment {
   }
 
   /**
-   * Build or retrieve previously registered {@link }.
+   * Build or retrieve previously registered {@link LongHistogram}.
    *
    * @param name - metric name
    * @param description metric description

@@ -1,0 +1,76 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+package io.opentelemetry.contrib.dynamic.policy.tracesampling;
+
+import io.opentelemetry.contrib.dynamic.policy.PolicyImplementer;
+import io.opentelemetry.contrib.dynamic.policy.PolicyValidator;
+import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
+import io.opentelemetry.sdk.trace.samplers.Sampler;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.logging.Logger;
+
+/**
+ * Implements the {@code trace-sampling} policy by updating a {@link DelegatingSampler}.
+ *
+ * <p>This implementer listens for validated {@link TelemetryPolicy} updates of type {@code
+ * "trace-sampling"} and applies {@link TraceSamplingRatePolicy#getProbability()} to the delegate
+ * sampler via {@link TraceSamplingRatePolicy#createSampler(double)}.
+ *
+ * <p>If a type-only {@link TelemetryPolicy} of type {@code "trace-sampling"} is received, it is
+ * treated as policy removal and the delegate is reset using {@code
+ * TraceSamplingRatePolicy.createSampler(1.0)}.
+ *
+ * <p>Validation is performed by {@link TraceSamplingValidator}; this implementer only consumes
+ * policies produced by that validator.
+ *
+ * <p>This class is thread-safe. Calls to {@link #onPoliciesChanged(List)} can occur concurrently
+ * with sampling operations on the associated {@link DelegatingSampler}.
+ */
+public final class TraceSamplingRatePolicyImplementer implements PolicyImplementer {
+  private static final Logger logger =
+      Logger.getLogger(TraceSamplingRatePolicyImplementer.class.getName());
+
+  private static final List<PolicyValidator> VALIDATORS =
+      Collections.<PolicyValidator>singletonList(new TraceSamplingValidator());
+
+  private final DelegatingSampler delegatingSampler;
+
+  /**
+   * Creates a new implementer that updates the provided {@link DelegatingSampler}.
+   *
+   * @param delegatingSampler the sampler to update when policies change
+   */
+  public TraceSamplingRatePolicyImplementer(DelegatingSampler delegatingSampler) {
+    Objects.requireNonNull(delegatingSampler, "delegatingSampler cannot be null");
+    this.delegatingSampler = delegatingSampler;
+  }
+
+  @Override
+  public List<PolicyValidator> getValidators() {
+    return VALIDATORS;
+  }
+
+  @Override
+  public void onPoliciesChanged(List<TelemetryPolicy> policies) {
+    for (TelemetryPolicy policy : policies) {
+      if (!TraceSamplingRatePolicy.POLICY_TYPE.equals(policy.getType())) {
+        continue;
+      }
+      if (!(policy instanceof TraceSamplingRatePolicy)) {
+        // Type-only policy represents removing trace-sampling config.
+        delegatingSampler.setDelegate(TraceSamplingRatePolicy.createSampler(1.0));
+        logger.info("Applied trace sampling policy reset: probability reset to 1.0");
+        continue;
+      }
+      double ratio = ((TraceSamplingRatePolicy) policy).getProbability();
+      Sampler sampler = TraceSamplingRatePolicy.createSampler(ratio);
+      delegatingSampler.setDelegate(sampler);
+      logger.info("Applied trace sampling policy update: probability=" + ratio);
+    }
+  }
+}

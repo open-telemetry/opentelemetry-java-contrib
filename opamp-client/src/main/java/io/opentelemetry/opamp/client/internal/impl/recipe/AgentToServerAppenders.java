@@ -11,6 +11,7 @@ import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.AgentToServe
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.CapabilitiesAppender;
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.EffectiveConfigAppender;
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.FlagsAppender;
+import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.HealthAppender;
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.InstanceUidAppender;
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.RemoteConfigStatusAppender;
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.SequenceNumberAppender;
@@ -29,17 +30,20 @@ public final class AgentToServerAppenders {
   public final RemoteConfigStatusAppender remoteConfigStatusAppender;
   public final SequenceNumberAppender sequenceNumberAppender;
   public final CapabilitiesAppender capabilitiesAppender;
+  public final HealthAppender healthAppender;
   public final InstanceUidAppender instanceUidAppender;
   public final FlagsAppender flagsAppender;
   public final AgentDisconnectAppender agentDisconnectAppender;
   private final Map<Field, AgentToServerAppender> allAppenders;
 
+  @SuppressWarnings("TooManyParameters")
   public AgentToServerAppenders(
       AgentDescriptionAppender agentDescriptionAppender,
       EffectiveConfigAppender effectiveConfigAppender,
       RemoteConfigStatusAppender remoteConfigStatusAppender,
       SequenceNumberAppender sequenceNumberAppender,
       CapabilitiesAppender capabilitiesAppender,
+      HealthAppender healthAppender,
       InstanceUidAppender instanceUidAppender,
       FlagsAppender flagsAppender,
       AgentDisconnectAppender agentDisconnectAppender) {
@@ -48,6 +52,7 @@ public final class AgentToServerAppenders {
     this.remoteConfigStatusAppender = remoteConfigStatusAppender;
     this.sequenceNumberAppender = sequenceNumberAppender;
     this.capabilitiesAppender = capabilitiesAppender;
+    this.healthAppender = healthAppender;
     this.instanceUidAppender = instanceUidAppender;
     this.flagsAppender = flagsAppender;
     this.agentDisconnectAppender = agentDisconnectAppender;
@@ -58,6 +63,7 @@ public final class AgentToServerAppenders {
     appenders.put(Field.REMOTE_CONFIG_STATUS, remoteConfigStatusAppender);
     appenders.put(Field.SEQUENCE_NUM, sequenceNumberAppender);
     appenders.put(Field.CAPABILITIES, capabilitiesAppender);
+    appenders.put(Field.HEALTH, healthAppender);
     appenders.put(Field.INSTANCE_UID, instanceUidAppender);
     appenders.put(Field.FLAGS, flagsAppender);
     appenders.put(Field.AGENT_DISCONNECT, agentDisconnectAppender);

@@ -21,10 +21,11 @@ dependencies {
   implementation("com.squareup.okhttp3:okhttp")
 
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
-  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-incubator")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-declarative-config")
   testImplementation("io.opentelemetry:opentelemetry-api-incubator")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation("io.opentelemetry:opentelemetry-exporter-logging")
+  testImplementation("io.opentelemetry:opentelemetry-exporter-otlp")
 
   testImplementation("com.linecorp.armeria:armeria-junit5")
   testRuntimeOnly("org.bouncycastle:bcpkix-jdk15on")

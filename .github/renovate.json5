@@ -1,6 +1,7 @@
 {
   $schema: 'https://docs.renovatebot.com/renovate-schema.json',
   extends: [
+    "github>grafana/flint#v0.22.5",
     'config:best-practices',
     'helpers:pinGitHubActionDigestsToSemver',
     'customManagers:githubActionsVersions',
@@ -16,6 +17,9 @@
     'dependencies',
   ],
   packageRules: [
+
+    // ── Scheduling & grouping ──────────────────────────────────────────
+
     {
       // reduces the number of Renovate PRs
       // (patch updates are typically non-breaking)
@@ -24,7 +28,7 @@
         'patch',
       ],
       schedule: [
-        'before 8am every weekday',
+        '* 0-7 * * 2', // weekly, before 8am on Tuesday
       ],
     },
     {
@@ -35,13 +39,38 @@
         'major',
       ],
       schedule: [
-        'before 8am on Monday',
+        '* 0-7 * * 2', // weekly, before 8am on Tuesday
       ],
       matchPackageNames: [
         '!io.opentelemetry:**',
         '!io.opentelemetry.*:**',
       ],
     },
+    {
+      // group all GitHub Actions updates into a single weekly PR
+      // (must be after patch rule so that it wins for GH Action patches)
+      groupName: 'github actions',
+      matchManagers: [
+        'github-actions',
+      ],
+      schedule: [
+        '* 0-7 * * 2', // weekly, before 8am on Tuesday
+      ],
+    },
+    {
+      // keep Kotlin Gradle plugin updates out of the catch-all patch PR because CodeQL often
+      // fails on them, which blocks unrelated patch updates
+      matchDepNames: [
+        'org.jetbrains.kotlin.jvm',
+      ],
+      schedule: [
+        '* 0-7 * * 2', // weekly, before 8am on Tuesday
+      ],
+      groupName: 'kotlin plugin updates',
+    },
+
+    // ── Version constraints ────────────────────────────────────────────
+
     {
       matchPackageNames: [
         'io.opentelemetry:**',
@@ -62,6 +91,56 @@
       ],
       allowedVersions: '!/^3\\.0\\.1$/',
     },
+
+    // ── Package family groups ──────────────────────────────────────────
+
+    {
+      groupName: 'spotless packages',
+      matchPackageNames: [
+        'com.diffplug.spotless',
+        'com.diffplug.spotless:**',
+      ],
+    },
+    {
+      groupName: 'hipparchus packages',
+      matchPackageNames: [
+        'org.hipparchus:**',
+      ],
+    },
+    {
+      groupName: 'errorprone packages',
+      matchPackageNames: [
+        'com.google.errorprone:**',
+      ],
+    },
+    {
+      groupName: 'jackson packages',
+      matchPackageNames: [
+        'com.fasterxml.jackson:**',
+        'com.fasterxml.jackson.core:**',
+      ],
+    },
+    {
+      groupName: 'develocity packages',
+      matchPackageNames: [
+        'com.gradle.develocity:**',
+      ],
+    },
+    {
+      groupName: 'bouncycastle packages',
+      matchPackageNames: [
+        'org.bouncycastle:**',
+      ],
+    },
+    {
+      groupName: 'ibm mq packages',
+      matchPackageNames: [
+        'com.ibm.mq:**',
+      ],
+    },
+
+    // ── Disabled updates (Java version compatibility) ──────────────────
+
     {
       // disruptor 4+ requires Java 11+
       matchFileNames: [
@@ -120,6 +199,16 @@
       ],
     },
     {
+      // wiremock 3+ requires Java 11+
+      matchUpdateTypes: [
+        'major',
+      ],
+      enabled: false,
+      matchPackageNames: [
+        'com.github.tomakehurst:wiremock-jre8'
+      ],
+    },
+    {
       // agrona 1.23+ requires Java 17+
       matchFileNames: [
         'inferred-spans/build.gradle.kts',
@@ -145,6 +234,16 @@
       enabled: false,
     },
     {
+      // snakeyaml-engine 3+ requires Java 11+
+      matchUpdateTypes: [
+        'major',
+      ],
+      enabled: false,
+      matchPackageNames: [
+        'org.snakeyaml:snakeyaml-engine'
+      ],
+    },
+    {
       // pinned version for compatibility
       matchFileNames: [
         'micrometer-meter-provider/build.gradle.kts',
@@ -164,44 +263,6 @@
       enabled: false,
       matchPackageNames: [
         'org.apache.maven:**',
-      ],
-    },
-    {
-      groupName: 'spotless packages',
-      matchPackageNames: [
-        'com.diffplug.spotless',
-        'com.diffplug.spotless:**',
-      ],
-    },
-    {
-      groupName: 'hipparchus packages',
-      matchPackageNames: [
-        'org.hipparchus:**',
-      ],
-    },
-    {
-      groupName: 'errorprone packages',
-      matchPackageNames: [
-        'com.google.errorprone:**',
-      ],
-    },
-    {
-      groupName: 'jackson packages',
-      matchPackageNames: [
-        'com.fasterxml.jackson:**',
-        'com.fasterxml.jackson.core:**',
-      ],
-    },
-    {
-      groupName: 'develocity packages',
-      matchPackageNames: [
-        'com.gradle.develocity:**',
-      ],
-    },
-    {
-      groupName: 'bouncycastle packages',
-      matchPackageNames: [
-        'org.bouncycastle:**',
       ],
     },
     {
@@ -241,19 +302,19 @@
         'org.springframework.boot:**',
       ],
     },
-    {
-      // group all GitHub Actions updates into a single weekly PR
-      // (Renovate applies packageRules in order and later rules win)
-      groupName: 'github actions',
-      matchManagers: [
-        'github-actions',
-      ],
-      schedule: [
-        'before 8am on Tuesday',
-      ],
-    },
   ],
   customManagers: [
+    {
+      // keep SHA-pinned raw.githubusercontent.com URLs in mise.toml up to date
+      customType: 'regex',
+      datasourceTemplate: 'github-tags',
+      managerFilePatterns: [
+        '/^mise\\.toml$/',
+      ],
+      matchStrings: [
+        'https://raw\\.githubusercontent\\.com/(?<depName>[^/]+/[^/]+)/(?<currentDigest>[a-f0-9]{40})/.*#\\s*(?<currentValue>v\\S+)',
+      ],
+    },
     {
       customType: 'regex',
       datasourceTemplate: 'npm',
@@ -266,15 +327,15 @@
     },
     {
       customType: 'regex',
-      datasourceTemplate: 'java-version',
+      datasourceTemplate: 'docker',
       managerFilePatterns: [
         '.github/workflows/**',
       ],
       matchStrings: [
         '(?<currentValue>\\d+) # renovate\\(java-version\\)',
       ],
-      depNameTemplate: 'java',
-      extractVersionTemplate: '^(?<version>\\d+)',
+      // using zulu because new releases get published quickly
+      depNameTemplate: 'azul/zulu-openjdk',
     },
     {
       customType: 'regex',

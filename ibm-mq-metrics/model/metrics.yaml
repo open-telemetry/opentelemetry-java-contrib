@@ -249,6 +249,20 @@ groups:
         requirement_level: required
       - ref: messaging.destination.name
         requirement_level: required
+  - id: ibm.mq.expired.messages
+    type: metric
+    metric_name: ibm.mq.expired.messages
+    stability: development
+    brief: "Number of expired messages"
+    instrument: gauge
+    unit: "{message}"
+    attributes:
+      - ref: ibm.mq.queue.manager
+        requirement_level: required
+      - ref: messaging.destination.name
+        requirement_level: required
+      - ref: ibm.mq.queue.type
+        requirement_level: required
   - id: ibm.mq.uncommitted.messages
     type: metric
     metric_name: ibm.mq.uncommitted.messages

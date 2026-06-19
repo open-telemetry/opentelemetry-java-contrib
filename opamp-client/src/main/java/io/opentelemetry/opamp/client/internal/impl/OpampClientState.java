@@ -19,6 +19,7 @@ public final class OpampClientState {
   public final State.SequenceNum sequenceNum;
   public final State.AgentDescription agentDescription;
   public final State.Capabilities capabilities;
+  public final State.Health health;
   public final State.InstanceUid instanceUid;
   public final State.Flags flags;
   public final State.EffectiveConfig effectiveConfig;
@@ -29,6 +30,7 @@ public final class OpampClientState {
       State.SequenceNum sequenceNum,
       State.AgentDescription agentDescription,
       State.Capabilities capabilities,
+      State.Health health,
       State.InstanceUid instanceUid,
       State.Flags flags,
       State.EffectiveConfig effectiveConfig) {
@@ -36,6 +38,7 @@ public final class OpampClientState {
     this.sequenceNum = sequenceNum;
     this.agentDescription = agentDescription;
     this.capabilities = capabilities;
+    this.health = health;
     this.instanceUid = instanceUid;
     this.flags = flags;
     this.effectiveConfig = effectiveConfig;
@@ -45,6 +48,7 @@ public final class OpampClientState {
     providedItems.add(sequenceNum);
     providedItems.add(agentDescription);
     providedItems.add(capabilities);
+    providedItems.add(health);
     providedItems.add(instanceUid);
     providedItems.add(flags);
     providedItems.add(effectiveConfig);

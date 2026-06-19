@@ -1,7 +1,7 @@
 plugins {
+  id("com.gradleup.shadow")
   id("otel.java-conventions")
   id("otel.publish-conventions")
-  id("otel.animalsniffer-conventions")
 }
 
 description = "Dynamic control of some specific features of the agent"
@@ -13,13 +13,19 @@ java {
 }
 
 dependencies {
+  implementation(project(":opamp-client"))
+  implementation("com.squareup.okhttp3:okhttp")
+
   annotationProcessor("com.google.auto.service:auto-service")
   compileOnly("com.google.auto.service:auto-service-annotations")
 
   implementation("com.fasterxml.jackson.core:jackson-databind")
+  implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml")
 
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
+  compileOnly("io.opentelemetry:opentelemetry-sdk-extension-declarative-config")
+  compileOnly("io.opentelemetry:opentelemetry-sdk-extension-incubator")
 
   testCompileOnly("com.google.auto.service:auto-service-annotations")
   testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
@@ -28,7 +34,19 @@ dependencies {
 
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-declarative-config")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-incubator")
   testImplementation("org.assertj:assertj-core")
   testImplementation("org.mockito:mockito-inline")
   testImplementation("org.mockito:mockito-junit-jupiter")
+}
+
+tasks {
+  shadowJar {
+    archiveClassifier.set("all")
+    mergeServiceFiles()
+    manifest {
+      attributes["Implementation-Version"] = project.version
+    }
+  }
 }

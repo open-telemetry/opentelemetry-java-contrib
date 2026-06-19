@@ -36,7 +36,7 @@ dependencies {
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation("io.opentelemetry:opentelemetry-api-incubator")
   testImplementation("io.opentelemetry:opentelemetry-exporter-logging")
-  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-incubator")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-declarative-config")
   testImplementation("org.apache.maven:maven-core:3.5.0")
   testImplementation("org.slf4j:slf4j-simple")
 }
@@ -58,6 +58,13 @@ tasks {
       attributes["Implementation-Version"] = project.version
     }
     archiveClassifier.set("")
+    // Concatenate colliding META-INF/services SPI files from bundled dependencies instead of
+    // letting them overwrite each other. Without this, the SDK's EnvironmentResourceProvider
+    // registration is dropped and OTEL_RESOURCE_ATTRIBUTES / OTEL_SERVICE_NAME are ignored.
+    mergeServiceFiles()
+    filesMatching("META-INF/services/**") {
+      duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    }
   }
 
   assemble {

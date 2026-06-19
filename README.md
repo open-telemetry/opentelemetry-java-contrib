@@ -8,14 +8,14 @@
 
 This project is intended to provide helpful libraries and standalone OpenTelemetry-based utilities that don't fit
 the express scope of the [OpenTelemetry Java](https://github.com/open-telemetry/opentelemetry-java) or
-[Java Instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation) projects.  If you need an
+[Java Instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation) projects. If you need an
 easier way to bring observability to remote JVM-based applications and workflows that isn't easily satisfied by an SDK
 feature or via instrumentation, this project is hopefully for you.
 
 ## Provided Libraries
 
 | Status* | Library                                                           |
-|---------|-------------------------------------------------------------------|
+| ------- | ----------------------------------------------------------------- |
 | beta    | [AWS Resources](./aws-resources/README.md)                        |
 | stable  | [AWS X-Ray SDK Support](./aws-xray/README.md)                     |
 | alpha   | [AWS X-Ray Propagator](./aws-xray-propagator/README.md)           |
@@ -47,7 +47,8 @@ feature or via instrumentation, this project is hopefully for you.
 To reach stable status, the library needs to have stable APIs, stable semantic conventions, and be production ready.
 On reaching stable status, the `otel.stable` value in `gradle.properties` should be set to `true`.
 Note that currently all the libraries are released together with the version of this repo, so breaking changes (after stable
-status is reached) would bump the major version of all libraries together. This could get complicated so `stable` has a high bar.
+status is reached) would bump the major version of all libraries together.
+This could get complicated, so `stable` has a high bar.
 
 ## Contributing
 
@@ -55,31 +56,29 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ### Maintainers
 
-- [Jack Berg](https://github.com/jack-berg), Grafana Labs
-- [Jason Plumb](https://github.com/breedx-splk), Splunk
-- [Jay DeLuca](https://github.com/jaydeluca), Grafana Labs
-- [Lauri Tulmin](https://github.com/laurit), Splunk
-- [Trask Stalnaker](https://github.com/trask), Microsoft
+* [Jack Berg](https://github.com/jack-berg), Grafana Labs
+* [Jason Plumb](https://github.com/breedx-splk), Splunk
+* [Jay DeLuca](https://github.com/jaydeluca), Grafana Labs
+* [Lauri Tulmin](https://github.com/laurit), Splunk
+* [Trask Stalnaker](https://github.com/trask), Microsoft
 
 For more information about the maintainer role, see the [community repository](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#maintainer).
 
 ### Approvers
 
-- [Gregor Zeitlinger](https://github.com/zeitlinger), Grafana Labs
-- [John Watson](https://github.com/jkwatson), Sublime Security
+* [Gregor Zeitlinger](https://github.com/zeitlinger), Grafana Labs
+* [John Watson](https://github.com/jkwatson), Sublime Security
 
 For more information about the approver role, see the [community repository](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#approver).
 
 ### Emeritus maintainers
 
-- [Mateusz Rzeszutek](https://github.com/mateuszrzeszutek)
-- [Nikita Salnikov-Tarnovski](https://github.com/iNikem)
-- [Ryan Fitzpatrick](https://github.com/rmfitzpatrick)
+* [Mateusz Rzeszutek](https://github.com/mateuszrzeszutek)
+* [Nikita Salnikov-Tarnovski](https://github.com/iNikem)
+* [Ryan Fitzpatrick](https://github.com/rmfitzpatrick)
 
 For more information about the emeritus role, see the [community repository](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#emeritus-maintainerapprovertriager).
 
-### Thanks to all of our contributors!
+### Thanks to all of our contributors
 
-<a href="https://github.com/open-telemetry/opentelemetry-java-contrib/graphs/contributors">
-  <img alt="Repo contributors" src="https://contrib.rocks/image?repo=open-telemetry/opentelemetry-java-contrib" />
-</a>
+[![Repo contributors](https://contrib.rocks/image?repo=open-telemetry/opentelemetry-java-contrib)](https://github.com/open-telemetry/opentelemetry-java-contrib/graphs/contributors)

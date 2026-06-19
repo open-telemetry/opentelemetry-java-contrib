@@ -1,5 +1,5 @@
-# yaml-language-server: $schema=https://github.com/open-telemetry/opentelemetry-configuration/raw/refs/tags/v1.0.0-rc.2/schema/opentelemetry_configuration.json
-file_format: 1.0-rc.2
+# yaml-language-server: $schema=https://github.com/open-telemetry/opentelemetry-configuration/raw/refs/tags/v1.0.0/schema/opentelemetry_configuration.json
+file_format: "1.0"
 tracer_provider:
   sampler:
     parent_based:

@@ -8,7 +8,7 @@ plugins {
   id("otel.errorprone-conventions")
   id("otel.spotless-conventions")
   id("otel.japicmp-conventions")
-  id("org.owasp.dependencycheck")
+  id("org.sonatype.gradle.plugins.scan")
 }
 
 val otelJava = extensions.create<OtelJavaExtension>("otelJava")
@@ -151,7 +151,7 @@ dependencies {
 
 testing {
   suites.withType(JvmTestSuite::class).configureEach {
-    useJUnitJupiter("5.14.3")
+    useJUnitJupiter("5.14.4")
 
     dependencies {
       implementation(project())
@@ -217,10 +217,11 @@ afterEvaluate {
   }
 }
 
-dependencyCheck {
-  scanConfigurations = mutableListOf("runtimeClasspath")
-  suppressionFile = "buildscripts/dependency-check-suppressions.xml"
-  failBuildOnCVSS = 7.0f // fail on high or critical CVE
-  nvd.apiKey = System.getenv("NVD_API_KEY")
-  nvd.delay = 3500 // until next dependency check release (https://github.com/jeremylong/DependencyCheck/pull/6333)
+ossIndexAudit {
+  isExcludeCompileOnly = true
+  outputFormat = org.sonatype.gradle.plugins.scan.ossindex.OutputFormat.JSON_CYCLONE_DX_1_4
+
+  // Guide PAT authentication ignores this, but the scan plugin requires it.
+  username = "unused"
+  password = System.getenv("SONATYPE_GUIDE_PAT") ?: ""
 }

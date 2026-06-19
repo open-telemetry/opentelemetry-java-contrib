@@ -7,6 +7,7 @@ package io.opentelemetry.ibm.mq.opentelemetry;
 
 import static java.util.Collections.emptyList;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -19,7 +20,8 @@ import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.Yaml;
+import org.snakeyaml.engine.v2.api.Load;
+import org.snakeyaml.engine.v2.api.LoadSettings;
 
 /** Low-fi domain-specific yaml wrapper. */
 public final class ConfigWrapper {
@@ -37,10 +39,18 @@ public final class ConfigWrapper {
   }
 
   public static ConfigWrapper parse(String configFile) throws IOException {
-    Yaml yaml = new Yaml();
-    Map<String, ?> config =
-        yaml.load(Files.newBufferedReader(Paths.get(configFile), Charset.defaultCharset()));
-    return new ConfigWrapper(config);
+    Load load = new Load(LoadSettings.builder().build());
+    try (BufferedReader reader =
+        Files.newBufferedReader(Paths.get(configFile), Charset.defaultCharset())) {
+      Object loaded = load.loadFromReader(reader);
+      if (!(loaded instanceof Map)) {
+        throw new IllegalArgumentException(
+            "Config file does not contain a YAML map: " + configFile);
+      }
+      @SuppressWarnings("unchecked") // Verified above
+      Map<String, ?> config = (Map<String, ?>) loaded;
+      return new ConfigWrapper(config);
+    }
   }
 
   public int getNumberOfThreads() {

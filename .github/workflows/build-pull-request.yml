@@ -19,14 +19,14 @@ jobs:
       # retry in merge queue to avoid unnecessary failures
       max-test-retries: ${{ github.event_name == 'merge_group' && 5 || 0 }}
 
-  link-check:
-    uses: ./.github/workflows/reusable-link-check.yml
+  lint:
+    uses: ./.github/workflows/reusable-lint.yml
 
   required-status-check:
     if: always()
     needs:
       - common
-      - link-check # wait for link check to complete, but don't require it to pass for merging
+      - lint # wait for lint to complete, but don't require it to pass for merging
     runs-on: ubuntu-latest
     steps:
       # The reusable workflow success depends on all its jobs passing

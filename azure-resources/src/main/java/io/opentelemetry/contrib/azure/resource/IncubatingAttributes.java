@@ -24,6 +24,7 @@ final class IncubatingAttributes {
     public static final String AZURE_AKS = "azure.aks";
     public static final String AZURE_FUNCTIONS = "azure.functions";
     public static final String AZURE_APP_SERVICE = "azure.app_service";
+    public static final String AZURE_CONTAINER_APPS = "azure.container_apps";
 
     private CloudPlatformIncubatingValues() {}
   }
@@ -33,10 +34,6 @@ final class IncubatingAttributes {
 
     private CloudProviderIncubatingValues() {}
   }
-
-  // deployment attributes
-  public static final AttributeKey<String> DEPLOYMENT_ENVIRONMENT_NAME =
-      AttributeKey.stringKey("deployment.environment.name");
 
   // host attributes
   public static final AttributeKey<String> HOST_ID = AttributeKey.stringKey("host.id");

@@ -19,13 +19,10 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
@@ -149,25 +146,20 @@ public final class HttpRequestService implements RequestService {
     AgentToServer agentToServer = Objects.requireNonNull(requestSupplier).get().getAgentToServer();
 
     byte[] data = agentToServer.encodeByteString().toByteArray();
-    CompletableFuture<HttpSender.Response> future =
-        requestSender.send(outputStream -> outputStream.write(data), data.length);
-    try (HttpSender.Response response = future.get(30, TimeUnit.SECONDS)) {
-      getCallback().onConnectionSuccess();
+    try (HttpSender.Response response =
+        requestSender.send(outputStream -> outputStream.write(data), data.length)) {
       if (isSuccessful(response)) {
-        handleHttpSuccess(
-            Response.create(ServerToAgent.ADAPTER.decode(response.bodyInputStream())));
+        ServerToAgent serverToAgent = ServerToAgent.ADAPTER.decode(response.bodyInputStream());
+        getCallback().onConnectionSuccess();
+        handleHttpSuccess(Response.create(serverToAgent));
       } else {
         handleHttpError(response);
       }
-    } catch (IOException | InterruptedException | TimeoutException e) {
+    } catch (IOException e) {
       getCallback().onConnectionFailed(e);
       connectionStatus.retryAfter(null);
-    } catch (ExecutionException e) {
-      if (e.getCause() != null) {
-        getCallback().onConnectionFailed(e.getCause());
-      } else {
-        getCallback().onConnectionFailed(e);
-      }
+    } catch (RuntimeException e) {
+      getCallback().onRequestFailed(e);
       connectionStatus.retryAfter(null);
     }
   }

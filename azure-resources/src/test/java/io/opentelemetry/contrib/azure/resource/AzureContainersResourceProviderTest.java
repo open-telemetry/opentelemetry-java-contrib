@@ -11,6 +11,7 @@ import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_NAME;
 import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_VERSION;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PLATFORM;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PROVIDER;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudPlatformIncubatingValues.AZURE_CONTAINER_APPS;
 
 import com.google.common.collect.ImmutableMap;
 import io.opentelemetry.sdk.testing.assertj.AttributesAssert;
@@ -34,7 +35,7 @@ class AzureContainersResourceProviderTest {
   void defaultValues() {
     createResource(DEFAULT_ENV_VARS)
         .containsEntry(CLOUD_PROVIDER, "azure")
-        .containsEntry(CLOUD_PLATFORM, "azure_container_apps")
+        .containsEntry(CLOUD_PLATFORM, AZURE_CONTAINER_APPS)
         .containsEntry(SERVICE_NAME, TEST_APP_NAME)
         .containsEntry(SERVICE_INSTANCE_ID, TEST_REPLICA_NAME)
         .containsEntry(SERVICE_VERSION, TEST_REVISION);

@@ -6,6 +6,7 @@
 package io.opentelemetry.contrib.disk.buffering.internal.utils;
 
 import com.squareup.wire.ProtoAdapter;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -29,7 +30,7 @@ public final class ProtobufTools {
     for (; offset < 32; offset += 7) {
       int b = input.read();
       if (b == -1) {
-        throw new IllegalStateException();
+        throw new EOFException("Unexpected end-of-stream while reading a varint32. Offset < 32");
       }
       result |= (b & 0x7f) << offset;
       if ((b & 0x80) == 0) {
@@ -40,13 +41,13 @@ public final class ProtobufTools {
     for (; offset < 64; offset += 7) {
       int b = input.read();
       if (b == -1) {
-        throw new IllegalStateException();
+        throw new EOFException("Unexpected end-of-stream while reading a varint32. Offset < 64");
       }
       if ((b & 0x80) == 0) {
         return result;
       }
     }
-    throw new IllegalStateException();
+    throw new IOException("Malformed/overlong varint32");
   }
 
   /**

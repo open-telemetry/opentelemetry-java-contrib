@@ -10,6 +10,7 @@ import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.MIN_FILE_AGE_FOR_READ_MILLIS;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -260,6 +261,31 @@ class FolderManagerTest {
     createFiles(writableFile);
 
     assertThat(getReadableFile()).isNull();
+  }
+
+  @Test
+  void createWritableFile_ignoresNonNumericFilesWhenPurgingExpired() throws IOException {
+    // Non-numeric files (e.g. .nomedia on Android, .DS_Store on macOS) must not crash the write
+    // path.
+    File nomedia = new File(rootDir, ".nomedia");
+    if (!nomedia.createNewFile()) {
+      fail("Could not create .nomedia file");
+    }
+    when(clock.now()).thenReturn(MILLISECONDS.toNanos(1000L));
+
+    WritableFile file = folderManager.createWritableFile();
+
+    assertThat(file.getFile().getName()).isEqualTo("1000");
+    assertThat(nomedia.exists()).isTrue();
+  }
+
+  @Test
+  void clear_throwsIOException_whenFolderIsUnreadable() {
+    assertThat(rootDir.delete()).isTrue();
+
+    assertThatThrownBy(() -> folderManager.clear())
+        .isInstanceOf(IOException.class)
+        .hasMessageContaining("Could not list files");
   }
 
   @Test

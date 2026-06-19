@@ -53,6 +53,17 @@ class AzureFunctionsResourceProviderTest {
     createResource(map).isEmpty();
   }
 
+  @Test
+  void malformedMemoryLimit() {
+    HashMap<String, String> map = new HashMap<>(DEFAULT_ENV_VARS);
+    map.put("WEBSITE_MEMORY_LIMIT_MB", "not-a-number");
+
+    createResource(map)
+        .containsEntry(CLOUD_PROVIDER, "azure")
+        .containsEntry(CLOUD_PLATFORM, "azure.functions")
+        .doesNotContainKey(FAAS_MAX_MEMORY);
+  }
+
   @NotNull
   private static AttributesAssert createResource(Map<String, String> map) {
     return assertThat(new AzureFunctionsResourceProvider(map).createResource(null).getAttributes());

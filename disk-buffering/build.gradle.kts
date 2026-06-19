@@ -6,7 +6,7 @@ plugins {
   id("otel.animalsniffer-conventions")
   id("com.gradleup.shadow")
   id("me.champeau.jmh") version "0.7.3"
-  id("com.squareup.wire") version "5.5.1"
+  id("com.squareup.wire") version "6.4.0"
 }
 
 description = "Exporter implementations that store signals on disk"
@@ -16,7 +16,6 @@ val protos by configurations.creating
 
 dependencies {
   api("io.opentelemetry:opentelemetry-sdk")
-  implementation("io.opentelemetry:opentelemetry-api-incubator")
   implementation("io.opentelemetry:opentelemetry-exporter-otlp-common")
   compileOnly("com.google.auto.value:auto-value-annotations")
   annotationProcessor("com.google.auto.value:auto-value")

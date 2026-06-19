@@ -1,35 +1,37 @@
 # Azure Resource Detectors for OpenTelemetry
 
+[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-azure-resources/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-azure-resources)
+
 This module provides Azure resource detectors for OpenTelemetry.
 
 The following OpenTelemetry semantic conventions will be detected:
 
-| Resource attribute      | VM       | Functions       | App Service       | Containers           |
-|-------------------------|----------|-----------------|-------------------|----------------------|
-| cloud.platform          | azure_vm | azure_functions | azure_app_service | azure_container_apps |
-| cloud.provider          | azure    | azure           | azure             | azure                |
-| cloud.resource.id       | auto     |                 | auto              |                      |
-| cloud.region            | auto     | auto            | auto              |                      |
-| deployment.environment  |          |                 | auto              |                      |
-| host.id                 | auto     |                 | auto              |                      |
-| host.name               | auto     |                 |                   |                      |
-| host.type               | auto     |                 |                   |                      |
-| os.type                 | auto     |                 |                   |                      |
-| os.version              | auto     |                 |                   |                      |
-| azure.vm.scaleset.name  | auto     |                 |                   |                      |
-| azure.vm.sku            | auto     |                 |                   |                      |
-| service.name            |          |                 | auto              | auto                 |
-| service.version         |          |                 |                   | auto                 |
-| service.instance.id     |          |                 | auto              | auto                 |
-| azure.app.service.stamp |          |                 | auto              |                      |
-| faas.name               |          | auto            |                   |                      |
-| faas.version            |          | auto            |                   |                      |
-| faas.instance           |          | auto            |                   |                      |
-| faas.faas.max_memory    |          | auto            |                   |                      |
+| Resource attribute          | VM       | Functions       | App Service       | Containers           |
+| --------------------------- | -------- | --------------- | ----------------- | -------------------- |
+| cloud.platform              | azure.vm | azure.functions | azure.app_service | azure.container_apps |
+| cloud.provider              | azure    | azure           | azure             | azure                |
+| cloud.resource_id           | auto     |                 | auto              |                      |
+| cloud.region                | auto     | auto            | auto              |                      |
+| deployment.environment.name |          |                 | auto              |                      |
+| host.id                     | auto     |                 | auto              |                      |
+| host.name                   | auto     |                 |                   |                      |
+| host.type                   | auto     |                 |                   |                      |
+| os.type                     | auto     |                 |                   |                      |
+| os.version                  | auto     |                 |                   |                      |
+| azure.vm.scaleset.name      | auto     |                 |                   |                      |
+| azure.vm.sku                | auto     |                 |                   |                      |
+| service.name                |          |                 | auto              | auto                 |
+| service.version             |          |                 |                   | auto                 |
+| service.instance.id         |          |                 | auto              | auto                 |
+| azure.app.service.stamp     |          |                 | auto              |                      |
+| faas.name                   |          | auto            |                   |                      |
+| faas.version                |          | auto            |                   |                      |
+| faas.instance               |          | auto            |                   |                      |
+| faas.max_memory             |          | auto            |                   |                      |
 
 ## Component Owners
 
-- [Trask Stalnaker](https://github.com/trask), Microsoft
-- [Gregor Zeitlinger](https://github.com/zeitlinger), Grafana
+* [Trask Stalnaker](https://github.com/trask), Microsoft
+* [Gregor Zeitlinger](https://github.com/zeitlinger), Grafana
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).

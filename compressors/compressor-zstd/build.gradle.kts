@@ -7,9 +7,9 @@ description = "zstd compressor implementation for use with OTLP exporters"
 otelJava.moduleName.set("io.opentelemetry.contrib.compressor.zstd")
 
 dependencies {
-  api("io.opentelemetry:opentelemetry-exporter-common")
+  api("io.opentelemetry:opentelemetry-sdk-common")
 
-  implementation("com.github.luben:zstd-jni:1.5.7-7")
+  implementation("com.github.luben:zstd-jni:1.5.7-11")
 
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation("io.opentelemetry:opentelemetry-exporter-otlp")

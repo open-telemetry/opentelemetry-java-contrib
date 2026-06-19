@@ -39,7 +39,7 @@ components:
     - PeterF778
   disk-buffering:
     - LikeTheSalad
-    - zeitlinger
+    - breedx-splk
   gcp-resources:
     - jsuereth
     - psx95
@@ -74,7 +74,6 @@ components:
     - jkwatson
   resource-providers:
     - breedx-splk
-    - mateuszrzeszutek
     - laurit
   runtime-attach:
     - jeanbisutti
@@ -95,6 +94,7 @@ components:
   opamp-client:
     - LikeTheSalad
     - jackshirazi
+    - breedx-splk
   ibm-mq-metrics:
     - breedx-splk
     - atoulme

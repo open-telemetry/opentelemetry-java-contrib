@@ -83,6 +83,10 @@ public final class MetricsConfig {
     return isEnabled("ibm.mq.queue.depth.low.event");
   }
 
+  public boolean isIbmMqExpiredMessagesEnabled() {
+    return isEnabled("ibm.mq.expired.messages");
+  }
+
   public boolean isIbmMqUncommittedMessagesEnabled() {
     return isEnabled("ibm.mq.uncommitted.messages");
   }

@@ -19,7 +19,7 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.contrib.sampler.cel.CelBasedSampler;
 import io.opentelemetry.contrib.sampler.cel.CelBasedSamplerBuilder;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
-import io.opentelemetry.sdk.extension.incubator.fileconfig.DeclarativeConfiguration;
+import io.opentelemetry.sdk.autoconfigure.declarativeconfig.DeclarativeConfiguration;
 import io.opentelemetry.sdk.trace.IdGenerator;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
@@ -46,7 +46,8 @@ class CelBasedSamplerComponentProviderTest {
     // Load YAML configuration from resource file
     InputStream configStream = loadResource("cel-sampler-config.yaml");
 
-    OpenTelemetrySdk openTelemetrySdk = DeclarativeConfiguration.parseAndCreate(configStream);
+    OpenTelemetrySdk openTelemetrySdk =
+        DeclarativeConfiguration.parseAndCreate(configStream).getSdk();
     Sampler sampler = openTelemetrySdk.getSdkTracerProvider().getSampler();
 
     // Create expected sampler for comparison

@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.azure.resource;
 
+import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.CloudPlatformIncubatingValues.AZURE_CONTAINER_APPS;
 import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_INSTANCE_ID;
 import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_NAME;
 import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_VERSION;
@@ -54,8 +55,7 @@ public final class AzureContainersResourceProvider extends CloudResourceProvider
       return Attributes.empty();
     }
 
-    AttributesBuilder builder =
-        AzureVmResourceProvider.azureAttributeBuilder("azure_container_apps");
+    AttributesBuilder builder = AzureVmResourceProvider.azureAttributeBuilder(AZURE_CONTAINER_APPS);
 
     AzureEnvVarPlatform.addAttributesFromEnv(ENV_VAR_MAPPING, env, builder);
 

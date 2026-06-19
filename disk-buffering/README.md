@@ -1,5 +1,7 @@
 # Disk buffering
 
+[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-disk-buffering/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-disk-buffering)
+
 This module provides an abstraction
 named [SignalStorage](src/main/java/io/opentelemetry/contrib/disk/buffering/storage/SignalStorage.java),
 as well as default implementations for each signal type that allow writing signals to disk and
@@ -187,7 +189,7 @@ the reading and the writing actions are executed within the same application pro
 
 ## Component owners
 
-- [Cesar Munoz](https://github.com/LikeTheSalad), Elastic
-- [Gregor Zeitlinger](https://github.com/zeitlinger), Grafana
+* [Cesar Munoz](https://github.com/LikeTheSalad), Elastic
+* [Jason Plumb](https://github.com/breedx-splk), Splunk
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).
