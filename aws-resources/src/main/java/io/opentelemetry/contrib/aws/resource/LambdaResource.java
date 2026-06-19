@@ -34,7 +34,6 @@ public final class LambdaResource {
   private static final Logger logger = Logger.getLogger(LambdaResource.class.getName());
 
   private static final String ACCOUNT_ID_SYMLINK_PATH = "/tmp/.otel-aws-account-id";
-
   private static final Resource INSTANCE = buildResource();
 
   /**
