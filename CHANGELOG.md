@@ -46,7 +46,7 @@
 
 - Move to produce metrics via MetricProducer
   ([#2836](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2836))
-- Change ibm-mq-metrics to use snake yaml engine v2
+- Change ibm-mq-metrics to use SnakeYAML Engine v2
   ([#2872](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2872))
 
 ### JMX scraper
@@ -61,7 +61,7 @@
 
 ### OpAMP client
 
-- Added health reporting support
+- Add health reporting support
   ([#2867](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2867))
 
 ## Version 1.57.0 (2026-05-20)
