@@ -5,7 +5,7 @@
 
 package io.opentelemetry.opamp.client.internal.connectivity.http;
 
-import io.opentelemetry.api.internal.InstrumentationUtil;
+import io.opentelemetry.api.impl.InstrumentationUtil;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Duration;
