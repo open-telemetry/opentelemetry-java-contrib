@@ -26,6 +26,27 @@ It is capable of detecting common scenarios among the popular application server
 * IBM Websphere Liberty
 * Wildfly
 
+## Usage with declarative configuration
+
+You can configure the app server resource detector using declarative YAML configuration with the
+OpenTelemetry SDK. For example:
+
+```yaml
+file_format: "1.0"
+resource:
+  detection/development:
+    detectors:
+      # Provides 'service.name' from the application server
+      - app_server:
+      # Provides 'service.name' and 'service.instance.id'
+      - service:
+```
+
+The `app_server` detector needs to be listed before the `service` detector to allow overriding
+the `service.name` attribute with the `OTEL_SERVICE_NAME` environment variable. Also, the resource
+detectors in `detection/development` have lower priority over the explicit `resource.attributes`
+configuration.
+
 ## Component owners
 
 * [Jason Plumb](https://github.com/breedx-splk), Splunk
