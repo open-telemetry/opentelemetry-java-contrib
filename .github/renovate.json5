@@ -68,6 +68,17 @@
       ],
       groupName: 'kotlin plugin updates',
     },
+    {
+      // The workflow only stores the Java version number, so Renovate has nowhere to write a
+      // Docker digest for this custom-managed dependency.
+      matchDepNames: [
+        'azul/zulu-openjdk',
+      ],
+      matchUpdateTypes: [
+        'pinDigest',
+      ],
+      enabled: false,
+    },
 
     // ── Version constraints ────────────────────────────────────────────
 
