@@ -1,6 +1,6 @@
 # OpenTelemetry Noop API
 
-[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-noop-api/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-noop-api)
+[![Maven](https://img.shields.io/maven-central/v/io.opentelemetry.contrib/opentelemetry-noop-api?label=Maven&color=orange)](https://central.sonatype.com/artifact/io.opentelemetry.contrib/opentelemetry-noop-api)
 
 An implementation of `OpenTelemetry` that is completely no-op. Unlike `OpenTelemetry#noop()`, this
 implementation does not support in-process context propagation at all. This means that no objects

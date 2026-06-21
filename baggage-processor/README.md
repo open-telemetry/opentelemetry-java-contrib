@@ -1,6 +1,6 @@
 # OpenTelemetry Baggage Span and Log Record Processor
 
-[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-baggage-processor/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-baggage-processor)
+[![Maven](https://img.shields.io/maven-central/v/io.opentelemetry.contrib/opentelemetry-baggage-processor?label=Maven&color=orange)](https://central.sonatype.com/artifact/io.opentelemetry.contrib/opentelemetry-baggage-processor)
 
 The `BaggageSpanProcessor` and `BaggageLogRecordProcessor` read entries stored in Baggage from the
 parent context and adds the baggage keys and values to the `Span`, respectively `LogRecord`, as
