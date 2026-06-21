@@ -1,6 +1,6 @@
 # OpenTelemetry CloudFoundry Resource Support
 
-[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-cloudfoundry-resources/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-cloudfoundry-resources)
+[![Maven](https://img.shields.io/maven-central/v/io.opentelemetry.contrib/opentelemetry-cloudfoundry-resources?label=Maven&color=orange)](https://central.sonatype.com/artifact/io.opentelemetry.contrib/opentelemetry-cloudfoundry-resources)
 
 This module contains CloudFoundry resource detectors for OpenTelemetry.
 

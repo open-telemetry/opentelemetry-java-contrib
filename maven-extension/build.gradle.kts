@@ -58,6 +58,13 @@ tasks {
       attributes["Implementation-Version"] = project.version
     }
     archiveClassifier.set("")
+    // Concatenate colliding META-INF/services SPI files from bundled dependencies instead of
+    // letting them overwrite each other. Without this, the SDK's EnvironmentResourceProvider
+    // registration is dropped and OTEL_RESOURCE_ATTRIBUTES / OTEL_SERVICE_NAME are ignored.
+    mergeServiceFiles()
+    filesMatching("META-INF/services/**") {
+      duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    }
   }
 
   assemble {

@@ -1,6 +1,6 @@
 # Dynamic Control
 
-[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-dynamic-control/badge.svg?label=Maven&color=orange)](https://central.sonatype.com/artifact/io.opentelemetry.contrib/opentelemetry-dynamic-control)
+[![Maven](https://img.shields.io/maven-central/v/io.opentelemetry.contrib/opentelemetry-dynamic-control?label=Maven&color=orange)](https://central.sonatype.com/artifact/io.opentelemetry.contrib/opentelemetry-dynamic-control)
 
 Adding dynamic control of some specific features of the Java agent.
 
