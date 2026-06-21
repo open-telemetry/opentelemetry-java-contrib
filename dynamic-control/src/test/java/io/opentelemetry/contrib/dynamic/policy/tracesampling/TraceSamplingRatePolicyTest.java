@@ -21,6 +21,7 @@ class TraceSamplingRatePolicyTest {
   void constructorStoresProbabilityAndType() {
     TraceSamplingRatePolicy policy = new TraceSamplingRatePolicy(0.25);
 
+    assertThat(policy.getIdentity()).isEqualTo(TraceSamplingRatePolicy.DEFAULT_IDENTITY);
     assertThat(policy.getProbability()).isEqualTo(0.25);
     assertThat(policy.getType()).isEqualTo(TraceSamplingRatePolicy.POLICY_TYPE);
   }
