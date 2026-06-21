@@ -230,6 +230,76 @@ and the new sampling rate applied to the sampler.
 Because `opamp` source has higher priority than `file` source, if both sources generate a change
 at the same time, the opamp change would be applied and the file change dropped.
 
+## policyType, id, and name
+
+Telemetry policy uses `policyType`, `id`, and `name` for different purposes:
+
+* `policyType` in the pipeline initialization maps a source key to the Java policy implementation.
+  For example, `policyType: trace-sampling` tells dynamic control to validate matching source
+  values as trace sampling policies and deliver them to the trace sampling implementer.
+* `id` identifies one policy instance within a policy type. It is used to distinguish updates,
+  removals, and duplicate policies of the same type.
+* `name` is a human-readable description of the policy identified by `id`.
+
+An example helps to understand the differences between these fields. `trace-sampling` is an existing
+policy type, detailed above, and because it uses a sampling rate applied globally, the id for it
+would be irrelevant. A different implementation, say called `trace-sampling-per-span`, could
+allow different sampling rates to be applied to different types of spans. So you could sample
+db spans at 5%, but pings to the `/health` endpoint at only 1%. In this case both policies are of
+type `trace-sampling-per-span`, but one would have id `sample-database-spans` while the other
+would have id `sample-healthcheck-spans`. The id would allow these two different instances to be
+updated separately.
+
+The pipeline initialization maps a source key to the implementation:
+
+```yaml
+sources:
+  - kind: opamp
+    format: jsonkeyvalue
+    location: vendor
+    mappings:
+      - sourceKey: trace_sampling_policies
+        policyType: trace-sampling-per-span
+```
+
+The source payload would use `trace_sampling_policies`.
+The resulting policies would have the same policyType but different ids
+(note `matching` is defined in the spec as part of the policy not the pipeline,
+but is not yet implemented in this repo,
+so the `match` field here is currently for illustrative purposes only):
+
+```json
+{
+  "trace_sampling_policies": {
+    "id": "sample-database-spans",
+    "name": "Sample database spans",
+    "match": {
+      "span_attribute": ["db.system"],
+      "exists": true
+    },
+    "probability": 0.05
+  }
+}
+```
+
+```json
+{
+  "trace_sampling_policies": {
+    "id": "sample-healthcheck-spans",
+    "name": "Sample healthcheck spans",
+    "match": {
+      "span_attribute": ["http.route"],
+      "exact": "/health"
+    },
+    "probability": 0.01
+  }
+}
+```
+
+These can be separate messages or both sent in one message (as a JSON array).
+Because the IDs are different, these would be two different policies. It would be
+the responsibility of the sender/updater to manage the IDs and matchers consistently.
+
 ## Component owners
 
 * [Jack Shirazi](https://github.com/jackshirazi), Elastic
