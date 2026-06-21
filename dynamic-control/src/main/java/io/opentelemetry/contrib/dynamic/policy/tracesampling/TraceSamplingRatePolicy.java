@@ -104,6 +104,8 @@ public final class TraceSamplingRatePolicy extends TelemetryPolicy {
 
   @Override
   public int hashCode() {
-    return Objects.hash(identity, probability);
+    int result = identity.hashCode();
+    result = 31 * result + Double.hashCode(probability);
+    return result;
   }
 }
