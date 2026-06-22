@@ -1,6 +1,6 @@
 # Exporting SpanData to Kafka
 
-[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-kafka-exporter/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-kafka-exporter)
+[![Maven](https://img.shields.io/maven-central/v/io.opentelemetry.contrib/opentelemetry-kafka-exporter?label=Maven&color=orange)](https://central.sonatype.com/artifact/io.opentelemetry.contrib/opentelemetry-kafka-exporter)
 
 This module contains `KafkaSpanExporter`, which is an implementation of the
 `io.opentelemetry.sdk.trace.export.SpanExporter` interface.

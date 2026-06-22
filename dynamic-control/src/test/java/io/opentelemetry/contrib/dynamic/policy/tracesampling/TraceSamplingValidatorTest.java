@@ -34,6 +34,8 @@ class TraceSamplingValidatorTest {
     assertThat(policy).isNotNull();
     assertThat(policy.getType()).isEqualTo(TRACE_SAMPLING_POLICY_TYPE);
     assertThat(policy).isInstanceOf(TraceSamplingRatePolicy.class);
+    assertThat(((TraceSamplingRatePolicy) policy).getIdentity())
+        .isEqualTo(TraceSamplingRatePolicy.DEFAULT_IDENTITY);
     assertThat(((TraceSamplingRatePolicy) policy).getProbability()).isCloseTo(0.5, within(1e-9));
   }
 
@@ -61,6 +63,8 @@ class TraceSamplingValidatorTest {
     assertThat(policy).isNotNull();
     assertThat(policy.getType()).isEqualTo(TRACE_SAMPLING_POLICY_TYPE);
     assertThat(policy).isInstanceOf(TraceSamplingRatePolicy.class);
+    assertThat(((TraceSamplingRatePolicy) policy).getIdentity())
+        .isEqualTo(TraceSamplingRatePolicy.DEFAULT_IDENTITY);
     assertThat(((TraceSamplingRatePolicy) policy).getProbability()).isCloseTo(0.5, within(1e-9));
   }
 
@@ -121,6 +125,8 @@ class TraceSamplingValidatorTest {
     assertThat(policy).isNotNull();
     assertThat(policy.getType()).isEqualTo(TRACE_SAMPLING_POLICY_TYPE);
     assertThat(policy).isInstanceOf(TraceSamplingRatePolicy.class);
+    assertThat(((TraceSamplingRatePolicy) policy).getIdentity())
+        .isEqualTo(TraceSamplingRatePolicy.DEFAULT_IDENTITY);
     assertThat(((TraceSamplingRatePolicy) policy).getProbability()).isCloseTo(0.5, within(1e-9));
   }
 

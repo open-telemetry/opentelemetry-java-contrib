@@ -9,6 +9,69 @@
   become visible to the reader immediately. Orphan `*.tmp` files left behind by an unclean
   shutdown are recovered on the next storage open. The `minFileAgeForReadMillis` default changes
   from `33s` to `0` and is no longer required to be greater than `maxFileAgeForWriteMillis`.
+## Version 1.58.0 (2026-06-19)
+
+### AWS X-Ray SDK support
+
+- Prevent regex on hot path
+  ([#2879](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2879))
+
+### Azure resources
+
+- Close leaky resources in azure-resources
+  ([#2876](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2876))
+- Handle NumberFormatException when parsing numbers
+  ([#2880](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2880))
+
+### Disk buffering
+
+- Add guard for non-numeric files
+  ([#2877](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2877))
+
+### Dynamic control
+
+- Wire up first policy
+  ([#2833](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2833))
+- Enable autoconfigurable extension
+  ([#2866](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2866))
+- Register implementers
+  ([#2858](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2858))
+- Add shadowJar target for fat jar including dependencies
+  ([#2869](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2869))
+- Update README on instructions for using the project as an extension
+  ([#2885](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2885))
+
+### GCP authentication extension
+
+- Support 'none' option in GOOGLE_OTEL_AUTH_TARGET_SIGNALS
+  ([#2899](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2899))
+
+### GCP resources
+
+- Handle NumberFormatException when parsing numbers
+  ([#2880](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2880))
+
+### IBM MQ metrics
+
+- Move to produce metrics via MetricProducer
+  ([#2836](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2836))
+- Change ibm-mq-metrics to use SnakeYAML Engine v2
+  ([#2872](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2872))
+
+### JMX scraper
+
+- Reconnect when connection is lost
+  ([#2910](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2910))
+
+### Maven extension
+
+- Fix issue with extension service files being overridden
+  ([#2886](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2886))
+
+### OpAMP client
+
+- Add health reporting support
+  ([#2867](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2867))
 
 ## Version 1.57.0 (2026-05-20)
 
