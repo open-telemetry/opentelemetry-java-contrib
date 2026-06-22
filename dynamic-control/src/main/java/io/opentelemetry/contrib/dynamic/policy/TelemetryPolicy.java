@@ -59,6 +59,11 @@ public class TelemetryPolicy {
     return type;
   }
 
+  /**
+   * Returns whether this policy represents a deleted element.
+   *
+   * <p>Deleted policies are used to signal explicit removal of a previously known policy.
+   */
   public boolean isDeleted() {
     return false;
   }
