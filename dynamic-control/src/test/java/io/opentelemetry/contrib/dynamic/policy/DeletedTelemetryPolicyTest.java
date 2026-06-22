@@ -31,20 +31,17 @@ class DeletedTelemetryPolicyTest {
   void equalsAndHashCodeUseIdentityAndType() {
     DeletedTelemetryPolicy first =
         new DeletedTelemetryPolicy(
-            new TelemetryPolicyIdentity("trace-sampling", "Trace sampling rate"),
-            "trace-sampling");
+            new TelemetryPolicyIdentity("trace-sampling", "Trace sampling rate"), "trace-sampling");
     DeletedTelemetryPolicy same =
         new DeletedTelemetryPolicy(
-            new TelemetryPolicyIdentity("trace-sampling", "Trace sampling rate"),
-            "trace-sampling");
+            new TelemetryPolicyIdentity("trace-sampling", "Trace sampling rate"), "trace-sampling");
     DeletedTelemetryPolicy differentIdentity =
         new DeletedTelemetryPolicy(
             new TelemetryPolicyIdentity("other-trace-sampling", "Other trace sampling rate"),
             "trace-sampling");
     DeletedTelemetryPolicy differentType =
         new DeletedTelemetryPolicy(
-            new TelemetryPolicyIdentity("trace-sampling", "Trace sampling rate"),
-            "other-policy");
+            new TelemetryPolicyIdentity("trace-sampling", "Trace sampling rate"), "other-policy");
 
     assertThat(first).isEqualTo(same);
     assertThat(first.hashCode()).isEqualTo(same.hashCode());
