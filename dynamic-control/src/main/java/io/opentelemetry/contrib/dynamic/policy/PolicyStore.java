@@ -5,7 +5,6 @@
 
 package io.opentelemetry.contrib.dynamic.policy;
 
-import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingRatePolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -118,7 +117,7 @@ public final class PolicyStore {
     ArrayList<TelemetryPolicy> deletedPolicies = new ArrayList<>();
     for (TelemetryPolicy previousPolicy : previousPolicies) {
       String policyKey = policyKey(previousPolicy);
-      TelemetryPolicyIdentity identity = policyIdentity(previousPolicy);
+      TelemetryPolicyIdentity identity = previousPolicy.getIdentity();
       if (policyKey != null && identity != null && !activePolicyKeys.contains(policyKey)) {
         deletedPolicies.add(new DeletedTelemetryPolicy(identity, previousPolicy.getType()));
       }
@@ -128,19 +127,8 @@ public final class PolicyStore {
 
   @Nullable
   private static String policyKey(TelemetryPolicy policy) {
-    TelemetryPolicyIdentity identity = policyIdentity(policy);
+    TelemetryPolicyIdentity identity = policy.getIdentity();
     return identity == null ? null : policy.getType() + "\u0000" + identity.getId();
-  }
-
-  @Nullable
-  private static TelemetryPolicyIdentity policyIdentity(TelemetryPolicy policy) {
-    if (policy instanceof TraceSamplingRatePolicy) {
-      return ((TraceSamplingRatePolicy) policy).getIdentity();
-    }
-    if (policy instanceof DeletedTelemetryPolicy) {
-      return ((DeletedTelemetryPolicy) policy).getIdentity();
-    }
-    return null;
   }
 
   private static void notifyImplementer(

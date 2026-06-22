@@ -15,6 +15,7 @@ public final class DeletedTelemetryPolicy extends TelemetryPolicy {
     this.identity = Objects.requireNonNull(identity, "identity cannot be null");
   }
 
+  @Override
   public TelemetryPolicyIdentity getIdentity() {
     return identity;
   }

@@ -142,6 +142,32 @@ class PolicyStoreTest {
   }
 
   @Test
+  void updatePoliciesNotifiesDeletedPolicyForAnyIdentityBearingPolicy() {
+    PolicyStore store = new PolicyStore();
+    PolicyImplementer implementer = implementerFor("test-policy");
+    TestTelemetryPolicy removedPolicy =
+        new TestTelemetryPolicy(
+            new TelemetryPolicyIdentity("test-policy-id", "Test policy"), "test-policy", "old");
+    store.updatePolicies(singletonList(removedPolicy));
+    store.registerImplementer(implementer);
+    clearInvocations(implementer);
+
+    assertThat(store.updatePolicies(Collections.emptyList())).isTrue();
+
+    verify(implementer)
+        .onPoliciesChanged(
+            argThat(
+                policies ->
+                    policies.size() == 1
+                        && policies.get(0) instanceof DeletedTelemetryPolicy
+                        && policies.get(0).isDeleted()
+                        && ((DeletedTelemetryPolicy) policies.get(0))
+                            .getIdentity()
+                            .equals(removedPolicy.getIdentity())
+                        && policies.get(0).getType().equals(removedPolicy.getType())));
+  }
+
+  @Test
   void updatePoliciesContinuesWhenImplementerThrows() {
     PolicyStore store = new PolicyStore();
     PolicyImplementer failingImplementer = traceSamplingImplementer();
@@ -182,10 +208,52 @@ class PolicyStoreTest {
   }
 
   private static PolicyImplementer traceSamplingImplementer() {
+    return implementerFor(TraceSamplingRatePolicy.POLICY_TYPE);
+  }
+
+  private static PolicyImplementer implementerFor(String policyType) {
     PolicyImplementer implementer = mock(PolicyImplementer.class);
     PolicyValidator validator = mock(PolicyValidator.class);
-    when(validator.getPolicyType()).thenReturn(TraceSamplingRatePolicy.POLICY_TYPE);
+    when(validator.getPolicyType()).thenReturn(policyType);
     when(implementer.getValidators()).thenReturn(singletonList(validator));
     return implementer;
+  }
+
+  private static final class TestTelemetryPolicy extends TelemetryPolicy {
+    private final TelemetryPolicyIdentity identity;
+    private final String value;
+
+    private TestTelemetryPolicy(TelemetryPolicyIdentity identity, String type, String value) {
+      super(type);
+      this.identity = identity;
+      this.value = value;
+    }
+
+    @Override
+    public TelemetryPolicyIdentity getIdentity() {
+      return identity;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (!(obj instanceof TestTelemetryPolicy)) {
+        return false;
+      }
+      TestTelemetryPolicy that = (TestTelemetryPolicy) obj;
+      return identity.equals(that.identity)
+          && getType().equals(that.getType())
+          && value.equals(that.value);
+    }
+
+    @Override
+    public int hashCode() {
+      int result = identity.hashCode();
+      result = 31 * result + getType().hashCode();
+      result = 31 * result + value.hashCode();
+      return result;
+    }
   }
 }

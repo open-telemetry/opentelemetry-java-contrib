@@ -6,6 +6,7 @@
 package io.opentelemetry.contrib.dynamic.policy;
 
 import java.util.Objects;
+import javax.annotation.Nullable;
 
 /**
  * Represents a single Telemetry Policy identified by type.
@@ -57,6 +58,16 @@ public class TelemetryPolicy {
    */
   public String getType() {
     return type;
+  }
+
+  /**
+   * Returns the policy identity when this policy has one.
+   *
+   * <p>Type-only policies do not have an identity and return null.
+   */
+  @Nullable
+  public TelemetryPolicyIdentity getIdentity() {
+    return null;
   }
 
   /**
