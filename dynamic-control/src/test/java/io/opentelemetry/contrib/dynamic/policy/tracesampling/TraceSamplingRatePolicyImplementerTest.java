@@ -11,6 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Context;
+import io.opentelemetry.contrib.dynamic.policy.DeletedTelemetryPolicy;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingDecision;
@@ -23,13 +24,15 @@ import org.junit.jupiter.api.Test;
 class TraceSamplingRatePolicyImplementerTest {
 
   @Test
-  void typeOnlyTraceSamplingPolicyFallsBackToAlwaysOn() {
+  void deletedTraceSamplingPolicyFallsBackToAlwaysOn() {
     DelegatingSampler delegatingSampler = new DelegatingSampler(Sampler.alwaysOff());
     TraceSamplingRatePolicyImplementer implementer =
         new TraceSamplingRatePolicyImplementer(delegatingSampler);
 
     implementer.onPoliciesChanged(
-        singletonList(new TelemetryPolicy(TraceSamplingRatePolicy.POLICY_TYPE)));
+        singletonList(
+            new DeletedTelemetryPolicy(
+                TraceSamplingRatePolicy.DEFAULT_IDENTITY, TraceSamplingRatePolicy.POLICY_TYPE)));
 
     assertThat(decisionFor(delegatingSampler)).isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
   }

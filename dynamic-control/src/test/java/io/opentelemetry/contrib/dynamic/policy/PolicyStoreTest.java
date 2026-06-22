@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.dynamic.policy;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -99,6 +100,45 @@ class PolicyStoreTest {
         Arrays.asList(new TelemetryPolicy("other-policy"), new TraceSamplingRatePolicy(0.25)));
 
     verify(implementer).onPoliciesChanged(singletonList(new TraceSamplingRatePolicy(0.25)));
+  }
+
+  @Test
+  void updatePoliciesNotifiesDeletedPolicyWhenPolicyDisappears() {
+    PolicyStore store = new PolicyStore();
+    PolicyImplementer implementer = traceSamplingImplementer();
+    TraceSamplingRatePolicy removedPolicy = new TraceSamplingRatePolicy(0.5);
+    store.updatePolicies(singletonList(removedPolicy));
+    store.registerImplementer(implementer);
+    clearInvocations(implementer);
+
+    assertThat(store.updatePolicies(Collections.emptyList())).isTrue();
+
+    verify(implementer)
+        .onPoliciesChanged(
+            argThat(
+                policies ->
+                    policies.size() == 1
+                        && policies.get(0) instanceof DeletedTelemetryPolicy
+                        && policies.get(0).isDeleted()
+                        && ((DeletedTelemetryPolicy) policies.get(0))
+                            .getIdentity()
+                            .equals(removedPolicy.getIdentity())
+                        && policies.get(0).getType().equals(removedPolicy.getType())));
+    assertThat(store.getPolicies()).isEmpty();
+  }
+
+  @Test
+  void updatePoliciesDoesNotNotifyDeletedPolicyWhenPolicyValueChangesWithSameIdentity() {
+    PolicyStore store = new PolicyStore();
+    PolicyImplementer implementer = traceSamplingImplementer();
+    TraceSamplingRatePolicy updatedPolicy = new TraceSamplingRatePolicy(0.75);
+    store.updatePolicies(singletonList(new TraceSamplingRatePolicy(0.5)));
+    store.registerImplementer(implementer);
+    clearInvocations(implementer);
+
+    assertThat(store.updatePolicies(singletonList(updatedPolicy))).isTrue();
+
+    verify(implementer).onPoliciesChanged(singletonList(updatedPolicy));
   }
 
   @Test
