@@ -60,6 +60,18 @@ public class TelemetryPolicy {
   }
 
   /**
+   * Returns whether this policy represents a deleted element.
+   *
+   * <p>Deleted policies are used to signal explicit removal of a previously known policy. Most
+   * policies are not deleted and should leave this method returning false.
+   *
+   * @return true if this policy represents a deleted element, false otherwise.
+   */
+  public boolean isDeleted() {
+    return false;
+  }
+
+  /**
    * Type-only policies ({@link TelemetryPolicy} instances) do not equal typed subclasses that share
    * the same {@link #getType() type} string. Subclasses must override {@code equals} (and {@code
    * hashCode}) for value-based equality; see the class Javadoc.
