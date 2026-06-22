@@ -59,6 +59,10 @@ public class TelemetryPolicy {
     return type;
   }
 
+  public boolean isDeleted() {
+    return false;
+  }
+
   /**
    * Type-only policies ({@link TelemetryPolicy} instances) do not equal typed subclasses that share
    * the same {@link #getType() type} string. Subclasses must override {@code equals} (and {@code
