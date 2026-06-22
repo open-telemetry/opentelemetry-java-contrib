@@ -55,8 +55,7 @@ public final class PolicyStore {
       policyVersion++;
       snapshotVersion = policyVersion;
       policiesSnapshot = new ArrayList<>(policies);
-      notificationSnapshot =
-          new ArrayList<>(deletedPolicies.size() + policiesSnapshot.size());
+      notificationSnapshot = new ArrayList<>(deletedPolicies.size() + policiesSnapshot.size());
       notificationSnapshot.addAll(deletedPolicies);
       notificationSnapshot.addAll(policiesSnapshot);
       implementersSnapshot = new ArrayList<>(implementers);
