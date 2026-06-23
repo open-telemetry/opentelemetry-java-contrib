@@ -23,8 +23,8 @@ class DeletedTelemetryPolicyTest {
   }
 
   @Test
-  void baseTelemetryPolicyIsNotDeleted() {
-    assertThat(new TelemetryPolicy("trace-sampling").isDeleted()).isFalse();
+  void ordinaryTelemetryPolicyIsNotDeleted() {
+    assertThat(new TestTelemetryPolicy("trace-sampling").isDeleted()).isFalse();
   }
 
   @Test
@@ -49,5 +49,25 @@ class DeletedTelemetryPolicyTest {
     assertThat(first).isNotEqualTo(differentType);
     assertThat(first).isNotEqualTo(null);
     assertThat(first).isNotEqualTo("not-a-policy");
+  }
+
+  private static final class TestTelemetryPolicy implements TelemetryPolicy {
+    private final TelemetryPolicyIdentity identity;
+    private final String type;
+
+    private TestTelemetryPolicy(String type) {
+      this.identity = new TelemetryPolicyIdentity(type, "Test policy");
+      this.type = type;
+    }
+
+    @Override
+    public TelemetryPolicyIdentity getIdentity() {
+      return identity;
+    }
+
+    @Override
+    public String getType() {
+      return type;
+    }
   }
 }

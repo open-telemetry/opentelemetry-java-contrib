@@ -16,7 +16,7 @@ import io.opentelemetry.sdk.trace.samplers.Sampler;
 import java.util.Objects;
 import javax.annotation.Nullable;
 
-public final class TraceSamplingRatePolicy extends TelemetryPolicy {
+public final class TraceSamplingRatePolicy implements TelemetryPolicy {
   public static final String POLICY_TYPE = "trace-sampling";
   public static final TelemetryPolicyIdentity DEFAULT_IDENTITY =
       new TelemetryPolicyIdentity("trace-sampling", "Trace sampling rate");
@@ -27,7 +27,6 @@ public final class TraceSamplingRatePolicy extends TelemetryPolicy {
   private final double probability;
 
   public TraceSamplingRatePolicy(double probability) {
-    super(POLICY_TYPE);
     this.identity = DEFAULT_IDENTITY;
     this.probability = normalizeProbability(probability);
   }
@@ -35,6 +34,11 @@ public final class TraceSamplingRatePolicy extends TelemetryPolicy {
   @Override
   public TelemetryPolicyIdentity getIdentity() {
     return identity;
+  }
+
+  @Override
+  public String getType() {
+    return POLICY_TYPE;
   }
 
   public double getProbability() {

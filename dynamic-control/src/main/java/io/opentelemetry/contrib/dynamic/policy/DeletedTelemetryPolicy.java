@@ -7,17 +7,23 @@ package io.opentelemetry.contrib.dynamic.policy;
 
 import java.util.Objects;
 
-public final class DeletedTelemetryPolicy extends TelemetryPolicy {
+public final class DeletedTelemetryPolicy implements TelemetryPolicy {
   private final TelemetryPolicyIdentity identity;
+  private final String type;
 
   public DeletedTelemetryPolicy(TelemetryPolicyIdentity identity, String type) {
-    super(type);
     this.identity = Objects.requireNonNull(identity, "identity cannot be null");
+    this.type = Objects.requireNonNull(type, "type cannot be null");
   }
 
   @Override
   public TelemetryPolicyIdentity getIdentity() {
     return identity;
+  }
+
+  @Override
+  public String getType() {
+    return type;
   }
 
   @Override
