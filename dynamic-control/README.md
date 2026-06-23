@@ -50,7 +50,7 @@ echo "  - kind: opamp" >> config.yaml
 echo "    format: jsonkeyvalue" >> config.yaml
 echo "    location: vendor" >> config.yaml
 echo "    mappings:" >> config.yaml
-echo "      - sourceKey: sampling_rate" >> config.yaml
+echo "      - policyId: sampling_rate" >> config.yaml
 echo "        policyType: trace-sampling" >> config.yaml
 java -Dotel.javaagent.extensions=./opentelemetry-dynamic-control-all.jar -Dotel.java.experimental.telemetry.policy.init.yaml=./config.yaml -Dotel.opamp.service.url=http://127.0.0.1:4320/v1/opamp -javaagent:path/to/opentelemetry-javaagent.jar -Dotel.service.name=my-service -jar myapp.jar
 ```
@@ -115,7 +115,7 @@ telemetry_policy/development:
       format: jsonkeyvalue
       location: vendor
       mappings:
-        - sourceKey: sampling_rate
+        - policyId: sampling_rate
           policyType: trace-sampling
 
 ```
@@ -138,7 +138,7 @@ sources:
     format: jsonkeyvalue
     location: vendor
     mappings:
-      - sourceKey: sampling_rate
+      - policyId: sampling_rate
         policyType: trace-sampling
 
 ```
@@ -158,12 +158,12 @@ finding the value at the key given by `location`. The contents of that value are
 simple json objects that are key and value, eg '{ "key": value}' or '[{ "key1": value1}, { "key2": value2}]'
   * `keyvalue`: expects the contents to be convertible as a string into one or more
 line separated 'key=value' pairs (eg a properties file)
-* `mappings`: one or more mappings from source-specific keys to dynamic-control policy types
+* `mappings`: one or more mappings from policy IDs to dynamic-control policy types
 * `location`: optional source-specific selector. For `opamp`, this is the OpAMP config map key, for example `vendor`
 
 Each mapping must specify:
 
-* `sourceKey`: the key in the source payload, for example `sampling_rate` (this is an arbitrary string defined
+* `policyId`: the key in the source payload, for example `sampling_rate` (this is an arbitrary string defined
 by the user or already being used/sent from some source)
 * `policyType`: the dynamic-control policy type to update, currently only `trace-sampling` is valid
 
@@ -175,7 +175,7 @@ sources:
     format: jsonkeyvalue|keyvalue
     location: 'opamp config map key'|'file path'|'http url'|omit row
     mappings:
-      - sourceKey: user-defined-string
+      - policyId: user-defined-string
         policyType: trace-sampling
 
 ```
@@ -200,15 +200,15 @@ sources:
     format: jsonkeyvalue
     location: vendor
     mappings:
-      - sourceKey: sampling_rate
+      - policyId: sampling_rate
         policyType: trace-sampling
   - kind: file
     format: keyvalue
     location: /path/to/here.conf
     mappings:
-      - sourceKey: trace_rate
+      - policyId: trace_rate
         policyType: trace-sampling
-      - sourceKey: traceid_ratio
+      - policyId: traceid_ratio
         policyType: trace-sampling
 
 ```
@@ -216,14 +216,14 @@ sources:
 There are two sources. The first expects a message from an OpAMP server (`kind: opamp`),
 from which it will access the config map and extract the value at key `vendor` (`location: vendor`).
 The value is expected to be this json style key-value (`format: jsonkeyvalue`)
-object string (ignoring whitespace and numeric diffs) {"sampling_rate": 0.5} (key defined by `sourceKey: sampling_rate`).
+object string (ignoring whitespace and numeric diffs) {"sampling_rate": 0.5} (key defined by `policyId: sampling_rate`).
 On receipt of this, the message is converted to a trace-sampling policy (`policyType: trace-sampling`)
 and the new sampling rate applied to the sampler.
 
 The second source expects a file (`kind: file`) at file path /path/to/here.conf (`location: /path/to/here.conf`)
 which when changed will be re-read. The contents are expected to be key=value entries,
-one per line (`format: keyvalue`). The only keys recognized are `trace_rate` (`sourceKey: trace_rate`)
-and `traceid_ratio` (`sourceKey: traceid_ratio`). When the value changes, the message is converted
+one per line (`format: keyvalue`). The only keys recognized are `trace_rate` (`policyId: trace_rate`)
+and `traceid_ratio` (`policyId: traceid_ratio`). When the value changes, the message is converted
 to a trace-sampling policy (`policyType: trace-sampling`)
 and the new sampling rate applied to the sampler.
 
@@ -234,7 +234,7 @@ at the same time, the opamp change would be applied and the file change dropped.
 
 Telemetry policy uses `policyType`, `id`, and `name` for different purposes:
 
-* `policyType` in the pipeline initialization maps a source key to the Java policy implementation.
+* `policyType` in the pipeline initialization maps a policy ID to the Java policy implementation.
   For example, `policyType: trace-sampling` tells dynamic control to validate matching source
   values as trace sampling policies and deliver them to the trace sampling implementer.
 * `id` identifies one policy instance within a policy type. It is used to distinguish updates,
@@ -250,7 +250,7 @@ type `trace-sampling-per-span`, but one would have id `sample-database-spans` wh
 would have id `sample-healthcheck-spans`. The id would allow these two different instances to be
 updated separately.
 
-The pipeline initialization maps a source key to the implementation:
+The pipeline initialization maps a policy ID to the implementation:
 
 ```yaml
 sources:
@@ -258,11 +258,14 @@ sources:
     format: jsonkeyvalue
     location: vendor
     mappings:
-      - sourceKey: trace_sampling_policies
+      - policyId: sample-database-spans
+        policyType: trace-sampling-per-span
+      - policyId: sample-healthcheck-spans
         policyType: trace-sampling-per-span
 ```
 
-The source payload would use `trace_sampling_policies`.
+The source payload would use the policy ID as the key for this current key-value-style
+format.
 The resulting policies would have the same policyType but different ids
 (note `matching` is defined in the spec as part of the policy not the pipeline,
 but is not yet implemented in this repo,
@@ -270,7 +273,7 @@ so the `match` field here is currently for illustrative purposes only):
 
 ```json
 {
-  "trace_sampling_policies": {
+  "sample-database-spans": {
     "id": "sample-database-spans",
     "name": "Sample database spans",
     "match": {
@@ -284,7 +287,7 @@ so the `match` field here is currently for illustrative purposes only):
 
 ```json
 {
-  "trace_sampling_policies": {
+  "sample-healthcheck-spans": {
     "id": "sample-healthcheck-spans",
     "name": "Sample healthcheck spans",
     "match": {

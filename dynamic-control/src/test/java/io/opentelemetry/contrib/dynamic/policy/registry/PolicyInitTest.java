@@ -149,7 +149,7 @@ class PolicyInitTest {
     when(source.getString(PolicyInitConfig.LOCATION_DECLARATIVE_KEY)).thenReturn("vendor");
     when(source.getStructuredList(PolicyInitConfig.MAPPINGS_DECLARATIVE_KEY))
         .thenReturn(Collections.singletonList(mapping));
-    when(mapping.getString(PolicyInitConfig.SOURCE_KEY_DECLARATIVE_KEY))
+    when(mapping.getString(PolicyInitConfig.POLICY_ID_DECLARATIVE_KEY))
         .thenReturn("sampling_rate");
     when(mapping.getString(PolicyInitConfig.POLICY_TYPE_DECLARATIVE_KEY)).thenReturn(policyType);
     return telemetryPolicy;
@@ -157,7 +157,7 @@ class PolicyInitTest {
 
   private static String minimalJsonInitConfig() {
     return "{\"sources\":[{\"kind\":\"opamp\",\"format\":\"jsonkeyvalue\",\"location\":\"vendor\","
-        + "\"mappings\":[{\"sourceKey\":\"sampling_rate\",\"policyType\":\""
+        + "\"mappings\":[{\"policyId\":\"sampling_rate\",\"policyType\":\""
         + TraceSamplingRatePolicy.POLICY_TYPE
         + "\"}]}]}";
   }
