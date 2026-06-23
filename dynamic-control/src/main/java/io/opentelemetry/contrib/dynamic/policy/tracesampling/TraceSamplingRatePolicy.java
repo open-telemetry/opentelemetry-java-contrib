@@ -32,6 +32,7 @@ public final class TraceSamplingRatePolicy extends TelemetryPolicy {
     this.probability = normalizeProbability(probability);
   }
 
+  @Override
   public TelemetryPolicyIdentity getIdentity() {
     return identity;
   }

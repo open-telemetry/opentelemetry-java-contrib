@@ -13,6 +13,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.Nullable;
 
 /**
  * Holds the latest validated policy snapshot and reports whether an update changed effective
@@ -41,20 +42,26 @@ public final class PolicyStore {
     Objects.requireNonNull(newPolicies, "newPolicies cannot be null");
     LinkedHashSet<TelemetryPolicy> newPolicySet = new LinkedHashSet<>(newPolicies);
     List<TelemetryPolicy> policiesSnapshot;
+    List<TelemetryPolicy> notificationSnapshot;
     List<RegisteredImplementer> implementersSnapshot;
     long snapshotVersion;
     synchronized (this) {
       if (new LinkedHashSet<>(policies).equals(newPolicySet)) {
         return false;
       }
+      List<TelemetryPolicy> deletedPolicies =
+          deletedPoliciesFrom(policies, new ArrayList<>(newPolicySet));
       policies = new ArrayList<>(newPolicySet);
       policyVersion++;
       snapshotVersion = policyVersion;
       policiesSnapshot = new ArrayList<>(policies);
+      notificationSnapshot = new ArrayList<>(deletedPolicies.size() + policiesSnapshot.size());
+      notificationSnapshot.addAll(deletedPolicies);
+      notificationSnapshot.addAll(policiesSnapshot);
       implementersSnapshot = new ArrayList<>(implementers);
     }
     for (RegisteredImplementer implementer : implementersSnapshot) {
-      notifyImplementer(implementer, policiesSnapshot, snapshotVersion);
+      notifyImplementer(implementer, notificationSnapshot, snapshotVersion);
     }
     return true;
   }
@@ -97,6 +104,32 @@ public final class PolicyStore {
       }
     }
     return Collections.unmodifiableList(relevant);
+  }
+
+  private static List<TelemetryPolicy> deletedPoliciesFrom(
+      List<TelemetryPolicy> previousPolicies, List<TelemetryPolicy> newPolicies) {
+    Set<String> activePolicyKeys = new LinkedHashSet<>();
+    for (TelemetryPolicy policy : newPolicies) {
+      String policyKey = policyKey(policy);
+      if (policyKey != null) {
+        activePolicyKeys.add(policyKey);
+      }
+    }
+    ArrayList<TelemetryPolicy> deletedPolicies = new ArrayList<>();
+    for (TelemetryPolicy previousPolicy : previousPolicies) {
+      String policyKey = policyKey(previousPolicy);
+      TelemetryPolicyIdentity identity = previousPolicy.getIdentity();
+      if (policyKey != null && identity != null && !activePolicyKeys.contains(policyKey)) {
+        deletedPolicies.add(new DeletedTelemetryPolicy(identity, previousPolicy.getType()));
+      }
+    }
+    return deletedPolicies;
+  }
+
+  @Nullable
+  private static String policyKey(TelemetryPolicy policy) {
+    TelemetryPolicyIdentity identity = policy.getIdentity();
+    return identity == null ? null : policy.getType() + "\u0000" + identity.getId();
   }
 
   private static void notifyImplementer(
