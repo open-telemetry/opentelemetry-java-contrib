@@ -76,8 +76,7 @@ class PolicyStoreTest {
   @Test
   void registerImplementerReceivesCurrentRelevantPolicies() {
     PolicyStore store = new PolicyStore();
-    store.updatePolicies(
-        Arrays.asList(new TraceSamplingRatePolicy(0.5), new TelemetryPolicy("other-policy")));
+    store.updatePolicies(Arrays.asList(new TraceSamplingRatePolicy(0.5), unrelatedPolicy()));
 
     PolicyImplementer implementer = mock(PolicyImplementer.class);
     PolicyValidator validator = mock(PolicyValidator.class);
@@ -96,8 +95,7 @@ class PolicyStoreTest {
 
     store.registerImplementer(implementer);
     clearInvocations(implementer);
-    store.updatePolicies(
-        Arrays.asList(new TelemetryPolicy("other-policy"), new TraceSamplingRatePolicy(0.25)));
+    store.updatePolicies(Arrays.asList(unrelatedPolicy(), new TraceSamplingRatePolicy(0.25)));
 
     verify(implementer).onPoliciesChanged(singletonList(new TraceSamplingRatePolicy(0.25)));
   }
@@ -219,19 +217,30 @@ class PolicyStoreTest {
     return implementer;
   }
 
-  private static final class TestTelemetryPolicy extends TelemetryPolicy {
+  private static TelemetryPolicy unrelatedPolicy() {
+    return new TestTelemetryPolicy(
+        new TelemetryPolicyIdentity("other-policy", "Other policy"), "other-policy", "value");
+  }
+
+  private static final class TestTelemetryPolicy implements TelemetryPolicy {
     private final TelemetryPolicyIdentity identity;
+    private final String type;
     private final String value;
 
     private TestTelemetryPolicy(TelemetryPolicyIdentity identity, String type, String value) {
-      super(type);
       this.identity = identity;
+      this.type = type;
       this.value = value;
     }
 
     @Override
     public TelemetryPolicyIdentity getIdentity() {
       return identity;
+    }
+
+    @Override
+    public String getType() {
+      return type;
     }
 
     @Override
@@ -243,15 +252,13 @@ class PolicyStoreTest {
         return false;
       }
       TestTelemetryPolicy that = (TestTelemetryPolicy) obj;
-      return identity.equals(that.identity)
-          && getType().equals(that.getType())
-          && value.equals(that.value);
+      return identity.equals(that.identity) && type.equals(that.type) && value.equals(that.value);
     }
 
     @Override
     public int hashCode() {
       int result = identity.hashCode();
-      result = 31 * result + getType().hashCode();
+      result = 31 * result + type.hashCode();
       result = 31 * result + value.hashCode();
       return result;
     }

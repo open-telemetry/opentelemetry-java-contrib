@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.contrib.dynamic.policy.PolicyImplementer;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
+import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicyIdentity;
 import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingRatePolicy;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
@@ -161,9 +162,18 @@ class PolicyInitTest {
         + "\"}]}]}";
   }
 
-  private static final class IdempotentTestPolicy extends TelemetryPolicy {
-    private IdempotentTestPolicy() {
-      super("test-policy-idempotent");
+  private static final class IdempotentTestPolicy implements TelemetryPolicy {
+    private static final TelemetryPolicyIdentity IDENTITY =
+        new TelemetryPolicyIdentity("test-policy-idempotent", "Test policy idempotent");
+
+    @Override
+    public TelemetryPolicyIdentity getIdentity() {
+      return IDENTITY;
+    }
+
+    @Override
+    public String getType() {
+      return "test-policy-idempotent";
     }
   }
 }

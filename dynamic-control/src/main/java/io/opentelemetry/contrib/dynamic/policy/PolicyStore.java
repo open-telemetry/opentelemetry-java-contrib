@@ -13,7 +13,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.annotation.Nullable;
 
 /**
  * Holds the latest validated policy snapshot and reports whether an update changed effective
@@ -29,12 +28,11 @@ public final class PolicyStore {
   /**
    * Replaces the stored policies when the new snapshot is not equal to the current one.
    *
-   * <p>Input lists are normalized to a set of distinct policies ({@link TelemetryPolicy#equals
-   * value equality}): duplicates are dropped and only the first occurrence of each policy is kept
-   * (insertion order). Change detection uses set equality, so list order does not matter. That
-   * matches telemetry policy semantics where the effective result does not depend on processing
-   * order (see the telemetry policy OTEP, commutativity / no user-defined ordering between
-   * policies).
+   * <p>Input lists are normalized to a set of distinct policies using value equality: duplicates
+   * are dropped and only the first occurrence of each policy is kept (insertion order). Change
+   * detection uses set equality, so list order does not matter. That matches telemetry policy
+   * semantics where the effective result does not depend on processing order (see the telemetry
+   * policy OTEP, commutativity / no user-defined ordering between policies).
    *
    * @return {@code true} if the store was updated, {@code false} if the snapshot was unchanged
    */
@@ -110,26 +108,21 @@ public final class PolicyStore {
       List<TelemetryPolicy> previousPolicies, List<TelemetryPolicy> newPolicies) {
     Set<String> activePolicyKeys = new LinkedHashSet<>();
     for (TelemetryPolicy policy : newPolicies) {
-      String policyKey = policyKey(policy);
-      if (policyKey != null) {
-        activePolicyKeys.add(policyKey);
-      }
+      activePolicyKeys.add(policyKey(policy));
     }
     ArrayList<TelemetryPolicy> deletedPolicies = new ArrayList<>();
     for (TelemetryPolicy previousPolicy : previousPolicies) {
       String policyKey = policyKey(previousPolicy);
       TelemetryPolicyIdentity identity = previousPolicy.getIdentity();
-      if (policyKey != null && identity != null && !activePolicyKeys.contains(policyKey)) {
+      if (!activePolicyKeys.contains(policyKey)) {
         deletedPolicies.add(new DeletedTelemetryPolicy(identity, previousPolicy.getType()));
       }
     }
     return deletedPolicies;
   }
 
-  @Nullable
   private static String policyKey(TelemetryPolicy policy) {
-    TelemetryPolicyIdentity identity = policy.getIdentity();
-    return identity == null ? null : policy.getType() + "\u0000" + identity.getId();
+    return policy.getType() + "\u0000" + policy.getIdentity().getId();
   }
 
   private static void notifyImplementer(
