@@ -234,9 +234,10 @@ at the same time, the opamp change would be applied and the file change dropped.
 
 Telemetry policy uses `policyType`, `id`, and `name` for different purposes:
 
-* The pipeline initialization maps a policy ID (`policyId`) to a `policyType`, which selects the Java policy implementation.
-  For example, `policyType: trace-sampling` tells dynamic control to validate matching source
-  values as trace sampling policies and deliver them to the trace sampling implementer.
+* `policyId` in the pipeline initialization identifies the source payload key for a policy mapping.
+* `policyType` selects the Java policy implementation for that mapped policy ID. For example,
+  `policyType: trace-sampling` tells dynamic control to validate matching source values as trace
+  sampling policies and deliver them to the trace sampling implementer.
 * `id` identifies one policy instance within a policy type. It is used to distinguish updates,
   removals, and duplicate policies of the same type.
 * `name` is a human-readable description of the policy identified by `id`.
@@ -258,14 +259,11 @@ sources:
     format: jsonkeyvalue
     location: vendor
     mappings:
-      - policyId: sample-database-spans
-        policyType: trace-sampling-per-span
-      - policyId: sample-healthcheck-spans
+      - policyId: trace_sampling_policies
         policyType: trace-sampling-per-span
 ```
 
-The source payload would use the policy ID as the key for this current key-value-style
-format.
+The source payload would use `trace_sampling_policies`.
 The resulting policies would have the same policyType but different ids
 (note `matching` is defined in the spec as part of the policy not the pipeline,
 but is not yet implemented in this repo,
@@ -273,7 +271,7 @@ so the `match` field here is currently for illustrative purposes only):
 
 ```json
 {
-  "sample-database-spans": {
+  "trace_sampling_policies": {
     "id": "sample-database-spans",
     "name": "Sample database spans",
     "match": {
@@ -287,7 +285,7 @@ so the `match` field here is currently for illustrative purposes only):
 
 ```json
 {
-  "sample-healthcheck-spans": {
+  "trace_sampling_policies": {
     "id": "sample-healthcheck-spans",
     "name": "Sample healthcheck spans",
     "match": {

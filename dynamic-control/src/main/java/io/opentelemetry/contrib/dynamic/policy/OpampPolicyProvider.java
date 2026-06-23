@@ -263,11 +263,11 @@ public final class OpampPolicyProvider implements PolicyProvider {
       return;
     }
     for (SourceWrapper source : parsedSources) {
-      String policyType = source.getPolicyType();
-      if (policyType == null || policyType.isEmpty()) {
+      String incomingPolicyId = source.getPolicyType();
+      if (incomingPolicyId == null || incomingPolicyId.isEmpty()) {
         continue;
       }
-      String mappedPolicyType = policyIdToPolicyType.get(policyType);
+      String mappedPolicyType = policyIdToPolicyType.get(incomingPolicyId);
       if (mappedPolicyType == null) {
         continue;
       }
