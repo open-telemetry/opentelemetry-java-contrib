@@ -49,8 +49,8 @@ import opamp.proto.ServerErrorResponse;
  * {@link PolicyProvider} implementation backed by OpAMP remote configuration updates.
  *
  * <p>The provider subscribes to an OpAMP endpoint, extracts the configured payload for one source
- * location key, maps incoming policy IDs to internal policy types, validates them with the
- * supplied validators, and publishes the resulting policies to callers.
+ * location key, maps incoming policy IDs to internal policy types, validates them with the supplied
+ * validators, and publishes the resulting policies to callers.
  */
 public final class OpampPolicyProvider implements PolicyProvider {
   private static final Logger logger = Logger.getLogger(OpampPolicyProvider.class.getName());

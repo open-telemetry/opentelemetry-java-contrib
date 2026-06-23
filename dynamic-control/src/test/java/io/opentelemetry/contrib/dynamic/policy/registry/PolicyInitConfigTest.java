@@ -425,8 +425,7 @@ class PolicyInitConfigTest {
 
   private static DeclarativeConfigProperties mappingConfig() {
     DeclarativeConfigProperties mapping = mock(DeclarativeConfigProperties.class);
-    when(mapping.getString(PolicyInitConfig.POLICY_ID_DECLARATIVE_KEY))
-        .thenReturn("sampling_rate");
+    when(mapping.getString(PolicyInitConfig.POLICY_ID_DECLARATIVE_KEY)).thenReturn("sampling_rate");
     when(mapping.getString(PolicyInitConfig.POLICY_TYPE_DECLARATIVE_KEY))
         .thenReturn("trace-sampling");
     return mapping;
