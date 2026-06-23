@@ -234,7 +234,7 @@ at the same time, the opamp change would be applied and the file change dropped.
 
 Telemetry policy uses `policyType`, `id`, and `name` for different purposes:
 
-* `policyType` in the pipeline initialization maps a policy ID to the Java policy implementation.
+* The pipeline initialization maps a policy ID (`policyId`) to a `policyType`, which selects the Java policy implementation.
   For example, `policyType: trace-sampling` tells dynamic control to validate matching source
   values as trace sampling policies and deliver them to the trace sampling implementer.
 * `id` identifies one policy instance within a policy type. It is used to distinguish updates,
