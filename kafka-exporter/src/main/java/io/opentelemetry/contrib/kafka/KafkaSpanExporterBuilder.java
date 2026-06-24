@@ -11,9 +11,11 @@ import static org.apache.kafka.clients.producer.ProducerConfig.KEY_SERIALIZER_CL
 import static org.apache.kafka.clients.producer.ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.opentelemetry.sdk.common.export.MemoryMode;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -71,6 +73,7 @@ public final class KafkaSpanExporterBuilder {
     private Map<String, Object> config;
     private Serializer<String> keySerializer;
     private Serializer<Collection<SpanData>> valueSerializer;
+    private MemoryMode memoryMode = MemoryMode.IMMUTABLE_DATA;
 
     public static ProducerBuilder newInstance() {
       return new ProducerBuilder();
@@ -97,6 +100,12 @@ public final class KafkaSpanExporterBuilder {
       return this;
     }
 
+    @CanIgnoreReturnValue
+    public ProducerBuilder setMemoryMode(MemoryMode memoryMode) {
+      this.memoryMode = Objects.requireNonNull(memoryMode, "memoryMode");
+      return this;
+    }
+
     public Producer<String, Collection<SpanData>> build() {
       if (isNull(config)) {
         throw new IllegalArgumentException("producer configuration cannot be null");
@@ -111,10 +120,24 @@ public final class KafkaSpanExporterBuilder {
         throw new IllegalArgumentException(
             "Both the key and value serializers should be provided either in the configuration or by using the corresponding setters");
       }
+
+      // If user hasn't explicitly set valueSerializer, choose based on memoryMode
+      if (valueSerializer == null && !config.containsKey(VALUE_SERIALIZER_CLASS_CONFIG)) {
+        valueSerializer = createDefaultSerializer();
+      }
+
       if (config.containsKey(KEY_SERIALIZER_CLASS_CONFIG)) {
         return new KafkaProducer<>(config);
       }
       return new KafkaProducer<>(config, keySerializer, valueSerializer);
+    }
+
+    private Serializer<Collection<SpanData>> createDefaultSerializer() {
+      if (memoryMode == MemoryMode.REUSABLE_DATA) {
+        return new PooledSpanDataSerializer();
+      } else {
+        return new SpanDataSerializer();
+      }
     }
   }
 }
