@@ -17,7 +17,7 @@ import java.util.Collections;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-class TelemetryPolicyComponentProviderTest {
+class TelemetryPolicySamplerComponentProviderTest {
 
   @AfterEach
   void tearDown() throws Exception {
@@ -27,7 +27,8 @@ class TelemetryPolicyComponentProviderTest {
 
   @Test
   void initializesPolicyFromTopLevelTelemetryPolicyDeclarativeConfig() {
-    TelemetryPolicyComponentProvider provider = new TelemetryPolicyComponentProvider();
+    TelemetryPolicySamplerComponentProvider provider =
+        new TelemetryPolicySamplerComponentProvider();
     provider.create(telemetryPolicyNodeConfig());
 
     assertThat(TraceSamplingRatePolicy.getInitializedSampler()).isNotNull();
@@ -35,7 +36,8 @@ class TelemetryPolicyComponentProviderTest {
 
   @Test
   void doesNothingWhenTelemetryPolicyDeclarativeConfigMissing() {
-    TelemetryPolicyComponentProvider provider = new TelemetryPolicyComponentProvider();
+    TelemetryPolicySamplerComponentProvider provider =
+        new TelemetryPolicySamplerComponentProvider();
     provider.create(mock(DeclarativeConfigProperties.class));
 
     assertThat(TraceSamplingRatePolicy.getInitializedSampler()).isNull();

@@ -23,11 +23,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 
-/** Declarative component that bootstraps top-level telemetry policy wiring. */
+/** Declarative sampler component that bootstraps top-level telemetry policy wiring. */
 @AutoService(ComponentProvider.class)
-public final class TelemetryPolicyComponentProvider implements ComponentProvider {
+public final class TelemetryPolicySamplerComponentProvider implements ComponentProvider {
   private static final Logger logger =
-      Logger.getLogger(TelemetryPolicyComponentProvider.class.getName());
+      Logger.getLogger(TelemetryPolicySamplerComponentProvider.class.getName());
   public static final String NAME = "telemetry_policy/development";
 
   @Override

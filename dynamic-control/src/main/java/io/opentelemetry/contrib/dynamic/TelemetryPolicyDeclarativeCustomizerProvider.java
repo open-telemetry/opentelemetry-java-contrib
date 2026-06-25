@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.annotation.Nullable;
 
 /**
  * Declarative config customizer for top-level telemetry policy configuration.
@@ -64,11 +63,18 @@ public final class TelemetryPolicyDeclarativeCustomizerProvider
     if (telemetryPolicy == null) {
       return;
     }
+    if (!(telemetryPolicy instanceof Map)) {
+      logger.log(
+          Level.WARNING,
+          "Ignoring top-level declarative telemetry policy config because it is not an object");
+      return;
+    }
 
-    JsonNode telemetryPolicyNode = MAPPER.valueToTree(telemetryPolicy);
+    Map<?, ?> telemetryPolicyConfig = (Map<?, ?>) telemetryPolicy;
+    JsonNode telemetryPolicyNode = MAPPER.valueToTree(telemetryPolicyConfig);
     PolicyInitConfig initConfig = JsonNodePolicyInitConfigParser.parse(telemetryPolicyNode);
     PolicyInit.setDeclarativeInitConfig(initConfig);
-    maybeInstallTelemetryPolicySampler(model, telemetryPolicy, initConfig);
+    maybeInstallTelemetryPolicySampler(model, telemetryPolicyConfig, initConfig);
     logger.log(
         Level.INFO,
         "Dynamic control extension has loaded top-level declarative telemetry policy config with {0} source(s)",
@@ -76,11 +82,13 @@ public final class TelemetryPolicyDeclarativeCustomizerProvider
   }
 
   private static void maybeInstallTelemetryPolicySampler(
-      OpenTelemetryConfigurationModel model, Object telemetryPolicy, PolicyInitConfig initConfig) {
+      OpenTelemetryConfigurationModel model,
+      Map<?, ?> telemetryPolicy,
+      PolicyInitConfig initConfig) {
     if (!containsPolicyType(initConfig, TraceSamplingRatePolicy.POLICY_TYPE)) {
       return;
     }
-    Object sources = getSources(telemetryPolicy);
+    Object sources = telemetryPolicy.get("sources");
     if (sources == null) {
       return;
     }
@@ -95,7 +103,7 @@ public final class TelemetryPolicyDeclarativeCustomizerProvider
       tracerProvider.withSampler(sampler);
     }
     sampler.withAdditionalProperty(
-        TelemetryPolicyComponentProvider.NAME,
+        TelemetryPolicySamplerComponentProvider.NAME,
         new SamplerPropertyModel()
             .withAdditionalProperty("sources", sources)
             .withAdditionalProperty("resource_attributes", resourceAttributes(model))
@@ -111,14 +119,6 @@ public final class TelemetryPolicyDeclarativeCustomizerProvider
       }
     }
     return false;
-  }
-
-  @Nullable
-  private static Object getSources(Object telemetryPolicy) {
-    if (telemetryPolicy instanceof Map) {
-      return ((Map<?, ?>) telemetryPolicy).get("sources");
-    }
-    return null;
   }
 
   private static Map<String, String> resourceAttributes(OpenTelemetryConfigurationModel model) {

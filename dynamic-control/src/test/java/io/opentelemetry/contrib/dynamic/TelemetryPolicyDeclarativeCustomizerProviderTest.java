@@ -55,7 +55,7 @@ class TelemetryPolicyDeclarativeCustomizerProviderTest {
             .getTracerProvider()
             .getSampler()
             .getAdditionalProperties()
-            .get(TelemetryPolicyComponentProvider.NAME);
+            .get(TelemetryPolicySamplerComponentProvider.NAME);
     assertThat(samplerProperty).isNotNull();
     assertThat(samplerProperty.getAdditionalProperties().get("resource_attributes"))
         .isEqualTo(resourceAttributes());
