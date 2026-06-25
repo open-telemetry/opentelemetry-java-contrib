@@ -23,7 +23,7 @@ dependencies {
 
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
-  compileOnly("io.opentelemetry:opentelemetry-sdk-extension-declarative-config")
+  compileOnly("io.opentelemetry:opentelemetry-sdk-extension-declarative-config:1.63.0-alpha")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-incubator")
   compileOnly("io.opentelemetry.instrumentation:opentelemetry-declarative-config-bridge")
 
@@ -34,7 +34,7 @@ dependencies {
 
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
-  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-declarative-config")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-declarative-config:1.63.0-alpha")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-incubator")
   testImplementation("io.opentelemetry.instrumentation:opentelemetry-declarative-config-bridge")
   testImplementation("org.assertj:assertj-core")
