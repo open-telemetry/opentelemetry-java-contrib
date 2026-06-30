@@ -1,7 +1,7 @@
 plugins {
   `kotlin-dsl`
   // When updating, update below in dependencies too
-  id("com.diffplug.spotless") version "8.7.0"
+  id("com.diffplug.spotless") version "8.8.0"
 }
 
 repositories {
@@ -14,7 +14,7 @@ repositories {
 
 dependencies {
   // When updating, update above in plugins too
-  implementation("com.diffplug.spotless:com.diffplug.spotless.gradle.plugin:8.7.0")
+  implementation("com.diffplug.spotless:com.diffplug.spotless.gradle.plugin:8.8.0")
   implementation("net.ltgt.errorprone:net.ltgt.errorprone.gradle.plugin:5.1.0")
   implementation("net.ltgt.nullaway:net.ltgt.nullaway.gradle.plugin:3.1.0")
   implementation("org.sonatype.gradle.plugins:scan-gradle-plugin:3.1.6")
