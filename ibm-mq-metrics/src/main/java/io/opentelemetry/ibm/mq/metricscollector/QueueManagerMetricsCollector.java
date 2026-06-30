@@ -79,6 +79,17 @@ public final class QueueManagerMetricsCollector implements Consumer<MetricsColle
         int maxActiveChannels = context.getQueueManager().getMaxActiveChannels();
         producer.recordIbmMqManagerMaxActiveChannels(maxActiveChannels, attributes);
       }
+      if (context.getMetricsConfig().isIbmMqQueueManagerUptimeEnabled()) {
+        try {
+          long uptimeSeconds = MessageBuddy.queueManagerUptime(responses.get(0));
+          producer.recordIbmMqQueueManagerUptime(uptimeSeconds, attributes);
+        } catch (Exception e) {
+          logger.debug(
+              "Unable to calculate queue manager uptime for {}: {}",
+              context.getQueueManagerName(),
+              e.getMessage());
+        }
+      }
     } catch (Exception e) {
       logger.error(e.getMessage());
       throw new IllegalStateException(e);

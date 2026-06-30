@@ -533,6 +533,16 @@ groups:
     attributes:
       - ref: ibm.mq.queue.manager
         requirement_level: required
+  - id: ibm.mq.queue_manager.uptime
+    type: metric
+    metric_name: ibm.mq.queue_manager.uptime
+    stability: development
+    brief: "Queue manager uptime"
+    instrument: gauge
+    unit: "s"
+    attributes:
+      - ref: ibm.mq.queue.manager
+        requirement_level: required
   - id: ibm.mq.archive.log.size
     type: metric
     metric_name: ibm.mq.archive.log.size
