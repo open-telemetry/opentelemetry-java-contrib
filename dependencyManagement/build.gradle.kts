@@ -54,7 +54,7 @@ dependencies {
     api("org.bouncycastle:bcprov-jdk18on:1.84")
     api("org.junit-pioneer:junit-pioneer:1.9.1")
     api("org.skyscreamer:jsonassert:1.5.3")
-    api("org.apache.kafka:kafka-clients:4.3.0")
+    api("org.apache.kafka:kafka-clients:4.3.1")
     api("org.testcontainers:testcontainers-kafka:2.0.5")
     api("org.jctools:jctools-core:4.0.6")
     api("tools.profiler:async-profiler:4.4")
