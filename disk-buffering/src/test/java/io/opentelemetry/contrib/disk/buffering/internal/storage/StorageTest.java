@@ -116,7 +116,7 @@ class StorageTest {
     assertThat(write(Collections.singletonList(THIRD_LOG_RECORD))).isTrue();
     assertThat(destinationDir.list())
         .containsExactlyInAnyOrder(
-            String.valueOf(firstFileWriteTime), String.valueOf(secondFileWriteTime));
+            String.valueOf(firstFileWriteTime), secondFileWriteTime + ".tmp");
 
     // Forward past first time read
     currentTimeMillis.set(firstFileWriteTime + MAX_FILE_AGE_FOR_READ_MILLIS + 1);
@@ -132,7 +132,7 @@ class StorageTest {
     // Purge expired files on write
     currentTimeMillis.set(50000);
     assertThat(write(Collections.singletonList(FIRST_LOG_RECORD))).isTrue();
-    assertThat(destinationDir.list()).containsExactly("50000");
+    assertThat(destinationDir.list()).containsExactly("50000.tmp");
   }
 
   @Test
@@ -147,7 +147,7 @@ class StorageTest {
     assertThat(write(Collections.singletonList(THIRD_LOG_RECORD))).isTrue();
     assertThat(destinationDir.list())
         .containsExactlyInAnyOrder(
-            String.valueOf(firstFileWriteTime), String.valueOf(secondFileWriteTime));
+            String.valueOf(firstFileWriteTime), secondFileWriteTime + ".tmp");
 
     // Forward to all files read time
     currentTimeMillis.set(secondFileWriteTime + MIN_FILE_AGE_FOR_READ_MILLIS);
@@ -158,7 +158,7 @@ class StorageTest {
     assertThat(result.getContent()).containsExactly(FIRST_LOG_RECORD, SECOND_LOG_RECORD);
     assertThat(destinationDir.list())
         .containsExactlyInAnyOrder(
-            String.valueOf(firstFileWriteTime), String.valueOf(secondFileWriteTime));
+            String.valueOf(firstFileWriteTime), secondFileWriteTime + ".tmp");
     result.delete();
     result.close();
 
