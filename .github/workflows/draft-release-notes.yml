@@ -1,0 +1,40 @@
+name: Draft Release Notes
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  draft-notes:
+    runs-on: ubuntu-latest
+    environment: protected
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
+        with:
+          python-version: '3.11'
+
+      - name: Install GitHub CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gh
+
+      - name: Install Copilot CLI
+        run: npm install -g @githubnext/github-copilot-cli
+
+      - name: Authenticate Copilot CLI
+        run: github-copilot-cli auth "${{ secrets.COPILOT_GITHUB_TOKEN }}"
+
+      - name: Draft release notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 .github/scripts/draft-release-notes/draft-release-notes.py
