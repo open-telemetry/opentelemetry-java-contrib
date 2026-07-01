@@ -255,6 +255,16 @@
       ],
     },
     {
+      // mockserver 6+ requires Java 11+
+      matchUpdateTypes: [
+        'major',
+      ],
+      enabled: false,
+      matchPackageNames: [
+        'org.mock-server:**'
+      ],
+    },
+    {
       // pinned version for compatibility
       matchFileNames: [
         'micrometer-meter-provider/build.gradle.kts',
