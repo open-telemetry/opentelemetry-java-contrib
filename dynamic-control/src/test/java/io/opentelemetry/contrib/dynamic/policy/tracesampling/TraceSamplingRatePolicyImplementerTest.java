@@ -50,6 +50,19 @@ class TraceSamplingRatePolicyImplementerTest {
   }
 
   @Test
+  void skipsRepeatedEquivalentProbability() {
+    CountingDelegatingSampler delegatingSampler =
+        new CountingDelegatingSampler(Sampler.alwaysOff());
+    TraceSamplingRatePolicyImplementer implementer =
+        new TraceSamplingRatePolicyImplementer(delegatingSampler);
+
+    implementer.onPoliciesChanged(singletonList(new TraceSamplingRatePolicy(1.0)));
+    implementer.onPoliciesChanged(singletonList(new TraceSamplingRatePolicy(1.0)));
+
+    assertThat(delegatingSampler.changedProbabilityCount).isEqualTo(1);
+  }
+
+  @Test
   void ignoresUnrelatedPolicyTypes() {
     DelegatingSampler delegatingSampler = new DelegatingSampler(Sampler.alwaysOff());
     TraceSamplingRatePolicyImplementer implementer =
@@ -84,6 +97,23 @@ class TraceSamplingRatePolicyImplementerTest {
             Attributes.empty(),
             Collections.emptyList());
     return result.getDecision();
+  }
+
+  private static final class CountingDelegatingSampler extends DelegatingSampler {
+    private int changedProbabilityCount;
+
+    private CountingDelegatingSampler(Sampler initialDelegate) {
+      super(initialDelegate);
+    }
+
+    @Override
+    public synchronized boolean setSamplingProbability(double probability) {
+      boolean changed = super.setSamplingProbability(probability);
+      if (changed) {
+        changedProbabilityCount++;
+      }
+      return changed;
+    }
   }
 
   private static final class TestTelemetryPolicy implements TelemetryPolicy {
