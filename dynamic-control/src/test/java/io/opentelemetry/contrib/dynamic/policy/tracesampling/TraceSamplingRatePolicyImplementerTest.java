@@ -51,7 +51,8 @@ class TraceSamplingRatePolicyImplementerTest {
 
   @Test
   void skipsRepeatedEquivalentProbability() {
-    CountingDelegatingSampler delegatingSampler = new CountingDelegatingSampler(Sampler.alwaysOff());
+    CountingDelegatingSampler delegatingSampler =
+        new CountingDelegatingSampler(Sampler.alwaysOff());
     TraceSamplingRatePolicyImplementer implementer =
         new TraceSamplingRatePolicyImplementer(delegatingSampler);
 
