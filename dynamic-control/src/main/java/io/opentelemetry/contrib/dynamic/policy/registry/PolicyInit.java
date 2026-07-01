@@ -191,7 +191,7 @@ public final class PolicyInit {
                   + "' in mapping for source kind '"
                   + source.getKind().configValue()
                   + "' key '"
-                  + mapping.getSourceKey()
+                  + mapping.getPolicyId()
                   + "'");
         }
         initializePolicyClass(policyClass, autoConfiguration, initializedPolicyClasses);

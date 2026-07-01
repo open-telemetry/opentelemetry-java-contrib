@@ -33,7 +33,7 @@ class YamlPolicyInitConfigReaderTest {
       assertThat(source.getFormat()).isEqualTo(SourceFormat.JSONKEYVALUE);
       assertThat(source.getLocation()).isEqualTo("vendor-specific");
       assertThat(source.getMappings()).hasSize(4);
-      assertThat(source.getMappings().get(0).getSourceKey()).isEqualTo("sampling_rate");
+      assertThat(source.getMappings().get(0).getPolicyId()).isEqualTo("sampling_rate");
       assertThat(source.getMappings().get(0).getPolicyType()).isEqualTo("trace-sampling");
     }
   }
@@ -69,7 +69,7 @@ class YamlPolicyInitConfigReaderTest {
   }
 
   @Test
-  void mappingMissingSourceKeyThrows() {
+  void mappingMissingPolicyIdThrows() {
     String yaml =
         "sources:\n"
             + "  - kind: opamp\n"
@@ -78,6 +78,6 @@ class YamlPolicyInitConfigReaderTest {
             + "      - policyType: x\n";
     assertThatThrownBy(() -> YamlPolicyInitConfigReader.read(yaml))
         .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("sourceKey");
+        .hasMessageContaining("policyId");
   }
 }

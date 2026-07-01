@@ -36,7 +36,7 @@ public final class PolicyInitConfig {
   static final String FORMAT_DECLARATIVE_KEY = "format";
   static final String LOCATION_DECLARATIVE_KEY = "location";
   static final String MAPPINGS_DECLARATIVE_KEY = "mappings";
-  static final String SOURCE_KEY_DECLARATIVE_KEY = "sourceKey";
+  static final String POLICY_ID_DECLARATIVE_KEY = "policyId";
   static final String POLICY_TYPE_DECLARATIVE_KEY = "policyType";
   static final String POLICY_INIT_CONFIG_PROPERTY_JSON =
       "otel.java.experimental.telemetry.policy.init.json";
@@ -71,7 +71,7 @@ public final class PolicyInitConfig {
    *       format: ...
    *       location: ...
    *       mappings:
-   *         - sourceKey: ...
+   *         - policyId: ...
    *           policyType: ...
    * }</pre>
    *
@@ -115,7 +115,7 @@ public final class PolicyInitConfig {
    *     format: ...
    *     location: ...
    *     mappings:
-   *       - sourceKey: ...
+   *       - policyId: ...
    *         policyType: ...
    * }</pre>
    *
@@ -251,15 +251,15 @@ public final class PolicyInitConfig {
   private static PolicySourceMappingConfig parseDeclarativeMapping(
       DeclarativeConfigProperties mappingConfig) {
     Objects.requireNonNull(mappingConfig, "mapping config cannot be null");
-    String sourceKey =
+    String policyId =
         requireDeclarativeText(
-            mappingConfig.getString(SOURCE_KEY_DECLARATIVE_KEY),
-            "Each mapping must define string 'sourceKey'.");
+            mappingConfig.getString(POLICY_ID_DECLARATIVE_KEY),
+            "Each mapping must define string 'policyId'.");
     String policyType =
         requireDeclarativeText(
             mappingConfig.getString(POLICY_TYPE_DECLARATIVE_KEY),
             "Each mapping must define string 'policyType'.");
-    return new PolicySourceMappingConfig(sourceKey, policyType);
+    return new PolicySourceMappingConfig(policyId, policyType);
   }
 
   private static String requireDeclarativeText(@Nullable String value, String message) {

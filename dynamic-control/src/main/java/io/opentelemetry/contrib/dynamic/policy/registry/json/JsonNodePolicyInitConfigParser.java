@@ -61,11 +61,11 @@ public final class JsonNodePolicyInitConfigParser {
 
   private static PolicySourceMappingConfig parseMapping(JsonNode node) {
     JsonNode objectNode = requireObject(node, "Each mapping entry must be an object.");
-    String sourceKey =
-        requireText(objectNode.get("sourceKey"), "Each mapping must define string 'sourceKey'.");
+    String policyId =
+        requireText(objectNode.get("policyId"), "Each mapping must define string 'policyId'.");
     String policyType =
         requireText(objectNode.get("policyType"), "Each mapping must define string 'policyType'.");
-    return new PolicySourceMappingConfig(sourceKey, policyType);
+    return new PolicySourceMappingConfig(policyId, policyType);
   }
 
   @CanIgnoreReturnValue

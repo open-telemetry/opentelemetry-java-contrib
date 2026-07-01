@@ -49,8 +49,8 @@ import opamp.proto.ServerErrorResponse;
  * {@link PolicyProvider} implementation backed by OpAMP remote configuration updates.
  *
  * <p>The provider subscribes to an OpAMP endpoint, extracts the configured payload for one source
- * location key, maps incoming source keys to internal policy types, validates them with the
- * supplied validators, and publishes the resulting policies to callers.
+ * location key, maps incoming policy IDs to internal policy types, validates them with the supplied
+ * validators, and publishes the resulting policies to callers.
  */
 public final class OpampPolicyProvider implements PolicyProvider {
   private static final Logger logger = Logger.getLogger(OpampPolicyProvider.class.getName());
@@ -75,7 +75,7 @@ public final class OpampPolicyProvider implements PolicyProvider {
   private final Map<String, String> headers;
   private final SourceFormat format;
   private final List<PolicyValidator> validators;
-  private final Map<String, String> sourceKeyToPolicyType;
+  private final Map<String, String> policyIdToPolicyType;
   private final MutablePeriodicDelay pollingDelay;
   private final AtomicReference<List<TelemetryPolicy>> currentPolicies =
       new AtomicReference<>(Collections.<TelemetryPolicy>emptyList());
@@ -88,7 +88,7 @@ public final class OpampPolicyProvider implements PolicyProvider {
    * @param properties auto-configuration properties used to resolve endpoint/service identity
    * @param configuredLocation source location key used to select one OpAMP config entry
    * @param format payload format parser for the selected source
-   * @param mappings source-key-to-policy-type mappings for this source
+   * @param mappings policy-id-to-policy-type mappings for this source
    * @param validators validators used to materialize typed {@link TelemetryPolicy} instances
    * @throws IllegalArgumentException if required configuration such as OpAMP endpoint is missing
    */
@@ -114,7 +114,7 @@ public final class OpampPolicyProvider implements PolicyProvider {
     this.headers = Collections.unmodifiableMap(new HashMap<>(properties.getMap(OPAMP_HEADERS)));
     this.format = format;
     this.validators = Collections.unmodifiableList(new ArrayList<>(validators));
-    this.sourceKeyToPolicyType = Collections.unmodifiableMap(buildSourceKeyToPolicyType(mappings));
+    this.policyIdToPolicyType = Collections.unmodifiableMap(buildPolicyIdToPolicyType(mappings));
     this.pollingDelay =
         new MutablePeriodicDelay(
             Objects.requireNonNull(
@@ -256,18 +256,18 @@ public final class OpampPolicyProvider implements PolicyProvider {
     logger.info("Received OpAMP policy payload for key '" + key + "': " + policyText);
     List<SourceWrapper> parsedSources = format.parse(policyText);
     if (parsedSources == null && format == SourceFormat.JSONKEYVALUE) {
-      parsedSources = parseMappedJsonObject(policyText, sourceKeyToPolicyType.keySet());
+      parsedSources = parseMappedJsonObject(policyText, policyIdToPolicyType.keySet());
     }
     if (parsedSources == null) {
       logger.info("Ignoring invalid OpAMP config entry for key: " + key);
       return;
     }
     for (SourceWrapper source : parsedSources) {
-      String policyType = source.getPolicyType();
-      if (policyType == null || policyType.isEmpty()) {
+      String incomingPolicyId = source.getPolicyType();
+      if (incomingPolicyId == null || incomingPolicyId.isEmpty()) {
         continue;
       }
-      String mappedPolicyType = sourceKeyToPolicyType.get(policyType);
+      String mappedPolicyType = policyIdToPolicyType.get(incomingPolicyId);
       if (mappedPolicyType == null) {
         continue;
       }
@@ -437,11 +437,11 @@ public final class OpampPolicyProvider implements PolicyProvider {
     }
   }
 
-  private static Map<String, String> buildSourceKeyToPolicyType(
+  private static Map<String, String> buildPolicyIdToPolicyType(
       List<PolicySourceMappingConfig> mappings) {
     Map<String, String> mapping = new HashMap<>();
     for (PolicySourceMappingConfig item : mappings) {
-      mapping.put(item.getSourceKey(), item.getPolicyType());
+      mapping.put(item.getPolicyId(), item.getPolicyType());
     }
     return mapping;
   }
