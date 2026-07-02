@@ -21,6 +21,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Set up Python 3.11
         uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
@@ -48,20 +49,23 @@ jobs:
           private-key: ${{ secrets.OTELBOT_PRIVATE_KEY }}
           owner: open-telemetry
           repositories: opentelemetry-java-contrib
+          permission-contents: write
+          permission-pull-requests: write
 
       - name: Create pull request against main
         env:
-          # not using secrets.GITHUB_TOKEN since pull requests from that token do not run workflows
           GH_TOKEN: ${{ steps.otelbot-token.outputs.token }}
         run: |
           message="Draft release notes"
           body="Automated draft of the \`## Unreleased\` section of \`CHANGELOG.md\`. Review the diff to recover any hand-written content that should be retained."
           branch="otelbot/draft-release-notes-${GITHUB_RUN_ID}"
 
-          git checkout -b $branch
+          git checkout -b "$branch"
           git commit -a -m "$message"
-          git push --set-upstream origin $branch
+
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/open-telemetry/opentelemetry-java-contrib.git"
+          git push --set-upstream origin "$branch"
+
           gh pr create --title "$message" \
                        --body "$body" \
                        --base main
-                       
