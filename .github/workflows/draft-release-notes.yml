@@ -46,6 +46,8 @@ jobs:
         with:
           app-id: ${{ vars.OTELBOT_APP_ID }}
           private-key: ${{ secrets.OTELBOT_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: opentelemetry-java-contrib
 
       - name: Create pull request against main
         env:
@@ -62,3 +64,4 @@ jobs:
           gh pr create --title "$message" \
                        --body "$body" \
                        --base main
+                       
