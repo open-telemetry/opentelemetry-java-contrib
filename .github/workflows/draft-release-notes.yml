@@ -18,6 +18,7 @@ jobs:
     environment: protected
     steps:
       - name: Checkout code
+        # zizmor: ignore[artipacked] - Maintainer requested persisting credentials for the git push step
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
@@ -46,7 +47,7 @@ jobs:
         with:
           app-id: ${{ vars.OTELBOT_APP_ID }}
           private-key: ${{ secrets.OTELBOT_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
+          owner: open-telemetry
           repositories: opentelemetry-java-contrib
 
       - name: Create pull request against main
@@ -64,4 +65,3 @@ jobs:
           gh pr create --title "$message" \
                        --body "$body" \
                        --base main
-                       
