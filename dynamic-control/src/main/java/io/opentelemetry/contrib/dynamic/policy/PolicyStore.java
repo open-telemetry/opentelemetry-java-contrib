@@ -124,9 +124,11 @@ public final class PolicyStore {
     return normalized;
   }
 
-  private static PolicyKey policyKey(TelemetryPolicy policy) {
-    return new PolicyKey(policy.getType(), policy.getIdentity().getId());
-  }
+private static PolicyKey policyKey(TelemetryPolicy policy) {
+  TelemetryPolicyIdentity identity =
+      Objects.requireNonNull(policy.getIdentity(), "policy identity cannot be null");
+  return new PolicyKey(policy.getType(), identity.getId());
+}
 
   private static void notifyImplementer(
       RegisteredImplementer registration, List<TelemetryPolicy> policiesSnapshot, long version) {
