@@ -7,17 +7,16 @@ package io.opentelemetry.contrib.dynamic.policy;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- * Holds the latest validated policy snapshot and reports whether an update changed effective
- * configuration.
- */
+/** Holds the latest validated policy snapshot and publishes accepted updates to implementers. */
 public final class PolicyStore {
   private static final Logger logger = Logger.getLogger(PolicyStore.class.getName());
 
@@ -26,30 +25,25 @@ public final class PolicyStore {
   private long policyVersion;
 
   /**
-   * Replaces the stored policies when the new snapshot is not equal to the current one.
+   * Replaces the stored policies with a new accepted snapshot.
    *
-   * <p>Input lists are normalized to a set of distinct policies using value equality: duplicates
-   * are dropped and only the first occurrence of each policy is kept (insertion order). Change
-   * detection uses set equality, so list order does not matter. That matches telemetry policy
-   * semantics where the effective result does not depend on processing order (see the telemetry
-   * policy OTEP, commutativity / no user-defined ordering between policies).
+   * <p>Input lists are normalized by policy identity, using policy type and policy id. Duplicate
+   * policies with the same identity are dropped and only the first occurrence is kept in insertion
+   * order. The store does not perform value-level no-op detection; providers can use source
+   * hashes/versions to skip unchanged snapshots, and implementers must apply policies idempotently.
    *
-   * @return {@code true} if the store was updated, {@code false} if the snapshot was unchanged
+   * @return {@code true} after the snapshot is accepted
    */
   public boolean updatePolicies(List<TelemetryPolicy> newPolicies) {
     Objects.requireNonNull(newPolicies, "newPolicies cannot be null");
-    LinkedHashSet<TelemetryPolicy> newPolicySet = new LinkedHashSet<>(newPolicies);
+    Map<PolicyKey, TelemetryPolicy> newPolicyMap = normalizedPolicyMap(newPolicies);
     List<TelemetryPolicy> policiesSnapshot;
     List<TelemetryPolicy> notificationSnapshot;
     List<RegisteredImplementer> implementersSnapshot;
     long snapshotVersion;
     synchronized (this) {
-      if (new LinkedHashSet<>(policies).equals(newPolicySet)) {
-        return false;
-      }
-      List<TelemetryPolicy> deletedPolicies =
-          deletedPoliciesFrom(policies, new ArrayList<>(newPolicySet));
-      policies = new ArrayList<>(newPolicySet);
+      List<TelemetryPolicy> deletedPolicies = deletedPoliciesFrom(policies, newPolicyMap.keySet());
+      policies = new ArrayList<>(newPolicyMap.values());
       policyVersion++;
       snapshotVersion = policyVersion;
       policiesSnapshot = new ArrayList<>(policies);
@@ -105,14 +99,10 @@ public final class PolicyStore {
   }
 
   private static List<TelemetryPolicy> deletedPoliciesFrom(
-      List<TelemetryPolicy> previousPolicies, List<TelemetryPolicy> newPolicies) {
-    Set<String> activePolicyKeys = new LinkedHashSet<>();
-    for (TelemetryPolicy policy : newPolicies) {
-      activePolicyKeys.add(policyKey(policy));
-    }
+      List<TelemetryPolicy> previousPolicies, Set<PolicyKey> activePolicyKeys) {
     ArrayList<TelemetryPolicy> deletedPolicies = new ArrayList<>();
     for (TelemetryPolicy previousPolicy : previousPolicies) {
-      String policyKey = policyKey(previousPolicy);
+      PolicyKey policyKey = policyKey(previousPolicy);
       TelemetryPolicyIdentity identity = previousPolicy.getIdentity();
       if (!activePolicyKeys.contains(policyKey)) {
         deletedPolicies.add(new DeletedTelemetryPolicy(identity, previousPolicy.getType()));
@@ -121,8 +111,23 @@ public final class PolicyStore {
     return deletedPolicies;
   }
 
-  private static String policyKey(TelemetryPolicy policy) {
-    return policy.getType() + "\u0000" + policy.getIdentity().getId();
+  private static Map<PolicyKey, TelemetryPolicy> normalizedPolicyMap(
+      List<TelemetryPolicy> policies) {
+    LinkedHashMap<PolicyKey, TelemetryPolicy> normalized = new LinkedHashMap<>();
+    for (TelemetryPolicy policy : policies) {
+      Objects.requireNonNull(policy, "newPolicies cannot contain null elements");
+      PolicyKey key = policyKey(policy);
+      if (!normalized.containsKey(key)) {
+        normalized.put(key, policy);
+      }
+    }
+    return normalized;
+  }
+
+  private static PolicyKey policyKey(TelemetryPolicy policy) {
+    TelemetryPolicyIdentity identity =
+        Objects.requireNonNull(policy.getIdentity(), "policy identity cannot be null");
+    return new PolicyKey(policy.getType(), identity.getId());
   }
 
   private static void notifyImplementer(
@@ -148,6 +153,35 @@ public final class PolicyStore {
 
     private RegisteredImplementer(PolicyImplementer implementer) {
       this.implementer = implementer;
+    }
+  }
+
+  private static final class PolicyKey {
+    private final String type;
+    private final String id;
+
+    private PolicyKey(String type, String id) {
+      this.type = Objects.requireNonNull(type, "policy type cannot be null");
+      this.id = Objects.requireNonNull(id, "policy id cannot be null");
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (!(obj instanceof PolicyKey)) {
+        return false;
+      }
+      PolicyKey that = (PolicyKey) obj;
+      return type.equals(that.type) && id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+      int result = type.hashCode();
+      result = 31 * result + id.hashCode();
+      return result;
     }
   }
 }

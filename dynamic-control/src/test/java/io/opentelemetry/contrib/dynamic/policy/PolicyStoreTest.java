@@ -32,10 +32,10 @@ class PolicyStoreTest {
   }
 
   @Test
-  void updatePoliciesReturnsFalseWhenEqualContent() {
+  void updatePoliciesAcceptsRepeatedEquivalentSnapshot() {
     PolicyStore store = new PolicyStore();
     assertThat(store.updatePolicies(singletonList(new TraceSamplingRatePolicy(0.5)))).isTrue();
-    assertThat(store.updatePolicies(singletonList(new TraceSamplingRatePolicy(0.5)))).isFalse();
+    assertThat(store.updatePolicies(singletonList(new TraceSamplingRatePolicy(0.5)))).isTrue();
   }
 
   @Test
@@ -43,29 +43,40 @@ class PolicyStoreTest {
     PolicyStore store = new PolicyStore();
     assertThat(store.updatePolicies(singletonList(new TraceSamplingRatePolicy(0.25)))).isTrue();
     assertThat(store.updatePolicies(singletonList(new TraceSamplingRatePolicy(0.75)))).isTrue();
-    assertThat(store.getPolicies()).containsExactly(new TraceSamplingRatePolicy(0.75));
+    assertThat(store.getPolicies()).hasSize(1);
+    assertThat(((TraceSamplingRatePolicy) store.getPolicies().get(0)).getProbability())
+        .isEqualTo(0.75);
   }
 
   @Test
-  void updatePoliciesReturnsFalseWhenOnlyOrderDiffers() {
+  void updatePoliciesAcceptsReorderedSnapshot() {
     PolicyStore store = new PolicyStore();
     List<TelemetryPolicy> first =
-        Arrays.asList(new TraceSamplingRatePolicy(0.1), new TraceSamplingRatePolicy(0.2));
-    List<TelemetryPolicy> reordered =
-        Arrays.asList(new TraceSamplingRatePolicy(0.2), new TraceSamplingRatePolicy(0.1));
+        Arrays.asList(
+            new TestTelemetryPolicy(
+                new TelemetryPolicyIdentity("first-policy", "First policy"), "test-policy"),
+            new TestTelemetryPolicy(
+                new TelemetryPolicyIdentity("second-policy", "Second policy"), "test-policy"));
+    List<TelemetryPolicy> reordered = Arrays.asList(first.get(1), first.get(0));
 
     assertThat(store.updatePolicies(first)).isTrue();
-    assertThat(store.updatePolicies(reordered)).isFalse();
-    assertThat(store.getPolicies()).isEqualTo(first);
+    assertThat(store.updatePolicies(reordered)).isTrue();
+    assertThat(store.getPolicies()).containsExactly(reordered.get(0), reordered.get(1));
   }
 
   @Test
-  void updatePoliciesIgnoresDuplicatePoliciesInInput() {
+  void updatePoliciesIgnoresDuplicatePolicyIdentitiesInInput() {
     PolicyStore store = new PolicyStore();
-    TraceSamplingRatePolicy p = new TraceSamplingRatePolicy(0.5);
-    assertThat(store.updatePolicies(Arrays.asList(p, new TraceSamplingRatePolicy(0.5)))).isTrue();
-    assertThat(store.getPolicies()).containsExactly(p);
-    assertThat(store.updatePolicies(singletonList(new TraceSamplingRatePolicy(0.5)))).isFalse();
+    TelemetryPolicy first =
+        new TestTelemetryPolicy(
+            new TelemetryPolicyIdentity("test-policy", "Test policy"), "test-policy");
+    TelemetryPolicy duplicate =
+        new TestTelemetryPolicy(
+            new TelemetryPolicyIdentity("test-policy", "Updated name"), "test-policy");
+
+    assertThat(store.updatePolicies(Arrays.asList(first, duplicate))).isTrue();
+
+    assertThat(store.getPolicies()).containsExactly(first);
   }
 
   @Test
@@ -85,7 +96,8 @@ class PolicyStoreTest {
 
     store.registerImplementer(implementer);
 
-    verify(implementer).onPoliciesChanged(singletonList(new TraceSamplingRatePolicy(0.5)));
+    verify(implementer)
+        .onPoliciesChanged(argThat(policies -> containsTraceSamplingProbability(policies, 0.5)));
   }
 
   @Test
@@ -97,7 +109,8 @@ class PolicyStoreTest {
     clearInvocations(implementer);
     store.updatePolicies(Arrays.asList(unrelatedPolicy(), new TraceSamplingRatePolicy(0.25)));
 
-    verify(implementer).onPoliciesChanged(singletonList(new TraceSamplingRatePolicy(0.25)));
+    verify(implementer)
+        .onPoliciesChanged(argThat(policies -> containsTraceSamplingProbability(policies, 0.25)));
   }
 
   @Test
@@ -145,7 +158,7 @@ class PolicyStoreTest {
     PolicyImplementer implementer = implementerFor("test-policy");
     TestTelemetryPolicy removedPolicy =
         new TestTelemetryPolicy(
-            new TelemetryPolicyIdentity("test-policy-id", "Test policy"), "test-policy", "old");
+            new TelemetryPolicyIdentity("test-policy-id", "Test policy"), "test-policy");
     store.updatePolicies(singletonList(removedPolicy));
     store.registerImplementer(implementer);
     clearInvocations(implementer);
@@ -219,18 +232,25 @@ class PolicyStoreTest {
 
   private static TelemetryPolicy unrelatedPolicy() {
     return new TestTelemetryPolicy(
-        new TelemetryPolicyIdentity("other-policy", "Other policy"), "other-policy", "value");
+        new TelemetryPolicyIdentity("other-policy", "Other policy"), "other-policy");
+  }
+
+  private static boolean containsTraceSamplingProbability(
+      List<TelemetryPolicy> policies, double probability) {
+    if (policies.size() != 1 || !(policies.get(0) instanceof TraceSamplingRatePolicy)) {
+      return false;
+    }
+    TraceSamplingRatePolicy policy = (TraceSamplingRatePolicy) policies.get(0);
+    return Double.compare(policy.getProbability(), probability) == 0;
   }
 
   private static final class TestTelemetryPolicy implements TelemetryPolicy {
     private final TelemetryPolicyIdentity identity;
     private final String type;
-    private final String value;
 
-    private TestTelemetryPolicy(TelemetryPolicyIdentity identity, String type, String value) {
+    private TestTelemetryPolicy(TelemetryPolicyIdentity identity, String type) {
       this.identity = identity;
       this.type = type;
-      this.value = value;
     }
 
     @Override
@@ -241,26 +261,6 @@ class PolicyStoreTest {
     @Override
     public String getType() {
       return type;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      if (this == obj) {
-        return true;
-      }
-      if (!(obj instanceof TestTelemetryPolicy)) {
-        return false;
-      }
-      TestTelemetryPolicy that = (TestTelemetryPolicy) obj;
-      return identity.equals(that.identity) && type.equals(that.type) && value.equals(that.value);
-    }
-
-    @Override
-    public int hashCode() {
-      int result = identity.hashCode();
-      result = 31 * result + type.hashCode();
-      result = 31 * result + value.hashCode();
-      return result;
     }
   }
 }
