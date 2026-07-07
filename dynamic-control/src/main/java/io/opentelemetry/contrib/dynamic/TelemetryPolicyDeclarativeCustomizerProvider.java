@@ -50,6 +50,7 @@ public final class TelemetryPolicyDeclarativeCustomizerProvider
   public void customize(DeclarativeConfigurationCustomizer customizer) {
     customizer.addModelCustomizer(
         model -> {
+          // Need to return new model if needed, can't guarantee model is mutable
           return registerTopLevelTelemetryPolicy(model);
         });
   }
