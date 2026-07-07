@@ -46,8 +46,7 @@ public final class TelemetryPolicySamplerComponentProvider implements ComponentP
     try {
       PolicyInit.initFromDeclarativeConfig(config, bridgedConfig);
     } catch (IllegalArgumentException e) {
-      // No-op when the component is present but does not include a valid telemetry_policy block.
-      logger.log(Level.FINE, "Skipping telemetry policy initialization from component config", e);
+      logger.log(Level.WARNING, "Failed to initialize telemetry policy from component config", e);
     }
     // TODO: install specifically a delegating sampler, and allow it to be dynamically updated by
     // the policy configuration
