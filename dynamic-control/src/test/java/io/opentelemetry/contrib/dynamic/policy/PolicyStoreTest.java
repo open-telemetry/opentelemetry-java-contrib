@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.dynamic.policy;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -75,8 +76,7 @@ class PolicyStoreTest {
   @Test
   void registerImplementerReceivesCurrentRelevantPolicies() {
     PolicyStore store = new PolicyStore();
-    store.updatePolicies(
-        Arrays.asList(new TraceSamplingRatePolicy(0.5), new TelemetryPolicy("other-policy")));
+    store.updatePolicies(Arrays.asList(new TraceSamplingRatePolicy(0.5), unrelatedPolicy()));
 
     PolicyImplementer implementer = mock(PolicyImplementer.class);
     PolicyValidator validator = mock(PolicyValidator.class);
@@ -95,10 +95,74 @@ class PolicyStoreTest {
 
     store.registerImplementer(implementer);
     clearInvocations(implementer);
-    store.updatePolicies(
-        Arrays.asList(new TelemetryPolicy("other-policy"), new TraceSamplingRatePolicy(0.25)));
+    store.updatePolicies(Arrays.asList(unrelatedPolicy(), new TraceSamplingRatePolicy(0.25)));
 
     verify(implementer).onPoliciesChanged(singletonList(new TraceSamplingRatePolicy(0.25)));
+  }
+
+  @Test
+  void updatePoliciesNotifiesDeletedPolicyWhenPolicyDisappears() {
+    PolicyStore store = new PolicyStore();
+    PolicyImplementer implementer = traceSamplingImplementer();
+    TraceSamplingRatePolicy removedPolicy = new TraceSamplingRatePolicy(0.5);
+    store.updatePolicies(singletonList(removedPolicy));
+    store.registerImplementer(implementer);
+    clearInvocations(implementer);
+
+    assertThat(store.updatePolicies(Collections.emptyList())).isTrue();
+
+    verify(implementer)
+        .onPoliciesChanged(
+            argThat(
+                policies ->
+                    policies.size() == 1
+                        && policies.get(0) instanceof DeletedTelemetryPolicy
+                        && policies.get(0).isDeleted()
+                        && ((DeletedTelemetryPolicy) policies.get(0))
+                            .getIdentity()
+                            .equals(removedPolicy.getIdentity())
+                        && policies.get(0).getType().equals(removedPolicy.getType())));
+    assertThat(store.getPolicies()).isEmpty();
+  }
+
+  @Test
+  void updatePoliciesDoesNotNotifyDeletedPolicyWhenPolicyValueChangesWithSameIdentity() {
+    PolicyStore store = new PolicyStore();
+    PolicyImplementer implementer = traceSamplingImplementer();
+    TraceSamplingRatePolicy updatedPolicy = new TraceSamplingRatePolicy(0.75);
+    store.updatePolicies(singletonList(new TraceSamplingRatePolicy(0.5)));
+    store.registerImplementer(implementer);
+    clearInvocations(implementer);
+
+    assertThat(store.updatePolicies(singletonList(updatedPolicy))).isTrue();
+
+    verify(implementer).onPoliciesChanged(singletonList(updatedPolicy));
+  }
+
+  @Test
+  void updatePoliciesNotifiesDeletedPolicyForAnyIdentityBearingPolicy() {
+    PolicyStore store = new PolicyStore();
+    PolicyImplementer implementer = implementerFor("test-policy");
+    TestTelemetryPolicy removedPolicy =
+        new TestTelemetryPolicy(
+            new TelemetryPolicyIdentity("test-policy-id", "Test policy"), "test-policy", "old");
+    store.updatePolicies(singletonList(removedPolicy));
+    store.registerImplementer(implementer);
+    clearInvocations(implementer);
+
+    assertThat(store.updatePolicies(Collections.emptyList())).isTrue();
+
+    verify(implementer)
+        .onPoliciesChanged(
+            argThat(
+                policies ->
+                    policies.size() == 1
+                        && policies.get(0) instanceof DeletedTelemetryPolicy
+                        && policies.get(0).isDeleted()
+                        && ((DeletedTelemetryPolicy) policies.get(0))
+                            .getIdentity()
+                            .equals(removedPolicy.getIdentity())
+                        && policies.get(0).getType().equals(removedPolicy.getType())));
   }
 
   @Test
@@ -142,10 +206,61 @@ class PolicyStoreTest {
   }
 
   private static PolicyImplementer traceSamplingImplementer() {
+    return implementerFor(TraceSamplingRatePolicy.POLICY_TYPE);
+  }
+
+  private static PolicyImplementer implementerFor(String policyType) {
     PolicyImplementer implementer = mock(PolicyImplementer.class);
     PolicyValidator validator = mock(PolicyValidator.class);
-    when(validator.getPolicyType()).thenReturn(TraceSamplingRatePolicy.POLICY_TYPE);
+    when(validator.getPolicyType()).thenReturn(policyType);
     when(implementer.getValidators()).thenReturn(singletonList(validator));
     return implementer;
+  }
+
+  private static TelemetryPolicy unrelatedPolicy() {
+    return new TestTelemetryPolicy(
+        new TelemetryPolicyIdentity("other-policy", "Other policy"), "other-policy", "value");
+  }
+
+  private static final class TestTelemetryPolicy implements TelemetryPolicy {
+    private final TelemetryPolicyIdentity identity;
+    private final String type;
+    private final String value;
+
+    private TestTelemetryPolicy(TelemetryPolicyIdentity identity, String type, String value) {
+      this.identity = identity;
+      this.type = type;
+      this.value = value;
+    }
+
+    @Override
+    public TelemetryPolicyIdentity getIdentity() {
+      return identity;
+    }
+
+    @Override
+    public String getType() {
+      return type;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (!(obj instanceof TestTelemetryPolicy)) {
+        return false;
+      }
+      TestTelemetryPolicy that = (TestTelemetryPolicy) obj;
+      return identity.equals(that.identity) && type.equals(that.type) && value.equals(that.value);
+    }
+
+    @Override
+    public int hashCode() {
+      int result = identity.hashCode();
+      result = 31 * result + type.hashCode();
+      result = 31 * result + value.hashCode();
+      return result;
+    }
   }
 }

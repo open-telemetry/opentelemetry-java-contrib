@@ -1,6 +1,6 @@
 # Azure Resource Detectors for OpenTelemetry
 
-[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-azure-resources/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-azure-resources)
+[![Maven](https://img.shields.io/maven-central/v/io.opentelemetry.contrib/opentelemetry-azure-resources?label=Maven&color=orange)](https://central.sonatype.com/artifact/io.opentelemetry.contrib/opentelemetry-azure-resources)
 
 This module provides Azure resource detectors for OpenTelemetry.
 

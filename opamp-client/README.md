@@ -1,6 +1,6 @@
 # OpAMP Client
 
-[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-opamp-client/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-opamp-client)
+[![Maven](https://img.shields.io/maven-central/v/io.opentelemetry.contrib/opentelemetry-opamp-client?label=Maven&color=orange)](https://central.sonatype.com/artifact/io.opentelemetry.contrib/opentelemetry-opamp-client)
 
 Java implementation of the OpAMP
 client [spec](https://github.com/open-telemetry/opamp-spec/blob/main/specification.md).
@@ -59,5 +59,6 @@ client.close();
 
 * [Cesar Munoz](https://github.com/LikeTheSalad), Elastic
 * [Jack Shirazi](https://github.com/jackshirazi), Elastic
+* [Jason Plumb](https://github.com/breedx-splk), Splunk
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).

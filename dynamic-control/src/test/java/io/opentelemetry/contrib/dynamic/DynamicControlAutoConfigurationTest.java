@@ -83,7 +83,7 @@ class DynamicControlAutoConfigurationTest {
         + "    format: jsonkeyvalue\n"
         + "    location: vendor\n"
         + "    mappings:\n"
-        + "      - sourceKey: sampling_rate\n"
+        + "      - policyId: sampling_rate\n"
         + "        policyType: "
         + TraceSamplingRatePolicy.POLICY_TYPE
         + "\n";

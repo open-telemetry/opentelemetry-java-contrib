@@ -1,4 +1,5 @@
 plugins {
+  id("com.gradleup.shadow")
   id("otel.java-conventions")
   id("otel.publish-conventions")
 }
@@ -40,4 +41,14 @@ dependencies {
   testImplementation("org.assertj:assertj-core")
   testImplementation("org.mockito:mockito-inline")
   testImplementation("org.mockito:mockito-junit-jupiter")
+}
+
+tasks {
+  shadowJar {
+    archiveClassifier.set("all")
+    mergeServiceFiles()
+    manifest {
+      attributes["Implementation-Version"] = project.version
+    }
+  }
 }

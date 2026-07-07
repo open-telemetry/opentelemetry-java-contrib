@@ -9,6 +9,8 @@ import io.opentelemetry.opamp.client.internal.request.Field;
 import java.util.Objects;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import opamp.proto.ComponentHealth;
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
@@ -72,6 +74,17 @@ public interface State<T> extends Supplier<T> {
     @Override
     public Field getFieldType() {
       return Field.CAPABILITIES;
+    }
+  }
+
+  final class Health extends InMemoryState<ComponentHealth> {
+    public Health(@Nullable ComponentHealth initialValue) {
+      super(initialValue);
+    }
+
+    @Override
+    public Field getFieldType() {
+      return Field.HEALTH;
     }
   }
 

@@ -46,9 +46,7 @@ public final class AzureMetadataService {
             .connectTimeout(TIMEOUT)
             .readTimeout(TIMEOUT)
             .build();
-
     Request request = new Request.Builder().url(url).get().addHeader("Metadata", "true").build();
-
     try (Response response = client.newCall(request).execute()) {
       int responseCode = response.code();
       if (responseCode != 200) {
@@ -62,11 +60,13 @@ public final class AzureMetadataService {
                 + response.message());
         return Optional.empty();
       }
-
       return Optional.of(requireNonNull(response.body()).string());
     } catch (IOException e) {
       logger.log(Level.FINE, "Failed to fetch Azure VM metadata", e);
       return Optional.empty();
+    } finally {
+      client.dispatcher().executorService().shutdown();
+      client.connectionPool().evictAll();
     }
   }
 

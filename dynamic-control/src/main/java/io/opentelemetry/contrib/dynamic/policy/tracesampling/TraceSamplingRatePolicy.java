@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.dynamic.policy.tracesampling;
 
 import io.opentelemetry.contrib.dynamic.policy.PolicyImplementer;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
+import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicyIdentity;
 import io.opentelemetry.contrib.dynamic.policy.registry.PolicyInit;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.extension.incubator.trace.samplers.ComposableSampler;
@@ -15,16 +16,29 @@ import io.opentelemetry.sdk.trace.samplers.Sampler;
 import java.util.Objects;
 import javax.annotation.Nullable;
 
-public final class TraceSamplingRatePolicy extends TelemetryPolicy {
+public final class TraceSamplingRatePolicy implements TelemetryPolicy {
   public static final String POLICY_TYPE = "trace-sampling";
+  public static final TelemetryPolicyIdentity DEFAULT_IDENTITY =
+      new TelemetryPolicyIdentity("trace-sampling", "Trace sampling rate");
 
   @Nullable private static volatile DelegatingSampler initializedSampler;
 
+  private final TelemetryPolicyIdentity identity;
   private final double probability;
 
   public TraceSamplingRatePolicy(double probability) {
-    super(POLICY_TYPE);
+    this.identity = DEFAULT_IDENTITY;
     this.probability = normalizeProbability(probability);
+  }
+
+  @Override
+  public TelemetryPolicyIdentity getIdentity() {
+    return identity;
+  }
+
+  @Override
+  public String getType() {
+    return POLICY_TYPE;
   }
 
   public double getProbability() {
@@ -90,11 +104,13 @@ public final class TraceSamplingRatePolicy extends TelemetryPolicy {
       return false;
     }
     TraceSamplingRatePolicy that = (TraceSamplingRatePolicy) obj;
-    return Double.compare(probability, that.probability) == 0;
+    return Double.compare(probability, that.probability) == 0 && identity.equals(that.identity);
   }
 
   @Override
   public int hashCode() {
-    return Double.hashCode(probability);
+    int result = identity.hashCode();
+    result = 31 * result + Double.hashCode(probability);
+    return result;
   }
 }

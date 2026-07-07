@@ -2,8 +2,8 @@ plugins {
   `java-platform`
 }
 
-val otelInstrumentationVersion = "2.28.1-alpha"
-val semconvVersion = "1.41.1"
+val otelInstrumentationVersion = "2.29.0-alpha"
+val semconvVersion = "1.42.0"
 
 javaPlatform {
   allowDependencies()
@@ -15,9 +15,9 @@ dependencies {
   // (the constraints section below doesn't have this issue, and will only show up
   // as runtime dependencies if they are actually used as runtime dependencies)
   api(platform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${otelInstrumentationVersion}"))
-  api(platform("com.fasterxml.jackson:jackson-bom:2.21.3"))
-  api(platform("com.google.protobuf:protobuf-bom:4.35.0"))
-  api(platform("com.squareup.okhttp3:okhttp-bom:5.3.2"))
+  api(platform("com.fasterxml.jackson:jackson-bom:2.22.0"))
+  api(platform("com.google.protobuf:protobuf-bom:4.35.1"))
+  api(platform("com.squareup.okhttp3:okhttp-bom:5.4.0"))
 
   constraints {
     api("io.opentelemetry.semconv:opentelemetry-semconv:${semconvVersion}")
@@ -27,9 +27,9 @@ dependencies {
     api("com.google.auto.service:auto-service-annotations:1.1.1")
     api("com.google.auto.value:auto-value:1.11.1")
     api("com.google.auto.value:auto-value-annotations:1.11.1")
-    api("com.google.errorprone:error_prone_annotations:2.49.0")
-    api("com.google.errorprone:error_prone_core:2.49.0")
-    api("com.google.errorprone:error_prone_test_helpers:2.49.0")
+    api("com.google.errorprone:error_prone_annotations:2.50.0")
+    api("com.google.errorprone:error_prone_core:2.50.0")
+    api("com.google.errorprone:error_prone_test_helpers:2.50.0")
     api("io.github.netmikey.logunit:logunit-jul:2.0.0")
     api("io.opentelemetry.proto:opentelemetry-proto:1.10.0-alpha")
     api("io.prometheus:simpleclient:0.16.0")
@@ -46,7 +46,7 @@ dependencies {
 
     api("com.google.code.findbugs:annotations:3.0.1u2")
     api("com.google.code.findbugs:jsr305:3.0.2")
-    api("com.uber.nullaway:nullaway:0.13.4")
+    api("com.uber.nullaway:nullaway:0.13.7")
     api("org.assertj:assertj-core:3.27.7")
     api("org.awaitility:awaitility:4.3.0")
     api("org.bouncycastle:bcpkix-jdk15on:1.70")
@@ -54,7 +54,7 @@ dependencies {
     api("org.bouncycastle:bcprov-jdk18on:1.84")
     api("org.junit-pioneer:junit-pioneer:1.9.1")
     api("org.skyscreamer:jsonassert:1.5.3")
-    api("org.apache.kafka:kafka-clients:4.3.0")
+    api("org.apache.kafka:kafka-clients:4.3.1")
     api("org.testcontainers:testcontainers-kafka:2.0.5")
     api("org.jctools:jctools-core:4.0.6")
     api("tools.profiler:async-profiler:4.4")

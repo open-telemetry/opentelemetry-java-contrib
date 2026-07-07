@@ -11,7 +11,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Context;
+import io.opentelemetry.contrib.dynamic.policy.DeletedTelemetryPolicy;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
+import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicyIdentity;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingDecision;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
@@ -23,13 +25,15 @@ import org.junit.jupiter.api.Test;
 class TraceSamplingRatePolicyImplementerTest {
 
   @Test
-  void typeOnlyTraceSamplingPolicyFallsBackToAlwaysOn() {
+  void deletedTraceSamplingPolicyFallsBackToAlwaysOn() {
     DelegatingSampler delegatingSampler = new DelegatingSampler(Sampler.alwaysOff());
     TraceSamplingRatePolicyImplementer implementer =
         new TraceSamplingRatePolicyImplementer(delegatingSampler);
 
     implementer.onPoliciesChanged(
-        singletonList(new TelemetryPolicy(TraceSamplingRatePolicy.POLICY_TYPE)));
+        singletonList(
+            new DeletedTelemetryPolicy(
+                TraceSamplingRatePolicy.DEFAULT_IDENTITY, TraceSamplingRatePolicy.POLICY_TYPE)));
 
     assertThat(decisionFor(delegatingSampler)).isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
   }
@@ -51,7 +55,7 @@ class TraceSamplingRatePolicyImplementerTest {
     TraceSamplingRatePolicyImplementer implementer =
         new TraceSamplingRatePolicyImplementer(delegatingSampler);
 
-    implementer.onPoliciesChanged(singletonList(new TelemetryPolicy("other-policy")));
+    implementer.onPoliciesChanged(singletonList(new TestTelemetryPolicy("other-policy")));
 
     assertThat(decisionFor(delegatingSampler)).isEqualTo(SamplingDecision.DROP);
   }
@@ -80,5 +84,25 @@ class TraceSamplingRatePolicyImplementerTest {
             Attributes.empty(),
             Collections.emptyList());
     return result.getDecision();
+  }
+
+  private static final class TestTelemetryPolicy implements TelemetryPolicy {
+    private final TelemetryPolicyIdentity identity;
+    private final String type;
+
+    private TestTelemetryPolicy(String type) {
+      this.identity = new TelemetryPolicyIdentity(type, "Test policy");
+      this.type = type;
+    }
+
+    @Override
+    public TelemetryPolicyIdentity getIdentity() {
+      return identity;
+    }
+
+    @Override
+    public String getType() {
+      return type;
+    }
   }
 }

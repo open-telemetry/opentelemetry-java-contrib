@@ -24,9 +24,9 @@ dependencies {
   api("com.google.code.findbugs:jsr305:3.0.2")
   api("io.swagger:swagger-annotations:1.6.16")
   api("org.jetbrains:annotations:26.1.0")
-  api("com.ibm.mq:com.ibm.mq.allclient:9.4.5.1")
+  api("com.ibm.mq:com.ibm.mq.allclient:10.0.0.0")
   api("org.snakeyaml:snakeyaml-engine:2.10")
-  api("com.fasterxml.jackson.core:jackson-databind:2.21.3")
+  api("com.fasterxml.jackson.core:jackson-databind:2.22.0")
   api("io.opentelemetry:opentelemetry-sdk")
   api("io.opentelemetry:opentelemetry-exporter-otlp")
   api("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
@@ -35,7 +35,7 @@ dependencies {
   testImplementation("com.google.guava:guava")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   annotationProcessor("com.google.auto.value:auto-value:1.11.1")
-  ibmClientJar("com.ibm.mq:com.ibm.mq.allclient:9.4.5.1") {
+  ibmClientJar("com.ibm.mq:com.ibm.mq.allclient:10.0.0.0") {
     artifact {
       name = "com.ibm.mq.allclient"
       extension = "jar"
@@ -50,7 +50,7 @@ testing {
       dependencies {
         implementation("org.assertj:assertj-core")
         implementation("io.opentelemetry:opentelemetry-sdk-testing")
-        implementation("com.ibm.mq:com.ibm.mq.jakarta.client:9.4.5.1")
+        implementation("com.ibm.mq:com.ibm.mq.jakarta.client:10.0.0.0")
         implementation("jakarta.jms:jakarta.jms-api:3.1.0")
       }
 

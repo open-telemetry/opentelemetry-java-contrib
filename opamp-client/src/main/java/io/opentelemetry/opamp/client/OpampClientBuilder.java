@@ -19,12 +19,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import opamp.proto.AgentCapabilities;
 import opamp.proto.AgentDescription;
 import opamp.proto.AnyValue;
 import opamp.proto.ArrayValue;
+import opamp.proto.ComponentHealth;
 import opamp.proto.KeyValue;
 import opamp.proto.RemoteConfigStatus;
 
@@ -37,6 +40,7 @@ public final class OpampClientBuilder {
       HttpRequestService.create(OkHttpSender.create("http://localhost:4320/v1/opamp"));
   @Nullable private byte[] instanceUid;
   @Nullable private State.EffectiveConfig effectiveConfigState;
+  @Nullable private ComponentHealth initialHealth;
 
   OpampClientBuilder() {}
 
@@ -341,10 +345,8 @@ public final class OpampClientBuilder {
    */
   @CanIgnoreReturnValue
   public OpampClientBuilder enableRemoteConfig() {
-    capabilities =
-        capabilities
-            | AgentCapabilities.AgentCapabilities_AcceptsRemoteConfig.getValue()
-            | AgentCapabilities.AgentCapabilities_ReportsRemoteConfig.getValue();
+    enableCapability(AgentCapabilities.AgentCapabilities_AcceptsRemoteConfig);
+    enableCapability(AgentCapabilities.AgentCapabilities_ReportsRemoteConfig);
     return this;
   }
 
@@ -357,8 +359,7 @@ public final class OpampClientBuilder {
    */
   @CanIgnoreReturnValue
   public OpampClientBuilder enableEffectiveConfigReporting() {
-    capabilities =
-        capabilities | AgentCapabilities.AgentCapabilities_ReportsEffectiveConfig.getValue();
+    enableCapability(AgentCapabilities.AgentCapabilities_ReportsEffectiveConfig);
     return this;
   }
 
@@ -373,6 +374,20 @@ public final class OpampClientBuilder {
   @CanIgnoreReturnValue
   public OpampClientBuilder setEffectiveConfigState(State.EffectiveConfig effectiveConfigState) {
     this.effectiveConfigState = effectiveConfigState;
+    return this;
+  }
+
+  /**
+   * Enables health reporting and sets the initial health object that is then passed to the
+   * corresponding state implementation.
+   *
+   * @param initialHealth The component health
+   * @return this
+   */
+  @CanIgnoreReturnValue
+  public OpampClientBuilder enableHealthReporting(@Nonnull ComponentHealth initialHealth) {
+    this.initialHealth = Objects.requireNonNull(initialHealth);
+    enableCapability(AgentCapabilities.AgentCapabilities_ReportsHealth);
     return this;
   }
 
@@ -399,10 +414,15 @@ public final class OpampClientBuilder {
                     .non_identifying_attributes(protoNonIdentifyingAttributes)
                     .build()),
             new State.Capabilities(capabilities),
+            new State.Health(initialHealth),
             new State.InstanceUid(instanceUid),
             new State.Flags(0L),
             effectiveConfigState);
     return OpampClientImpl.create(service, state, callbacks);
+  }
+
+  private void enableCapability(AgentCapabilities capability) {
+    capabilities = capabilities | capability.getValue();
   }
 
   private static State.EffectiveConfig createEffectiveConfigNoop() {

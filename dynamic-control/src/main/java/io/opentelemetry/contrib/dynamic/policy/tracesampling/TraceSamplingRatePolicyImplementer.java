@@ -21,9 +21,8 @@ import java.util.logging.Logger;
  * "trace-sampling"} and applies {@link TraceSamplingRatePolicy#getProbability()} to the delegate
  * sampler via {@link TraceSamplingRatePolicy#createSampler(double)}.
  *
- * <p>If a type-only {@link TelemetryPolicy} of type {@code "trace-sampling"} is received, it is
- * treated as policy removal and the delegate is reset using {@code
- * TraceSamplingRatePolicy.createSampler(1.0)}.
+ * <p>If a deleted policy of type {@code "trace-sampling"} is received, it is treated as policy
+ * removal and the delegate is reset using {@code TraceSamplingRatePolicy.createSampler(1.0)}.
  *
  * <p>Validation is performed by {@link TraceSamplingValidator}; this implementer only consumes
  * policies produced by that validator.
@@ -61,10 +60,12 @@ public final class TraceSamplingRatePolicyImplementer implements PolicyImplement
       if (!TraceSamplingRatePolicy.POLICY_TYPE.equals(policy.getType())) {
         continue;
       }
-      if (!(policy instanceof TraceSamplingRatePolicy)) {
-        // Type-only policy represents removing trace-sampling config.
+      if (policy.isDeleted()) {
         delegatingSampler.setDelegate(TraceSamplingRatePolicy.createSampler(1.0));
         logger.info("Applied trace sampling policy reset: probability reset to 1.0");
+        continue;
+      }
+      if (!(policy instanceof TraceSamplingRatePolicy)) {
         continue;
       }
       double ratio = ((TraceSamplingRatePolicy) policy).getProbability();

@@ -1,6 +1,6 @@
 # IBM MQ Metrics
 
-[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-ibm-mq-metrics/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-ibm-mq-metrics)
+[![Maven](https://img.shields.io/maven-central/v/io.opentelemetry.contrib/opentelemetry-ibm-mq-metrics?label=Maven&color=orange)](https://central.sonatype.com/artifact/io.opentelemetry.contrib/opentelemetry-ibm-mq-metrics)
 
 :warning: This software is under development.
 
@@ -176,7 +176,7 @@ _Note: The following is only needed for versions of Java 8 before 8u161._
    * `-Djavax.net.ssl.keyStorePassword=<PASS>`
 
    b. In `config.yml`, configure `sslConnection.trustStorePassword`.
-      The same applies to the key store configuration.
+   The same applies to the key store configuration.
 
     ```text
     sslConnection:
