@@ -129,7 +129,7 @@ class TelemetryPolicyDeclarativeCustomizerProviderTest {
 
   private static Map<String, Object> telemetryPolicy(String policyType) {
     Map<String, Object> mapping = new LinkedHashMap<>();
-    mapping.put("sourceKey", "sampling_rate");
+    mapping.put("policyId", "sampling-rate");
     mapping.put("policyType", policyType);
 
     Map<String, Object> source = new LinkedHashMap<>();

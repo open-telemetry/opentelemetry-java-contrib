@@ -54,7 +54,7 @@ class TelemetryPolicySamplerComponentProviderTest {
     when(source.getString("format")).thenReturn("jsonkeyvalue");
     when(source.getString("location")).thenReturn("vendor");
     when(source.getStructuredList("mappings")).thenReturn(Collections.singletonList(mapping));
-    when(mapping.getString("sourceKey")).thenReturn("sampling_rate");
+    when(mapping.getString("policyId")).thenReturn("sampling-rate");
     when(mapping.getString("policyType")).thenReturn(TraceSamplingRatePolicy.POLICY_TYPE);
 
     return telemetryPolicy;
