@@ -34,8 +34,7 @@ class TraceSamplingRatePolicyTest {
     assertThat(negativeZero.getProbability()).isEqualTo(0.0);
     assertThat(Double.doubleToRawLongBits(negativeZero.getProbability()))
         .isEqualTo(Double.doubleToRawLongBits(0.0));
-    assertThat(negativeZero).isEqualTo(positiveZero);
-    assertThat(negativeZero.hashCode()).isEqualTo(positiveZero.hashCode());
+    assertThat(positiveZero.getProbability()).isEqualTo(0.0);
   }
 
   @Test
@@ -49,19 +48,6 @@ class TraceSamplingRatePolicyTest {
     assertThatThrownBy(() -> new TraceSamplingRatePolicy(1.001))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("probability must be within [0.0, 1.0]");
-  }
-
-  @Test
-  void equalsAndHashCodeUseProbability() {
-    TraceSamplingRatePolicy a = new TraceSamplingRatePolicy(0.5);
-    TraceSamplingRatePolicy b = new TraceSamplingRatePolicy(0.5);
-    TraceSamplingRatePolicy c = new TraceSamplingRatePolicy(0.75);
-
-    assertThat(a).isEqualTo(b);
-    assertThat(a.hashCode()).isEqualTo(b.hashCode());
-    assertThat(a).isNotEqualTo(c);
-    assertThat(a).isNotEqualTo(null);
-    assertThat(a).isNotEqualTo("not-a-policy");
   }
 
   @Test

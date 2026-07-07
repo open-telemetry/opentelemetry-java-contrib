@@ -150,24 +150,5 @@ class LinePerPolicyFileProviderTest {
     public String getType() {
       return type;
     }
-
-    @Override
-    public boolean equals(Object obj) {
-      if (this == obj) {
-        return true;
-      }
-      if (!(obj instanceof TestTelemetryPolicy)) {
-        return false;
-      }
-      TestTelemetryPolicy that = (TestTelemetryPolicy) obj;
-      return identity.equals(that.identity) && type.equals(that.type);
-    }
-
-    @Override
-    public int hashCode() {
-      int result = identity.hashCode();
-      result = 31 * result + type.hashCode();
-      return result;
-    }
   }
 }
