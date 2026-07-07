@@ -8,6 +8,7 @@ package io.opentelemetry.contrib.dynamic;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.auto.service.AutoService;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.opentelemetry.contrib.dynamic.policy.registry.PolicyInit;
 import io.opentelemetry.contrib.dynamic.policy.registry.PolicyInitConfig;
 import io.opentelemetry.contrib.dynamic.policy.registry.PolicySourceConfig;
@@ -49,25 +50,26 @@ public final class TelemetryPolicyDeclarativeCustomizerProvider
   public void customize(DeclarativeConfigurationCustomizer customizer) {
     customizer.addModelCustomizer(
         model -> {
-          registerTopLevelTelemetryPolicy(model);
-          return model;
+          return registerTopLevelTelemetryPolicy(model);
         });
   }
 
-  private static void registerTopLevelTelemetryPolicy(OpenTelemetryConfigurationModel model) {
+  @CanIgnoreReturnValue
+  private static OpenTelemetryConfigurationModel registerTopLevelTelemetryPolicy(
+      OpenTelemetryConfigurationModel model) {
     if (model == null || model.getAdditionalProperties() == null) {
-      return;
+      return model;
     }
     Map<String, Object> additionalProperties = model.getAdditionalProperties();
     Object telemetryPolicy = additionalProperties.remove(TELEMETRY_POLICY_TOP_LEVEL_KEY);
     if (telemetryPolicy == null) {
-      return;
+      return model;
     }
     if (!(telemetryPolicy instanceof Map)) {
       logger.log(
           Level.WARNING,
           "Ignoring top-level declarative telemetry policy config because it is not an object");
-      return;
+      return model;
     }
 
     Map<?, ?> telemetryPolicyConfig = (Map<?, ?>) telemetryPolicy;
@@ -79,6 +81,7 @@ public final class TelemetryPolicyDeclarativeCustomizerProvider
         Level.INFO,
         "Dynamic control extension has loaded top-level declarative telemetry policy config with {0} source(s)",
         initConfig.getSources().size());
+    return model;
   }
 
   private static void maybeInstallTelemetryPolicySampler(
