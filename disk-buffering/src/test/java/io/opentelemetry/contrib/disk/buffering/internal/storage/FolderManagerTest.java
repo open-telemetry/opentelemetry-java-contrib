@@ -307,7 +307,7 @@ class FolderManagerTest {
     createFiles(orphan);
     Files.write(orphan.toPath(), new byte[] {1, 2, 3});
 
-    FolderManager fresh = new FolderManager(rootDir, TestData.getConfiguration(), clock);
+    FolderManager fresh = FolderManager.create(rootDir, TestData.getConfiguration(), clock);
     try {
       assertThat(rootDir.list()).containsExactly("1234");
       assertThat(Files.readAllBytes(expectedFinal.toPath())).containsExactly(1, 2, 3);
