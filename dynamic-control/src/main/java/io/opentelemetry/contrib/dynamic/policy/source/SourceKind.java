@@ -25,23 +25,25 @@ import javax.annotation.Nullable;
  */
 public enum SourceKind {
   /** Policies loaded from a local file (e.g. line-per-policy file). */
-  FILE("file", SourceKind::createNoProvider),
+  FILE("file", 3, SourceKind::createNoProvider),
 
   /** Policies delivered via OpAMP (remote management). */
-  OPAMP("opamp", SourceKind::createOpampProvider),
+  OPAMP("opamp", 1, SourceKind::createOpampProvider),
 
   /** Policies fetched from an HTTP/HTTPS endpoint. */
-  HTTP("http", SourceKind::createNoProvider),
+  HTTP("http", 2, SourceKind::createNoProvider),
 
   /** User-defined or extension provider. */
-  CUSTOM("custom", SourceKind::createNoProvider);
+  CUSTOM("custom", 1_000, SourceKind::createNoProvider);
 
   private final String configValue;
+  private final int priority;
   private final ProviderCreator providerCreator;
   private static final Logger logger = Logger.getLogger(SourceKind.class.getName());
 
-  SourceKind(String configValue, ProviderCreator providerCreator) {
+  SourceKind(String configValue, int priority, ProviderCreator providerCreator) {
     this.configValue = configValue;
+    this.priority = priority;
     this.providerCreator = providerCreator;
   }
 
@@ -52,6 +54,21 @@ public enum SourceKind {
    */
   public String configValue() {
     return configValue;
+  }
+
+  /**
+   * Returns the priority used to resolve duplicate policy IDs across providers.
+   *
+   * <p>Lower numbers have higher priority, following the policy specification's OpAMP, HTTP, FILE
+   * ordering.
+   */
+  public int priority() {
+    return priority;
+  }
+
+  public boolean hasHigherPriorityThan(SourceKind other) {
+    Objects.requireNonNull(other, "other cannot be null");
+    return priority < other.priority;
   }
 
   /**
