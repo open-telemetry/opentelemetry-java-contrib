@@ -82,7 +82,7 @@ public final class TraceSamplingRatePolicy implements TelemetryPolicy {
     if (Double.isNaN(probability) || probability < 0.0 || probability > 1.0) {
       throw new IllegalArgumentException("probability must be within [0.0, 1.0]");
     }
-    // Normalize -0.0 to +0.0 so equality/hash behavior stays intuitive.
+    // Normalize -0.0 to +0.0 so idempotent update checks stay intuitive.
     return probability == 0.0 ? 0.0 : probability;
   }
 
@@ -93,24 +93,5 @@ public final class TraceSamplingRatePolicy implements TelemetryPolicy {
 
   static void resetForTest() {
     initializedSampler = null;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (!(obj instanceof TraceSamplingRatePolicy)) {
-      return false;
-    }
-    TraceSamplingRatePolicy that = (TraceSamplingRatePolicy) obj;
-    return Double.compare(probability, that.probability) == 0 && identity.equals(that.identity);
-  }
-
-  @Override
-  public int hashCode() {
-    int result = identity.hashCode();
-    result = 31 * result + Double.hashCode(probability);
-    return result;
   }
 }
