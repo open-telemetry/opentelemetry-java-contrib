@@ -13,7 +13,7 @@ public final class DeletedTelemetryPolicy implements TelemetryPolicy {
   private final String type;
   private final SourceKind sourceKind;
 
-  // TODO after "source" prioritization handling is complete, make non-default
+  // TODO after "source" prioritization handling is complete, remove this constructor
   public DeletedTelemetryPolicy(TelemetryPolicyIdentity identity, String type) {
     this(identity, type, SourceKind.CUSTOM);
   }
