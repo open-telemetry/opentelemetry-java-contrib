@@ -29,6 +29,35 @@ class SourceKindTest {
   }
 
   @Test
+  void prioritiesEncodeProviderPrecedence() {
+    assertThat(SourceKind.OPAMP.priority()).isLessThan(SourceKind.HTTP.priority());
+    assertThat(SourceKind.HTTP.priority()).isLessThan(SourceKind.FILE.priority());
+    assertThat(SourceKind.FILE.priority()).isLessThan(SourceKind.CUSTOM.priority());
+  }
+
+  @Test
+  void hasHigherPriorityThanUsesProviderPrecedence() {
+    assertThat(SourceKind.OPAMP.hasHigherPriorityThan(SourceKind.HTTP)).isTrue();
+    assertThat(SourceKind.OPAMP.hasHigherPriorityThan(SourceKind.FILE)).isTrue();
+    assertThat(SourceKind.OPAMP.hasHigherPriorityThan(SourceKind.CUSTOM)).isTrue();
+    assertThat(SourceKind.HTTP.hasHigherPriorityThan(SourceKind.FILE)).isTrue();
+    assertThat(SourceKind.HTTP.hasHigherPriorityThan(SourceKind.CUSTOM)).isTrue();
+    assertThat(SourceKind.FILE.hasHigherPriorityThan(SourceKind.CUSTOM)).isTrue();
+
+    assertThat(SourceKind.HTTP.hasHigherPriorityThan(SourceKind.OPAMP)).isFalse();
+    assertThat(SourceKind.FILE.hasHigherPriorityThan(SourceKind.HTTP)).isFalse();
+    assertThat(SourceKind.CUSTOM.hasHigherPriorityThan(SourceKind.FILE)).isFalse();
+    assertThat(SourceKind.OPAMP.hasHigherPriorityThan(SourceKind.OPAMP)).isFalse();
+  }
+
+  @Test
+  void hasHigherPriorityThanRejectsNullInput() {
+    assertThatThrownBy(() -> SourceKind.OPAMP.hasHigherPriorityThan(null))
+        .isInstanceOf(NullPointerException.class)
+        .hasMessage("other cannot be null");
+  }
+
+  @Test
   void fromConfigValueParsesCaseInsensitive() {
     assertThat(SourceKind.fromConfigValue("FILE")).isEqualTo(SourceKind.FILE);
     assertThat(SourceKind.fromConfigValue("Opamp")).isEqualTo(SourceKind.OPAMP);
