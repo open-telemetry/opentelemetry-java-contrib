@@ -39,12 +39,11 @@ class WritableFileTest {
   @BeforeEach
   void setUp() throws IOException {
     clock = mock();
+    File destination = new File(rootDir, String.valueOf(CREATED_TIME_MILLIS));
+    File staging = new File(rootDir, destination.getName() + ".tmp");
     writableFile =
         new WritableFile(
-            new File(rootDir, String.valueOf(CREATED_TIME_MILLIS)),
-            CREATED_TIME_MILLIS,
-            TestData.getConfiguration(),
-            clock);
+            destination, staging, CREATED_TIME_MILLIS, TestData.getConfiguration(), clock);
   }
 
   @AfterEach
@@ -113,6 +112,17 @@ class WritableFileTest {
 
     assertThat(writableFile.append(new ByteArraySerializer(new byte[2])))
         .isEqualTo(WritableResult.FAILED);
+  }
+
+  @Test
+  void whenAppendingData_dataIsStagedUntilClose_andPromotedOnClose() throws IOException {
+    writableFile.append(new ByteArraySerializer(getByteArrayLine("payload")));
+    assertThat(rootDir.list()).hasSize(1).doesNotContain(writableFile.getFile().getName());
+
+    writableFile.close();
+
+    assertThat(rootDir.list()).containsExactly(writableFile.getFile().getName());
+    assertThat(getWrittenLines()).containsExactly("payload");
   }
 
   private static byte[] getByteArrayLine(String line) {
