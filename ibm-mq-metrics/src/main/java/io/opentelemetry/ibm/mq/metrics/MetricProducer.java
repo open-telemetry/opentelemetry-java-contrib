@@ -668,6 +668,21 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
                         this.currentEpochNanos, Clock.getDefault().now(), attributes, value)))));
   }
 
+  public void recordIbmMqQueueManagerUptime(long value, Attributes attributes) {
+    metricData.add(
+        createMetricData(
+            this.resource,
+            this.instrumentationScopeInfo,
+            "ibm.mq.queue_manager.uptime",
+            "Queue manager uptime",
+            "s",
+            MetricDataType.LONG_GAUGE,
+            GaugeData.createLongGaugeData(
+                Collections.singletonList(
+                    LongPointData.create(
+                        this.currentEpochNanos, Clock.getDefault().now(), attributes, value)))));
+  }
+
   public void recordIbmMqArchiveLogSize(long value, Attributes attributes) {
     metricData.add(
         createMetricData(

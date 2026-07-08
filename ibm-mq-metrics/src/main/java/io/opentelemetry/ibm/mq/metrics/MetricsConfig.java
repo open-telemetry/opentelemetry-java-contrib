@@ -171,6 +171,10 @@ public final class MetricsConfig {
     return isEnabled("ibm.mq.heartbeat");
   }
 
+  public boolean isIbmMqQueueManagerUptimeEnabled() {
+    return isEnabled("ibm.mq.queue_manager.uptime");
+  }
+
   public boolean isIbmMqArchiveLogSizeEnabled() {
     return isEnabled("ibm.mq.archive.log.size");
   }
