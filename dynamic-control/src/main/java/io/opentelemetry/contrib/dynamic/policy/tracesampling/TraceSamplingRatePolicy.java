@@ -9,6 +9,7 @@ import io.opentelemetry.contrib.dynamic.policy.PolicyImplementer;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicyIdentity;
 import io.opentelemetry.contrib.dynamic.policy.registry.PolicyInit;
+import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.extension.incubator.trace.samplers.ComposableSampler;
 import io.opentelemetry.sdk.extension.incubator.trace.samplers.CompositeSampler;
@@ -25,10 +26,17 @@ public final class TraceSamplingRatePolicy implements TelemetryPolicy {
 
   private final TelemetryPolicyIdentity identity;
   private final double probability;
+  private final SourceKind sourceKind;
 
+  // TODO after "source" prioritization handling is complete, remove this constructor
   public TraceSamplingRatePolicy(double probability) {
+    this(probability, SourceKind.CUSTOM);
+  }
+
+  public TraceSamplingRatePolicy(double probability, SourceKind sourceKind) {
     this.identity = DEFAULT_IDENTITY;
     this.probability = normalizeProbability(probability);
+    this.sourceKind = Objects.requireNonNull(sourceKind, "sourceKind cannot be null");
   }
 
   @Override
@@ -39,6 +47,11 @@ public final class TraceSamplingRatePolicy implements TelemetryPolicy {
   @Override
   public String getType() {
     return POLICY_TYPE;
+  }
+
+  @Override
+  public SourceKind getSourceKind() {
+    return sourceKind;
   }
 
   public double getProbability() {
