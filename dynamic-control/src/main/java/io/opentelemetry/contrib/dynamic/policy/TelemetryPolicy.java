@@ -9,8 +9,8 @@ package io.opentelemetry.contrib.dynamic.policy;
  * Represents a single telemetry policy with spec-required identity and policy type.
  *
  * <p>Policies are immutable data carriers. Store-level identity, deletion detection, and
- * deduplication are based on {@link #getType()} and {@link #getIdentity()}, not on Java object
- * equality.
+ * deduplication are based on {@link #getType()} and {@code getIdentity().getId()}, not on Java
+ * object equality.
  *
  * @see io.opentelemetry.contrib.dynamic.policy
  */
