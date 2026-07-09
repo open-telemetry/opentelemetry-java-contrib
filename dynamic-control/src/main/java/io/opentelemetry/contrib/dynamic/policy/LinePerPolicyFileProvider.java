@@ -6,6 +6,7 @@
 package io.opentelemetry.contrib.dynamic.policy;
 
 import io.opentelemetry.contrib.dynamic.policy.source.SourceFormat;
+import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceWrapper;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -85,7 +86,7 @@ final class LinePerPolicyFileProvider implements PolicyProvider {
               if (!policyType.equals(validator.getPolicyType())) {
                 continue;
               }
-              policy = validator.validate(parsedSource);
+              policy = validator.validate(parsedSource, SourceKind.FILE);
               break;
             }
             if (policy == null) {

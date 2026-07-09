@@ -14,6 +14,7 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.contrib.dynamic.policy.DeletedTelemetryPolicy;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicyIdentity;
+import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingDecision;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
@@ -89,10 +90,16 @@ class TraceSamplingRatePolicyImplementerTest {
   private static final class TestTelemetryPolicy implements TelemetryPolicy {
     private final TelemetryPolicyIdentity identity;
     private final String type;
+    private final SourceKind sourceKind;
 
     private TestTelemetryPolicy(String type) {
+      this(type, SourceKind.CUSTOM);
+    }
+
+    private TestTelemetryPolicy(String type, SourceKind sourceKind) {
       this.identity = new TelemetryPolicyIdentity(type, "Test policy");
       this.type = type;
+      this.sourceKind = sourceKind;
     }
 
     @Override
@@ -103,6 +110,11 @@ class TraceSamplingRatePolicyImplementerTest {
     @Override
     public String getType() {
       return type;
+    }
+
+    @Override
+    public SourceKind getSourceKind() {
+      return sourceKind;
     }
   }
 }

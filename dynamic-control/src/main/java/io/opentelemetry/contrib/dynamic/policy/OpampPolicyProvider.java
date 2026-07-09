@@ -12,6 +12,7 @@ import io.opentelemetry.contrib.dynamic.policy.registry.PolicySourceMappingConfi
 import io.opentelemetry.contrib.dynamic.policy.source.JsonSourceWrapper;
 import io.opentelemetry.contrib.dynamic.policy.source.KeyValueSourceWrapper;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceFormat;
+import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceWrapper;
 import io.opentelemetry.opamp.client.OpampClient;
 import io.opentelemetry.opamp.client.OpampClientBuilder;
@@ -279,7 +280,7 @@ public final class OpampPolicyProvider implements PolicyProvider {
         if (!mappedPolicyType.equals(validator.getPolicyType())) {
           continue;
         }
-        TelemetryPolicy policy = validator.validate(normalizedSource);
+        TelemetryPolicy policy = validator.validate(normalizedSource, SourceKind.OPAMP);
         if (policy != null) {
           out.add(policy);
           break;
