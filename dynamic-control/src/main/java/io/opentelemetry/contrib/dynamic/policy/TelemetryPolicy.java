@@ -5,6 +5,8 @@
 
 package io.opentelemetry.contrib.dynamic.policy;
 
+import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
+
 /**
  * Represents a single telemetry policy with spec-required identity and policy type.
  *
@@ -34,6 +36,17 @@ public interface TelemetryPolicy {
    * @return the non-null policy type
    */
   String getType();
+
+  /**
+   * Returns the provider source kind that supplied this policy.
+   *
+   * <p>The source is used to resolve duplicate policy IDs across providers. Lower-priority sources
+   * are dropped when a higher-priority source supplies the same policy identity.
+   */
+  // TODO after "source" prioritization handling is complete, make non-default
+  default SourceKind getSourceKind() {
+    return SourceKind.CUSTOM;
+  }
 
   /**
    * Returns whether this policy represents a deleted element.
