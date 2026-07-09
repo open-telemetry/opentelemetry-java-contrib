@@ -19,7 +19,6 @@ import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.time.Duration;
 import java.util.Collections;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.AfterEach;
@@ -155,7 +154,6 @@ class PolicyProviderPollerTest {
           exchange.getResponseBody().write(body);
           exchange.close();
         });
-    httpServer.setExecutor(Executors.newSingleThreadExecutor());
     httpServer.start();
     String host = loopback.getHostAddress();
     if (host.indexOf(':') >= 0) {

@@ -43,6 +43,10 @@ import javax.annotation.Nullable;
  * <p>Of the three source types, opamp, http and file, the http and file sources are polled using
  * this shared scheduler. The opamp source is polled using a scheduler built into the opamp
  * implementation.
+ *
+ * <p>As a defensive measure, the http response body is limited to 4MB
+ * (MAX_URL_RESPONSE_BODY_BYTES). If the response body exceeds 4MB, the poller will log an
+ * exception.
  */
 @SuppressWarnings("NonFinalStaticField")
 public final class PolicyProviderPoller {
@@ -52,6 +56,7 @@ public final class PolicyProviderPoller {
   public static final String POLL_INTERVAL_PROPERTY =
       "otel.java.experimental.telemetry.policy.provider.poll.interval";
   private static final int URL_READ_TIMEOUT_MILLIS = 10_000;
+  private static final int MAX_URL_RESPONSE_BODY_BYTES = 4 * 1024 * 1024;
   private static final Duration DEFAULT_POLL_INTERVAL = Duration.ofSeconds(30);
   private static final AtomicReference<Duration> GLOBAL_POLL_INTERVAL =
       new AtomicReference<>(DEFAULT_POLL_INTERVAL);
@@ -399,6 +404,12 @@ public final class PolicyProviderPoller {
       byte[] buffer = new byte[8192];
       int read;
       while ((read = in.read(buffer)) != -1) {
+        if (out.size() + read > MAX_URL_RESPONSE_BODY_BYTES) {
+          throw new IOException(
+              "Policy provider URL response body exceeds "
+                  + MAX_URL_RESPONSE_BODY_BYTES
+                  + " bytes");
+        }
         out.write(buffer, 0, read);
       }
       return out.toByteArray();
