@@ -14,6 +14,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingRatePolicy;
 import java.util.Arrays;
 import java.util.Collections;
@@ -77,6 +78,49 @@ class PolicyStoreTest {
     assertThat(store.updatePolicies(Arrays.asList(first, duplicate))).isTrue();
 
     assertThat(store.getPolicies()).containsExactly(first);
+  }
+
+  @Test
+  void updatePoliciesResolvesDuplicatePolicyIdentitiesBySourcePriority() {
+    PolicyStore store = new PolicyStore();
+    TelemetryPolicy filePolicy =
+        new TestTelemetryPolicy(
+            new TelemetryPolicyIdentity("test-policy", "File policy"),
+            "test-policy",
+            SourceKind.FILE);
+    TelemetryPolicy httpPolicy =
+        new TestTelemetryPolicy(
+            new TelemetryPolicyIdentity("test-policy", "HTTP policy"),
+            "test-policy",
+            SourceKind.HTTP);
+    TelemetryPolicy opampPolicy =
+        new TestTelemetryPolicy(
+            new TelemetryPolicyIdentity("test-policy", "OpAMP policy"),
+            "test-policy",
+            SourceKind.OPAMP);
+
+    assertThat(store.updatePolicies(Arrays.asList(filePolicy, opampPolicy, httpPolicy))).isTrue();
+
+    assertThat(store.getPolicies()).containsExactly(opampPolicy);
+  }
+
+  @Test
+  void updatePoliciesUsesHttpWhenDuplicatePolicyHasNoOpampSource() {
+    PolicyStore store = new PolicyStore();
+    TelemetryPolicy filePolicy =
+        new TestTelemetryPolicy(
+            new TelemetryPolicyIdentity("test-policy", "File policy"),
+            "test-policy",
+            SourceKind.FILE);
+    TelemetryPolicy httpPolicy =
+        new TestTelemetryPolicy(
+            new TelemetryPolicyIdentity("test-policy", "HTTP policy"),
+            "test-policy",
+            SourceKind.HTTP);
+
+    assertThat(store.updatePolicies(Arrays.asList(filePolicy, httpPolicy))).isTrue();
+
+    assertThat(store.getPolicies()).containsExactly(httpPolicy);
   }
 
   @Test
@@ -247,10 +291,17 @@ class PolicyStoreTest {
   private static final class TestTelemetryPolicy implements TelemetryPolicy {
     private final TelemetryPolicyIdentity identity;
     private final String type;
+    private final SourceKind sourceKind;
 
     private TestTelemetryPolicy(TelemetryPolicyIdentity identity, String type) {
+      this(identity, type, SourceKind.CUSTOM);
+    }
+
+    private TestTelemetryPolicy(
+        TelemetryPolicyIdentity identity, String type, SourceKind sourceKind) {
       this.identity = identity;
       this.type = type;
+      this.sourceKind = sourceKind;
     }
 
     @Override
@@ -261,6 +312,11 @@ class PolicyStoreTest {
     @Override
     public String getType() {
       return type;
+    }
+
+    @Override
+    public SourceKind getSourceKind() {
+      return sourceKind;
     }
   }
 }
