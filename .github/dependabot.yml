@@ -1,0 +1,15 @@
+# Security updates are owned by Dependabot, while routine dependency updates remain with Renovate.
+# See https://github.com/open-telemetry/semantic-conventions-genai/blob/main/.github/DEPENDENCIES.md.
+version: 2
+
+updates:
+  - package-ecosystem: gradle
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+    groups:
+      gradle-security:
+        applies-to: security-updates
+        patterns:
+          - "*"
