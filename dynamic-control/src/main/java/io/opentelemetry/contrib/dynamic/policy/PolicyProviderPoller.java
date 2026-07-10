@@ -67,6 +67,7 @@ public final class PolicyProviderPoller {
   @Nullable private static ScheduledExecutorService scheduler;
   @Nullable private static ScheduledFuture<?> scheduledTask;
   @Nullable private static Thread shutdownHook;
+  // schedulerStartCount is useful for test assertions, it doesn't affect runtime.
   private static int schedulerStartCount;
 
   /** Callback invoked after a monitored file changes. */
@@ -188,6 +189,7 @@ public final class PolicyProviderPoller {
    */
   public static int getSchedulerStartCount() {
     synchronized (SCHEDULER_LOCK) {
+      // schedulerStartCount is useful for test assertions, it doesn't affect runtime.
       return schedulerStartCount;
     }
   }
@@ -218,6 +220,7 @@ public final class PolicyProviderPoller {
       stopSharedSchedulerLocked();
       ACTIVE_TARGETS.clear();
       GLOBAL_POLL_INTERVAL.set(DEFAULT_POLL_INTERVAL);
+      // schedulerStartCount is useful for test assertions, it doesn't affect runtime.
       schedulerStartCount = 0;
     }
   }
@@ -238,6 +241,7 @@ public final class PolicyProviderPoller {
       }
       scheduler = Executors.newSingleThreadScheduledExecutor(new PollerThreadFactory());
       scheduledTask = scheduleTask(scheduler);
+      // schedulerStartCount is useful for test assertions, it doesn't affect runtime.
       schedulerStartCount++;
       Thread hook =
           new Thread(
