@@ -7,6 +7,11 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    cooldown:
+    # GitHub does not apply cooldown to security updates. Routine Dependabot updates are disabled
+    # by open-pull-requests-limit: 0 below, so this is retained for zizmor compliance and would
+    # apply only if routine updates are re-enabled.
+      default-days: 7
     open-pull-requests-limit: 0
     groups:
       gradle-security:
