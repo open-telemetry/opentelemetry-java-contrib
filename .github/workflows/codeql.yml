@@ -73,3 +73,13 @@ jobs:
         uses: github/codeql-action/analyze@54f647b7e1bb85c95cddabcd46b0c578ec92bc1a # v4.36.3
         with:
           category: "/language:${{matrix.language}}"
+
+  workflow-notification:
+    permissions:
+      issues: write
+    needs:
+      - analyze
+    if: always() && github.event_name == 'schedule'
+    uses: open-telemetry/shared-workflows/.github/workflows/workflow-failure-issue.yml@7c49790392da7de86fdb4bb968446f9cb8461eb8 # v0.3.1
+    with:
+      success: ${{ needs.analyze.result == 'success' }}
