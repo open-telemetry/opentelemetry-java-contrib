@@ -12,21 +12,11 @@ plugins {
 }
 
 /**
- * The latest *released* version of the project. Evaluated lazily so the work is only done if necessary.
+ * The baseline version japicmp compares against. Pinned in version.gradle.kts and bumped
+ * atomically with docs/apidiffs/current_vs_latest/ by the post-release PR opened from
+ * .github/workflows/release.yml.
  */
-val latestReleasedVersion: String by lazy {
-  // hack to find the current released version of the project
-  val temp: Configuration = configurations.create("tempConfig") {
-    resolutionStrategy.cacheChangingModulesFor(0, "seconds")
-    resolutionStrategy.cacheDynamicVersionsFor(0, "seconds")
-  }
-  // pick aws-xray, since it's a stable module that's always there.
-  dependencies.add(temp.name, "io.opentelemetry.contrib:opentelemetry-aws-xray:latest.release")
-  val moduleVersion = configurations["tempConfig"].resolvedConfiguration.firstLevelModuleDependencies.elementAt(0).moduleVersion
-  configurations.remove(temp)
-  logger.debug("Discovered latest release version: " + moduleVersion)
-  moduleVersion
-}
+val apidiffBaselineVersion = rootProject.extra["apidiffBaselineVersion"] as String
 
 class AllowNewAbstractMethodOnAutovalueClasses : AbstractRecordingSeenMembers() {
   override fun maybeAddViolation(member: JApiCompatibility): Violation? {
@@ -97,9 +87,9 @@ if (project.findProperty("otel.stable") == "true" && !project.name.startsWith("b
         // only output changes, not everything
         onlyModified.set(true)
 
-        // the japicmp "old" version is either the user-specified one, or the latest release.
+        // the japicmp "old" version is either the user-specified one, or the pinned baseline.
         val apiBaseVersion: String? by project
-        val baselineVersion = apiBaseVersion ?: latestReleasedVersion
+        val baselineVersion = apiBaseVersion ?: apidiffBaselineVersion
         oldClasspath.from(
           try {
             files(findArtifact(baselineVersion))
