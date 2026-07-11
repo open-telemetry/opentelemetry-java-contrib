@@ -4,9 +4,9 @@
 name: Assign reviewers
 
 on:
-  # pull_request_target is needed instead of just pull_request
-  # because repository write permission is needed to assign reviewers
-  pull_request_target: # zizmor: ignore[dangerous-triggers] only runs a pinned action against base-branch config
+  # Required to assign reviewers on fork PRs; no PR code is checked out and no
+  # PR-controlled values flow into executable contexts.
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
 
 permissions:
   contents: read
