@@ -68,7 +68,6 @@ jobs:
         with:
           client-id: ${{ vars.OTELBOT_CLIENT_ID }}
           private-key: ${{ secrets.OTELBOT_PRIVATE_KEY }}
-          permission-contents: write
           permission-pull-requests: write
 
       - name: Create pull request against the release branch
@@ -127,7 +126,6 @@ jobs:
         with:
           client-id: ${{ vars.OTELBOT_CLIENT_ID }}
           private-key: ${{ secrets.OTELBOT_PRIVATE_KEY }}
-          permission-contents: write
           permission-pull-requests: write
 
       - name: Create pull request against main
