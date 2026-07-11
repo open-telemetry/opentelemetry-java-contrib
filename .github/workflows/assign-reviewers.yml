@@ -6,7 +6,7 @@ name: Assign reviewers
 on:
   # pull_request_target is needed instead of just pull_request
   # because repository write permission is needed to assign reviewers
-  pull_request_target:
+  pull_request_target: # zizmor: ignore[dangerous-triggers] only runs a pinned action against base-branch config
 
 permissions:
   contents: read
