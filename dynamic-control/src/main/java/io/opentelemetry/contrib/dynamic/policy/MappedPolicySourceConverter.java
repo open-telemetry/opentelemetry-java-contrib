@@ -49,7 +49,7 @@ final class MappedPolicySourceConverter {
   }
 
   Set<String> getMappedPolicyIds() {
-    return Collections.unmodifiableSet(new HashSet<>(policyIdToPolicyType.keySet()));
+    return policyIdToPolicyType.keySet();
   }
 
   List<TelemetryPolicy> convert(List<SourceWrapper> sources) {
