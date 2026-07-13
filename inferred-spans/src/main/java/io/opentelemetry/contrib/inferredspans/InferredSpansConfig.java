@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.inferredspans;
 
+import static java.util.Collections.singletonMap;
 import static java.util.Collections.unmodifiableList;
 import static java.util.stream.Collectors.toList;
 
@@ -12,6 +13,7 @@ import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.instrumentation.config.bridge.ConfigPropertiesBackedConfigProvider;
+import io.opentelemetry.instrumentation.config.bridge.ConfigPropertiesBackedDeclarativeConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
 import io.opentelemetry.sdk.trace.SpanProcessor;
@@ -26,20 +28,19 @@ class InferredSpansConfig {
 
   private InferredSpansConfig() {}
 
-  static final String ENABLED_OPTION = "otel.inferred.spans.enabled";
-  static final String LOGGING_OPTION = "otel.inferred.spans.logging.enabled";
-  static final String DIAGNOSTIC_FILES_OPTION = "otel.inferred.spans.backup.diagnostic.files";
-  static final String SAFEMODE_OPTION = "otel.inferred.spans.safe.mode";
-  static final String POSTPROCESSING_OPTION = "otel.inferred.spans.post.processing.enabled";
-  static final String SAMPLING_INTERVAL_OPTION = "otel.inferred.spans.sampling.interval";
-  static final String MIN_DURATION_OPTION = "otel.inferred.spans.min.duration";
-  static final String INCLUDED_CLASSES_OPTION = "otel.inferred.spans.included.classes";
-  static final String EXCLUDED_CLASSES_OPTION = "otel.inferred.spans.excluded.classes";
-  static final String INTERVAL_OPTION = "otel.inferred.spans.interval";
-  static final String DURATION_OPTION = "otel.inferred.spans.duration";
-  static final String LIB_DIRECTORY_OPTION = "otel.inferred.spans.lib.directory";
-  static final String PARENT_OVERRIDE_HANDLER_OPTION =
-      "otel.inferred.spans.parent.override.handler";
+  static final String ENABLED_OPTION = "enabled";
+  static final String LOGGING_OPTION = "logging_enabled";
+  static final String DIAGNOSTIC_FILES_OPTION = "backup_diagnostic_files";
+  static final String SAFEMODE_OPTION = "safe_mode";
+  static final String POSTPROCESSING_OPTION = "post_processing_enabled";
+  static final String SAMPLING_INTERVAL_OPTION = "sampling_interval";
+  static final String MIN_DURATION_OPTION = "min_duration";
+  static final String INCLUDED_CLASSES_OPTION = "included_classes";
+  static final String EXCLUDED_CLASSES_OPTION = "excluded_classes";
+  static final String INTERVAL_OPTION = "interval";
+  static final String DURATION_OPTION = "duration";
+  static final String LIB_DIRECTORY_OPTION = "lib_directory";
+  static final String PARENT_OVERRIDE_HANDLER_OPTION = "parent_override_handler";
 
   static final List<String> ALL_PROPERTIES =
       unmodifiableList(
@@ -64,35 +65,41 @@ class InferredSpansConfig {
     ConfigPropertiesBackedConfigProvider.Builder builder =
         ConfigPropertiesBackedConfigProvider.builder();
     for (String property : ALL_PROPERTIES) {
-      builder.addMapping(translateDeclarativeKey(property), property);
+      addConfigMapping(builder, property);
     }
     return builder.build(properties).getInstrumentationConfig();
   }
 
+  private static void addConfigMapping(
+      ConfigPropertiesBackedConfigProvider.Builder builder, String configProperty) {
+    builder.addMapping(configProperty, toSystemProperty(configProperty));
+  }
+
   static boolean isEnabled(DeclarativeConfigProperties properties) {
-    Boolean enabled = properties.getBoolean(translateDeclarativeKey(ENABLED_OPTION));
-    return enabled == null || enabled;
+    return properties.getBoolean(ENABLED_OPTION, true);
+  }
+
+  static String toSystemProperty(String configProperty) {
+    return PREFIX + configProperty.replace("_", ".");
   }
 
   static SpanProcessor createSpanProcessor(DeclarativeConfigProperties properties) {
     InferredSpansProcessorBuilder builder = InferredSpansProcessor.builder().profilerEnabled(true);
 
-    DeclarativeConfigPropertiesApplier applier = new DeclarativeConfigPropertiesApplier(properties);
+    applyValue(properties.getBoolean(LOGGING_OPTION), builder::profilerLoggingEnabled);
 
-    applier.applyBool(LOGGING_OPTION, builder::profilerLoggingEnabled);
-    applier.applyBool(DIAGNOSTIC_FILES_OPTION, builder::backupDiagnosticFiles);
-    applier.applyInt(SAFEMODE_OPTION, builder::asyncProfilerSafeMode);
-    applier.applyBool(POSTPROCESSING_OPTION, builder::postProcessingEnabled);
-    applier.applyDuration(SAMPLING_INTERVAL_OPTION, builder::samplingInterval);
-    applier.applyDuration(MIN_DURATION_OPTION, builder::inferredSpansMinDuration);
-    applier.applyWildcards(INCLUDED_CLASSES_OPTION, builder::includedClasses);
-    applier.applyWildcards(EXCLUDED_CLASSES_OPTION, builder::excludedClasses);
-    applier.applyDuration(INTERVAL_OPTION, builder::profilerInterval);
-    applier.applyDuration(DURATION_OPTION, builder::profilingDuration);
-    applier.applyString(LIB_DIRECTORY_OPTION, builder::profilerLibDirectory);
+    applyValue(properties.getBoolean(DIAGNOSTIC_FILES_OPTION), builder::backupDiagnosticFiles);
+    applyValue(properties.getInt(SAFEMODE_OPTION), builder::asyncProfilerSafeMode);
+    applyValue(properties.getBoolean(POSTPROCESSING_OPTION), builder::postProcessingEnabled);
+    applyValue(parseDuration(properties, SAMPLING_INTERVAL_OPTION), builder::samplingInterval);
+    applyValue(parseDuration(properties, MIN_DURATION_OPTION), builder::inferredSpansMinDuration);
+    applyWildcards(properties, INCLUDED_CLASSES_OPTION, builder::includedClasses);
+    applyWildcards(properties, EXCLUDED_CLASSES_OPTION, builder::excludedClasses);
+    applyValue(parseDuration(properties, INTERVAL_OPTION), builder::profilerInterval);
+    applyValue(parseDuration(properties, DURATION_OPTION), builder::profilingDuration);
+    applyValue(properties.getString(LIB_DIRECTORY_OPTION), builder::profilerLibDirectory);
 
-    String parentOverrideHandlerName =
-        properties.getString(translateDeclarativeKey(PARENT_OVERRIDE_HANDLER_OPTION));
+    String parentOverrideHandlerName = properties.getString(PARENT_OVERRIDE_HANDLER_OPTION);
     if (parentOverrideHandlerName != null && !parentOverrideHandlerName.isEmpty()) {
       builder.parentOverrideHandler(constructParentOverrideHandler(parentOverrideHandlerName));
     }
@@ -110,63 +117,42 @@ class InferredSpansConfig {
     }
   }
 
-  private static String translateDeclarativeKey(String configKey) {
-    return configKey.substring(PREFIX.length()).replace('.', '_');
-  }
-
   private static <T> void applyValue(@Nullable T value, Consumer<T> funcToApply) {
     if (value != null) {
       funcToApply.accept(value);
     }
   }
 
-  private static class DeclarativeConfigPropertiesApplier {
-
-    private final DeclarativeConfigProperties properties;
-
-    private DeclarativeConfigPropertiesApplier(DeclarativeConfigProperties properties) {
-      this.properties = properties;
-    }
-
-    void applyBool(String configKey, Consumer<Boolean> funcToApply) {
-      applyValue(properties.getBoolean(translateDeclarativeKey(configKey)), funcToApply);
-    }
-
-    void applyInt(String configKey, Consumer<Integer> funcToApply) {
-      applyValue(properties.getInt(translateDeclarativeKey(configKey)), funcToApply);
-    }
-
-    void applyDuration(String configKey, Consumer<Duration> funcToApply) {
-      applyValue(parseDuration(configKey), funcToApply);
-    }
-
-    @Nullable
-    private Duration parseDuration(String configKey) {
-      String declarativeKey = translateDeclarativeKey(configKey);
-      String rawValue = properties.getString(declarativeKey);
+  @Nullable
+  private static Duration parseDuration(DeclarativeConfigProperties properties, String key) {
+    if (properties instanceof ConfigPropertiesBackedDeclarativeConfigProperties) {
+      String rawValue = properties.getString(key);
       if (rawValue == null || rawValue.isEmpty()) {
         return null;
       }
-      return DefaultConfigProperties.createFromMap(
-              java.util.Collections.singletonMap(declarativeKey, rawValue))
-          .getDuration(declarativeKey);
+      return DefaultConfigProperties.createFromMap(singletonMap(key, rawValue)).getDuration(key);
     }
 
-    void applyString(String configKey, Consumer<String> funcToApply) {
-      applyValue(properties.getString(translateDeclarativeKey(configKey)), funcToApply);
+    Long rawLongValue = properties.getLong(key);
+    if (rawLongValue == null) {
+      return null;
     }
+    return Duration.ofMillis(rawLongValue);
+  }
 
-    void applyWildcards(String configKey, Consumer<? super List<WildcardMatcher>> funcToApply) {
-      String wildcardListString = properties.getString(translateDeclarativeKey(configKey));
-      if (wildcardListString != null && !wildcardListString.isEmpty()) {
-        List<WildcardMatcher> values =
-            Arrays.stream(wildcardListString.split(","))
-                .filter(str -> !str.isEmpty())
-                .map(WildcardMatcher::valueOf)
-                .collect(toList());
-        if (!values.isEmpty()) {
-          funcToApply.accept(values);
-        }
+  private static void applyWildcards(
+      DeclarativeConfigProperties properties,
+      String key,
+      Consumer<? super List<WildcardMatcher>> funcToApply) {
+    String wildcardListString = properties.getString(key);
+    if (wildcardListString != null && !wildcardListString.isEmpty()) {
+      List<WildcardMatcher> values =
+          Arrays.stream(wildcardListString.split(","))
+              .filter(str -> !str.isEmpty())
+              .map(WildcardMatcher::valueOf)
+              .collect(toList());
+      if (!values.isEmpty()) {
+        funcToApply.accept(values);
       }
     }
   }

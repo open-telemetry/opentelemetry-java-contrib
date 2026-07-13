@@ -5,12 +5,14 @@
 
 package io.opentelemetry.contrib.stacktrace;
 
+import static java.util.Collections.singletonMap;
 import static java.util.logging.Level.FINE;
 import static java.util.logging.Level.SEVERE;
 
 import com.google.auto.service.AutoService;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.instrumentation.config.bridge.ConfigPropertiesBackedConfigProvider;
+import io.opentelemetry.instrumentation.config.bridge.ConfigPropertiesBackedDeclarativeConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
@@ -78,12 +80,19 @@ public class StackTraceAutoConfig implements AutoConfigurationCustomizerProvider
 
   @Nullable
   private static Duration parseDuration(DeclarativeConfigProperties properties, String key) {
-    String rawValue = properties.getString(key);
-    if (rawValue == null || rawValue.isEmpty()) {
+    if (properties instanceof ConfigPropertiesBackedDeclarativeConfigProperties) {
+      String rawValue = properties.getString(key);
+      if (rawValue == null || rawValue.isEmpty()) {
+        return null;
+      }
+      return DefaultConfigProperties.createFromMap(singletonMap(key, rawValue)).getDuration(key);
+    }
+
+    Long rawLongValue = properties.getLong(key);
+    if (rawLongValue == null) {
       return null;
     }
-    return DefaultConfigProperties.createFromMap(java.util.Collections.singletonMap(key, rawValue))
-        .getDuration(key);
+    return Duration.ofMillis(rawLongValue);
   }
 
   static Predicate<ReadableSpan> getFilterPredicate(DeclarativeConfigProperties properties) {
