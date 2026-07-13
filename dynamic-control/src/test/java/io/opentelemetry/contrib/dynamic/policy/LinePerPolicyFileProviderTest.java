@@ -8,6 +8,7 @@ package io.opentelemetry.contrib.dynamic.policy;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.opentelemetry.contrib.dynamic.policy.source.SourceFormat;
+import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceWrapper;
 import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingRatePolicy;
 import java.io.IOException;
@@ -46,6 +47,7 @@ class LinePerPolicyFileProviderTest {
 
     assertThat(policies).hasSize(1);
     assertThat(policies.get(0).getType()).isEqualTo(TRACE_SAMPLING_TYPE);
+    assertThat(policies.get(0).getSourceKind()).isEqualTo(SourceKind.FILE);
   }
 
   @Test
@@ -58,6 +60,7 @@ class LinePerPolicyFileProviderTest {
 
     assertThat(policies).hasSize(1);
     assertThat(policies.get(0).getType()).isEqualTo(TRACE_SAMPLING_TYPE);
+    assertThat(policies.get(0).getSourceKind()).isEqualTo(SourceKind.FILE);
   }
 
   @Test
@@ -110,35 +113,38 @@ class LinePerPolicyFileProviderTest {
     }
 
     @Override
-    public TelemetryPolicy validate(SourceWrapper source) {
+    public TelemetryPolicy validate(SourceWrapper source, SourceKind sourceKind) {
       if (source.getFormat() == SourceFormat.JSONKEYVALUE) {
         if (!acceptJson) {
           return null;
         }
-        return testPolicy();
+        return testPolicy(sourceKind);
       }
       if (source.getFormat() == SourceFormat.KEYVALUE) {
         if (!acceptKeyValue) {
           return null;
         }
-        return testPolicy();
+        return testPolicy(sourceKind);
       }
       return null;
     }
   }
 
-  private static TelemetryPolicy testPolicy() {
+  private static TelemetryPolicy testPolicy(SourceKind sourceKind) {
     return new TestTelemetryPolicy(
-        new TelemetryPolicyIdentity("test-policy", "Test policy"), TRACE_SAMPLING_TYPE);
+        new TelemetryPolicyIdentity("test-policy", "Test policy"), TRACE_SAMPLING_TYPE, sourceKind);
   }
 
   private static final class TestTelemetryPolicy implements TelemetryPolicy {
     private final TelemetryPolicyIdentity identity;
     private final String type;
+    private final SourceKind sourceKind;
 
-    private TestTelemetryPolicy(TelemetryPolicyIdentity identity, String type) {
+    private TestTelemetryPolicy(
+        TelemetryPolicyIdentity identity, String type, SourceKind sourceKind) {
       this.identity = identity;
       this.type = type;
+      this.sourceKind = sourceKind;
     }
 
     @Override
@@ -149,6 +155,11 @@ class LinePerPolicyFileProviderTest {
     @Override
     public String getType() {
       return type;
+    }
+
+    @Override
+    public SourceKind getSourceKind() {
+      return sourceKind;
     }
   }
 }
