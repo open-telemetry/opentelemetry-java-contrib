@@ -9,6 +9,7 @@ import com.google.auto.service.AutoService;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.contrib.dynamic.policy.registry.PolicyInit;
 import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingRatePolicy;
+import io.opentelemetry.instrumentation.config.bridge.DeclarativeConfigPropertiesBridgeBuilder;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.ComponentProvider;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
@@ -40,7 +41,8 @@ public final class TelemetryPolicySamplerComponentProvider implements ComponentP
         Level.INFO,
         "Dynamic control extension has been loaded by the agent via declarative config");
     ConfigProperties bridgedConfig =
-        new SystemPropertyFallbackConfigProperties(EmptyConfigProperties.INSTANCE);
+        new SystemPropertyFallbackConfigProperties(
+            new DeclarativeConfigPropertiesBridgeBuilder().build(config));
     try {
       PolicyInit.initFromDeclarativeConfig(config, bridgedConfig);
     } catch (IllegalArgumentException e) {
@@ -57,56 +59,6 @@ public final class TelemetryPolicySamplerComponentProvider implements ComponentP
   @Override
   public Class<Sampler> getType() {
     return Sampler.class;
-  }
-
-  private enum EmptyConfigProperties implements ConfigProperties {
-    INSTANCE;
-
-    @Override
-    @Nullable
-    public String getString(String name) {
-      return null;
-    }
-
-    @Override
-    @Nullable
-    public Boolean getBoolean(String name) {
-      return null;
-    }
-
-    @Override
-    @Nullable
-    public Integer getInt(String name) {
-      return null;
-    }
-
-    @Override
-    @Nullable
-    public Long getLong(String name) {
-      return null;
-    }
-
-    @Override
-    @Nullable
-    public Double getDouble(String name) {
-      return null;
-    }
-
-    @Override
-    @Nullable
-    public Duration getDuration(String name) {
-      return null;
-    }
-
-    @Override
-    public List<String> getList(String name) {
-      return Collections.emptyList();
-    }
-
-    @Override
-    public Map<String, String> getMap(String name) {
-      return Collections.emptyMap();
-    }
   }
 
   private static final class SystemPropertyFallbackConfigProperties implements ConfigProperties {

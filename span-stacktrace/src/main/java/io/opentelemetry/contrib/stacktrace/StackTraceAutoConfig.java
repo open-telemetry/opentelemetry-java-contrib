@@ -14,6 +14,7 @@ import io.opentelemetry.instrumentation.config.bridge.ConfigPropertiesBackedConf
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
+import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -59,20 +60,30 @@ public class StackTraceAutoConfig implements AutoConfigurationCustomizerProvider
 
   // package-private for testing
   static long getMinDuration(DeclarativeConfigProperties properties) {
-    Long minDuration = properties.getLong("min_duration");
+    Duration minDuration = parseDuration(properties, "min_duration");
     if (minDuration == null) {
-      minDuration = CONFIG_MIN_DURATION_DEFAULT.toMillis();
+      minDuration = CONFIG_MIN_DURATION_DEFAULT;
     }
-    minDuration = Duration.ofMillis(minDuration).toNanos();
-    if (minDuration < 0) {
+    long minDurationNanos = minDuration.toNanos();
+    if (minDurationNanos < 0) {
       log.fine("Stack traces capture is disabled");
     } else {
       log.log(
           FINE,
           "Stack traces will be added to spans with a minimum duration of {0} nanos",
-          minDuration);
+          minDurationNanos);
     }
-    return minDuration;
+    return minDurationNanos;
+  }
+
+  @Nullable
+  private static Duration parseDuration(DeclarativeConfigProperties properties, String key) {
+    String rawValue = properties.getString(key);
+    if (rawValue == null || rawValue.isEmpty()) {
+      return null;
+    }
+    return DefaultConfigProperties.createFromMap(java.util.Collections.singletonMap(key, rawValue))
+        .getDuration(key);
   }
 
   static Predicate<ReadableSpan> getFilterPredicate(DeclarativeConfigProperties properties) {

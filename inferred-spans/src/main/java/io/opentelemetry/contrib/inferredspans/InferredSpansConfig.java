@@ -13,12 +13,11 @@ import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.instrumentation.config.bridge.ConfigPropertiesBackedConfigProvider;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
-import io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException;
+import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
@@ -121,40 +120,6 @@ class InferredSpansConfig {
     }
   }
 
-  private static TimeUnit getDurationUnit(String unitString) {
-    switch (unitString) {
-      case "us":
-        return TimeUnit.MICROSECONDS;
-      case "ns":
-        return TimeUnit.NANOSECONDS;
-      case "":
-      case "ms":
-        return TimeUnit.MILLISECONDS;
-      case "s":
-        return TimeUnit.SECONDS;
-      case "m":
-        return TimeUnit.MINUTES;
-      case "h":
-        return TimeUnit.HOURS;
-      case "d":
-        return TimeUnit.DAYS;
-      default:
-        throw new ConfigurationException("Invalid duration string, found: " + unitString);
-    }
-  }
-
-  private static String getUnitString(String rawValue) {
-    int lastDigitIndex = rawValue.length() - 1;
-    while (lastDigitIndex >= 0) {
-      char c = rawValue.charAt(lastDigitIndex);
-      if (Character.isDigit(c)) {
-        break;
-      }
-      lastDigitIndex -= 1;
-    }
-    return rawValue.substring(lastDigitIndex + 1);
-  }
-
   private static class DeclarativeConfigPropertiesApplier {
 
     private final DeclarativeConfigProperties properties;
@@ -177,34 +142,14 @@ class InferredSpansConfig {
 
     @Nullable
     private Duration parseDuration(String configKey) {
-      String rawValue = properties.getString(translateDeclarativeKey(configKey));
+      String declarativeKey = translateDeclarativeKey(configKey);
+      String rawValue = properties.getString(declarativeKey);
       if (rawValue == null || rawValue.isEmpty()) {
         return null;
       }
-      String unitString = getUnitString(rawValue);
-      String numberString = rawValue.substring(0, rawValue.length() - unitString.length());
-      try {
-        long rawNumber = Long.parseLong(numberString.trim());
-        TimeUnit unit = getDurationUnit(unitString.trim());
-        return Duration.ofNanos(TimeUnit.NANOSECONDS.convert(rawNumber, unit));
-      } catch (NumberFormatException e) {
-        throw new ConfigurationException(
-            "Invalid duration property "
-                + translateDeclarativeKey(configKey)
-                + "="
-                + rawValue
-                + ". Expected number, found: "
-                + numberString,
-            e);
-      } catch (ConfigurationException e) {
-        throw new ConfigurationException(
-            "Invalid duration property "
-                + translateDeclarativeKey(configKey)
-                + "="
-                + rawValue
-                + ". "
-                + e.getMessage());
-      }
+      return DefaultConfigProperties.createFromMap(
+              java.util.Collections.singletonMap(declarativeKey, rawValue))
+          .getDuration(declarativeKey);
     }
 
     void applyString(String configKey, Consumer<String> funcToApply) {
