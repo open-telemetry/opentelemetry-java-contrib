@@ -14,7 +14,6 @@ dependencies {
   compileOnly("io.opentelemetry:opentelemetry-sdk")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-declarative-config")
-  compileOnly("io.opentelemetry.instrumentation:opentelemetry-declarative-config-bridge")
   compileOnly("io.opentelemetry.semconv:opentelemetry-semconv")
   implementation("com.lmax:disruptor:3.4.4")
   implementation("org.jctools:jctools-core")
@@ -31,7 +30,6 @@ dependencies {
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation("io.opentelemetry:opentelemetry-api-incubator")
   testImplementation("io.opentelemetry:opentelemetry-exporter-logging")
-  testImplementation("io.opentelemetry.instrumentation:opentelemetry-declarative-config-bridge")
 }
 
 tasks {

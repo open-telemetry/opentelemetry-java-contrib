@@ -9,6 +9,7 @@ import static java.util.logging.Level.FINE;
 import static java.util.logging.Level.SEVERE;
 
 import com.google.auto.service.AutoService;
+import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
@@ -46,6 +47,10 @@ public class StackTraceAutoConfig implements AutoConfigurationCustomizerProvider
     return new StackTraceSpanProcessor(getMinDuration(properties), getFilterPredicate(properties));
   }
 
+  static StackTraceSpanProcessor create(DeclarativeConfigProperties properties) {
+    return new StackTraceSpanProcessor(getMinDuration(properties), getFilterPredicate(properties));
+  }
+
   // package-private for testing
   static long getMinDuration(ConfigProperties properties) {
     long minDuration =
@@ -61,9 +66,32 @@ public class StackTraceAutoConfig implements AutoConfigurationCustomizerProvider
     return minDuration;
   }
 
-  // package private for testing
+  static long getMinDuration(DeclarativeConfigProperties properties) {
+    Long minDuration = properties.getLong("min_duration");
+    if (minDuration == null) {
+      minDuration = CONFIG_MIN_DURATION_DEFAULT.toMillis();
+    }
+    minDuration = Duration.ofMillis(minDuration).toNanos();
+    if (minDuration < 0) {
+      log.fine("Stack traces capture is disabled");
+    } else {
+      log.log(
+          FINE,
+          "Stack traces will be added to spans with a minimum duration of {0} nanos",
+          minDuration);
+    }
+    return minDuration;
+  }
+
+  static Predicate<ReadableSpan> getFilterPredicate(DeclarativeConfigProperties properties) {
+    return getFilterPredicate(properties.getString("filter"));
+  }
+
   static Predicate<ReadableSpan> getFilterPredicate(ConfigProperties properties) {
-    String filterClass = properties.getString(CONFIG_FILTER);
+    return getFilterPredicate(properties.getString(CONFIG_FILTER));
+  }
+
+  private static Predicate<ReadableSpan> getFilterPredicate(@Nullable String filterClass) {
     Predicate<ReadableSpan> filter = null;
     if (filterClass != null) {
       Class<?> filterType = getFilterType(filterClass);

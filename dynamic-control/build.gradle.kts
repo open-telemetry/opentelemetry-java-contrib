@@ -26,7 +26,6 @@ dependencies {
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-declarative-config")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-incubator")
-  compileOnly("io.opentelemetry.instrumentation:opentelemetry-declarative-config-bridge")
 
   testCompileOnly("com.google.auto.service:auto-service-annotations")
   testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
@@ -37,7 +36,6 @@ dependencies {
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-declarative-config")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-incubator")
-  testImplementation("io.opentelemetry.instrumentation:opentelemetry-declarative-config-bridge")
   testImplementation("org.assertj:assertj-core")
   testImplementation("org.mockito:mockito-inline")
   testImplementation("org.mockito:mockito-junit-jupiter")

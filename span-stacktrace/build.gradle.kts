@@ -16,11 +16,9 @@ dependencies {
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-declarative-config")
-  compileOnly("io.opentelemetry.instrumentation:opentelemetry-declarative-config-bridge")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-declarative-config")
-  testImplementation("io.opentelemetry.instrumentation:opentelemetry-declarative-config-bridge")
 
   compileOnly("io.opentelemetry.semconv:opentelemetry-semconv")
   testImplementation("io.opentelemetry.semconv:opentelemetry-semconv")
