@@ -10,6 +10,7 @@ import static java.util.logging.Level.SEVERE;
 
 import com.google.auto.service.AutoService;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
+import io.opentelemetry.instrumentation.config.bridge.ConfigPropertiesBackedConfigProvider;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
@@ -36,36 +37,27 @@ public class StackTraceAutoConfig implements AutoConfigurationCustomizerProvider
   public void customize(AutoConfigurationCustomizer config) {
     config.addTracerProviderCustomizer(
         (providerBuilder, properties) -> {
-          if (getMinDuration(properties) >= 0) {
-            providerBuilder.addSpanProcessor(create(properties));
+          DeclarativeConfigProperties declarativeConfig = createDeclarativeConfig(properties);
+          if (getMinDuration(declarativeConfig) >= 0) {
+            providerBuilder.addSpanProcessor(create(declarativeConfig));
           }
           return providerBuilder;
         });
-  }
-
-  static StackTraceSpanProcessor create(ConfigProperties properties) {
-    return new StackTraceSpanProcessor(getMinDuration(properties), getFilterPredicate(properties));
   }
 
   static StackTraceSpanProcessor create(DeclarativeConfigProperties properties) {
     return new StackTraceSpanProcessor(getMinDuration(properties), getFilterPredicate(properties));
   }
 
-  // package-private for testing
-  static long getMinDuration(ConfigProperties properties) {
-    long minDuration =
-        properties.getDuration(CONFIG_MIN_DURATION, CONFIG_MIN_DURATION_DEFAULT).toNanos();
-    if (minDuration < 0) {
-      log.fine("Stack traces capture is disabled");
-    } else {
-      log.log(
-          FINE,
-          "Stack traces will be added to spans with a minimum duration of {0} nanos",
-          minDuration);
-    }
-    return minDuration;
+  static DeclarativeConfigProperties createDeclarativeConfig(ConfigProperties properties) {
+    return ConfigPropertiesBackedConfigProvider.builder()
+        .addMapping("min_duration", CONFIG_MIN_DURATION)
+        .addMapping("filter", CONFIG_FILTER)
+        .build(properties)
+        .getInstrumentationConfig();
   }
 
+  // package-private for testing
   static long getMinDuration(DeclarativeConfigProperties properties) {
     Long minDuration = properties.getLong("min_duration");
     if (minDuration == null) {
@@ -85,10 +77,6 @@ public class StackTraceAutoConfig implements AutoConfigurationCustomizerProvider
 
   static Predicate<ReadableSpan> getFilterPredicate(DeclarativeConfigProperties properties) {
     return getFilterPredicate(properties.getString("filter"));
-  }
-
-  static Predicate<ReadableSpan> getFilterPredicate(ConfigProperties properties) {
-    return getFilterPredicate(properties.getString(CONFIG_FILTER));
   }
 
   private static Predicate<ReadableSpan> getFilterPredicate(@Nullable String filterClass) {

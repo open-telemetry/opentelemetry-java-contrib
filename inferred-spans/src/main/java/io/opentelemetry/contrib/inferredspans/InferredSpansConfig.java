@@ -11,13 +11,14 @@ import static java.util.stream.Collectors.toList;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanContext;
+import io.opentelemetry.instrumentation.config.bridge.ConfigPropertiesBackedConfigProvider;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
@@ -60,6 +61,15 @@ class InferredSpansConfig {
 
   private static final String PREFIX = "otel.inferred.spans.";
 
+  static DeclarativeConfigProperties createDeclarativeConfig(ConfigProperties properties) {
+    ConfigPropertiesBackedConfigProvider.Builder builder =
+        ConfigPropertiesBackedConfigProvider.builder();
+    for (String property : ALL_PROPERTIES) {
+      builder.addMapping(translateDeclarativeKey(property), property);
+    }
+    return builder.build(properties).getInstrumentationConfig();
+  }
+
   static boolean isEnabled(DeclarativeConfigProperties properties) {
     Boolean enabled = properties.getBoolean(translateDeclarativeKey(ENABLED_OPTION));
     return enabled == null || enabled;
@@ -91,31 +101,6 @@ class InferredSpansConfig {
     return builder.build();
   }
 
-  static SpanProcessor createSpanProcessor(ConfigProperties properties) {
-    InferredSpansProcessorBuilder builder = InferredSpansProcessor.builder().profilerEnabled(true);
-
-    PropertiesApplier applier = new PropertiesApplier(properties);
-
-    applier.applyBool(LOGGING_OPTION, builder::profilerLoggingEnabled);
-    applier.applyBool(DIAGNOSTIC_FILES_OPTION, builder::backupDiagnosticFiles);
-    applier.applyInt(SAFEMODE_OPTION, builder::asyncProfilerSafeMode);
-    applier.applyBool(POSTPROCESSING_OPTION, builder::postProcessingEnabled);
-    applier.applyDuration(SAMPLING_INTERVAL_OPTION, builder::samplingInterval);
-    applier.applyDuration(MIN_DURATION_OPTION, builder::inferredSpansMinDuration);
-    applier.applyWildcards(INCLUDED_CLASSES_OPTION, builder::includedClasses);
-    applier.applyWildcards(EXCLUDED_CLASSES_OPTION, builder::excludedClasses);
-    applier.applyDuration(INTERVAL_OPTION, builder::profilerInterval);
-    applier.applyDuration(DURATION_OPTION, builder::profilingDuration);
-    applier.applyString(LIB_DIRECTORY_OPTION, builder::profilerLibDirectory);
-
-    String parentOverrideHandlerName = properties.getString(PARENT_OVERRIDE_HANDLER_OPTION);
-    if (parentOverrideHandlerName != null && !parentOverrideHandlerName.isEmpty()) {
-      builder.parentOverrideHandler(constructParentOverrideHandler(parentOverrideHandlerName));
-    }
-
-    return builder.build();
-  }
-
   @SuppressWarnings("unchecked") // handler must implement BiConsumer<SpanBuilder, SpanContext>
   private static BiConsumer<SpanBuilder, SpanContext> constructParentOverrideHandler(String name) {
     try {
@@ -135,47 +120,6 @@ class InferredSpansConfig {
       funcToApply.accept(value);
     }
   }
-
-  private static class PropertiesApplier {
-
-    private final ConfigProperties properties;
-
-    PropertiesApplier(ConfigProperties properties) {
-      this.properties = properties;
-    }
-
-    void applyBool(String configKey, Consumer<Boolean> funcToApply) {
-      applyValue(properties.getBoolean(configKey), funcToApply);
-    }
-
-    void applyInt(String configKey, Consumer<Integer> funcToApply) {
-      applyValue(properties.getInt(configKey), funcToApply);
-    }
-
-    void applyDuration(String configKey, Consumer<Duration> funcToApply) {
-      applyValue(properties.getDuration(configKey), funcToApply);
-    }
-
-    void applyString(String configKey, Consumer<String> funcToApply) {
-      applyValue(properties.getString(configKey), funcToApply);
-    }
-
-    void applyWildcards(String configKey, Consumer<? super List<WildcardMatcher>> funcToApply) {
-      String wildcardListString = properties.getString(configKey);
-      if (wildcardListString != null && !wildcardListString.isEmpty()) {
-        List<WildcardMatcher> values =
-            Arrays.stream(wildcardListString.split(","))
-                .filter(str -> !str.isEmpty())
-                .map(WildcardMatcher::valueOf)
-                .collect(toList());
-        if (!values.isEmpty()) {
-          funcToApply.accept(values);
-        }
-      }
-    }
-  }
-
-
 
   private static TimeUnit getDurationUnit(String unitString) {
     switch (unitString) {
