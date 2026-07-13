@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.opentelemetry.contrib.dynamic.policy.registry.PolicySourceMappingConfig;
 import io.opentelemetry.contrib.dynamic.policy.source.JsonSourceWrapper;
-import io.opentelemetry.contrib.dynamic.policy.source.KeyValueSourceWrapper;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceFormat;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceWrapper;
 import io.opentelemetry.opamp.client.OpampClient;
@@ -52,7 +51,7 @@ import opamp.proto.ServerErrorResponse;
  * location key, maps incoming policy IDs to internal policy types, validates them with the supplied
  * validators, and publishes the resulting policies to callers.
  */
-public final class OpampPolicyProvider implements PolicyProvider {
+public final class OpampPolicyProvider extends AbstractPolicyProvider {
   private static final Logger logger = Logger.getLogger(OpampPolicyProvider.class.getName());
   private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -74,11 +73,8 @@ public final class OpampPolicyProvider implements PolicyProvider {
   @Nullable private final String serviceEnvironment;
   private final Map<String, String> headers;
   private final SourceFormat format;
-  private final List<PolicyValidator> validators;
-  private final Map<String, String> policyIdToPolicyType;
+  private final MappedPolicySourceConverter sourceConverter;
   private final MutablePeriodicDelay pollingDelay;
-  private final AtomicReference<List<TelemetryPolicy>> currentPolicies =
-      new AtomicReference<>(Collections.<TelemetryPolicy>emptyList());
   private final AtomicReference<OpampClient> clientRef = new AtomicReference<>();
   private final AtomicReference<Thread> shutdownHookRef = new AtomicReference<>();
 
@@ -113,22 +109,17 @@ public final class OpampPolicyProvider implements PolicyProvider {
     this.serviceEnvironment = getServiceEnvironment(properties);
     this.headers = Collections.unmodifiableMap(new HashMap<>(properties.getMap(OPAMP_HEADERS)));
     this.format = format;
-    this.validators = Collections.unmodifiableList(new ArrayList<>(validators));
-    this.policyIdToPolicyType = Collections.unmodifiableMap(buildPolicyIdToPolicyType(mappings));
+    this.sourceConverter = MappedPolicySourceConverter.create(mappings, validators);
     this.pollingDelay =
         new MutablePeriodicDelay(
             Objects.requireNonNull(
                 GLOBAL_POLLING_INTERVAL.get(), "polling interval cannot be null"));
   }
 
-  /**
-   * Returns the latest validated policies received from OpAMP.
-   *
-   * <p>The returned list is the current immutable snapshot held by this provider.
-   */
+  /** Returns the latest validated policies received from OpAMP. */
   @Override
   public List<TelemetryPolicy> fetchPolicies() {
-    return Objects.requireNonNull(currentPolicies.get(), "currentPolicies cannot be null");
+    return getCurrentPolicies();
   }
 
   /**
@@ -224,27 +215,21 @@ public final class OpampPolicyProvider implements PolicyProvider {
     }
     AgentConfigMap configMap = remoteConfig.config;
     if (configMap == null || configMap.config_map == null || configMap.config_map.isEmpty()) {
-      List<TelemetryPolicy> empty = Collections.emptyList();
-      currentPolicies.set(empty);
-      onUpdate.accept(empty);
+      updateCurrentPoliciesAndNotify(Collections.<TelemetryPolicy>emptyList(), onUpdate);
       return buildStatus(
           RemoteConfigStatuses.RemoteConfigStatuses_FAILED, remoteConfig.config_hash);
     }
     AgentConfigFile selected = configMap.config_map.get(location);
     if (selected == null || selected.body == null) {
       logger.info("No OpAMP config payload found for location key: " + location);
-      List<TelemetryPolicy> empty = Collections.emptyList();
-      currentPolicies.set(empty);
-      onUpdate.accept(empty);
+      updateCurrentPoliciesAndNotify(Collections.<TelemetryPolicy>emptyList(), onUpdate);
       return buildStatus(
           RemoteConfigStatuses.RemoteConfigStatuses_FAILED, remoteConfig.config_hash);
     }
 
     List<TelemetryPolicy> policies = new ArrayList<>();
     parsePolicyText(location, selected.body.utf8(), policies);
-    List<TelemetryPolicy> snapshot = Collections.unmodifiableList(new ArrayList<>(policies));
-    currentPolicies.set(snapshot);
-    onUpdate.accept(snapshot);
+    List<TelemetryPolicy> snapshot = updateCurrentPoliciesAndNotify(policies, onUpdate);
     RemoteConfigStatuses status =
         snapshot.isEmpty()
             ? RemoteConfigStatuses.RemoteConfigStatuses_FAILED
@@ -256,36 +241,13 @@ public final class OpampPolicyProvider implements PolicyProvider {
     logger.info("Received OpAMP policy payload for key '" + key + "': " + policyText);
     List<SourceWrapper> parsedSources = format.parse(policyText);
     if (parsedSources == null && format == SourceFormat.JSONKEYVALUE) {
-      parsedSources = parseMappedJsonObject(policyText, policyIdToPolicyType.keySet());
+      parsedSources = parseMappedJsonObject(policyText, sourceConverter.getMappedPolicyIds());
     }
     if (parsedSources == null) {
       logger.info("Ignoring invalid OpAMP config entry for key: " + key);
       return;
     }
-    for (SourceWrapper source : parsedSources) {
-      String incomingPolicyId = source.getPolicyType();
-      if (incomingPolicyId == null || incomingPolicyId.isEmpty()) {
-        continue;
-      }
-      String mappedPolicyType = policyIdToPolicyType.get(incomingPolicyId);
-      if (mappedPolicyType == null) {
-        continue;
-      }
-      SourceWrapper normalizedSource = remapSourcePolicyType(source, mappedPolicyType);
-      if (normalizedSource == null) {
-        continue;
-      }
-      for (PolicyValidator validator : validators) {
-        if (!mappedPolicyType.equals(validator.getPolicyType())) {
-          continue;
-        }
-        TelemetryPolicy policy = validator.validate(normalizedSource);
-        if (policy != null) {
-          out.add(policy);
-          break;
-        }
-      }
-    }
+    out.addAll(sourceConverter.convert(parsedSources));
   }
 
   private void stop() {
@@ -435,35 +397,6 @@ public final class OpampPolicyProvider implements PolicyProvider {
     } catch (IOException e) {
       return null;
     }
-  }
-
-  private static Map<String, String> buildPolicyIdToPolicyType(
-      List<PolicySourceMappingConfig> mappings) {
-    Map<String, String> mapping = new HashMap<>();
-    for (PolicySourceMappingConfig item : mappings) {
-      mapping.put(item.getPolicyId(), item.getPolicyType());
-    }
-    return mapping;
-  }
-
-  @Nullable
-  private static SourceWrapper remapSourcePolicyType(
-      SourceWrapper source, String mappedPolicyType) {
-    if (source instanceof JsonSourceWrapper) {
-      JsonNode node = ((JsonSourceWrapper) source).asJsonNode();
-      if (!node.isObject() || node.size() != 1) {
-        return null;
-      }
-      JsonNode value = node.elements().next();
-      ObjectNode remappedNode = MAPPER.createObjectNode();
-      remappedNode.set(mappedPolicyType, value);
-      return new JsonSourceWrapper(remappedNode);
-    }
-    if (source instanceof KeyValueSourceWrapper) {
-      KeyValueSourceWrapper keyValue = (KeyValueSourceWrapper) source;
-      return new KeyValueSourceWrapper(mappedPolicyType, keyValue.getValue());
-    }
-    return source;
   }
 
   private static RemoteConfigStatus buildStatus(
