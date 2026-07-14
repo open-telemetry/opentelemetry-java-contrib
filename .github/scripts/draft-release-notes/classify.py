@@ -7,7 +7,7 @@ at-a-time diff-based decision before any CHANGELOG text is written, which
 is the design intent of the draft-release-notes skill.
 
 Outputs per PR (under build/changelog-bundle/prs/<N>/):
-  - prompt.md                 — LLM prompt with the diff embedded
+  - prompt.md             — LLM prompt with the diff embedded
   - decision.json             — structured classification (schema below)
   - decision.md               — human-readable rendering
   - cli-response.jsonl / .txt — raw copilot stdout (forensic; always written
@@ -16,9 +16,10 @@ Outputs per PR (under build/changelog-bundle/prs/<N>/):
 decision.json schema:
   {
     "pr": <int>,
+    "module": <string (the user-facing module name inferred from the file paths)>,
     "decision": "include" | "omit",
-    "section": "breaking" | "deprecations" | "new-javaagent"
-             | "new-library" | "enhancements" | "bug-fixes" | null,
+    "section": "breaking" | "deprecations" | "new-module"
+             | "enhancements" | "bug-fixes" | null,
     "surface": <short phrase>,
     "user_visible_effect": <one sentence or "none">,
     "bullet": <final CHANGELOG sentence without PR link> | null,
@@ -66,14 +67,24 @@ VALID_SECTIONS = {
     "bug-fixes",
     None,
 }
-}
 
 PROMPT_TEMPLATE = """You are classifying a single PR from the \
 opentelemetry-java-contrib repository for inclusion in CHANGELOG.md.
 
 Apply the classification rules below. Respond with a single JSON object \
-matching the schema described in those rules and nothing else (no prose, \
+matching the exact schema described below and nothing else (no prose, \
 no code fences).
+
+JSON Schema Requirement:
+{
+  "module": "string (the user-facing module name inferred from the file paths, e.g., 'Disk buffering', 'AWS X-Ray SDK support', 'JMX metric gatherer')",
+  "section": "string (must be exactly one of: 'breaking', 'deprecations', 'new-module', 'enhancements', 'bug-fixes', or null)",
+  "decision": "string ('include' or 'omit')",
+  "surface": "string (short phrase describing the affected surface)",
+  "user_visible_effect": "string (one sentence or 'none')",
+  "bullet": "string (final CHANGELOG sentence) or null",
+  "evidence": "string (2-4 line verbatim quote from the diff)"
+}
 
 ---BEGIN RULES---
 {rules}
@@ -132,6 +143,7 @@ def preclassify(bundle: PrBundle) -> dict | None:
     if "module cleanup" in labels:
         return {
             "decision": "omit",
+            "module": None,
             "section": None,
             "surface": "module cleanup",
             "user_visible_effect": "none",
@@ -143,6 +155,7 @@ def preclassify(bundle: PrBundle) -> dict | None:
         files = [f["path"] for f in bundle.meta.get("files", [])]
         return {
             "decision": "omit",
+            "module": None,
             "section": None,
             "surface": "test/build/docs only",
             "user_visible_effect": "none",
@@ -290,6 +303,8 @@ def validate(decision: dict) -> list[str]:
     if decision.get("decision") not in ("include", "omit"):
         errors.append("decision must be include or omit")
     if decision.get("decision") == "include":
+        if not decision.get("module"):
+            errors.append("module required for include")
         if decision.get("section") not in VALID_SECTIONS - {None}:
             errors.append("section required for include")
         if not decision.get("bullet"):
@@ -306,6 +321,7 @@ def render_markdown(pr: int, decision: dict) -> str:
     lines = [
         f"# PR #{pr}",
         "",
+        f"- module: {decision.get('module')}",
         f"- decision: **{decision.get('decision')}**",
         f"- section: {decision.get('section')}",
         f"- source: {decision.get('source', 'llm')}",

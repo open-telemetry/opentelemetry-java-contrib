@@ -876,7 +876,6 @@ def do_draft(
         relative_bundle = bundle_dir.relative_to(REPO_ROOT).as_posix()
         warn(f"Prepared changelog bundle at {relative_bundle}")
 
-    sys.stdout.write(render_draft_output(breaking_prs, deprecation_prs, candidates))
     return 0
 
 

@@ -2,15 +2,15 @@
 """Merge per-PR decision.json files into a CHANGELOG Unreleased section.
 
 Reads build/changelog-bundle/prs/<N>/decision.json for every PR that has
-one, groups kept entries by section, sorts each section by ascending PR
-number, and prints the Unreleased markdown block to stdout.
+one, groups kept entries by module name, sorts each module's entries by
+ascending PR number, and prints the Unreleased markdown block to stdout.
 
-The output contains only the `## Unreleased` heading and section bullets;
+The output contains only the `## Unreleased` heading and module sections;
 the SDK-version preamble is inserted at release time by
 .github/scripts/update-changelog-for-release.sh.
 
 Any entry in state other than `include`/`omit`, or `include` without a
-section and bullet, is reported on stderr and excluded.
+summary/bullet, is reported on stderr and excluded.
 
 By default writes to stdout. Use --splice to rewrite CHANGELOG.md in
 place, replacing the entire `## Unreleased` block. Any hand-written
@@ -29,15 +29,6 @@ from pathlib import Path
 
 BUNDLE_ROOT = Path("build/changelog-bundle/prs")
 CHANGELOG = Path("CHANGELOG.md")
-
-SECTION_ORDER = [
-    ("breaking", "### ⚠️ Breaking changes to non-stable APIs"),
-    ("deprecations", "### 🚫 Deprecations"),
-    ("new-javaagent", "### 🌟 New javaagent instrumentation"),
-    ("new-library", "### 🌟 New library instrumentation"),
-    ("enhancements", "### 📈 Enhancements"),
-    ("bug-fixes", "### 🛠️ Bug fixes"),
-]
 
 PR_URL = "https://github.com/open-telemetry/opentelemetry-java-contrib/pull/{pr}"
 
@@ -96,7 +87,7 @@ def main() -> int:
     ap.add_argument("--missing-ok", action="store_true",
                     help="do not warn about PRs lacking decision.json")
     ap.add_argument("--report", action="store_true",
-                    help="also print a section-count summary on stderr")
+                    help="also print a module-count summary on stderr")
     ap.add_argument("--splice", action="store_true",
                     help="rewrite CHANGELOG.md in place (otherwise write to stdout)")
     args = ap.parse_args()
@@ -116,40 +107,67 @@ def main() -> int:
                 file=sys.stderr,
             )
 
-    grouped: dict[str, list[dict]] = {key: [] for key, _ in SECTION_ORDER}
+    modules: dict[str, list[dict]] = {}
     errors = 0
     for d in decisions:
         pr = d.get("pr")
         decision = d.get("decision")
         section = d.get("section")
+        
         if decision == "omit":
             continue
+            
         reason: str | None = None
+        # Fallback to 'bullet' if the older output format is somehow retained
+        text = d.get("summary") or d.get("bullet")
+        mod_name = d.get("module", "Other")
+
         if decision != "include":
             reason = f"unknown decision {decision!r}"
-        elif section not in grouped:
-            reason = f"unknown section {section!r}"
-        elif not d.get("bullet"):
-            reason = "empty bullet"
+        elif not text:
+            reason = "empty summary"
+            
         if reason is not None:
             print(f"#{pr}: skipping, {reason}", file=sys.stderr)
             errors += 1
             continue
-        grouped[section].append(d)
+            
+        if mod_name not in modules:
+            modules[mod_name] = []
+        modules[mod_name].append(d)
 
     out_lines = [
         "## Unreleased",
         "",
     ]
 
-    for key, header in SECTION_ORDER:
-        items = sorted(grouped[key], key=lambda d: d["pr"])
-        if not items:
-            continue
+    for mod_name in sorted(modules.keys()):
+        mod_entries = modules[mod_name]
+        
+        is_new_module = any(e.get("section") == "new-module" for e in mod_entries)
+        
+        header = f"### {mod_name}"
+        if is_new_module:
+            header += " - New 🌟"
+            
         out_lines.append(header)
         out_lines.append("")
-        for d in items:
-            out_lines.append(format_bullet(d["bullet"], d["pr"]))
+        
+        items = sorted(mod_entries, key=lambda d: d["pr"])
+        for entry in items:
+            section = entry.get("section")
+            prefix = ""
+            if section == "breaking":
+                prefix = "**[Breaking]** "
+            elif section == "deprecations":
+                prefix = "**[Deprecation]** "
+            elif section == "bug-fixes":
+                prefix = "**[Bug Fix]** "
+                
+            text = entry.get("summary") or entry.get("bullet")
+            full_text = f"{prefix}{text}"
+            
+            out_lines.append(format_bullet(full_text, entry["pr"]))
         out_lines.append("")
 
     block = "\n".join(out_lines)
@@ -167,15 +185,15 @@ def main() -> int:
             sys.exit("## Unreleased section not found in CHANGELOG.md")
         new_text = text[: m.start()] + block + "\n" + text[m.end():]
         CHANGELOG.write_text(new_text, encoding="utf-8")
-        bullet_count = sum(len(v) for v in grouped.values())
+        bullet_count = sum(len(v) for v in modules.values())
         print(f"Rewrote {CHANGELOG} ({bullet_count} PR-linked bullets)", file=sys.stderr)
     else:
         sys.stdout.write(block)
 
     if args.report:
-        print("Section counts:", file=sys.stderr)
-        for key, header in SECTION_ORDER:
-            print(f"  {key}: {len(grouped[key])}", file=sys.stderr)
+        print("Module counts:", file=sys.stderr)
+        for mod_name in sorted(modules.keys()):
+            print(f"  {mod_name}: {len(modules[mod_name])}", file=sys.stderr)
 
     return 1 if errors else 0
 

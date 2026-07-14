@@ -1,170 +1,63 @@
-# Classification rules
+# Changelog Classification Rules
 
-Single source of truth for the draft-release-notes skill. Read by
-`classify.py` (embedded verbatim into the per-PR LLM prompt) and by
-humans during the finalize step.
+You are an expert software maintainer generating release notes for the
+`open-telemetry/opentelemetry-java-contrib` repository. Your task is to analyze a
+Pull Request diff and determine the appropriate changelog classification.
 
-## Schema
+## 1. Module Extraction
 
-Respond with a single JSON object matching exactly this schema and
-nothing else (no prose). A surrounding `json` code fence is tolerated
-by the parser but discouraged — prefer a bare JSON object:
+Unlike other repositories, the changelog here is grouped by the **module name**, not the change type.
+You must extract the primary user-facing module affected by analyzing the file paths in the diff
+(e.g., paths like `jmx-scraper/...`, `samplers/...`, `aws-xray/...`, `disk-buffering/...`).
+Format the module name as a clean, capitalized, human-readable string (e.g., "JMX metric gatherer",
+"Disk buffering", "AWS X-Ray SDK support", "Samplers").
 
-```text
-{
-  "decision": "include" | "omit",
-  "section": "breaking" | "deprecations" | "new-javaagent" | "new-library" | "enhancements" | "bug-fixes" | null,
-  "surface": "<short phrase describing what the diff changes>",
-  "user_visible_effect": "<one sentence a user notices after upgrade, or 'none' if omit>",
-  "bullet": "<final CHANGELOG sentence without the PR link, or null if omit>",
-  "evidence": "<2-4 line verbatim quote from the diff that justifies the decision>"
-}
-```
+## 2. Section Classification
 
-## Core rule
+Choose exactly one of the following classification sections:
 
-Classify every PR from its diff only. PR titles, manifest `subject`,
-draft-script bullet text, scratch-bucket headings, file lists, and
-`--stat` summaries are indexing metadata, not evidence. If the diff and
-the metadata disagree, the diff wins.
+### new-module
 
-## Breaking changes to non-stable APIs
+Only use this if a brand-new top-level module is introduced to the repository. This is evidenced by
+a new top-level directory containing a new `build.gradle.kts` and a new entry in the root
+`settings.gradle.kts`.
 
-Removes or changes the signature of a non-private method, class, or
-interface in a non-stable (`-alpha`) module or in `javaagent-extension-api`
-/ `*/internal/**`. Includes:
+### breaking
 
-* removal of a non-`@Deprecated` method,
-* removal of a `default` method from an internal interface,
-* signature change even when the method never carried `@Deprecated`.
+Any change that breaks backwards compatibility for users.
+Examples:
 
-Treat non-private `Experimental*` helpers in published `:library`
-artifacts as incubating public API even when their package name
-contains `.internal`; removals or binary-incompatible reshaping belong
-under Breaking.
+* Removing a previously public builder method.
+* Changing the default behavior or default configuration of an existing resource provider or sampler.
+* Deleting a public class or method.
 
-Emitted-attribute, attribute-value, or span-name changes are Breaking
-**only** when they ship unconditionally. If the change is gated behind
-`otel.instrumentation.common.v3-preview`,
-`otel.semconv-stability.opt-in=…`, or an `experimental` property, the
-entry belongs under Enhancements.
+### deprecations
 
-Deprecate-then-remove across two PRs in one cycle produces two bullets —
-one under Deprecations, one under Breaking.
+Marks a class, method, or configuration property as `@Deprecated`.
 
-## Deprecations
+### enhancements
 
-Adds `@Deprecated` to a user-facing API, or renames a config property /
-YAML key while keeping the old one. Name both the old and new user-facing
-flat property; include the YAML key when relevant.
+New features, performance improvements, or non-breaking API additions to existing modules.
+Examples:
 
-Configuration property renames always go here, never in Enhancements.
-Stability policy:
+* Adding a new configuration option or metric to the JMX scraper.
+* Optimizing disk buffering I/O writes.
+* Adding a new method to a builder without removing old ones.
 
-* Stable property/API: may be deprecated in any minor; removable only in
-  a major.
-* Experimental property (name contains `experimental` or YAML key ends
-  with `/development`): may be deprecated in one release and removed in
-  the next.
+### bug-fixes
 
-If an unlinked summary bullet at the top of Deprecations already covers
-the rename, do not add a duplicate PR-linked bullet.
+Resolves crashes, incorrect behavior, or memory leaks in existing modules.
+Examples:
 
-## New javaagent / library instrumentation
+* Fixing a memory leak in a resource provider.
+* Resolving a `NullPointerException` when parsing specific configurations.
 
-Only for a brand-new module under `instrumentation/<name>/javaagent/**`
-or `instrumentation/<name>/library/**` — new `build.gradle.kts`, new
-sources, and a new `settings.gradle.kts` entry. Renames or extractions
-do not qualify.
+### null (Exclude from Changelog)
 
-## Enhancements
+Internal repo maintenance that does not affect user-facing behavior.
+Examples:
 
-New attributes, new config flags, new stable-semconv support, observable
-behavior gated on a flag (`v3-preview`, `SemconvStability`, experimental
-property), or measurable hot-path performance improvements. For semconv
-opt-ins, cite the flag value (for example
-`otel.semconv-stability.opt-in=messaging`) — the known values in this
-repo are `database`, `messaging`, `http`, `jvm`, `rpc`. Gated changes go
-here, never under Breaking.
-
-## Bug fixes
-
-Wrong attributes, missing spans, NPE/leak/deadlock fixes, latest-dep
-compatibility, instrumentation-activation fixes (muzzle `versionRange`,
-SPI resource names, type matchers), startup ordering, context
-propagation, and class-loading fixes. Restoring silently broken
-behavior is a bug fix, not an enhancement — diffs that remove an
-over-restrictive condition, add a fallback branch, or invert an `&&`
-usually belong here. Describe the user-visible symptom.
-
-## metadata.yaml is documentation, not evidence
-
-`metadata.yaml` files are static documentation; they don't change
-runtime behavior. Treat any change to `metadata.yaml` as describing
-existing functionality. Don't emit an Enhancements bullet for a config
-property whose only diff evidence is a metadata.yaml entry.
-
-## When to omit
-
-Omit only when the PR's `src/main` runtime changes are entirely limited
-to one or more of:
-
-* pure refactor, style, or naming cleanup of non-API surfaces,
-* test-only changes, cross-testing, moving tests out of default packages,
-* CI/build-tooling with no runtime effect,
-* renames of internal (not extension-API) fields, packages, or helpers,
-* new package-private, `internal`-package, or test-only methods,
-* `metadata.yaml` documentation (see section above).
-
-Do not use the internal-helper omit rule for non-private `Experimental*`
-classes in published artifacts; classify their
-removal or binary-incompatible reshaping under Breaking.
-
-Trivial omits (renovate bumps, all-test/docs/build paths, post-release
-version bumps) are handled by `classify.py --preclassify-only`.
-Everything else must be decided from the diff on a per-PR basis.
-
-Omit reasons that lean on appearance words — "probably internal",
-"mostly plumbing", "looks like refactor", "reads as tooling", "diff is
-dominated by X" — are not acceptable while `src/main` runtime code is
-touched. Re-read the diff and write a concrete user-visible effect, or
-keep the PR.
-
-## Bias toward keeping when the diff touches
-
-* Emitted telemetry: new attributes, gated-behavior changes, schema URL
-  changes, new `SemconvStability.emitStable…` branches.
-* Startup, context propagation, class loading, or lifecycle behavior
-  that can disable telemetry, leak memory, deadlock, or otherwise break
-  normal operation (removal of an early `GlobalOpenTelemetry.get()`
-  call; closing bridged callbacks on GC; fixing an agent deadlock).
-* Agent transformation correctness: `@Advice` inline vs indy, advice
-  scope, helper-class exposure to the application class loader.
-* Any public or extension-facing API, builder method, config key, or
-  semconv surface, even when the diff also includes plumbing.
-
-## Bullet style
-
-* One sentence per bullet.
-* Name concrete user-facing surfaces: flag names, property names, class
-  names, attribute names. Use backticks for config keys, property names,
-  attributes, and class/method names.
-* For `v3-preview`-gated changes, cite the user-facing property name
-  `otel.instrumentation.common.v3-preview`, not the internal
-  `v3_preview` key.
-* Do not describe implementation details ("refactored", "moved",
-  "simplified") unless that is the user-visible change.
-* Do not credit authors.
-
-The merger renders bullets with the PR link on the second line, indented
-two spaces:
-
-```text
-- Short user-facing description
-  ([#NNNN](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/NNNN))
-```
-
-Grouping multiple PRs into one logical bullet is done by hand after
-merging — edit `CHANGELOG.md` directly to combine trailing PR links, or
-set identical `bullet` text on each `decision.json` and collapse by hand
-after running the merger.
+* Changes isolated exclusively to test applications (`jmx-scraper/test-app/`, `example/`, etc.).
+* Internal GitHub Action workflow updates or build script tweaks.
+* Dependency version bumps that do not introduce new user-facing features or fix documented bugs.
+* Documentation (`.md` files) updates.
