@@ -47,7 +47,8 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      - name: Set up gradle
+      # This workflow analyzes release branches but does not build or publish release artifacts.
+      - name: Set up gradle # zizmor: ignore[cache-poisoning]
         if: matrix.language == 'java'
         uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
 
@@ -73,3 +74,13 @@ jobs:
         uses: github/codeql-action/analyze@54f647b7e1bb85c95cddabcd46b0c578ec92bc1a # v4.36.3
         with:
           category: "/language:${{matrix.language}}"
+
+  workflow-notification:
+    permissions:
+      issues: write
+    needs:
+      - analyze
+    if: always() && github.event_name == 'schedule'
+    uses: open-telemetry/shared-workflows/.github/workflows/workflow-failure-issue.yml@7c49790392da7de86fdb4bb968446f9cb8461eb8 # v0.3.1
+    with:
+      success: ${{ needs.analyze.result == 'success' }}

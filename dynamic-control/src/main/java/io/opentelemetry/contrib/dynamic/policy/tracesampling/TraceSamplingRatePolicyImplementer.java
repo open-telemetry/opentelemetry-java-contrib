@@ -8,7 +8,6 @@ package io.opentelemetry.contrib.dynamic.policy.tracesampling;
 import io.opentelemetry.contrib.dynamic.policy.PolicyImplementer;
 import io.opentelemetry.contrib.dynamic.policy.PolicyValidator;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
-import io.opentelemetry.sdk.trace.samplers.Sampler;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -61,17 +60,20 @@ public final class TraceSamplingRatePolicyImplementer implements PolicyImplement
         continue;
       }
       if (policy.isDeleted()) {
-        delegatingSampler.setDelegate(TraceSamplingRatePolicy.createSampler(1.0));
-        logger.info("Applied trace sampling policy reset: probability reset to 1.0");
+        applySamplingProbability(1.0, "reset");
         continue;
       }
       if (!(policy instanceof TraceSamplingRatePolicy)) {
         continue;
       }
       double ratio = ((TraceSamplingRatePolicy) policy).getProbability();
-      Sampler sampler = TraceSamplingRatePolicy.createSampler(ratio);
-      delegatingSampler.setDelegate(sampler);
-      logger.info("Applied trace sampling policy update: probability=" + ratio);
+      applySamplingProbability(ratio, "update");
+    }
+  }
+
+  private void applySamplingProbability(double probability, String action) {
+    if (delegatingSampler.setSamplingProbability(probability)) {
+      logger.info("Applied trace sampling policy " + action + ": probability=" + probability);
     }
   }
 }

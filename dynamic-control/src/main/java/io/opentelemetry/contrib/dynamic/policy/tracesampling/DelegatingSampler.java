@@ -31,6 +31,7 @@ import javax.annotation.Nullable;
 public class DelegatingSampler implements Sampler {
 
   private volatile Sampler delegate;
+  private double samplingProbability = Double.NaN;
 
   /**
    * Creates a new {@link DelegatingSampler} with the given initial delegate.
@@ -58,8 +59,28 @@ public class DelegatingSampler implements Sampler {
    * @param sampler the new delegate sampler to use, or {@code null} to fall back to {@link
    *     Sampler#alwaysOn()}
    */
-  public void setDelegate(@Nullable Sampler sampler) {
+  public synchronized void setDelegate(@Nullable Sampler sampler) {
     delegate = sampler != null ? sampler : Sampler.alwaysOn();
+    samplingProbability = Double.NaN;
+  }
+
+  /**
+   * Updates the delegate sampler for a trace sampling policy probability.
+   *
+   * <p>The probability is tracked with the delegate so repeated equivalent policy updates can be
+   * skipped atomically.
+   *
+   * @param probability sampling probability in the inclusive range {@code [0.0, 1.0]}
+   * @return {@code true} if the delegate changed, {@code false} if the probability was already
+   *     applied
+   */
+  public synchronized boolean setSamplingProbability(double probability) {
+    if (Double.compare(samplingProbability, probability) == 0) {
+      return false;
+    }
+    delegate = TraceSamplingRatePolicy.createSampler(probability);
+    samplingProbability = probability;
+    return true;
   }
 
   @Override

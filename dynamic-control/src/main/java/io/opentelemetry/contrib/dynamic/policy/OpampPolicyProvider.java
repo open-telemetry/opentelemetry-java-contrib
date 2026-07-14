@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.opentelemetry.contrib.dynamic.policy.registry.PolicySourceMappingConfig;
 import io.opentelemetry.contrib.dynamic.policy.source.JsonSourceWrapper;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceFormat;
+import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceWrapper;
 import io.opentelemetry.opamp.client.OpampClient;
 import io.opentelemetry.opamp.client.OpampClientBuilder;

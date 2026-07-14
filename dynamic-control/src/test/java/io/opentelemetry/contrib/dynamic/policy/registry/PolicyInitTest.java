@@ -16,6 +16,7 @@ import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.contrib.dynamic.policy.PolicyImplementer;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicyIdentity;
+import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingRatePolicy;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
@@ -164,6 +165,15 @@ class PolicyInitTest {
   private static final class IdempotentTestPolicy implements TelemetryPolicy {
     private static final TelemetryPolicyIdentity IDENTITY =
         new TelemetryPolicyIdentity("test-policy-idempotent", "Test policy idempotent");
+    private final SourceKind sourceKind;
+
+    private IdempotentTestPolicy() {
+      this(SourceKind.CUSTOM);
+    }
+
+    private IdempotentTestPolicy(SourceKind sourceKind) {
+      this.sourceKind = sourceKind;
+    }
 
     @Override
     public TelemetryPolicyIdentity getIdentity() {
@@ -173,6 +183,11 @@ class PolicyInitTest {
     @Override
     public String getType() {
       return "test-policy-idempotent";
+    }
+
+    @Override
+    public SourceKind getSourceKind() {
+      return sourceKind;
     }
   }
 }

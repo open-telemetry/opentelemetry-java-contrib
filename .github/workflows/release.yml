@@ -266,6 +266,8 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           ./gradlew japicmp -PapiBaseVersion=$PRIOR_VERSION -PapiNewVersion=$VERSION
+          # Pin the apidiff baseline to the just-released version.
+          sed -i "s/^val apidiffBaselineVersion = .*/val apidiffBaselineVersion = \"$VERSION\"/" version.gradle.kts
           ./gradlew --refresh-dependencies japicmp
 
       - name: Use CLA approved bot
@@ -274,8 +276,9 @@ jobs:
       - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         id: otelbot-token
         with:
-          app-id: ${{ vars.OTELBOT_APP_ID }}
+          client-id: ${{ vars.OTELBOT_CLIENT_ID }}
           private-key: ${{ secrets.OTELBOT_PRIVATE_KEY }}
+          permission-pull-requests: write
 
       - name: Create pull request against main
         env:
@@ -290,6 +293,7 @@ jobs:
           git checkout -b $branch
           git add CHANGELOG.md
           git add docs/apidiffs
+          git add version.gradle.kts
           git commit -m "$message"
           git push --set-upstream origin $branch
           gh pr create --title "$message" \

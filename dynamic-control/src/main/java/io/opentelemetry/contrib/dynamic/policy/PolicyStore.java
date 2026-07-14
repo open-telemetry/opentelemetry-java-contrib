@@ -28,9 +28,9 @@ public final class PolicyStore {
    * Replaces the stored policies with a new accepted snapshot.
    *
    * <p>Input lists are normalized by policy identity, using policy type and policy id. Duplicate
-   * policies with the same identity are dropped and only the first occurrence is kept in insertion
-   * order. The store does not perform value-level no-op detection; providers can use source
-   * hashes/versions to skip unchanged snapshots, and implementers must apply policies idempotently.
+   * policies with the same identity are resolved by source kind priority. The store does not
+   * perform value-level no-op detection; providers can use source hashes/versions to skip unchanged
+   * snapshots, and implementers must apply policies idempotently.
    *
    * @return {@code true} after the snapshot is accepted
    */
@@ -105,7 +105,9 @@ public final class PolicyStore {
       PolicyKey policyKey = policyKey(previousPolicy);
       TelemetryPolicyIdentity identity = previousPolicy.getIdentity();
       if (!activePolicyKeys.contains(policyKey)) {
-        deletedPolicies.add(new DeletedTelemetryPolicy(identity, previousPolicy.getType()));
+        deletedPolicies.add(
+            new DeletedTelemetryPolicy(
+                identity, previousPolicy.getType(), previousPolicy.getSourceKind()));
       }
     }
     return deletedPolicies;
@@ -117,16 +119,22 @@ public final class PolicyStore {
     for (TelemetryPolicy policy : policies) {
       Objects.requireNonNull(policy, "newPolicies cannot contain null elements");
       PolicyKey key = policyKey(policy);
-      if (!normalized.containsKey(key)) {
+      TelemetryPolicy existing = normalized.get(key);
+      if (existing == null || hasHigherPriority(policy, existing)) {
         normalized.put(key, policy);
       }
     }
     return normalized;
   }
 
+  private static boolean hasHigherPriority(TelemetryPolicy candidate, TelemetryPolicy existing) {
+    return candidate.getSourceKind().hasHigherPriorityThan(existing.getSourceKind());
+  }
+
   private static PolicyKey policyKey(TelemetryPolicy policy) {
     TelemetryPolicyIdentity identity =
         Objects.requireNonNull(policy.getIdentity(), "policy identity cannot be null");
+    Objects.requireNonNull(policy.getSourceKind(), "policy source kind cannot be null");
     return new PolicyKey(policy.getType(), identity.getId());
   }
 

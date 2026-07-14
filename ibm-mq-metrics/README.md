@@ -2,8 +2,6 @@
 
 [![Maven](https://img.shields.io/maven-central/v/io.opentelemetry.contrib/opentelemetry-ibm-mq-metrics?label=Maven&color=orange)](https://central.sonatype.com/artifact/io.opentelemetry.contrib/opentelemetry-ibm-mq-metrics)
 
-:warning: This software is under development.
-
 ## Use case
 
 IBM MQ, formerly known as WebSphere MQ (message queue) series, is an IBM software for
