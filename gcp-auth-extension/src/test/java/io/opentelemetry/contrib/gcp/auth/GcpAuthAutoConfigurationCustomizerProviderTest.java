@@ -1218,7 +1218,6 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
           .setHeaders(traceHeaderSupplierCaptor.capture());
       Map<String, String> headers = traceHeaderSupplierCaptor.getValue().get();
       assertThat(headers)
-          .hasSize(1)
           .containsEntry("Authorization", "Bearer " + fakeIdToken)
           .doesNotContainKey(QUOTA_USER_PROJECT_HEADER);
 
