@@ -9,6 +9,7 @@ import com.google.auto.value.AutoValue;
 import io.opentelemetry.opamp.client.OpampClient;
 import javax.annotation.Nullable;
 import opamp.proto.AgentRemoteConfig;
+import opamp.proto.CustomMessage;
 
 /**
  * Data class provided in {@link OpampClient.Callbacks#onMessage(OpampClient, MessageData)} with
@@ -19,6 +20,9 @@ public abstract class MessageData {
   @Nullable
   public abstract AgentRemoteConfig getRemoteConfig();
 
+  @Nullable
+  public abstract CustomMessage getCustomMessage();
+
   public static Builder builder() {
     return new AutoValue_MessageData.Builder();
   }
@@ -26,6 +30,8 @@ public abstract class MessageData {
   @AutoValue.Builder
   public abstract static class Builder {
     public abstract Builder setRemoteConfig(AgentRemoteConfig remoteConfig);
+
+    public abstract Builder setCustomMessage(CustomMessage customMessage);
 
     public abstract MessageData build();
   }

@@ -17,9 +17,11 @@ import io.opentelemetry.opamp.client.request.service.RequestService;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -28,6 +30,7 @@ import opamp.proto.AgentDescription;
 import opamp.proto.AnyValue;
 import opamp.proto.ArrayValue;
 import opamp.proto.ComponentHealth;
+import opamp.proto.CustomCapabilities;
 import opamp.proto.KeyValue;
 import opamp.proto.RemoteConfigStatus;
 
@@ -35,6 +38,7 @@ import opamp.proto.RemoteConfigStatus;
 public final class OpampClientBuilder {
   private final Map<String, AnyValue> identifyingAttributes = new HashMap<>();
   private final Map<String, AnyValue> nonIdentifyingAttributes = new HashMap<>();
+  private final Set<String> customCapabilities = new LinkedHashSet<>();
   private long capabilities = 0;
   private RequestService service =
       HttpRequestService.create(OkHttpSender.create("http://localhost:4320/v1/opamp"));
@@ -391,6 +395,19 @@ public final class OpampClientBuilder {
     return this;
   }
 
+  /**
+   * Adds a custom capability supported by this Client for messages received from the Server. The
+   * configured capabilities are reported in {@code AgentToServer.custom_capabilities}.
+   *
+   * @param capability The reverse FQDN identifying the custom capability.
+   * @return this
+   */
+  @CanIgnoreReturnValue
+  public OpampClientBuilder addCustomCapability(String capability) {
+    customCapabilities.add(Objects.requireNonNull(capability));
+    return this;
+  }
+
   public OpampClient build(OpampClient.Callbacks callbacks) {
     List<KeyValue> protoIdentifyingAttributes = new ArrayList<>();
     List<KeyValue> protoNonIdentifyingAttributes = new ArrayList<>();
@@ -414,6 +431,7 @@ public final class OpampClientBuilder {
                     .non_identifying_attributes(protoNonIdentifyingAttributes)
                     .build()),
             new State.Capabilities(capabilities),
+            new State.CustomCapabilities(createCustomCapabilities()),
             new State.Health(initialHealth),
             new State.InstanceUid(instanceUid),
             new State.Flags(0L),
@@ -423,6 +441,16 @@ public final class OpampClientBuilder {
 
   private void enableCapability(AgentCapabilities capability) {
     capabilities = capabilities | capability.getValue();
+  }
+
+  @Nullable
+  private CustomCapabilities createCustomCapabilities() {
+    if (customCapabilities.isEmpty()) {
+      return null;
+    }
+    return new CustomCapabilities.Builder()
+        .capabilities(new ArrayList<>(customCapabilities))
+        .build();
   }
 
   private static State.EffectiveConfig createEffectiveConfigNoop() {

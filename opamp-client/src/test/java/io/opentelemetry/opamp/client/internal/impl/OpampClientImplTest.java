@@ -24,6 +24,7 @@ import io.opentelemetry.opamp.client.request.service.RequestService;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +49,8 @@ import opamp.proto.AgentToServer;
 import opamp.proto.AgentToServerFlags;
 import opamp.proto.AnyValue;
 import opamp.proto.ComponentHealth;
+import opamp.proto.CustomCapabilities;
+import opamp.proto.CustomMessage;
 import opamp.proto.EffectiveConfig;
 import opamp.proto.KeyValue;
 import opamp.proto.RemoteConfigStatus;
@@ -70,6 +73,7 @@ class OpampClientImplTest {
   private OpampClientImpl client;
   private TestEffectiveConfig effectiveConfig;
   private ComponentHealth initialHealth;
+  private CustomCapabilities customCapabilities;
   private TestCallbacks callbacks;
   @StartStop private final MockWebServer server = new MockWebServer();
 
@@ -87,6 +91,7 @@ class OpampClientImplTest {
             .status("running")
             .status_time_unix_nano(456L)
             .build();
+    customCapabilities = null;
     requestService = createHttpService();
   }
 
@@ -186,6 +191,52 @@ class OpampClientImplTest {
   }
 
   @Test
+  void verifyCustomCapabilitiesSent() {
+    customCapabilities = createCustomCapabilities("com.example.pause", "com.example.discovery");
+
+    RecordedRequest firstRequest = initializeClient();
+
+    assertThat(getAgentToServerMessage(firstRequest).custom_capabilities)
+        .isEqualTo(customCapabilities);
+
+    enqueueServerToAgentResponse(new ServerToAgent.Builder().build());
+    requestService.sendRequest();
+
+    assertThat(getAgentToServerMessage(takeRequest()).custom_capabilities).isNull();
+
+    ServerToAgent reportFullState =
+        new ServerToAgent.Builder()
+            .flags(ServerToAgentFlags.ServerToAgentFlags_ReportFullState.getValue())
+            .build();
+    enqueueServerToAgentResponse(reportFullState);
+    requestService.sendRequest();
+    takeRequest();
+
+    enqueueServerToAgentResponse(new ServerToAgent.Builder().build());
+    requestService.sendRequest();
+
+    assertThat(getAgentToServerMessage(takeRequest()).custom_capabilities)
+        .isEqualTo(customCapabilities);
+  }
+
+  @Test
+  void builderReportsCustomCapabilities() {
+    enqueueServerToAgentResponse(new ServerToAgent.Builder().build());
+    callbacks = spy(new TestCallbacks());
+
+    client =
+        (OpampClientImpl)
+            OpampClient.builder()
+                .setRequestService(requestService)
+                .addCustomCapability("com.example.pause")
+                .addCustomCapability("com.example.discovery")
+                .build(callbacks);
+
+    assertThat(getAgentToServerMessage(takeRequest()).custom_capabilities.capabilities)
+        .containsExactly("com.example.pause", "com.example.discovery");
+  }
+
+  @Test
   void verifyStop() {
     initializeClient();
 
@@ -214,6 +265,28 @@ class OpampClientImplTest {
 
     verify(callbacks)
         .onMessage(client, MessageData.builder().setRemoteConfig(remoteConfig).build());
+  }
+
+  @Test
+  void onSuccess_withCustomMessage_notifyCallbackOnMessage() {
+    initializeClient();
+    CustomMessage customMessage =
+        new CustomMessage.Builder()
+            .capability("com.example.pause")
+            .type("pause")
+            .data(ByteString.encodeUtf8("payload"))
+            .build();
+    ServerToAgent serverToAgent = new ServerToAgent.Builder().custom_message(customMessage).build();
+    enqueueServerToAgentResponse(serverToAgent);
+
+    // Force request
+    requestService.sendRequest();
+
+    // Await for onMessage call
+    await().atMost(Duration.ofSeconds(5)).until(() -> callbacks.onMessageCalls.get() == 1);
+
+    verify(callbacks)
+        .onMessage(client, MessageData.builder().setCustomMessage(customMessage).build());
   }
 
   @Test
@@ -410,6 +483,7 @@ class OpampClientImplTest {
         new State.SequenceNum(1L),
         new State.AgentDescription(new AgentDescription.Builder().build()),
         new State.Capabilities(capabilities),
+        new State.CustomCapabilities(customCapabilities),
         new State.Health(initialHealth),
         new State.InstanceUid(new byte[] {1, 2, 3}),
         new State.Flags((long) AgentToServerFlags.AgentToServerFlags_Unspecified.getValue()),
@@ -451,6 +525,10 @@ class OpampClientImplTest {
     Map<String, AgentConfigFile> keyToFile = new HashMap<>();
     keyToFile.put(key, new AgentConfigFile.Builder().body(ByteString.encodeUtf8(content)).build());
     return new AgentConfigMap.Builder().config_map(keyToFile).build();
+  }
+
+  private static CustomCapabilities createCustomCapabilities(String... capabilities) {
+    return new CustomCapabilities.Builder().capabilities(Arrays.asList(capabilities)).build();
   }
 
   private static AgentDescription getAgentDescriptionWithOneIdentifyingValue(

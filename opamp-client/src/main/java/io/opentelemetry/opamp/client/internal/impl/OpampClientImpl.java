@@ -12,6 +12,7 @@ import io.opentelemetry.opamp.client.internal.impl.recipe.RequestRecipe;
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.AgentDescriptionAppender;
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.AgentDisconnectAppender;
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.CapabilitiesAppender;
+import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.CustomCapabilitiesAppender;
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.EffectiveConfigAppender;
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.FlagsAppender;
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.HealthAppender;
@@ -79,6 +80,7 @@ public final class OpampClientImpl
     // Compressable fields init
     List<Field> compressableFields = new ArrayList<>();
     compressableFields.add(Field.AGENT_DESCRIPTION);
+    compressableFields.add(Field.CUSTOM_CAPABILITIES);
     compressableFields.add(Field.HEALTH);
     compressableFields.add(Field.EFFECTIVE_CONFIG);
     compressableFields.add(Field.REMOTE_CONFIG_STATUS);
@@ -94,6 +96,7 @@ public final class OpampClientImpl
             RemoteConfigStatusAppender.create(state.remoteConfigStatus),
             SequenceNumberAppender.create(state.sequenceNum),
             CapabilitiesAppender.create(state.capabilities),
+            CustomCapabilitiesAppender.create(state.customCapabilities),
             HealthAppender.create(state.health),
             InstanceUidAppender.create(state.instanceUid),
             FlagsAppender.create(state.flags),
@@ -204,6 +207,11 @@ public final class OpampClientImpl
     if (response.remote_config != null) {
       notifyOnMessage = true;
       messageBuilder.setRemoteConfig(response.remote_config);
+    }
+
+    if (response.custom_message != null) {
+      notifyOnMessage = true;
+      messageBuilder.setCustomMessage(response.custom_message);
     }
 
     if (notifyOnMessage) {
