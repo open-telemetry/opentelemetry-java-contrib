@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.opentelemetry.contrib.dynamic.policy.registry.PolicySourceMappingConfig;
 import io.opentelemetry.contrib.dynamic.policy.source.JsonSourceWrapper;
 import io.opentelemetry.contrib.dynamic.policy.source.KeyValueSourceWrapper;
+import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceWrapper;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -51,11 +52,12 @@ final class MappedPolicySourceConverter {
     return policyIdToPolicyType.keySet();
   }
 
-  List<TelemetryPolicy> convert(List<SourceWrapper> sources) {
+  List<TelemetryPolicy> convert(List<SourceWrapper> sources, SourceKind sourceKind) {
     Objects.requireNonNull(sources, "sources cannot be null");
+    Objects.requireNonNull(sourceKind, "sourceKind cannot be null");
     List<TelemetryPolicy> policies = new ArrayList<>();
     for (SourceWrapper source : sources) {
-      TelemetryPolicy policy = convert(source);
+      TelemetryPolicy policy = convert(source, sourceKind);
       if (policy != null) {
         policies.add(policy);
       }
@@ -64,8 +66,9 @@ final class MappedPolicySourceConverter {
   }
 
   @Nullable
-  TelemetryPolicy convert(SourceWrapper source) {
+  TelemetryPolicy convert(SourceWrapper source, SourceKind sourceKind) {
     Objects.requireNonNull(source, "source cannot be null");
+    Objects.requireNonNull(sourceKind, "sourceKind cannot be null");
     String incomingPolicyId = source.getPolicyType();
     if (incomingPolicyId == null || incomingPolicyId.isEmpty()) {
       return null;
@@ -82,7 +85,7 @@ final class MappedPolicySourceConverter {
       if (!policyType.equals(validator.getPolicyType())) {
         continue;
       }
-      TelemetryPolicy policy = validator.validate(normalizedSource);
+      TelemetryPolicy policy = validator.validate(normalizedSource, sourceKind);
       if (policy != null) {
         return policy;
       }

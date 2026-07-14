@@ -248,7 +248,7 @@ public final class OpampPolicyProvider extends AbstractPolicyProvider {
       logger.info("Ignoring invalid OpAMP config entry for key: " + key);
       return;
     }
-    out.addAll(sourceConverter.convert(parsedSources));
+    out.addAll(sourceConverter.convert(parsedSources, SourceKind.OPAMP));
   }
 
   private void stop() {
