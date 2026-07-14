@@ -17,7 +17,7 @@ import io.opentelemetry.opamp.client.request.service.RequestService;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -38,7 +38,7 @@ import opamp.proto.RemoteConfigStatus;
 public final class OpampClientBuilder {
   private final Map<String, AnyValue> identifyingAttributes = new HashMap<>();
   private final Map<String, AnyValue> nonIdentifyingAttributes = new HashMap<>();
-  private final Set<String> customCapabilities = new LinkedHashSet<>();
+  private final Set<String> customCapabilities = new HashSet<>();
   private long capabilities = 0;
   private RequestService service =
       HttpRequestService.create(OkHttpSender.create("http://localhost:4320/v1/opamp"));

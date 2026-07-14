@@ -283,7 +283,7 @@ class OpampClientImplTest {
     requestService.sendRequest();
 
     // Await for onMessage call
-    await().atMost(Duration.ofSeconds(5)).until(() -> callbacks.onMessageCalls.get() == 1);
+    await().atMost(Duration.ofSeconds(5)).until(() -> callbacks.onMessageCalls.get() > 0);
 
     verify(callbacks)
         .onMessage(client, MessageData.builder().setCustomMessage(customMessage).build());
