@@ -127,7 +127,7 @@ public final class PolicyProviderPoller {
   /**
    * Registers an HTTP(S)-backed target that is invoked only after the URL response changes.
    *
-   * <p>The initial response state is captured at registration time. Later poll ticks use
+   * <p>The initial response state is captured on the first poll tick. Later poll ticks use
    * conditional request headers when possible and invoke {@code onModified} only when the response
    * status, validators, or body hash changes.
    *
@@ -470,9 +470,7 @@ public final class PolicyProviderPoller {
     private UrlPollingRegistration(URI url, UrlPollingTarget onModified) {
       this.url = url;
       this.onModified = onModified;
-      UrlPollResult initialResult = readUrl(url, null);
-      this.lastKnownUrlState =
-          new AtomicReference<>(initialResult == null ? null : initialResult.state);
+      this.lastKnownUrlState = new AtomicReference<>();
     }
 
     @Override
@@ -483,7 +481,11 @@ public final class PolicyProviderPoller {
         return;
       }
       UrlState currentUrlState = currentResult.state;
-      if (previousUrlState != null && currentUrlState.equals(previousUrlState)) {
+      if (previousUrlState == null) {
+        lastKnownUrlState.set(currentUrlState);
+        return;
+      }
+      if (currentUrlState.equals(previousUrlState)) {
         return;
       }
       onModified.onModified(url, currentResult.responseBody);

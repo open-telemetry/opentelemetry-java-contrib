@@ -98,7 +98,8 @@ class PolicyProviderPollerTest {
   @Test
   void registerUrlInvokesTargetOnlyWhenResponseChanges() throws Exception {
     AtomicReference<String> responseBody = new AtomicReference<>("trace-sampling=0.5");
-    URI url = startHttpServer(responseBody);
+    AtomicInteger requestCount = new AtomicInteger();
+    URI url = startHttpServer(responseBody, requestCount);
     AtomicInteger pollCount = new AtomicInteger();
     AtomicReference<String> changedBody = new AtomicReference<>();
     PolicyProviderPoller.registerUrl(
@@ -108,8 +109,11 @@ class PolicyProviderPollerTest {
           changedBody.set(new String(body, StandardCharsets.UTF_8));
         });
 
+    assertThat(requestCount.get()).isZero();
+
     PolicyProviderPoller.poll();
 
+    assertThat(requestCount.get()).isEqualTo(1);
     assertThat(pollCount.get()).isZero();
 
     responseBody.set("trace-sampling=0.75");
@@ -142,12 +146,14 @@ class PolicyProviderPollerTest {
     return file;
   }
 
-  private URI startHttpServer(AtomicReference<String> responseBody) throws Exception {
+  private URI startHttpServer(AtomicReference<String> responseBody, AtomicInteger requestCount)
+      throws Exception {
     InetAddress loopback = InetAddress.getLoopbackAddress();
     httpServer = HttpServer.create(new InetSocketAddress(loopback, 0), 0);
     httpServer.createContext(
         "/policies",
         exchange -> {
+          requestCount.incrementAndGet();
           byte[] body = responseBody.get().getBytes(StandardCharsets.UTF_8);
           exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=utf-8");
           exchange.sendResponseHeaders(200, body.length);
