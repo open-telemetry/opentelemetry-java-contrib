@@ -127,7 +127,7 @@ public class GcpAuthAutoConfigurationCustomizerProvider
   }
 
   /**
-   * Lazily initializes and caches the {@link GoogleCredentials} used for authentication. The type
+   * Lazily initializes and caches the {@link OAuth2Credentials} used for authentication. The type
    * of the credentials is determined by the configured {@link
    * ConfigurableOption#GOOGLE_OTEL_AUTH_TOKEN_TYPE}.
    */
