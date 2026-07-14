@@ -61,11 +61,11 @@ MAX_PROMPT_CHARS = 24_000
 VALID_SECTIONS = {
     "breaking",
     "deprecations",
-    "new-javaagent",
-    "new-library",
+    "new-module",
     "enhancements",
     "bug-fixes",
     None,
+}
 }
 
 PROMPT_TEMPLATE = """You are classifying a single PR from the \
