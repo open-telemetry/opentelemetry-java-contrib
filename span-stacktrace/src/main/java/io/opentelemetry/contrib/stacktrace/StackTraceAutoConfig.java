@@ -5,18 +5,16 @@
 
 package io.opentelemetry.contrib.stacktrace;
 
-import static java.util.Collections.singletonMap;
 import static java.util.logging.Level.FINE;
 import static java.util.logging.Level.SEVERE;
 
 import com.google.auto.service.AutoService;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.instrumentation.config.bridge.ConfigPropertiesBackedConfigProvider;
-import io.opentelemetry.instrumentation.config.bridge.ConfigPropertiesBackedDeclarativeConfigProperties;
+import io.opentelemetry.instrumentation.config.bridge.DeclarativeConfigPropertiesDurationUtil;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
-import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -31,10 +29,7 @@ public class StackTraceAutoConfig implements AutoConfigurationCustomizerProvider
 
   private static final Logger log = Logger.getLogger(StackTraceAutoConfig.class.getName());
 
-  static final String PREFIX = "otel.java.experimental.span-stacktrace.";
-  static final String CONFIG_MIN_DURATION = PREFIX + "min.duration";
   private static final Duration CONFIG_MIN_DURATION_DEFAULT = Duration.ofMillis(5);
-  private static final String CONFIG_FILTER = PREFIX + "filter";
 
   @Override
   public void customize(AutoConfigurationCustomizer config) {
@@ -54,15 +49,15 @@ public class StackTraceAutoConfig implements AutoConfigurationCustomizerProvider
 
   static DeclarativeConfigProperties createDeclarativeConfig(ConfigProperties properties) {
     return ConfigPropertiesBackedConfigProvider.builder()
-        .addMapping("min_duration", CONFIG_MIN_DURATION)
-        .addMapping("filter", CONFIG_FILTER)
+        .setAccessPath("", "otel.java.experimental.span-stacktrace.")
         .build(properties)
         .getInstrumentationConfig();
   }
 
   // package-private for testing
   static long getMinDuration(DeclarativeConfigProperties properties) {
-    Duration minDuration = parseDuration(properties, "min_duration");
+    Duration minDuration =
+        DeclarativeConfigPropertiesDurationUtil.parseDuration(properties, "min_duration");
     if (minDuration == null) {
       minDuration = CONFIG_MIN_DURATION_DEFAULT;
     }
@@ -76,23 +71,6 @@ public class StackTraceAutoConfig implements AutoConfigurationCustomizerProvider
           minDurationNanos);
     }
     return minDurationNanos;
-  }
-
-  @Nullable
-  private static Duration parseDuration(DeclarativeConfigProperties properties, String key) {
-    if (properties instanceof ConfigPropertiesBackedDeclarativeConfigProperties) {
-      String rawValue = properties.getString(key);
-      if (rawValue == null || rawValue.isEmpty()) {
-        return null;
-      }
-      return DefaultConfigProperties.createFromMap(singletonMap(key, rawValue)).getDuration(key);
-    }
-
-    Long rawLongValue = properties.getLong(key);
-    if (rawLongValue == null) {
-      return null;
-    }
-    return Duration.ofMillis(rawLongValue);
   }
 
   static Predicate<ReadableSpan> getFilterPredicate(DeclarativeConfigProperties properties) {

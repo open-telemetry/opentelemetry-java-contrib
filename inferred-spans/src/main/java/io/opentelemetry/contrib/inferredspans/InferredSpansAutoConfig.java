@@ -8,6 +8,7 @@ package io.opentelemetry.contrib.inferredspans;
 import static io.opentelemetry.contrib.inferredspans.InferredSpansConfig.ENABLED_OPTION;
 
 import com.google.auto.service.AutoService;
+import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
 import java.util.logging.Logger;
@@ -21,13 +22,14 @@ public class InferredSpansAutoConfig implements AutoConfigurationCustomizerProvi
   public void customize(AutoConfigurationCustomizer config) {
     config.addTracerProviderCustomizer(
         (providerBuilder, properties) -> {
-          if (properties.getBoolean(ENABLED_OPTION, false)) {
+          DeclarativeConfigProperties declarativeProperties =
+              InferredSpansConfig.createDeclarativeConfig(properties);
+          if (declarativeProperties.getBoolean(ENABLED_OPTION, false)) {
             providerBuilder.addSpanProcessor(
-                InferredSpansConfig.createSpanProcessor(
-                    InferredSpansConfig.createDeclarativeConfig(properties)));
+                InferredSpansConfig.createSpanProcessor(declarativeProperties));
           } else {
             log.finest(
-                "Not enabling inferred spans processor because " + ENABLED_OPTION + " is not set");
+                "Not enabling inferred spans processor because otel.inferred.spans.enabled is not set");
           }
           return providerBuilder;
         });
