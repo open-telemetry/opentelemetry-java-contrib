@@ -202,9 +202,11 @@ def is_module_cleanup_commit(subject: str) -> bool:
 # no `/src/main/` in its path by construction and is therefore non-runtime
 # without needing an explicit allow-list.
 _NON_USER_FACING_PREFIXES = (
-    "smoke-tests/",
-    "smoke-tests-otel-starter/",
-    "instrumentation-docs/",
+    "jmx-scraper/test-app/",
+    "jmx-scraper/test-webapp/",
+    "cel-sampler/testapp/",
+    "static-instrumenter/test-app/",
+    "example/",
 )
 _NON_USER_FACING_SUBSTRINGS = ("/testing/", "-testing/")
 
