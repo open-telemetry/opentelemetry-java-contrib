@@ -147,17 +147,25 @@ public class GcpAuthAutoConfigurationCustomizerProvider
   // id_token, the Application Default Credentials are wrapped into IdTokenCredentials which mint
   // Google-signed ID tokens for the configured audience.
   private static OAuth2Credentials createCredentials(ConfigProperties configProperties) {
+    // Resolve and validate the configuration before any IO, so a misconfiguration (unsupported
+    // token type or missing audience) is reported deterministically instead of being masked by an
+    // Application Default Credentials retrieval failure.
+    boolean useIdToken = isIdTokenType(configProperties);
+    String audience =
+        useIdToken
+            ? ConfigurableOption.GOOGLE_OTEL_AUTH_ID_TOKEN_AUDIENCE.getConfiguredValue(
+                configProperties)
+            : null;
+
     GoogleCredentials applicationDefaultCredentials;
     try {
       applicationDefaultCredentials = GoogleCredentials.getApplicationDefault();
     } catch (IOException e) {
       throw new GoogleAuthException(Reason.FAILED_ADC_RETRIEVAL, e);
     }
-    if (!isIdTokenType(configProperties)) {
+    if (!useIdToken) {
       return applicationDefaultCredentials;
     }
-    String audience =
-        ConfigurableOption.GOOGLE_OTEL_AUTH_ID_TOKEN_AUDIENCE.getConfiguredValue(configProperties);
     if (!(applicationDefaultCredentials instanceof IdTokenProvider)) {
       throw new ConfigurationException(
           String.format(
