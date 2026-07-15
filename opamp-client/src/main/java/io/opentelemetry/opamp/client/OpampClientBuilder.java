@@ -397,8 +397,9 @@ public final class OpampClientBuilder {
 
   /**
    * Adds a custom capability supported by this Client for messages received from the Server. The
-   * configured capabilities are reported in {@code AgentToServer.custom_capabilities}.
-   * Note that incoming custom messages are not filtered, it is the user's responsibility to check the capability
+   * configured capabilities are reported in {@code AgentToServer.custom_capabilities}. Note that
+   * incoming custom messages are not filtered, it is the user's responsibility to check the
+   * capability
    *
    * @param capability The reverse FQDN identifying the custom capability.
    * @return this
