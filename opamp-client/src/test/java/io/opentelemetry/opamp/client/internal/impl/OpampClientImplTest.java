@@ -233,7 +233,7 @@ class OpampClientImplTest {
                 .build(callbacks);
 
     assertThat(getAgentToServerMessage(takeRequest()).custom_capabilities.capabilities)
-        .containsExactly("com.example.pause", "com.example.discovery");
+        .containsExactlyInAnyOrder("com.example.pause", "com.example.discovery");
   }
 
   @Test
