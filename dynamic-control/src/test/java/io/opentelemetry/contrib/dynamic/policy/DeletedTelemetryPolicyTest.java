@@ -16,7 +16,8 @@ class DeletedTelemetryPolicyTest {
   void storesIdentityTypeAndDeletedState() {
     TelemetryPolicyIdentity identity =
         new TelemetryPolicyIdentity("trace-sampling", "Trace sampling rate");
-    DeletedTelemetryPolicy policy = new DeletedTelemetryPolicy(identity, "trace-sampling");
+    DeletedTelemetryPolicy policy =
+        new DeletedTelemetryPolicy(identity, "trace-sampling", SourceKind.CUSTOM);
 
     assertThat(policy.getIdentity()).isEqualTo(identity);
     assertThat(policy.getType()).isEqualTo("trace-sampling");
