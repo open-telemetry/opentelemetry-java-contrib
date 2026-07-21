@@ -36,6 +36,7 @@ import java.util.stream.Stream;
  *
  * <p>Empty lines and lines starting with <code>#</code> are ignored.
  */
+// TODO this needs changing to a full provider implementation or deleting
 final class LinePerPolicyFileProvider implements PolicyProvider {
   private static final Logger logger = Logger.getLogger(LinePerPolicyFileProvider.class.getName());
   private final Path file;

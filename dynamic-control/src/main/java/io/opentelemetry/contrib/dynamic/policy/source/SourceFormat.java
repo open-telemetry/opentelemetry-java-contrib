@@ -15,6 +15,7 @@ import javax.annotation.Nullable;
 
 /** Supported source formats and their parser dispatch. */
 public enum SourceFormat {
+  // TODO keyvalue is not fully implemented, ignore mappedPolicyIds until done
   KEYVALUE("keyvalue", (source, mappedPolicyIds) -> KeyValueSourceWrapper.parse(source)),
   JSONKEYVALUE("jsonkeyvalue", JsonSourceWrapper::parse);
 
