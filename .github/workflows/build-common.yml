@@ -129,11 +129,12 @@ jobs:
         run: >
           ./gradlew check -x spotlessCheck
           "-PtestJavaVersion=${{ matrix.test-java-version }}"
-          "-Porg.gradle.java.installations.paths=${{ steps.setup-java-test.outputs.path }}"
+          "-Porg.gradle.java.installations.paths=${TEST_JAVA_PATH}"
           "-Porg.gradle.java.installations.auto-download=false"
           "-PmaxTestRetries=${{ inputs.max-test-retries }}"
           ${{ inputs.no-build-cache && '--no-build-cache' || '' }}
         env:
+          TEST_JAVA_PATH: ${{ steps.setup-java-test.outputs.path }}
           DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           GITHUB_TOKEN: ${{ github.token }}
 

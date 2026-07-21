@@ -215,6 +215,8 @@ jobs:
       # add change log sync (if any) into this PR since the apidiff update
       # is required before any other PR can be merged anyway
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
 
       - name: Copy change log section from release branch
         env:
@@ -226,6 +228,7 @@ jobs:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           ref: main
+          persist-credentials: false
 
       - name: Merge change log to main
         env:
