@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import javax.annotation.Nullable;
 
 /**
@@ -58,45 +59,54 @@ public final class JsonSourceWrapper implements SourceWrapper {
    *     wrappers if the source is a valid single-policy object or non-empty array of such objects;
    *     or {@code null} if the text is not valid JSON or the value shape is not supported for
    *     {@link SourceFormat#JSONKEYVALUE}.
-   * @throws NullPointerException if source is null
+   * @param mappedPolicyIds configured policy IDs accepted as JSON object keys
+   * @throws NullPointerException if source or mappedPolicyIds is null
    */
   @Nullable
-  public static List<SourceWrapper> parse(String source) {
+  public static List<SourceWrapper> parse(String source, Set<String> mappedPolicyIds) {
     Objects.requireNonNull(source, "source cannot be null");
+    Objects.requireNonNull(mappedPolicyIds, "mappedPolicyIds cannot be null");
     try {
       JsonNode parsed = MAPPER.readTree(source);
-      if (!isSupportedJsonShape(parsed)) {
+      if (!isSupportedJsonShape(parsed, mappedPolicyIds)) {
         return null;
       }
-      if (parsed.isObject()) {
-        return Collections.singletonList(new JsonSourceWrapper(parsed));
-      }
-      List<SourceWrapper> wrappers = new ArrayList<>();
-      for (JsonNode element : parsed) {
-        wrappers.add(new JsonSourceWrapper(element));
-      }
-      return Collections.unmodifiableList(wrappers);
+      return wrapSupportedJson(parsed);
     } catch (JsonProcessingException e) {
+      // the caller is responsible for logging if the source is malformed
       return null;
     }
   }
 
-  private static boolean isSupportedJsonShape(JsonNode node) {
+  private static List<SourceWrapper> wrapSupportedJson(JsonNode parsed) {
+    if (parsed.isObject()) {
+      return Collections.singletonList(new JsonSourceWrapper(parsed));
+    }
+    List<SourceWrapper> wrappers = new ArrayList<>();
+    for (JsonNode element : parsed) {
+      wrappers.add(new JsonSourceWrapper(element));
+    }
+    return Collections.unmodifiableList(wrappers);
+  }
+
+  private static boolean isSupportedJsonShape(JsonNode node, Set<String> mappedPolicyIds) {
     if (node.isObject()) {
-      return isSinglePolicyObject(node);
+      return isMappedSinglePolicyObject(node, mappedPolicyIds);
     }
     if (!node.isArray()) {
       return false;
     }
     for (JsonNode element : node) {
-      if (!isSinglePolicyObject(element)) {
+      if (!isMappedSinglePolicyObject(element, mappedPolicyIds)) {
         return false;
       }
     }
     return true;
   }
 
-  private static boolean isSinglePolicyObject(JsonNode node) {
-    return node.isObject() && node.size() == 1;
+  private static boolean isMappedSinglePolicyObject(JsonNode node, Set<String> mappedPolicyIds) {
+    return node.isObject()
+        && node.size() == 1
+        && mappedPolicyIds.contains(node.fieldNames().next());
   }
 }

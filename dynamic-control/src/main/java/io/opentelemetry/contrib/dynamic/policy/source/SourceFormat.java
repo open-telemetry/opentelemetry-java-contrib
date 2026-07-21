@@ -9,12 +9,13 @@ import com.google.errorprone.annotations.Immutable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /** Supported source formats and their parser dispatch. */
 public enum SourceFormat {
-  KEYVALUE("keyvalue", KeyValueSourceWrapper::parse),
+  KEYVALUE("keyvalue", (source, mappedPolicyIds) -> KeyValueSourceWrapper.parse(source)),
   JSONKEYVALUE("jsonkeyvalue", JsonSourceWrapper::parse);
 
   private final String configValue;
@@ -52,23 +53,27 @@ public enum SourceFormat {
   }
 
   /**
-   * Parses source text into normalized wrappers for this format.
+   * Parses source text into normalized wrappers, using configured policy mappings when supported by
+   * the format.
    *
+   * @param source source text to parse
+   * @param mappedPolicyIds configured policy IDs accepted by the parser
    * @return an empty list if the source is valid but contains no policies; a non-empty list of
    *     wrappers if one or more policies were parsed successfully; or {@code null} if the source is
-   *     malformed or does not conform to the expected shape for this format.
-   * @throws NullPointerException if source is null
+   *     malformed or does not conform to the expected shape for this format
+   * @throws NullPointerException if source or mappedPolicyIds is null
    */
   @Nullable
-  public List<SourceWrapper> parse(String source) {
+  public List<SourceWrapper> parse(String source, Set<String> mappedPolicyIds) {
     Objects.requireNonNull(source, "source cannot be null");
-    return parser.parse(source);
+    Objects.requireNonNull(mappedPolicyIds, "mappedPolicyIds cannot be null");
+    return parser.parse(source, mappedPolicyIds);
   }
 
   @Immutable
   @FunctionalInterface
   private interface SourceParser {
     @Nullable
-    List<SourceWrapper> parse(String source);
+    List<SourceWrapper> parse(String source, Set<String> mappedPolicyIds);
   }
 }

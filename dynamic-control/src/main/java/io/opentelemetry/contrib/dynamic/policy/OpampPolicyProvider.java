@@ -5,11 +5,7 @@
 
 package io.opentelemetry.contrib.dynamic.policy;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.opentelemetry.contrib.dynamic.policy.registry.PolicySourceMappingConfig;
-import io.opentelemetry.contrib.dynamic.policy.source.JsonSourceWrapper;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceFormat;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceWrapper;
@@ -29,7 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -54,7 +49,6 @@ import opamp.proto.ServerErrorResponse;
  */
 public final class OpampPolicyProvider extends AbstractPolicyProvider {
   private static final Logger logger = Logger.getLogger(OpampPolicyProvider.class.getName());
-  private static final ObjectMapper MAPPER = new ObjectMapper();
 
   private static final String OPAMP_ENDPOINT = "otel.opamp.service.url";
   private static final String OPAMP_HEADERS = "otel.experimental.opamp.headers";
@@ -240,10 +234,8 @@ public final class OpampPolicyProvider extends AbstractPolicyProvider {
 
   private void parsePolicyText(String key, String policyText, List<TelemetryPolicy> out) {
     logger.info("Received OpAMP policy payload for key '" + key + "': " + policyText);
-    List<SourceWrapper> parsedSources = format.parse(policyText);
-    if (parsedSources == null && format == SourceFormat.JSONKEYVALUE) {
-      parsedSources = parseMappedJsonObject(policyText, sourceConverter.getMappedPolicyIds());
-    }
+    List<SourceWrapper> parsedSources =
+        format.parse(policyText, sourceConverter.getMappedPolicyIds());
     if (parsedSources == null) {
       logger.info("Ignoring invalid OpAMP config entry for key: " + key);
       return;
@@ -374,30 +366,6 @@ public final class OpampPolicyProvider extends AbstractPolicyProvider {
       trimmed += "/v1/opamp";
     }
     return trimmed;
-  }
-
-  @Nullable
-  private static List<SourceWrapper> parseMappedJsonObject(
-      String policyText, Set<String> allowedKeys) {
-    try {
-      JsonNode root = MAPPER.readTree(policyText);
-      if (!root.isObject()) {
-        return null;
-      }
-      List<SourceWrapper> wrappers = new ArrayList<>();
-      for (String key : allowedKeys) {
-        JsonNode value = root.get(key);
-        if (value == null) {
-          continue;
-        }
-        ObjectNode singlePolicy = MAPPER.createObjectNode();
-        singlePolicy.set(key, value);
-        wrappers.add(new JsonSourceWrapper(singlePolicy));
-      }
-      return wrappers;
-    } catch (IOException e) {
-      return null;
-    }
   }
 
   private static RemoteConfigStatus buildStatus(
