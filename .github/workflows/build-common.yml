@@ -126,6 +126,7 @@ jobs:
           cache-read-only: ${{ inputs.cache-read-only }}
 
       - name: Test
+        shell: bash
         run: >
           ./gradlew check -x spotlessCheck
           "-PtestJavaVersion=${{ matrix.test-java-version }}"
