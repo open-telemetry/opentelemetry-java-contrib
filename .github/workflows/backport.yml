@@ -45,8 +45,8 @@ jobs:
           OTELBOT_TOKEN: ${{ steps.otelbot-token.outputs.token }}
         run: |
           gh auth setup-git
-          commit=$(GH_TOKEN="$OTELBOT_TOKEN" gh pr view $NUMBER --json mergeCommit --jq .mergeCommit.oid)
-          title=$(GH_TOKEN="$OTELBOT_TOKEN" gh pr view $NUMBER --json title --jq .title)
+          commit=$(GH_TOKEN="$OTELBOT_TOKEN" gh pr view "$NUMBER" --json mergeCommit --jq .mergeCommit.oid)
+          title=$(GH_TOKEN="$OTELBOT_TOKEN" gh pr view "$NUMBER" --json title --jq .title)
 
           branch="otelbot/backport-${NUMBER}-to-${GITHUB_REF_NAME//\//-}"
 
