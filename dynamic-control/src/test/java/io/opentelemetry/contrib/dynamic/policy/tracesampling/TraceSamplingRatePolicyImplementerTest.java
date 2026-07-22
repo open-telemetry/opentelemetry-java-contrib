@@ -34,7 +34,9 @@ class TraceSamplingRatePolicyImplementerTest {
     implementer.onPoliciesChanged(
         singletonList(
             new DeletedTelemetryPolicy(
-                TraceSamplingRatePolicy.DEFAULT_IDENTITY, TraceSamplingRatePolicy.POLICY_TYPE)));
+                TraceSamplingRatePolicy.DEFAULT_IDENTITY,
+                TraceSamplingRatePolicy.POLICY_TYPE,
+                SourceKind.CUSTOM)));
 
     assertThat(decisionFor(delegatingSampler)).isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
   }
@@ -45,7 +47,8 @@ class TraceSamplingRatePolicyImplementerTest {
     TraceSamplingRatePolicyImplementer implementer =
         new TraceSamplingRatePolicyImplementer(delegatingSampler);
 
-    implementer.onPoliciesChanged(singletonList(new TraceSamplingRatePolicy(1.0)));
+    implementer.onPoliciesChanged(
+        singletonList(new TraceSamplingRatePolicy(1.0, SourceKind.CUSTOM)));
 
     assertThat(decisionFor(delegatingSampler)).isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
   }
@@ -57,8 +60,10 @@ class TraceSamplingRatePolicyImplementerTest {
     TraceSamplingRatePolicyImplementer implementer =
         new TraceSamplingRatePolicyImplementer(delegatingSampler);
 
-    implementer.onPoliciesChanged(singletonList(new TraceSamplingRatePolicy(1.0)));
-    implementer.onPoliciesChanged(singletonList(new TraceSamplingRatePolicy(1.0)));
+    implementer.onPoliciesChanged(
+        singletonList(new TraceSamplingRatePolicy(1.0, SourceKind.CUSTOM)));
+    implementer.onPoliciesChanged(
+        singletonList(new TraceSamplingRatePolicy(1.0, SourceKind.CUSTOM)));
 
     assertThat(delegatingSampler.changedProbabilityCount).isEqualTo(1);
   }
@@ -81,7 +86,9 @@ class TraceSamplingRatePolicyImplementerTest {
         new TraceSamplingRatePolicyImplementer(delegatingSampler);
 
     List<TelemetryPolicy> policies =
-        Arrays.asList(new TraceSamplingRatePolicy(0.0), new TraceSamplingRatePolicy(1.0));
+        Arrays.asList(
+            new TraceSamplingRatePolicy(0.0, SourceKind.CUSTOM),
+            new TraceSamplingRatePolicy(1.0, SourceKind.CUSTOM));
 
     implementer.onPoliciesChanged(policies);
 

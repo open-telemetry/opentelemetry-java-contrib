@@ -20,7 +20,7 @@ class TraceSamplingRatePolicyTest {
 
   @Test
   void constructorStoresProbabilityAndType() {
-    TraceSamplingRatePolicy policy = new TraceSamplingRatePolicy(0.25);
+    TraceSamplingRatePolicy policy = new TraceSamplingRatePolicy(0.25, SourceKind.CUSTOM);
 
     assertThat(policy.getIdentity()).isEqualTo(TraceSamplingRatePolicy.DEFAULT_IDENTITY);
     assertThat(policy.getProbability()).isEqualTo(0.25);
@@ -39,8 +39,8 @@ class TraceSamplingRatePolicyTest {
 
   @Test
   void constructorNormalizesNegativeZeroToPositiveZero() {
-    TraceSamplingRatePolicy negativeZero = new TraceSamplingRatePolicy(-0.0);
-    TraceSamplingRatePolicy positiveZero = new TraceSamplingRatePolicy(0.0);
+    TraceSamplingRatePolicy negativeZero = new TraceSamplingRatePolicy(-0.0, SourceKind.CUSTOM);
+    TraceSamplingRatePolicy positiveZero = new TraceSamplingRatePolicy(0.0, SourceKind.CUSTOM);
 
     assertThat(negativeZero.getProbability()).isEqualTo(0.0);
     assertThat(Double.doubleToRawLongBits(negativeZero.getProbability()))
@@ -50,13 +50,13 @@ class TraceSamplingRatePolicyTest {
 
   @Test
   void constructorRejectsOutOfRangeOrNaNProbabilities() {
-    assertThatThrownBy(() -> new TraceSamplingRatePolicy(Double.NaN))
+    assertThatThrownBy(() -> new TraceSamplingRatePolicy(Double.NaN, SourceKind.CUSTOM))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("probability must be within [0.0, 1.0]");
-    assertThatThrownBy(() -> new TraceSamplingRatePolicy(-0.001))
+    assertThatThrownBy(() -> new TraceSamplingRatePolicy(-0.001, SourceKind.CUSTOM))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("probability must be within [0.0, 1.0]");
-    assertThatThrownBy(() -> new TraceSamplingRatePolicy(1.001))
+    assertThatThrownBy(() -> new TraceSamplingRatePolicy(1.001, SourceKind.CUSTOM))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("probability must be within [0.0, 1.0]");
   }

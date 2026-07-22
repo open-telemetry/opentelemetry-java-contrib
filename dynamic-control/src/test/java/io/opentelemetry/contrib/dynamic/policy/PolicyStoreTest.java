@@ -26,7 +26,7 @@ class PolicyStoreTest {
   @Test
   void updatePoliciesReturnsTrueOnFirstSet() {
     PolicyStore store = new PolicyStore();
-    List<TelemetryPolicy> policies = singletonList(new TraceSamplingRatePolicy(0.5));
+    List<TelemetryPolicy> policies = singletonList(traceSampling(0.5));
 
     assertThat(store.updatePolicies(policies)).isTrue();
     assertThat(store.getPolicies()).isEqualTo(policies);
@@ -35,15 +35,15 @@ class PolicyStoreTest {
   @Test
   void updatePoliciesAcceptsRepeatedEquivalentSnapshot() {
     PolicyStore store = new PolicyStore();
-    assertThat(store.updatePolicies(singletonList(new TraceSamplingRatePolicy(0.5)))).isTrue();
-    assertThat(store.updatePolicies(singletonList(new TraceSamplingRatePolicy(0.5)))).isTrue();
+    assertThat(store.updatePolicies(singletonList(traceSampling(0.5)))).isTrue();
+    assertThat(store.updatePolicies(singletonList(traceSampling(0.5)))).isTrue();
   }
 
   @Test
   void updatePoliciesReturnsTrueWhenProbabilityChanges() {
     PolicyStore store = new PolicyStore();
-    assertThat(store.updatePolicies(singletonList(new TraceSamplingRatePolicy(0.25)))).isTrue();
-    assertThat(store.updatePolicies(singletonList(new TraceSamplingRatePolicy(0.75)))).isTrue();
+    assertThat(store.updatePolicies(singletonList(traceSampling(0.25)))).isTrue();
+    assertThat(store.updatePolicies(singletonList(traceSampling(0.75)))).isTrue();
     assertThat(store.getPolicies()).hasSize(1);
     assertThat(((TraceSamplingRatePolicy) store.getPolicies().get(0)).getProbability())
         .isEqualTo(0.75);
@@ -131,7 +131,7 @@ class PolicyStoreTest {
   @Test
   void registerImplementerReceivesCurrentRelevantPolicies() {
     PolicyStore store = new PolicyStore();
-    store.updatePolicies(Arrays.asList(new TraceSamplingRatePolicy(0.5), unrelatedPolicy()));
+    store.updatePolicies(Arrays.asList(traceSampling(0.5), unrelatedPolicy()));
 
     PolicyImplementer implementer = mock(PolicyImplementer.class);
     PolicyValidator validator = mock(PolicyValidator.class);
@@ -151,7 +151,7 @@ class PolicyStoreTest {
 
     store.registerImplementer(implementer);
     clearInvocations(implementer);
-    store.updatePolicies(Arrays.asList(unrelatedPolicy(), new TraceSamplingRatePolicy(0.25)));
+    store.updatePolicies(Arrays.asList(unrelatedPolicy(), traceSampling(0.25)));
 
     verify(implementer)
         .onPoliciesChanged(argThat(policies -> containsTraceSamplingProbability(policies, 0.25)));
@@ -161,7 +161,7 @@ class PolicyStoreTest {
   void updatePoliciesNotifiesDeletedPolicyWhenPolicyDisappears() {
     PolicyStore store = new PolicyStore();
     PolicyImplementer implementer = traceSamplingImplementer();
-    TraceSamplingRatePolicy removedPolicy = new TraceSamplingRatePolicy(0.5);
+    TraceSamplingRatePolicy removedPolicy = traceSampling(0.5);
     store.updatePolicies(singletonList(removedPolicy));
     store.registerImplementer(implementer);
     clearInvocations(implementer);
@@ -186,8 +186,8 @@ class PolicyStoreTest {
   void updatePoliciesDoesNotNotifyDeletedPolicyWhenPolicyValueChangesWithSameIdentity() {
     PolicyStore store = new PolicyStore();
     PolicyImplementer implementer = traceSamplingImplementer();
-    TraceSamplingRatePolicy updatedPolicy = new TraceSamplingRatePolicy(0.75);
-    store.updatePolicies(singletonList(new TraceSamplingRatePolicy(0.5)));
+    TraceSamplingRatePolicy updatedPolicy = traceSampling(0.75);
+    store.updatePolicies(singletonList(traceSampling(0.5)));
     store.registerImplementer(implementer);
     clearInvocations(implementer);
 
@@ -227,7 +227,7 @@ class PolicyStoreTest {
     PolicyStore store = new PolicyStore();
     PolicyImplementer failingImplementer = traceSamplingImplementer();
     PolicyImplementer nextImplementer = traceSamplingImplementer();
-    List<TelemetryPolicy> updatedPolicies = singletonList(new TraceSamplingRatePolicy(0.25));
+    List<TelemetryPolicy> updatedPolicies = singletonList(traceSampling(0.25));
     doThrow(new IllegalStateException("boom"))
         .when(failingImplementer)
         .onPoliciesChanged(updatedPolicies);
@@ -246,7 +246,7 @@ class PolicyStoreTest {
   @Test
   void registerImplementerContinuesAfterPreviousImplementerThrows() {
     PolicyStore store = new PolicyStore();
-    List<TelemetryPolicy> currentPolicies = singletonList(new TraceSamplingRatePolicy(0.5));
+    List<TelemetryPolicy> currentPolicies = singletonList(traceSampling(0.5));
     assertThat(store.updatePolicies(currentPolicies)).isTrue();
 
     PolicyImplementer failingImplementer = traceSamplingImplementer();
@@ -264,6 +264,10 @@ class PolicyStoreTest {
 
   private static PolicyImplementer traceSamplingImplementer() {
     return implementerFor(TraceSamplingRatePolicy.POLICY_TYPE);
+  }
+
+  private static TraceSamplingRatePolicy traceSampling(double probability) {
+    return new TraceSamplingRatePolicy(probability, SourceKind.CUSTOM);
   }
 
   private static PolicyImplementer implementerFor(String policyType) {
