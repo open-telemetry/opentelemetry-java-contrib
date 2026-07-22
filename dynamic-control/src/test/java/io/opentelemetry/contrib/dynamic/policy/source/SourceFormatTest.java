@@ -62,9 +62,9 @@ class SourceFormatTest {
   }
 
   @Test
-  void parseRejectsJsonObjectWithUnmappedPolicyId() {
+  void parseSkipsJsonObjectWithUnmappedPolicyId() {
     assertThat(SourceFormat.JSONKEYVALUE.parse("{\"unmapped\": 0.5}", singleton("sampling_rate")))
-        .isNull();
+        .isEmpty();
   }
 
   @Test
@@ -86,12 +86,15 @@ class SourceFormatTest {
   @Test
   void parseReturnsNullForInvalidInput() {
     assertThat(SourceFormat.JSONKEYVALUE.parse("{invalid-json", emptySet())).isNull();
-    assertThat(SourceFormat.JSONKEYVALUE.parse("{}", emptySet())).isNull();
-    assertThat(SourceFormat.JSONKEYVALUE.parse("{\"a\": 1, \"b\": 2}", singleton("a"))).isNull();
+    assertThat(SourceFormat.JSONKEYVALUE.parse("{}", emptySet())).isEmpty();
+    assertThat(SourceFormat.JSONKEYVALUE.parse("{\"a\": 1, \"b\": 2}", singleton("a")))
+        .extracting(SourceWrapper::getPolicyType)
+        .containsExactly("a");
     assertThat(
             SourceFormat.JSONKEYVALUE.parse(
                 "[{\"trace-sampling\": 0.5}, {}]", singleton("trace-sampling")))
-        .isNull();
+        .extracting(SourceWrapper::getPolicyType)
+        .containsExactly("trace-sampling");
     assertThat(SourceFormat.KEYVALUE.parse("not-key-value", emptySet())).isNull();
   }
 

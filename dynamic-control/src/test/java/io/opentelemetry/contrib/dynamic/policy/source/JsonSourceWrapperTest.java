@@ -32,6 +32,17 @@ class JsonSourceWrapperTest {
   }
 
   @Test
+  void parseSupportsMultiPolicyObject() {
+    List<SourceWrapper> parsed =
+        JsonSourceWrapper.parse(
+            "{\"trace-sampling\": 0.5, \"other-policy\": true}", MAPPED_POLICY_IDS);
+
+    assertThat(parsed)
+        .extracting(SourceWrapper::getPolicyType)
+        .containsExactly("trace-sampling", "other-policy");
+  }
+
+  @Test
   void parseSupportsArrayOfObjects() {
     List<SourceWrapper> parsed =
         JsonSourceWrapper.parse(
@@ -65,19 +76,28 @@ class JsonSourceWrapperTest {
 
   @Test
   void parseRejectsUnsupportedJsonShapes() {
-    assertThat(JsonSourceWrapper.parse("{}", MAPPED_POLICY_IDS)).isNull();
-    assertThat(JsonSourceWrapper.parse("{\"a\": 1, \"b\": 2}", MAPPED_POLICY_IDS)).isNull();
-    assertThat(JsonSourceWrapper.parse("[1, 2, 3]", MAPPED_POLICY_IDS)).isNull();
+    assertThat(JsonSourceWrapper.parse("{}", MAPPED_POLICY_IDS)).isEmpty();
+    assertThat(JsonSourceWrapper.parse("{\"a\": 1, \"b\": 2}", MAPPED_POLICY_IDS)).isEmpty();
+    assertThat(JsonSourceWrapper.parse("[1, 2, 3]", MAPPED_POLICY_IDS)).isEmpty();
     assertThat(JsonSourceWrapper.parse("[{\"trace-sampling\": 0.5}, {}]", MAPPED_POLICY_IDS))
-        .isNull();
-    assertThat(JsonSourceWrapper.parse("[{\"a\": 1, \"b\": 2}]", MAPPED_POLICY_IDS)).isNull();
+        .extracting(SourceWrapper::getPolicyType)
+        .containsExactly("trace-sampling");
+    assertThat(
+            JsonSourceWrapper.parse(
+                "[{\"trace-sampling\": 1, \"other-policy\": 2}]", MAPPED_POLICY_IDS))
+        .isEmpty();
     assertThat(JsonSourceWrapper.parse("\"text\"", MAPPED_POLICY_IDS)).isNull();
     assertThat(JsonSourceWrapper.parse("{invalid-json", MAPPED_POLICY_IDS)).isNull();
   }
 
   @Test
-  void parseRejectsUnmappedPolicyId() {
-    assertThat(JsonSourceWrapper.parse("{\"unmapped\": 1}", MAPPED_POLICY_IDS)).isNull();
+  void parseSkipsUnmappedPolicyIds() {
+    assertThat(JsonSourceWrapper.parse("{\"unmapped\": 1}", MAPPED_POLICY_IDS)).isEmpty();
+    assertThat(
+            JsonSourceWrapper.parse(
+                "{\"trace-sampling\": 0.5, \"unmapped\": 1}", MAPPED_POLICY_IDS))
+        .extracting(SourceWrapper::getPolicyType)
+        .containsExactly("trace-sampling");
   }
 
   @Test
