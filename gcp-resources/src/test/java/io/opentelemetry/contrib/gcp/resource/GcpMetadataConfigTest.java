@@ -147,4 +147,18 @@ class GcpMetadataConfigTest {
     String result = new GcpMetadataConfig("http://localhost:8090/").getProjectId();
     assertThat(result).hasSize(4096).isEqualTo(new String(new char[4096]).replace('\0', 'x'));
   }
+
+  @Test
+  void testTrailingNewlineIsStripped() {
+    TestUtils.stubEndpoint("/project/project-id", "my-project\n");
+    assertThat(new GcpMetadataConfig("http://localhost:8090/").getProjectId())
+        .isEqualTo("my-project");
+  }
+
+  @Test
+  void testTrailingCrlfIsStripped() {
+    TestUtils.stubEndpoint("/project/project-id", "my-project\r\n");
+    assertThat(new GcpMetadataConfig("http://localhost:8090/").getProjectId())
+        .isEqualTo("my-project");
+  }
 }
