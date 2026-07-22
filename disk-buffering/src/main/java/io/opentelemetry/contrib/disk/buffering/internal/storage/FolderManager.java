@@ -15,13 +15,16 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,6 +34,7 @@ public final class FolderManager implements Closeable {
   private final FileStorageConfiguration configuration;
   private final Logger logger = Logger.getLogger(FolderManager.class.getName());
   private static final Pattern NUMBER_PATTERN = Pattern.compile("\\d+");
+  private static final String STAGING_SUFFIX = ".tmp";
   @Nullable private ReadableFile currentReadableFile;
   @Nullable private WritableFile currentWritableFile;
 
@@ -44,13 +48,51 @@ public final class FolderManager implements Closeable {
         throw new IllegalStateException("Could not create dir: " + destinationDir);
       }
     }
-    return new FolderManager(destinationDir, configuration, clock);
+    FolderManager folderManager = new FolderManager(destinationDir, configuration, clock);
+    folderManager.recoverOrphanTempFiles();
+    return folderManager;
   }
 
-  public FolderManager(File folder, FileStorageConfiguration configuration, Clock clock) {
+  FolderManager(File folder, FileStorageConfiguration configuration, Clock clock) {
     this.folder = folder;
     this.configuration = configuration;
     this.clock = clock;
+  }
+
+  private void recoverOrphanTempFiles() {
+    Optional.ofNullable(folder.listFiles())
+        .map(Arrays::stream)
+        .orElseGet(Stream::empty)
+        .filter(File::isFile)
+        .filter(file -> file.getName().endsWith(STAGING_SUFFIX))
+        .filter(file -> NUMBER_PATTERN.matcher(targetNameOf(file)).matches())
+        .filter(this::discardIfAlreadyPromoted)
+        .forEach(this::promoteOrphanTempFile);
+  }
+
+  private boolean discardIfAlreadyPromoted(File staging) {
+    if (!new File(folder, targetNameOf(staging)).exists()) {
+      return true;
+    }
+    if (!staging.delete()) {
+      logger.warning("Could not delete duplicate orphan temp file: '" + staging.getName() + "'");
+    }
+    return false;
+  }
+
+  private void promoteOrphanTempFile(File staging) {
+    String name = staging.getName();
+    File target = new File(folder, targetNameOf(staging));
+    if (staging.renameTo(target)) {
+      logger.fine("Recovered orphan temp file: '" + name + "' -> '" + target.getName() + "'");
+    } else {
+      logger.warning("Could not promote orphan temp file: '" + name + "'");
+    }
+  }
+
+  private static String targetNameOf(File staging) {
+    String name = staging.getName();
+    return name.substring(0, name.length() - STAGING_SUFFIX.length());
   }
 
   static class CacheFile {
@@ -77,12 +119,32 @@ public final class FolderManager implements Closeable {
       throws IOException {
     currentReadableFile = null;
     CacheFile selectedFile = selectReadableFile(listCacheFiles(excludeFiles));
+    if (selectedFile == null) {
+      if (closeFileIfExpired()) {
+        selectedFile = selectReadableFile(listCacheFiles(excludeFiles));
+      }
+    }
     if (selectedFile != null) {
       currentReadableFile =
           new ReadableFile(selectedFile.file, selectedFile.createdTimeMillis, clock, configuration);
       return currentReadableFile;
     }
     return null;
+  }
+
+  /*
+   * If the current writable file has expired, close it and return true.
+   * This allows to have a readable file without waiting for the next write to trigger the check.
+   */
+  private boolean closeFileIfExpired() throws IOException {
+    if (currentWritableFile == null || currentWritableFile.isClosed()) {
+      return false;
+    }
+    if (!currentWritableFile.hasExpired()) {
+      return false;
+    }
+    currentWritableFile.close();
+    return true;
   }
 
   @NotNull
@@ -95,8 +157,10 @@ public final class FolderManager implements Closeable {
         removeOldestFileIfSpaceIsNeeded(cacheFiles);
       }
     }
-    File file = new File(folder, String.valueOf(systemCurrentTimeMillis));
-    currentWritableFile = new WritableFile(file, systemCurrentTimeMillis, configuration, clock);
+    File destination = new File(folder, String.valueOf(systemCurrentTimeMillis));
+    File staging = new File(folder, destination.getName() + STAGING_SUFFIX);
+    currentWritableFile =
+        new WritableFile(destination, staging, systemCurrentTimeMillis, configuration, clock);
     return currentWritableFile;
   }
 

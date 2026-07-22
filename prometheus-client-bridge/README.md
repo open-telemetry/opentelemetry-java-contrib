@@ -1,6 +1,6 @@
 # Prometheus client bridge
 
-[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-prometheus-client-bridge/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-prometheus-client-bridge)
+[![Maven](https://img.shields.io/maven-central/v/io.opentelemetry.contrib/opentelemetry-prometheus-client-bridge?label=Maven&color=orange)](https://central.sonatype.com/artifact/io.opentelemetry.contrib/opentelemetry-prometheus-client-bridge)
 
 This module can be used to bridge OpenTelemetry metrics into the `prometheus-simpleclient` library.
 

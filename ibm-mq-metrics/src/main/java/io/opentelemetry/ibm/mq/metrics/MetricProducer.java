@@ -375,7 +375,7 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
             this.instrumentationScopeInfo,
             "ibm.mq.oldest.msg.age",
             "Queue message oldest age",
-            "microseconds",
+            "us",
             MetricDataType.LONG_GAUGE,
             GaugeData.createLongGaugeData(
                 Collections.singletonList(
@@ -555,7 +555,7 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
             this.instrumentationScopeInfo,
             "ibm.mq.onqtime.short_period",
             "Amount of time, in microseconds, that a message spent on the queue, over a short period",
-            "microseconds",
+            "us",
             MetricDataType.LONG_GAUGE,
             GaugeData.createLongGaugeData(
                 Collections.singletonList(
@@ -570,7 +570,7 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
             this.instrumentationScopeInfo,
             "ibm.mq.onqtime.long_period",
             "Amount of time, in microseconds, that a message spent on the queue, over a longer period",
-            "microseconds",
+            "us",
             MetricDataType.LONG_GAUGE,
             GaugeData.createLongGaugeData(
                 Collections.singletonList(
@@ -661,6 +661,21 @@ public final class MetricProducer implements io.opentelemetry.sdk.metrics.export
             "ibm.mq.heartbeat",
             "Queue manager heartbeat",
             "1",
+            MetricDataType.LONG_GAUGE,
+            GaugeData.createLongGaugeData(
+                Collections.singletonList(
+                    LongPointData.create(
+                        this.currentEpochNanos, Clock.getDefault().now(), attributes, value)))));
+  }
+
+  public void recordIbmMqQueueManagerUptime(long value, Attributes attributes) {
+    metricData.add(
+        createMetricData(
+            this.resource,
+            this.instrumentationScopeInfo,
+            "ibm.mq.queue_manager.uptime",
+            "Queue manager uptime",
+            "s",
             MetricDataType.LONG_GAUGE,
             GaugeData.createLongGaugeData(
                 Collections.singletonList(

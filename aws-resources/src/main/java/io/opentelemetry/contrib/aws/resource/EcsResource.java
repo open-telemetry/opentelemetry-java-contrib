@@ -103,16 +103,12 @@ public final class EcsResource {
       logArnBuilder
           .getLogGroupArn()
           .ifPresent(
-              logGroupArn -> {
-                attrBuilders.put(AWS_LOG_GROUP_ARNS, singletonList(logGroupArn));
-              });
+              logGroupArn -> attrBuilders.put(AWS_LOG_GROUP_ARNS, singletonList(logGroupArn)));
 
       logArnBuilder
           .getLogStreamArn()
           .ifPresent(
-              logStreamArn -> {
-                attrBuilders.put(AWS_LOG_STREAM_ARNS, singletonList(logStreamArn));
-              });
+              logStreamArn -> attrBuilders.put(AWS_LOG_STREAM_ARNS, singletonList(logStreamArn)));
     } catch (IOException e) {
       logger.log(WARNING, "Can't get ECS metadata", e);
     }
@@ -126,13 +122,13 @@ public final class EcsResource {
     return getArnPart(arn, ArnPart.REGION);
   }
 
-  private static enum ArnPart {
+  private enum ArnPart {
     REGION(3),
     ACCOUNT(4);
 
     final int partIndex;
 
-    private ArnPart(int partIndex) {
+    ArnPart(int partIndex) {
       this.partIndex = partIndex;
     }
   }
@@ -151,9 +147,7 @@ public final class EcsResource {
     return Optional.of(arnParts[arnPart.partIndex]);
   }
 
-  // Suppression is required for CONTAINER_IMAGE_TAG until we are ready to upgrade.
-  @SuppressWarnings("deprecation")
-  static void parseResponse(
+  private static void parseResponse(
       JsonParser parser, AttributesBuilder attrBuilders, LogArnBuilder logArnBuilder)
       throws IOException {
     if (!parser.isExpectedStartObjectToken()) {

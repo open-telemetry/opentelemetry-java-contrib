@@ -8,6 +8,7 @@ package io.opentelemetry.contrib.dynamic.policy.tracesampling;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.opentelemetry.contrib.dynamic.policy.AbstractSourcePolicyValidator;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
+import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 
@@ -26,7 +27,7 @@ public final class TraceSamplingValidator extends AbstractSourcePolicyValidator 
 
   @Override
   @Nullable
-  protected TelemetryPolicy validateJsonValue(JsonNode valueNode) {
+  protected TelemetryPolicy validateJsonValue(JsonNode valueNode, SourceKind sourceKind) {
     JsonNode probabilityNode = valueNode;
     if (valueNode.isObject()) {
       probabilityNode = valueNode.get("probability");
@@ -38,23 +39,23 @@ public final class TraceSamplingValidator extends AbstractSourcePolicyValidator 
     if (probability == null) {
       return null;
     }
-    return createPolicy(probability);
+    return createPolicy(probability, sourceKind);
   }
 
   @Override
   @Nullable
-  protected TelemetryPolicy validateKeyValueValue(String value) {
+  protected TelemetryPolicy validateKeyValueValue(String value, SourceKind sourceKind) {
     Double probability = parseDouble(value);
     if (probability == null) {
       return null;
     }
-    return createPolicy(probability);
+    return createPolicy(probability, sourceKind);
   }
 
   @Nullable
-  private static TelemetryPolicy createPolicy(double probability) {
+  private static TelemetryPolicy createPolicy(double probability, SourceKind sourceKind) {
     try {
-      return new TraceSamplingRatePolicy(probability);
+      return new TraceSamplingRatePolicy(probability, sourceKind);
     } catch (IllegalArgumentException e) {
       logger.info(
           "Invalid trace-sampling probability '"

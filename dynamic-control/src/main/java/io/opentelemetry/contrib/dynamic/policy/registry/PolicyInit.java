@@ -30,6 +30,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -64,6 +65,8 @@ public final class PolicyInit {
   private static final Map<PolicyProvider, List<TelemetryPolicy>> sourcePolicies =
       new ConcurrentHashMap<>();
   private static final PolicyStore policyStore = new PolicyStore();
+  private static final AtomicReference<PolicyInitConfig> declarativeInitConfig =
+      new AtomicReference<>();
 
   static {
     // For now, policies will be registered here. TODO: move to a more dynamic way.
@@ -124,7 +127,16 @@ public final class PolicyInit {
   public static void init(AutoConfigurationCustomizer autoConfiguration) {
     autoConfiguration.addPropertiesCustomizer(
         config -> {
-          PolicyInitConfig initConfig = PolicyInitConfig.readFromConfigProperties(config);
+          PolicyInitConfig initConfig = declarativeInitConfig.getAndSet(null);
+          if (initConfig != null) {
+            logger.log(
+                Level.INFO,
+                "Initializing telemetry policies from top-level declarative config with {0} source(s)",
+                initConfig.getSources().size());
+          } else {
+            initConfig = PolicyInitConfig.readFromConfigProperties(config);
+          }
+
           if (initConfig == null) {
             return Collections.emptyMap();
           }
@@ -132,6 +144,13 @@ public final class PolicyInit {
           activateSources(initConfig, config);
           return Collections.emptyMap();
         });
+  }
+
+  /**
+   * Stores parsed top-level declarative telemetry policy config for auto-configuration bootstrap.
+   */
+  public static void setDeclarativeInitConfig(PolicyInitConfig initConfig) {
+    declarativeInitConfig.set(Objects.requireNonNull(initConfig, "initConfig cannot be null"));
   }
 
   /** Initializes dynamic-control policy wiring from declarative config component input. */
@@ -191,7 +210,7 @@ public final class PolicyInit {
                   + "' in mapping for source kind '"
                   + source.getKind().configValue()
                   + "' key '"
-                  + mapping.getSourceKey()
+                  + mapping.getPolicyId()
                   + "'");
         }
         initializePolicyClass(policyClass, autoConfiguration, initializedPolicyClasses);
@@ -392,6 +411,7 @@ public final class PolicyInit {
     sourcesActivated.set(false);
     initializedImplementers.clear();
     policyStore.clear();
+    declarativeInitConfig.set(null);
   }
 
   /**

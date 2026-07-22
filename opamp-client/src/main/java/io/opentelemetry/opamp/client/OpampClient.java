@@ -9,6 +9,7 @@ import io.opentelemetry.opamp.client.internal.response.MessageData;
 import java.io.Closeable;
 import javax.annotation.Nullable;
 import opamp.proto.AgentDescription;
+import opamp.proto.ComponentHealth;
 import opamp.proto.RemoteConfigStatus;
 import opamp.proto.ServerErrorResponse;
 
@@ -34,6 +35,13 @@ public interface OpampClient extends Closeable {
    * @param remoteConfigStatus The new remote config status.
    */
   void setRemoteConfigStatus(RemoteConfigStatus remoteConfigStatus);
+
+  /**
+   * Sets the current Agent health which will be sent in the next agent to server request.
+   *
+   * @param health The new component health.
+   */
+  void setHealth(ComponentHealth health);
 
   interface Callbacks {
     /**

@@ -59,7 +59,7 @@ class FolderManagerTest {
 
     // Creating file
     folderManager.createWritableFile();
-    assertThat(rootDir.list()).containsExactly("1000");
+    assertThat(rootDir.list()).containsExactly("1000.tmp");
 
     // Clear
     folderManager.clear();
@@ -104,6 +104,7 @@ class FolderManagerTest {
 
     assertThat(readableFile.getFile()).isEqualTo(writableFile.getFile());
     assertThat(writableFile.isClosed()).isTrue();
+    assertThat(rootDir.list()).containsExactly(String.valueOf(createdFileTime));
   }
 
   @Test
@@ -297,6 +298,22 @@ class FolderManagerTest {
     when(clock.now()).thenReturn(creationReferenceTime + MAX_FILE_AGE_FOR_READ_MILLIS);
 
     assertThat(getReadableFile()).isNull();
+  }
+
+  @Test
+  void renameFilesToFinalName_whenTmpFilesFoundOnStart() throws IOException {
+    File orphan = new File(rootDir, "1234.tmp");
+    File expectedFinal = new File(rootDir, "1234");
+    createFiles(orphan);
+    Files.write(orphan.toPath(), new byte[] {1, 2, 3});
+
+    FolderManager fresh = FolderManager.create(rootDir, TestData.getConfiguration(), clock);
+    try {
+      assertThat(rootDir.list()).containsExactly("1234");
+      assertThat(Files.readAllBytes(expectedFinal.toPath())).containsExactly(1, 2, 3);
+    } finally {
+      fresh.close();
+    }
   }
 
   private ReadableFile getReadableFile() throws IOException {

@@ -12,8 +12,10 @@ import io.opentelemetry.opamp.client.internal.impl.recipe.RequestRecipe;
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.AgentDescriptionAppender;
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.AgentDisconnectAppender;
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.CapabilitiesAppender;
+import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.CustomCapabilitiesAppender;
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.EffectiveConfigAppender;
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.FlagsAppender;
+import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.HealthAppender;
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.InstanceUidAppender;
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.RemoteConfigStatusAppender;
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.SequenceNumberAppender;
@@ -32,8 +34,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 import okio.ByteString;
+import opamp.proto.AgentCapabilities;
 import opamp.proto.AgentDescription;
 import opamp.proto.AgentToServer;
+import opamp.proto.ComponentHealth;
 import opamp.proto.RemoteConfigStatus;
 import opamp.proto.ServerErrorResponse;
 import opamp.proto.ServerToAgent;
@@ -76,6 +80,8 @@ public final class OpampClientImpl
     // Compressable fields init
     List<Field> compressableFields = new ArrayList<>();
     compressableFields.add(Field.AGENT_DESCRIPTION);
+    compressableFields.add(Field.CUSTOM_CAPABILITIES);
+    compressableFields.add(Field.HEALTH);
     compressableFields.add(Field.EFFECTIVE_CONFIG);
     compressableFields.add(Field.REMOTE_CONFIG_STATUS);
     COMPRESSABLE_FIELDS = Collections.unmodifiableList(compressableFields);
@@ -90,6 +96,8 @@ public final class OpampClientImpl
             RemoteConfigStatusAppender.create(state.remoteConfigStatus),
             SequenceNumberAppender.create(state.sequenceNum),
             CapabilitiesAppender.create(state.capabilities),
+            CustomCapabilitiesAppender.create(state.customCapabilities),
+            HealthAppender.create(state.health),
             InstanceUidAppender.create(state.instanceUid),
             FlagsAppender.create(state.flags),
             AgentDisconnectAppender.create());
@@ -130,17 +138,24 @@ public final class OpampClientImpl
 
   @Override
   public void setAgentDescription(@Nonnull AgentDescription agentDescription) {
-    if (!state.agentDescription.get().equals(agentDescription)) {
-      state.agentDescription.set(agentDescription);
+    if (state.agentDescription.set(agentDescription)) {
       addFieldAndSend(Field.AGENT_DESCRIPTION);
     }
   }
 
   @Override
   public void setRemoteConfigStatus(@Nonnull RemoteConfigStatus remoteConfigStatus) {
-    if (!state.remoteConfigStatus.get().equals(remoteConfigStatus)) {
-      state.remoteConfigStatus.set(remoteConfigStatus);
+    verifyCapability(AgentCapabilities.AgentCapabilities_ReportsRemoteConfig);
+    if (state.remoteConfigStatus.set(remoteConfigStatus)) {
       addFieldAndSend(Field.REMOTE_CONFIG_STATUS);
+    }
+  }
+
+  @Override
+  public void setHealth(@Nonnull ComponentHealth health) {
+    verifyCapability(AgentCapabilities.AgentCapabilities_ReportsHealth);
+    if (state.health.set(health)) {
+      addFieldAndSend(Field.HEALTH);
     }
   }
 
@@ -192,6 +207,11 @@ public final class OpampClientImpl
     if (response.remote_config != null) {
       notifyOnMessage = true;
       messageBuilder.setRemoteConfig(response.remote_config);
+    }
+
+    if (response.custom_message != null) {
+      notifyOnMessage = true;
+      messageBuilder.setCustomMessage(response.custom_message);
     }
 
     if (notifyOnMessage) {
@@ -251,5 +271,12 @@ public final class OpampClientImpl
   private void addFieldAndSend(Field field) {
     recipeManager.next().addField(field);
     requestService.sendRequest();
+  }
+
+  private void verifyCapability(AgentCapabilities capabilityToCheck) {
+    if ((state.capabilities.mustGet() & capabilityToCheck.getValue()) == 0) {
+      throw new IllegalStateException(
+          "Required capability " + capabilityToCheck + " is not enabled");
+    }
   }
 }

@@ -1,6 +1,6 @@
 # Disk buffering
 
-[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-disk-buffering/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-disk-buffering)
+[![Maven](https://img.shields.io/maven-central/v/io.opentelemetry.contrib/opentelemetry-disk-buffering?label=Maven&color=orange)](https://central.sonatype.com/artifact/io.opentelemetry.contrib/opentelemetry-disk-buffering)
 
 This module provides an abstraction
 named [SignalStorage](src/main/java/io/opentelemetry/contrib/disk/buffering/storage/SignalStorage.java),
@@ -33,8 +33,10 @@ The available configuration parameters are the following:
 * Max folder size, defaults to 10MB.
 * Max age for file writing. It sets the time window where a file can get signals appended to it.
   Defaults to 30 seconds.
-* Min age for file reading. It sets the time to wait before starting to read from a file after
-  its creation. Defaults to 33 seconds. It must be greater that the max age for file writing.
+* Min age for file reading. Optional delay applied before a finalized file becomes eligible for
+  reading. Defaults to `0`. With the rename-on-close design the writer and reader are already
+  synchronized via atomic file rename, so this knob is no longer required for correctness; set it
+  if you want to give writers more time to accumulate larger batches before they're consumed.
 * Max age for file reading. After that time passes, the file will be considered stale and will be
   removed when new files are created. No more data will be read from a file past this time. Defaults
   to 18 hours.
@@ -179,13 +181,15 @@ age, so stale files are automatically purged when there's not enough space avail
 
 ### More details on the writing and reading processes
 
-Both the writing and reading processes can run in parallel as they won't overlap
-because each is supposed to happen in different files. We ensure that reader and writer don't
-accidentally meet in the same file by using the configurable parameters. These parameters set
-non-overlapping time frames for each action to be done on a single file at a time. On top of that,
-there's a mechanism in place to avoid overlapping on edge cases where the time frames ended but the
-resources haven't been released. For that mechanism to work properly, this tool assumes that both
-the reading and the writing actions are executed within the same application process.
+Writer and reader operate on disjoint files: the writer appends to `<timestamp>.tmp`, and the
+reader only considers files whose name is entirely numeric (matched against `\d+`). On close, the
+writer promotes the temp file via `File.renameTo`, atomic on POSIX, best-effort on Windows,
+so the reader never observes a partial file. Empty files are deleted instead of promoted. If the
+reader runs while the active writer has exceeded `maxFileAgeForWriteMillis` and no other file is
+ready, the reader force-closes the writer to make its data immediately visible.
+
+On startup any `*.tmp` left over from a crash is promoted to its final name (unless that name
+already exists, in which case the leftover is dropped), so buffered data is preserved.
 
 ## Component owners
 

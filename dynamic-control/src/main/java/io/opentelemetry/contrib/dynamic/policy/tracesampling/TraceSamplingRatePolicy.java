@@ -7,7 +7,9 @@ package io.opentelemetry.contrib.dynamic.policy.tracesampling;
 
 import io.opentelemetry.contrib.dynamic.policy.PolicyImplementer;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
+import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicyIdentity;
 import io.opentelemetry.contrib.dynamic.policy.registry.PolicyInit;
+import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.extension.incubator.trace.samplers.ComposableSampler;
 import io.opentelemetry.sdk.extension.incubator.trace.samplers.CompositeSampler;
@@ -15,16 +17,36 @@ import io.opentelemetry.sdk.trace.samplers.Sampler;
 import java.util.Objects;
 import javax.annotation.Nullable;
 
-public final class TraceSamplingRatePolicy extends TelemetryPolicy {
+public final class TraceSamplingRatePolicy implements TelemetryPolicy {
   public static final String POLICY_TYPE = "trace-sampling";
+  public static final TelemetryPolicyIdentity DEFAULT_IDENTITY =
+      new TelemetryPolicyIdentity("trace-sampling", "Trace sampling rate");
 
   @Nullable private static volatile DelegatingSampler initializedSampler;
 
+  private final TelemetryPolicyIdentity identity;
   private final double probability;
+  private final SourceKind sourceKind;
 
-  public TraceSamplingRatePolicy(double probability) {
-    super(POLICY_TYPE);
+  public TraceSamplingRatePolicy(double probability, SourceKind sourceKind) {
+    this.identity = DEFAULT_IDENTITY;
     this.probability = normalizeProbability(probability);
+    this.sourceKind = Objects.requireNonNull(sourceKind, "sourceKind cannot be null");
+  }
+
+  @Override
+  public TelemetryPolicyIdentity getIdentity() {
+    return identity;
+  }
+
+  @Override
+  public String getType() {
+    return POLICY_TYPE;
+  }
+
+  @Override
+  public SourceKind getSourceKind() {
+    return sourceKind;
   }
 
   public double getProbability() {
@@ -68,7 +90,7 @@ public final class TraceSamplingRatePolicy extends TelemetryPolicy {
     if (Double.isNaN(probability) || probability < 0.0 || probability > 1.0) {
       throw new IllegalArgumentException("probability must be within [0.0, 1.0]");
     }
-    // Normalize -0.0 to +0.0 so equality/hash behavior stays intuitive.
+    // Normalize -0.0 to +0.0 so idempotent update checks stay intuitive.
     return probability == 0.0 ? 0.0 : probability;
   }
 
@@ -79,22 +101,5 @@ public final class TraceSamplingRatePolicy extends TelemetryPolicy {
 
   static void resetForTest() {
     initializedSampler = null;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (!(obj instanceof TraceSamplingRatePolicy)) {
-      return false;
-    }
-    TraceSamplingRatePolicy that = (TraceSamplingRatePolicy) obj;
-    return Double.compare(probability, that.probability) == 0;
-  }
-
-  @Override
-  public int hashCode() {
-    return Double.hashCode(probability);
   }
 }

@@ -1,7 +1,7 @@
 {
   $schema: 'https://docs.renovatebot.com/renovate-schema.json',
   extends: [
-    "github>grafana/flint#v0.22.2",
+    "github>grafana/flint#v0.22.9",
     'config:best-practices',
     'helpers:pinGitHubActionDigestsToSemver',
     'customManagers:githubActionsVersions',
@@ -68,6 +68,17 @@
       ],
       groupName: 'kotlin plugin updates',
     },
+    {
+      // The workflow only stores the Java version number, so Renovate has nowhere to write a
+      // Docker digest for this custom-managed dependency.
+      matchDepNames: [
+        'azul/zulu-openjdk',
+      ],
+      matchUpdateTypes: [
+        'pinDigest',
+      ],
+      enabled: false,
+    },
 
     // ── Version constraints ────────────────────────────────────────────
 
@@ -130,6 +141,12 @@
       groupName: 'bouncycastle packages',
       matchPackageNames: [
         'org.bouncycastle:**',
+      ],
+    },
+    {
+      groupName: 'ibm mq packages',
+      matchPackageNames: [
+        'com.ibm.mq:**',
       ],
     },
 
@@ -226,6 +243,26 @@
         'minor',
       ],
       enabled: false,
+    },
+    {
+      // snakeyaml-engine 3+ requires Java 11+
+      matchUpdateTypes: [
+        'major',
+      ],
+      enabled: false,
+      matchPackageNames: [
+        'org.snakeyaml:snakeyaml-engine'
+      ],
+    },
+    {
+      // mockserver 6+ requires Java 11+
+      matchUpdateTypes: [
+        'major',
+      ],
+      enabled: false,
+      matchPackageNames: [
+        'org.mock-server:**'
+      ],
     },
     {
       // pinned version for compatibility

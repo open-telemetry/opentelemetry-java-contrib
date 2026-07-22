@@ -1,6 +1,6 @@
 # Micrometer MeterProvider
 
-[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-micrometer-meter-provider/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-micrometer-meter-provider)
+[![Maven](https://img.shields.io/maven-central/v/io.opentelemetry.contrib/opentelemetry-micrometer-meter-provider?label=Maven&color=orange)](https://central.sonatype.com/artifact/io.opentelemetry.contrib/opentelemetry-micrometer-meter-provider)
 
 This utility provides an implementation of `MeterProvider` which wraps a Micrometer `MeterRegistry`
 and delegates the reporting of all metrics through Micrometer. This enables projects which already

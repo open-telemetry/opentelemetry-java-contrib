@@ -6,6 +6,9 @@
 package io.opentelemetry.contrib.aws.resource;
 
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
+import static io.opentelemetry.semconv.ContainerAttributes.CONTAINER_ID;
+import static io.opentelemetry.semconv.ContainerAttributes.CONTAINER_IMAGE_NAME;
+import static io.opentelemetry.semconv.ContainerAttributes.CONTAINER_IMAGE_TAGS;
 import static io.opentelemetry.semconv.incubating.AwsIncubatingAttributes.AWS_ECS_CLUSTER_ARN;
 import static io.opentelemetry.semconv.incubating.AwsIncubatingAttributes.AWS_ECS_CONTAINER_ARN;
 import static io.opentelemetry.semconv.incubating.AwsIncubatingAttributes.AWS_ECS_LAUNCHTYPE;
@@ -22,9 +25,6 @@ import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOU
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PROVIDER;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_REGION;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_RESOURCE_ID;
-import static io.opentelemetry.semconv.incubating.ContainerIncubatingAttributes.CONTAINER_ID;
-import static io.opentelemetry.semconv.incubating.ContainerIncubatingAttributes.CONTAINER_IMAGE_NAME;
-import static io.opentelemetry.semconv.incubating.ContainerIncubatingAttributes.CONTAINER_IMAGE_TAGS;
 import static io.opentelemetry.semconv.incubating.ContainerIncubatingAttributes.CONTAINER_NAME;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.entry;

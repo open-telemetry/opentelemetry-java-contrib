@@ -178,6 +178,8 @@ metrics:
     enabled: true
   "ibm.mq.heartbeat":  # Queue manager heartbeat
     enabled: true
+  "ibm.mq.queue_manager.uptime":  # Queue manager uptime
+    enabled: true
   "ibm.mq.archive.log.size":  # Queue manager archive log size
     enabled: true
   "ibm.mq.manager.max.active.channels":  # Queue manager max active channels

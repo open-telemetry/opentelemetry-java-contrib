@@ -33,7 +33,7 @@ class JsonPolicyInitConfigReaderTest {
       assertThat(source.getFormat()).isEqualTo(SourceFormat.JSONKEYVALUE);
       assertThat(source.getLocation()).isEqualTo("vendor-specific");
       assertThat(source.getMappings()).hasSize(4);
-      assertThat(source.getMappings().get(0).getSourceKey()).isEqualTo("sampling_rate");
+      assertThat(source.getMappings().get(0).getPolicyId()).isEqualTo("sampling_rate");
       assertThat(source.getMappings().get(0).getPolicyType()).isEqualTo("trace-sampling");
     }
   }
@@ -69,11 +69,11 @@ class JsonPolicyInitConfigReaderTest {
   }
 
   @Test
-  void mappingMissingSourceKeyThrows() {
+  void mappingMissingPolicyIdThrows() {
     String json =
         "{\"sources\":[{\"kind\":\"opamp\",\"format\":\"jsonkeyvalue\",\"mappings\":[{\"policyType\":\"x\"}]}]}";
     assertThatThrownBy(() -> JsonPolicyInitConfigReader.read(json))
         .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("sourceKey");
+        .hasMessageContaining("policyId");
   }
 }

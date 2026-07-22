@@ -13,8 +13,8 @@ import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider;
 import io.opentelemetry.sdk.testing.assertj.AttributesAssert;
 import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions;
+import io.opentelemetry.semconv.K8sAttributes;
 import io.opentelemetry.semconv.incubating.CloudIncubatingAttributes;
-import io.opentelemetry.semconv.incubating.K8sIncubatingAttributes;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -42,7 +42,7 @@ class AzureAksResourceProviderTest extends MetadataBasedResourceProviderTest {
         .containsEntry(CLOUD_PROVIDER, "azure")
         .containsEntry(
             CLOUD_PLATFORM, CloudIncubatingAttributes.CloudPlatformIncubatingValues.AZURE_AKS)
-        .containsEntry(K8sIncubatingAttributes.K8S_CLUSTER_NAME, "macikgo-test-may-23");
+        .containsEntry(K8sAttributes.K8S_CLUSTER_NAME, "macikgo-test-may-23");
   }
 
   @Test
