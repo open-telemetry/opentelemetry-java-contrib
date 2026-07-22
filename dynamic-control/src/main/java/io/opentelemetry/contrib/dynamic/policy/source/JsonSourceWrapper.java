@@ -82,6 +82,27 @@ public final class JsonSourceWrapper implements SourceWrapper {
     }
   }
 
+  /**
+   * Returns {@code true} if {@code source} is valid JSON describing a single top-level object with
+   * exactly one key.
+   *
+   * <p>Unlike {@link #parse(String, Set)}, this does not drop unmapped keys: it reports the shape
+   * of the raw text. Callers that require exactly one policy per entry (for example, a file-backed
+   * provider with one policy per line) use this to reject objects carrying extra keys rather than
+   * silently discarding them.
+   *
+   * @throws NullPointerException if source is null
+   */
+  public static boolean isSingleKeyObject(String source) {
+    Objects.requireNonNull(source, "source cannot be null");
+    try {
+      JsonNode parsed = MAPPER.readTree(source);
+      return parsed.isObject() && parsed.size() == 1;
+    } catch (JsonProcessingException e) {
+      return false;
+    }
+  }
+
   private static List<SourceWrapper> wrapMappedObject(
       JsonNode object, Set<String> mappedPolicyIds) {
     List<SourceWrapper> wrappers = new ArrayList<>();
