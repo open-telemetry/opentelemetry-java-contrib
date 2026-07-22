@@ -44,13 +44,17 @@ jobs:
           # pull requests from secrets.GITHUB_TOKEN do not run workflows
           GH_TOKEN: ${{ steps.otelbot-token.outputs.token }}
         run: |
+          if [[ ! "$NUMBER" =~ ^[0-9]+$ ]]; then
+            echo "::error::Pull request number must be numeric."
+            exit 1
+          fi
           commit=$(gh pr view "$NUMBER" --json mergeCommit --jq .mergeCommit.oid)
           title=$(gh pr view "$NUMBER" --json title --jq .title)
 
           branch="otelbot/backport-${NUMBER}-to-${GITHUB_REF_NAME//\//-}"
 
-          git checkout -b $branch
-          git cherry-pick $commit
+          git checkout -b "$branch"
+          git cherry-pick "$commit"
 
           if git diff --name-only HEAD~1 HEAD | grep -q '^\.github/workflows/'; then
             echo "::error::This PR contains changes to workflow files (.github/workflows/)."
@@ -60,8 +64,8 @@ jobs:
             exit 1
           fi
 
-          git push --set-upstream origin $branch
+          git push --set-upstream origin "$branch"
           gh pr create \
             --title "[$GITHUB_REF_NAME] $title" \
             --body "Clean cherry-pick of #$NUMBER to the \`$GITHUB_REF_NAME\` branch." \
-            --base $GITHUB_REF_NAME
+            --base "$GITHUB_REF_NAME"
