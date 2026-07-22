@@ -25,6 +25,8 @@ jobs:
         with:
           # history is needed to run git cherry-pick below
           fetch-depth: 0
+          # zizmor: ignore[artipacked] Credentials are required by the branch push below.
+          persist-credentials: true
 
       - name: Use CLA approved bot
         run: .github/scripts/use-cla-approved-bot.sh
@@ -39,16 +41,20 @@ jobs:
       - name: Create pull request
         env:
           NUMBER: ${{ github.event.inputs.number }}
-          # not using secrets.GITHUB_TOKEN since pull requests from that token do not run workflows
+          # pull requests from secrets.GITHUB_TOKEN do not run workflows
           GH_TOKEN: ${{ steps.otelbot-token.outputs.token }}
         run: |
-          commit=$(gh pr view $NUMBER --json mergeCommit --jq .mergeCommit.oid)
-          title=$(gh pr view $NUMBER --json title --jq .title)
+          if [[ ! "$NUMBER" =~ ^[0-9]+$ ]]; then
+            echo "::error::Pull request number must be numeric."
+            exit 1
+          fi
+          commit=$(gh pr view "$NUMBER" --json mergeCommit --jq .mergeCommit.oid)
+          title=$(gh pr view "$NUMBER" --json title --jq .title)
 
           branch="otelbot/backport-${NUMBER}-to-${GITHUB_REF_NAME//\//-}"
 
-          git checkout -b $branch
-          git cherry-pick $commit
+          git checkout -b "$branch"
+          git cherry-pick "$commit"
 
           if git diff --name-only HEAD~1 HEAD | grep -q '^\.github/workflows/'; then
             echo "::error::This PR contains changes to workflow files (.github/workflows/)."
@@ -58,7 +64,8 @@ jobs:
             exit 1
           fi
 
-          git push --set-upstream origin $branch
-          gh pr create --title "[$GITHUB_REF_NAME] $title" \
-                       --body "Clean cherry-pick of #$NUMBER to the \`$GITHUB_REF_NAME\` branch." \
-                       --base $GITHUB_REF_NAME
+          git push --set-upstream origin "$branch"
+          gh pr create \
+            --title "[$GITHUB_REF_NAME] $title" \
+            --body "Clean cherry-pick of #$NUMBER to the \`$GITHUB_REF_NAME\` branch." \
+            --base "$GITHUB_REF_NAME"
