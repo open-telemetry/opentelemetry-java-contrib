@@ -10,8 +10,8 @@ import static java.util.stream.Collectors.toList;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanContext;
-import io.opentelemetry.instrumentation.config.bridge.ConfigPropertiesBackedConfigProvider;
-import io.opentelemetry.instrumentation.config.bridge.DeclarativeConfigPropertiesDurationUtil;
+import io.opentelemetry.instrumentation.config.bridge.DeclarativeConfigBridge;
+import io.opentelemetry.instrumentation.config.bridge.DeclarativeConfigDurationUtil;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 import java.util.Arrays;
@@ -27,10 +27,7 @@ class InferredSpansConfig {
   static final String ENABLED_OPTION = "enabled";
 
   static DeclarativeConfigProperties createDeclarativeConfig(ConfigProperties properties) {
-    return ConfigPropertiesBackedConfigProvider.builder()
-        .setAccessPath("", "otel.inferred.spans.")
-        .build(properties)
-        .getInstrumentationConfig();
+    return DeclarativeConfigBridge.createComponentProperties(properties, "otel.inferred.spans.");
   }
 
   static boolean isEnabled(DeclarativeConfigProperties properties) {
@@ -46,18 +43,18 @@ class InferredSpansConfig {
     applyValue(properties.getInt("safe_mode"), builder::asyncProfilerSafeMode);
     applyValue(properties.getBoolean("post_processing_enabled"), builder::postProcessingEnabled);
     applyValue(
-        DeclarativeConfigPropertiesDurationUtil.parseDuration(properties, "sampling_interval"),
+        DeclarativeConfigDurationUtil.getDuration(properties, "sampling_interval"),
         builder::samplingInterval);
     applyValue(
-        DeclarativeConfigPropertiesDurationUtil.parseDuration(properties, "min_duration"),
+        DeclarativeConfigDurationUtil.getDuration(properties, "min_duration"),
         builder::inferredSpansMinDuration);
     applyWildcards(properties, "included_classes", builder::includedClasses);
     applyWildcards(properties, "excluded_classes", builder::excludedClasses);
     applyValue(
-        DeclarativeConfigPropertiesDurationUtil.parseDuration(properties, "interval"),
+        DeclarativeConfigDurationUtil.getDuration(properties, "interval"),
         builder::profilerInterval);
     applyValue(
-        DeclarativeConfigPropertiesDurationUtil.parseDuration(properties, "duration"),
+        DeclarativeConfigDurationUtil.getDuration(properties, "duration"),
         builder::profilingDuration);
     applyValue(properties.getString("lib_directory"), builder::profilerLibDirectory);
 

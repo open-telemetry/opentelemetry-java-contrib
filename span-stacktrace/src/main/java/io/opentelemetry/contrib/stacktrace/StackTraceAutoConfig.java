@@ -10,8 +10,8 @@ import static java.util.logging.Level.SEVERE;
 
 import com.google.auto.service.AutoService;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
-import io.opentelemetry.instrumentation.config.bridge.ConfigPropertiesBackedConfigProvider;
-import io.opentelemetry.instrumentation.config.bridge.DeclarativeConfigPropertiesDurationUtil;
+import io.opentelemetry.instrumentation.config.bridge.DeclarativeConfigBridge;
+import io.opentelemetry.instrumentation.config.bridge.DeclarativeConfigDurationUtil;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
@@ -48,16 +48,13 @@ public class StackTraceAutoConfig implements AutoConfigurationCustomizerProvider
   }
 
   static DeclarativeConfigProperties createDeclarativeConfig(ConfigProperties properties) {
-    return ConfigPropertiesBackedConfigProvider.builder()
-        .setAccessPath("", "otel.java.experimental.span-stacktrace.")
-        .build(properties)
-        .getInstrumentationConfig();
+    return DeclarativeConfigBridge.createComponentProperties(
+        properties, "otel.java.experimental.span-stacktrace.");
   }
 
   // package-private for testing
   static long getMinDuration(DeclarativeConfigProperties properties) {
-    Duration minDuration =
-        DeclarativeConfigPropertiesDurationUtil.parseDuration(properties, "min_duration");
+    Duration minDuration = DeclarativeConfigDurationUtil.getDuration(properties, "min_duration");
     if (minDuration == null) {
       minDuration = CONFIG_MIN_DURATION_DEFAULT;
     }
