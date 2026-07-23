@@ -27,6 +27,13 @@ final class LegacyConfigPropertiesBridge {
     return new RootProperties(configProperties, delegate);
   }
 
+  static Map<String, String> getOpampHeaders(ConfigProperties configProperties) {
+    Map<String, String> headers = configProperties.getMap(OPAMP_HEADERS);
+    return headers.isEmpty()
+        ? Collections.emptyMap()
+        : Collections.unmodifiableMap(new HashMap<>(headers));
+  }
+
   private static final class RootProperties implements DeclarativeConfigProperties {
     private final ConfigProperties configProperties;
     private final DeclarativeConfigProperties delegate;
@@ -76,7 +83,7 @@ final class LegacyConfigPropertiesBridge {
     @Override
     @Nullable
     public DeclarativeConfigProperties getStructured(String name) {
-      if (OPAMP_HEADERS.equals(name) || RESOURCE_ATTRIBUTES.equals(name)) {
+      if (RESOURCE_ATTRIBUTES.equals(name)) {
         return new MapProperties(configProperties.getMap(name), delegate.getComponentLoader());
       }
       return delegate.getStructured(name);

@@ -121,11 +121,9 @@ class SourceKindTest {
   @Test
   void opampCreateProviderReturnsNullWhenRequiredConfigMissing() {
     DeclarativeConfigProperties config = mock(DeclarativeConfigProperties.class);
-    DeclarativeConfigProperties headers = emptyProperties();
     DeclarativeConfigProperties resourceAttributes = emptyProperties();
     when(config.getString("otel.opamp.service.url")).thenReturn(null);
     when(config.getString("otel.service.name")).thenReturn("test-service");
-    when(config.get("otel.experimental.opamp.headers")).thenReturn(headers);
     when(config.get("otel.resource.attributes")).thenReturn(resourceAttributes);
 
     PolicyProvider provider =
@@ -158,18 +156,14 @@ class SourceKindTest {
 
   private static DeclarativeConfigProperties opampConfig() {
     DeclarativeConfigProperties config = mock(DeclarativeConfigProperties.class);
-    DeclarativeConfigProperties headers = emptyProperties();
     DeclarativeConfigProperties resourceAttributes = emptyProperties();
     when(config.getString("otel.opamp.service.url")).thenReturn("https://example.com");
     when(config.getString("otel.service.name")).thenReturn("test-service");
-    when(config.get("otel.experimental.opamp.headers")).thenReturn(headers);
     when(config.get("otel.resource.attributes")).thenReturn(resourceAttributes);
     return config;
   }
 
   private static DeclarativeConfigProperties emptyProperties() {
-    DeclarativeConfigProperties properties = mock(DeclarativeConfigProperties.class);
-    when(properties.getPropertyKeys()).thenReturn(Collections.emptySet());
-    return properties;
+    return mock(DeclarativeConfigProperties.class);
   }
 }

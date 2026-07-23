@@ -25,7 +25,9 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -55,7 +57,6 @@ public final class OpampPolicyProvider extends AbstractPolicyProvider {
   private static final ObjectMapper MAPPER = new ObjectMapper();
 
   private static final String OPAMP_ENDPOINT = "otel.opamp.service.url";
-  private static final String OPAMP_HEADERS = "otel.experimental.opamp.headers";
   private static final String SERVICE_NAME = "otel.service.name";
   private static final String RESOURCE_ATTRIBUTES = "otel.resource.attributes";
   private static final String DEPLOYMENT_ENVIRONMENT_NAME = "deployment.environment.name";
@@ -70,7 +71,7 @@ public final class OpampPolicyProvider extends AbstractPolicyProvider {
   private final String location;
   private final String serviceName;
   @Nullable private final String serviceEnvironment;
-  private final DeclarativeConfigProperties headers;
+  private final Map<String, String> headers;
   private final SourceFormat format;
   private final MappedPolicySourceConverter sourceConverter;
   private final MutablePeriodicDelay pollingDelay;
@@ -93,11 +94,35 @@ public final class OpampPolicyProvider extends AbstractPolicyProvider {
       SourceFormat format,
       List<PolicySourceMappingConfig> mappings,
       List<PolicyValidator> validators) {
+    this(properties, configuredLocation, format, mappings, validators, Collections.emptyMap());
+  }
+
+  /**
+   * Creates a provider with legacy OpAMP headers captured at the {@code ConfigProperties} boundary.
+   *
+   * <p>The declarative bridge cannot enumerate keys from system-property-backed maps, so headers
+   * are passed as a map rather than being read through {@link DeclarativeConfigProperties}.
+   *
+   * @param properties declarative properties used to resolve endpoint/service identity
+   * @param configuredLocation source location key used to select one OpAMP config entry
+   * @param format payload format parser for the selected source
+   * @param mappings policy-id-to-policy-type mappings for this source
+   * @param validators validators used to materialize typed {@link TelemetryPolicy} instances
+   * @param headers legacy OpAMP headers captured from flat configuration
+   */
+  public OpampPolicyProvider(
+      DeclarativeConfigProperties properties,
+      String configuredLocation,
+      SourceFormat format,
+      List<PolicySourceMappingConfig> mappings,
+      List<PolicyValidator> validators,
+      Map<String, String> headers) {
     Objects.requireNonNull(properties, "properties cannot be null");
     Objects.requireNonNull(configuredLocation, "configuredLocation cannot be null");
     Objects.requireNonNull(format, "format cannot be null");
     Objects.requireNonNull(mappings, "mappings cannot be null");
     Objects.requireNonNull(validators, "validators cannot be null");
+    Objects.requireNonNull(headers, "headers cannot be null");
     String resolvedEndpoint = getEndpoint(properties);
     if (resolvedEndpoint == null) {
       throw new IllegalArgumentException("Missing OpAMP endpoint property: " + OPAMP_ENDPOINT);
@@ -106,7 +131,7 @@ public final class OpampPolicyProvider extends AbstractPolicyProvider {
     this.location = configuredLocation;
     this.serviceName = getServiceName(properties);
     this.serviceEnvironment = getServiceEnvironment(properties);
-    this.headers = properties.get(OPAMP_HEADERS);
+    this.headers = Collections.unmodifiableMap(new HashMap<>(headers));
     this.format = format;
     this.sourceConverter = MappedPolicySourceConverter.create(mappings, validators);
     this.pollingDelay =
@@ -138,9 +163,7 @@ public final class OpampPolicyProvider extends AbstractPolicyProvider {
       return this::stop;
     }
 
-    for (String key : headers.getPropertyKeys()) {
-      logger.info("OpAMP header: " + key);
-    }
+    headers.forEach((key, value) -> logger.info("OpAMP header: " + key));
 
     logger.info("Starting OpAMP client for: " + serviceName + " on endpoint " + endpoint);
     OkHttpClient.Builder okHttpClientBuilder = new OkHttpClient().newBuilder();
@@ -149,12 +172,12 @@ public final class OpampPolicyProvider extends AbstractPolicyProvider {
         .add(
             chain -> {
               Request.Builder modifiedRequest = chain.request().newBuilder();
-              for (String key : headers.getPropertyKeys()) {
-                String value = headers.getString(key);
-                if (value != null) {
-                  modifiedRequest.addHeader(key, value);
-                }
-              }
+              headers.forEach(
+                  (key, value) -> {
+                    if (value != null) {
+                      modifiedRequest.addHeader(key, value);
+                    }
+                  });
               return chain.proceed(modifiedRequest.build());
             });
     HttpRequestService requestService =

@@ -142,7 +142,10 @@ public final class PolicyInit {
             return Collections.emptyMap();
           }
           resolveAndInitializeConfiguredPolicyTypes(initConfig, autoConfiguration);
-          activateSources(initConfig, createLegacyConfig(config));
+          activateSources(
+              initConfig,
+              createLegacyConfig(config),
+              LegacyConfigPropertiesBridge.getOpampHeaders(config));
           return Collections.emptyMap();
         });
   }
@@ -179,7 +182,7 @@ public final class PolicyInit {
     }
     resolveAndInitializeConfiguredPolicyTypes(initConfig, createNoopAutoConfigurationCustomizer());
     try {
-      activateSources(initConfig, declarativeConfig);
+      activateSources(initConfig, declarativeConfig, Collections.emptyMap());
     } catch (RuntimeException e) {
       logger.log(
           Level.WARNING,
@@ -284,7 +287,9 @@ public final class PolicyInit {
    * <p>This is idempotent; repeated calls after first activation are ignored.
    */
   private static void activateSources(
-      PolicyInitConfig initConfig, DeclarativeConfigProperties config) {
+      PolicyInitConfig initConfig,
+      DeclarativeConfigProperties config,
+      Map<String, String> opampHeaders) {
     if (!sourcesActivated.compareAndSet(false, true)) {
       return;
     }
@@ -297,7 +302,8 @@ public final class PolicyInit {
             source.getKind().configValue());
         continue;
       }
-      PolicyProvider provider = source.getKind().createProvider(source, config, validators);
+      PolicyProvider provider =
+          source.getKind().createProvider(source, config, validators, opampHeaders);
       if (provider == null) {
         logger.log(
             Level.INFO,

@@ -11,8 +11,10 @@ import io.opentelemetry.contrib.dynamic.policy.OpampPolicyProvider;
 import io.opentelemetry.contrib.dynamic.policy.PolicyProvider;
 import io.opentelemetry.contrib.dynamic.policy.PolicyValidator;
 import io.opentelemetry.contrib.dynamic.policy.registry.PolicySourceConfig;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -82,22 +84,34 @@ public enum SourceKind {
       PolicySourceConfig source,
       DeclarativeConfigProperties config,
       List<PolicyValidator> validators) {
+    return createProvider(source, config, validators, Collections.emptyMap());
+  }
+
+  /** Creates a provider with legacy OpAMP headers captured at the configuration boundary. */
+  @Nullable
+  public PolicyProvider createProvider(
+      PolicySourceConfig source,
+      DeclarativeConfigProperties config,
+      List<PolicyValidator> validators,
+      Map<String, String> opampHeaders) {
     Objects.requireNonNull(source, "source cannot be null");
     Objects.requireNonNull(config, "config cannot be null");
     Objects.requireNonNull(validators, "validators cannot be null");
+    Objects.requireNonNull(opampHeaders, "opampHeaders cannot be null");
     SourceKind sourceKind = source.getKind();
     if (sourceKind != this) {
       throw new IllegalArgumentException(
           "Source kind mismatch: expected " + this + " but was " + sourceKind);
     }
-    return providerCreator.create(source, config, validators);
+    return providerCreator.create(source, config, validators, opampHeaders);
   }
 
   @Nullable
   private static PolicyProvider createNoProvider(
       PolicySourceConfig source,
       DeclarativeConfigProperties config,
-      List<PolicyValidator> validators) {
+      List<PolicyValidator> validators,
+      Map<String, String> opampHeaders) {
     return null;
   }
 
@@ -105,14 +119,15 @@ public enum SourceKind {
   private static PolicyProvider createOpampProvider(
       PolicySourceConfig source,
       DeclarativeConfigProperties config,
-      List<PolicyValidator> validators) {
+      List<PolicyValidator> validators,
+      Map<String, String> opampHeaders) {
     String location = source.getLocation();
     if (location == null || location.trim().isEmpty()) {
       return null;
     }
     try {
       return new OpampPolicyProvider(
-          config, location, source.getFormat(), source.getMappings(), validators);
+          config, location, source.getFormat(), source.getMappings(), validators, opampHeaders);
     } catch (IllegalArgumentException e) {
       logger.log(
           Level.FINE,
@@ -129,7 +144,8 @@ public enum SourceKind {
     PolicyProvider create(
         PolicySourceConfig source,
         DeclarativeConfigProperties config,
-        List<PolicyValidator> validators);
+        List<PolicyValidator> validators,
+        Map<String, String> opampHeaders);
   }
 
   /**

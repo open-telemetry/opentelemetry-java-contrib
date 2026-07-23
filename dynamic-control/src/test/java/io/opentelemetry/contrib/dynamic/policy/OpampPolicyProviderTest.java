@@ -11,9 +11,6 @@ import static org.mockito.Mockito.when;
 
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import org.junit.jupiter.api.Test;
 
 class OpampPolicyProviderTest {
@@ -41,7 +38,6 @@ class OpampPolicyProviderTest {
     DeclarativeConfigProperties resourceAttributes = mock(DeclarativeConfigProperties.class);
     when(properties.getString("otel.service.name")).thenReturn("my-service");
     when(properties.get("otel.resource.attributes")).thenReturn(resourceAttributes);
-    when(resourceAttributes.getPropertyKeys()).thenReturn(Collections.emptySet());
 
     assertThat(OpampPolicyProvider.getServiceName(properties)).isEqualTo("my-service");
   }
@@ -52,7 +48,6 @@ class OpampPolicyProviderTest {
     DeclarativeConfigProperties resourceAttributes = mock(DeclarativeConfigProperties.class);
     when(properties.getString("otel.service.name")).thenReturn(null);
     when(properties.get("otel.resource.attributes")).thenReturn(resourceAttributes);
-    when(resourceAttributes.getPropertyKeys()).thenReturn(Collections.singleton("service.name"));
     when(resourceAttributes.getString("service.name")).thenReturn("resource-service");
 
     assertThat(OpampPolicyProvider.getServiceName(properties)).isEqualTo("resource-service");
@@ -73,9 +68,6 @@ class OpampPolicyProviderTest {
     DeclarativeConfigProperties semconvProperties = mock(DeclarativeConfigProperties.class);
     DeclarativeConfigProperties semconvResourceAttributes = mock(DeclarativeConfigProperties.class);
     when(semconvProperties.get("otel.resource.attributes")).thenReturn(semconvResourceAttributes);
-    when(semconvResourceAttributes.getPropertyKeys())
-        .thenReturn(
-            new HashSet<>(Arrays.asList("deployment.environment.name", "deployment.environment")));
     when(semconvResourceAttributes.getString("deployment.environment.name")).thenReturn("prod");
     when(semconvResourceAttributes.getString("deployment.environment")).thenReturn("legacy");
     assertThat(OpampPolicyProvider.getServiceEnvironment(semconvProperties)).isEqualTo("prod");
@@ -83,8 +75,6 @@ class OpampPolicyProviderTest {
     DeclarativeConfigProperties legacyProperties = mock(DeclarativeConfigProperties.class);
     DeclarativeConfigProperties legacyResourceAttributes = mock(DeclarativeConfigProperties.class);
     when(legacyProperties.get("otel.resource.attributes")).thenReturn(legacyResourceAttributes);
-    when(legacyResourceAttributes.getPropertyKeys())
-        .thenReturn(Collections.singleton("deployment.environment"));
     when(legacyResourceAttributes.getString("deployment.environment")).thenReturn("staging");
     assertThat(OpampPolicyProvider.getServiceEnvironment(legacyProperties)).isEqualTo("staging");
   }
