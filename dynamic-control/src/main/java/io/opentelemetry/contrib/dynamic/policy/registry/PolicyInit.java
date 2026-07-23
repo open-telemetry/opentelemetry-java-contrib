@@ -14,6 +14,7 @@ import io.opentelemetry.contrib.dynamic.policy.PolicyTypeInitializer;
 import io.opentelemetry.contrib.dynamic.policy.PolicyValidator;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
 import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingRatePolicy;
+import io.opentelemetry.instrumentation.config.bridge.DeclarativeConfigBridge;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import java.io.Closeable;
@@ -141,9 +142,21 @@ public final class PolicyInit {
             return Collections.emptyMap();
           }
           resolveAndInitializeConfiguredPolicyTypes(initConfig, autoConfiguration);
-          activateSources(initConfig, config);
+          activateSources(initConfig, createLegacyConfig(config));
           return Collections.emptyMap();
         });
+  }
+
+  /**
+   * Exposes the legacy flat configuration as general declarative properties for source providers.
+   *
+   * <p>This is deliberately a component-properties bridge with an empty prefix, rather than the
+   * instrumentation-config bridge. OpAMP does not have a declarative schema yet, so its endpoint
+   * and service identity continue to come from the general {@code ConfigProperties} namespace.
+   */
+  private static DeclarativeConfigProperties createLegacyConfig(ConfigProperties config) {
+    return LegacyConfigPropertiesBridge.create(
+        config, DeclarativeConfigBridge.createComponentProperties(config, ""));
   }
 
   /**
@@ -154,10 +167,8 @@ public final class PolicyInit {
   }
 
   /** Initializes dynamic-control policy wiring from declarative config component input. */
-  public static void initFromDeclarativeConfig(
-      DeclarativeConfigProperties declarativeConfig, ConfigProperties config) {
+  public static void initFromDeclarativeConfig(DeclarativeConfigProperties declarativeConfig) {
     Objects.requireNonNull(declarativeConfig, "declarativeConfig cannot be null");
-    Objects.requireNonNull(config, "config cannot be null");
     PolicyInitConfig initConfig =
         PolicyInitConfig.readFromTelemetryPolicyDeclarativeConfig(declarativeConfig);
     if (initConfig == null) {
@@ -168,7 +179,7 @@ public final class PolicyInit {
     }
     resolveAndInitializeConfiguredPolicyTypes(initConfig, createNoopAutoConfigurationCustomizer());
     try {
-      activateSources(initConfig, config);
+      activateSources(initConfig, declarativeConfig);
     } catch (RuntimeException e) {
       logger.log(
           Level.WARNING,
@@ -272,7 +283,8 @@ public final class PolicyInit {
    *
    * <p>This is idempotent; repeated calls after first activation are ignored.
    */
-  private static void activateSources(PolicyInitConfig initConfig, ConfigProperties config) {
+  private static void activateSources(
+      PolicyInitConfig initConfig, DeclarativeConfigProperties config) {
     if (!sourcesActivated.compareAndSet(false, true)) {
       return;
     }

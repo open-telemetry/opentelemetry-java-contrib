@@ -81,22 +81,18 @@ class PolicyInitTest {
 
   @Test
   void initializesRegisteredPolicyTypeFromDeclarativeConfig() {
-    ConfigProperties config = mock(ConfigProperties.class);
-
     PolicyInit.initFromDeclarativeConfig(
-        telemetryPolicyNodeConfig(TraceSamplingRatePolicy.POLICY_TYPE), config);
+        telemetryPolicyNodeConfig(TraceSamplingRatePolicy.POLICY_TYPE));
 
     assertThat(TraceSamplingRatePolicy.getInitializedSampler()).isNotNull();
   }
 
   @Test
   void throwsWhenDeclarativeConfigUsesUnknownPolicyType() {
-    ConfigProperties config = mock(ConfigProperties.class);
-
     assertThatThrownBy(
             () ->
                 PolicyInit.initFromDeclarativeConfig(
-                    telemetryPolicyNodeConfig("trace_sampling_rate_policy"), config))
+                    telemetryPolicyNodeConfig("trace_sampling_rate_policy")))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("Unknown policyType");
   }
@@ -114,10 +110,8 @@ class PolicyInitTest {
           initializeCount.incrementAndGet();
           return implementer;
         });
-    ConfigProperties config = mock(ConfigProperties.class);
-
-    PolicyInit.initFromDeclarativeConfig(telemetryPolicyNodeConfig(policyType), config);
-    PolicyInit.initFromDeclarativeConfig(telemetryPolicyNodeConfig(policyType), config);
+    PolicyInit.initFromDeclarativeConfig(telemetryPolicyNodeConfig(policyType));
+    PolicyInit.initFromDeclarativeConfig(telemetryPolicyNodeConfig(policyType));
 
     assertThat(initializeCount.get()).isEqualTo(1);
     verify(implementer, times(1)).onPoliciesChanged(Collections.emptyList());

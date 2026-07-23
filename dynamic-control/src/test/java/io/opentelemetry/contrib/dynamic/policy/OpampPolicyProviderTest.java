@@ -9,18 +9,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
+import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
 import org.junit.jupiter.api.Test;
 
 class OpampPolicyProviderTest {
 
   @Test
   void getEndpointReturnsNullWhenUnset() {
-    ConfigProperties properties = mock(ConfigProperties.class);
+    DeclarativeConfigProperties properties = mock(DeclarativeConfigProperties.class);
     when(properties.getString("otel.opamp.service.url")).thenReturn(null);
 
     assertThat(OpampPolicyProvider.getEndpoint(properties)).isNull();
@@ -28,7 +28,7 @@ class OpampPolicyProviderTest {
 
   @Test
   void getEndpointAppendsOpampPathWhenMissing() {
-    ConfigProperties properties = mock(ConfigProperties.class);
+    DeclarativeConfigProperties properties = mock(DeclarativeConfigProperties.class);
     when(properties.getString("otel.opamp.service.url")).thenReturn("https://example.com/base");
 
     assertThat(OpampPolicyProvider.getEndpoint(properties))
@@ -37,39 +37,65 @@ class OpampPolicyProviderTest {
 
   @Test
   void getServiceNameUsesPrimaryPropertyFirst() {
-    ConfigProperties properties = mock(ConfigProperties.class);
+    DeclarativeConfigProperties properties = mock(DeclarativeConfigProperties.class);
+    DeclarativeConfigProperties resourceAttributes = mock(DeclarativeConfigProperties.class);
     when(properties.getString("otel.service.name")).thenReturn("my-service");
-    when(properties.getMap("otel.resource.attributes")).thenReturn(Collections.emptyMap());
+    when(properties.get("otel.resource.attributes")).thenReturn(resourceAttributes);
+    when(resourceAttributes.getPropertyKeys()).thenReturn(Collections.emptySet());
 
     assertThat(OpampPolicyProvider.getServiceName(properties)).isEqualTo("my-service");
   }
 
   @Test
   void getServiceNameFallsBackToResourceAttribute() {
-    ConfigProperties properties = mock(ConfigProperties.class);
-    Map<String, String> resourceAttributes = new HashMap<>();
-    resourceAttributes.put("service.name", "resource-service");
+    DeclarativeConfigProperties properties = mock(DeclarativeConfigProperties.class);
+    DeclarativeConfigProperties resourceAttributes = mock(DeclarativeConfigProperties.class);
     when(properties.getString("otel.service.name")).thenReturn(null);
-    when(properties.getMap("otel.resource.attributes")).thenReturn(resourceAttributes);
+    when(properties.get("otel.resource.attributes")).thenReturn(resourceAttributes);
+    when(resourceAttributes.getPropertyKeys()).thenReturn(Collections.singleton("service.name"));
+    when(resourceAttributes.getString("service.name")).thenReturn("resource-service");
 
     assertThat(OpampPolicyProvider.getServiceName(properties)).isEqualTo("resource-service");
   }
 
   @Test
+  void getServiceNameUsesUnknownServiceWhenResourceAttributesAreUnset() {
+    DeclarativeConfigProperties properties = mock(DeclarativeConfigProperties.class);
+    when(properties.getString("otel.service.name")).thenReturn(null);
+    when(properties.get("otel.resource.attributes"))
+        .thenReturn(DeclarativeConfigProperties.empty());
+
+    assertThat(OpampPolicyProvider.getServiceName(properties)).isEqualTo("unknown_service:java");
+  }
+
+  @Test
   void getServiceEnvironmentUsesSemconvThenLegacy() {
-    ConfigProperties semconvProperties = mock(ConfigProperties.class);
-    Map<String, String> semconvResourceAttributes = new HashMap<>();
-    semconvResourceAttributes.put("deployment.environment.name", "prod");
-    semconvResourceAttributes.put("deployment.environment", "legacy");
-    when(semconvProperties.getMap("otel.resource.attributes"))
-        .thenReturn(semconvResourceAttributes);
+    DeclarativeConfigProperties semconvProperties = mock(DeclarativeConfigProperties.class);
+    DeclarativeConfigProperties semconvResourceAttributes = mock(DeclarativeConfigProperties.class);
+    when(semconvProperties.get("otel.resource.attributes")).thenReturn(semconvResourceAttributes);
+    when(semconvResourceAttributes.getPropertyKeys())
+        .thenReturn(
+            new HashSet<>(Arrays.asList("deployment.environment.name", "deployment.environment")));
+    when(semconvResourceAttributes.getString("deployment.environment.name")).thenReturn("prod");
+    when(semconvResourceAttributes.getString("deployment.environment")).thenReturn("legacy");
     assertThat(OpampPolicyProvider.getServiceEnvironment(semconvProperties)).isEqualTo("prod");
 
-    ConfigProperties legacyProperties = mock(ConfigProperties.class);
-    Map<String, String> legacyResourceAttributes = new HashMap<>();
-    legacyResourceAttributes.put("deployment.environment", "staging");
-    when(legacyProperties.getMap("otel.resource.attributes")).thenReturn(legacyResourceAttributes);
+    DeclarativeConfigProperties legacyProperties = mock(DeclarativeConfigProperties.class);
+    DeclarativeConfigProperties legacyResourceAttributes = mock(DeclarativeConfigProperties.class);
+    when(legacyProperties.get("otel.resource.attributes")).thenReturn(legacyResourceAttributes);
+    when(legacyResourceAttributes.getPropertyKeys())
+        .thenReturn(Collections.singleton("deployment.environment"));
+    when(legacyResourceAttributes.getString("deployment.environment")).thenReturn("staging");
     assertThat(OpampPolicyProvider.getServiceEnvironment(legacyProperties)).isEqualTo("staging");
+  }
+
+  @Test
+  void getServiceEnvironmentReturnsNullWhenResourceAttributesAreUnset() {
+    DeclarativeConfigProperties properties = mock(DeclarativeConfigProperties.class);
+    when(properties.get("otel.resource.attributes"))
+        .thenReturn(DeclarativeConfigProperties.empty());
+
+    assertThat(OpampPolicyProvider.getServiceEnvironment(properties)).isNull();
   }
 
   @Test
