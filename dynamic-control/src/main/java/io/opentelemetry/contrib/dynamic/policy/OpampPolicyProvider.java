@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -79,7 +78,7 @@ public final class OpampPolicyProvider extends AbstractPolicyProvider {
   private final AtomicReference<Thread> shutdownHookRef = new AtomicReference<>();
 
   /**
-   * Creates a provider for one OpAMP-backed policy source.
+   * Creates a provider for one OpAMP-backed policy source without legacy OpAMP headers.
    *
    * @param properties declarative properties used to resolve endpoint/service identity
    * @param configuredLocation source location key used to select one OpAMP config entry
@@ -94,35 +93,30 @@ public final class OpampPolicyProvider extends AbstractPolicyProvider {
       SourceFormat format,
       List<PolicySourceMappingConfig> mappings,
       List<PolicyValidator> validators) {
-    this(properties, configuredLocation, format, mappings, validators, Collections.emptyMap());
+    this(new PolicyProviderConfig(properties), configuredLocation, format, mappings, validators);
   }
 
   /**
-   * Creates a provider with legacy OpAMP headers captured at the {@code ConfigProperties} boundary.
+   * Creates a provider with the shared provider configuration context.
    *
-   * <p>The declarative bridge cannot enumerate keys from system-property-backed maps, so headers
-   * are passed as a map rather than being read through {@link DeclarativeConfigProperties}.
-   *
-   * @param properties declarative properties used to resolve endpoint/service identity
+   * @param config declarative properties and any legacy OpAMP headers
    * @param configuredLocation source location key used to select one OpAMP config entry
    * @param format payload format parser for the selected source
    * @param mappings policy-id-to-policy-type mappings for this source
    * @param validators validators used to materialize typed {@link TelemetryPolicy} instances
-   * @param headers legacy OpAMP headers captured from flat configuration
    */
   public OpampPolicyProvider(
-      DeclarativeConfigProperties properties,
+      PolicyProviderConfig config,
       String configuredLocation,
       SourceFormat format,
       List<PolicySourceMappingConfig> mappings,
-      List<PolicyValidator> validators,
-      Map<String, String> headers) {
-    Objects.requireNonNull(properties, "properties cannot be null");
+      List<PolicyValidator> validators) {
+    Objects.requireNonNull(config, "config cannot be null");
     Objects.requireNonNull(configuredLocation, "configuredLocation cannot be null");
     Objects.requireNonNull(format, "format cannot be null");
     Objects.requireNonNull(mappings, "mappings cannot be null");
     Objects.requireNonNull(validators, "validators cannot be null");
-    Objects.requireNonNull(headers, "headers cannot be null");
+    DeclarativeConfigProperties properties = config.getProperties();
     String resolvedEndpoint = getEndpoint(properties);
     if (resolvedEndpoint == null) {
       throw new IllegalArgumentException("Missing OpAMP endpoint property: " + OPAMP_ENDPOINT);
@@ -131,7 +125,7 @@ public final class OpampPolicyProvider extends AbstractPolicyProvider {
     this.location = configuredLocation;
     this.serviceName = getServiceName(properties);
     this.serviceEnvironment = getServiceEnvironment(properties);
-    this.headers = Collections.unmodifiableMap(new HashMap<>(headers));
+    this.headers = config.getOpampHeaders();
     this.format = format;
     this.sourceConverter = MappedPolicySourceConverter.create(mappings, validators);
     this.pollingDelay =
