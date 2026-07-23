@@ -10,10 +10,24 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
+import io.opentelemetry.contrib.dynamic.policy.source.SourceFormat;
+import java.io.Closeable;
 import java.time.Duration;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import mockwebserver3.MockResponse;
+import mockwebserver3.MockWebServer;
+import mockwebserver3.RecordedRequest;
+import mockwebserver3.junit5.StartStop;
+import okio.Buffer;
+import opamp.proto.ServerToAgent;
 import org.junit.jupiter.api.Test;
 
 class OpampPolicyProviderTest {
+
+  @StartStop private final MockWebServer server = new MockWebServer();
 
   @Test
   void getEndpointReturnsNullWhenUnset() {
@@ -95,5 +109,44 @@ class OpampPolicyProviderTest {
 
     assertThat(OpampPolicyProvider.getGlobalPollingIntervalForTest())
         .isEqualTo(Duration.ofSeconds(30));
+  }
+
+  @Test
+  void startWatchingAddsConfiguredHeadersToOpampRequests() throws Exception {
+    DeclarativeConfigProperties properties = mock(DeclarativeConfigProperties.class);
+    when(properties.getString("otel.opamp.service.url"))
+        .thenReturn(server.url("/v1/opamp").toString());
+    when(properties.getString("otel.service.name")).thenReturn("test-service");
+    when(properties.get("otel.resource.attributes"))
+        .thenReturn(DeclarativeConfigProperties.empty());
+
+    Map<String, String> headers = new HashMap<>();
+    headers.put("Authorization", "Bearer token");
+    headers.put("X-Test-Header", "test-value");
+    OpampPolicyProvider provider =
+        new OpampPolicyProvider(
+            properties,
+            "vendor-specific",
+            SourceFormat.KEYVALUE,
+            Collections.emptyList(),
+            Collections.emptyList(),
+            headers);
+    server.enqueue(emptyServerResponse());
+
+    try (Closeable ignored = provider.startWatching(policies -> {})) {
+      RecordedRequest request = server.takeRequest(5, TimeUnit.SECONDS);
+
+      assertThat(request).isNotNull();
+      assertThat(request.getHeaders().get("Authorization")).isEqualTo("Bearer token");
+      assertThat(request.getHeaders().get("X-Test-Header")).isEqualTo("test-value");
+    } finally {
+      OpampPolicyProvider.resetForTest();
+    }
+  }
+
+  private static MockResponse emptyServerResponse() {
+    Buffer body = new Buffer();
+    body.write(new ServerToAgent.Builder().build().encode());
+    return new MockResponse.Builder().code(200).body(body).build();
   }
 }
