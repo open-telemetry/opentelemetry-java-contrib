@@ -28,10 +28,10 @@ dependencies {
   testImplementation("io.opentelemetry:opentelemetry-sdk")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-declarative-config")
+  testImplementation("io.opentelemetry.instrumentation:opentelemetry-declarative-config-bridge")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation("io.opentelemetry:opentelemetry-api-incubator")
   testImplementation("io.opentelemetry:opentelemetry-exporter-logging")
-  testImplementation("io.opentelemetry.instrumentation:opentelemetry-declarative-config-bridge")
 }
 
 tasks {
