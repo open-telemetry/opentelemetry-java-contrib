@@ -125,7 +125,7 @@ class OpampPolicyProviderTest {
     headers.put("X-Test-Header", "test-value");
     OpampPolicyProvider provider =
         new OpampPolicyProvider(
-            new PolicyProviderConfig(properties, headers),
+            PolicyProviderConfig.createWithOpampHeaders(properties, headers),
             "vendor-specific",
             SourceFormat.KEYVALUE,
             Collections.emptyList(),

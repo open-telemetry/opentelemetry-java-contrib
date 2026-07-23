@@ -93,7 +93,7 @@ public final class OpampPolicyProvider extends AbstractPolicyProvider {
       SourceFormat format,
       List<PolicySourceMappingConfig> mappings,
       List<PolicyValidator> validators) {
-    this(new PolicyProviderConfig(properties), configuredLocation, format, mappings, validators);
+    this(PolicyProviderConfig.create(properties), configuredLocation, format, mappings, validators);
   }
 
   /**
