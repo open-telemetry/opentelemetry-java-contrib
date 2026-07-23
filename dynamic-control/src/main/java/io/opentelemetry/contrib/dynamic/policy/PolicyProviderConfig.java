@@ -17,8 +17,8 @@ public final class PolicyProviderConfig {
   private final Map<String, String> opampHeaders;
 
   /** Creates a configuration context without legacy OpAMP headers. */
-  public PolicyProviderConfig(DeclarativeConfigProperties properties) {
-    this(properties, Collections.emptyMap());
+  public static PolicyProviderConfig create(DeclarativeConfigProperties properties) {
+    return new PolicyProviderConfig(properties, Collections.emptyMap());
   }
 
   /**
@@ -27,7 +27,12 @@ public final class PolicyProviderConfig {
    * <p>The headers are kept separately because the flat-to-declarative bridge cannot enumerate keys
    * from system-property-backed maps.
    */
-  public PolicyProviderConfig(
+  public static PolicyProviderConfig createWithOpampHeaders(
+      DeclarativeConfigProperties properties, Map<String, String> opampHeaders) {
+    return new PolicyProviderConfig(properties, opampHeaders);
+  }
+
+  private PolicyProviderConfig(
       DeclarativeConfigProperties properties, Map<String, String> opampHeaders) {
     this.properties = Objects.requireNonNull(properties, "properties cannot be null");
     this.opampHeaders =

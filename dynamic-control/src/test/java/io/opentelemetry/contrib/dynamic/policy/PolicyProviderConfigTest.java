@@ -22,7 +22,7 @@ class PolicyProviderConfigTest {
     Map<String, String> headers = new HashMap<>();
     headers.put("Authorization", "Bearer token");
 
-    PolicyProviderConfig config = new PolicyProviderConfig(properties, headers);
+    PolicyProviderConfig config = PolicyProviderConfig.createWithOpampHeaders(properties, headers);
     headers.put("X-Changed", "after-construction");
 
     assertThat(config.getProperties()).isSameAs(properties);
@@ -36,6 +36,6 @@ class PolicyProviderConfigTest {
   void defaultsToNoOpampHeaders() {
     DeclarativeConfigProperties properties = mock(DeclarativeConfigProperties.class);
 
-    assertThat(new PolicyProviderConfig(properties).getOpampHeaders()).isEmpty();
+    assertThat(PolicyProviderConfig.create(properties).getOpampHeaders()).isEmpty();
   }
 }

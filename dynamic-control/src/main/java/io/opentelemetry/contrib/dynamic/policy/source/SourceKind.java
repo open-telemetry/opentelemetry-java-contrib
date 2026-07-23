@@ -84,7 +84,7 @@ public enum SourceKind {
       DeclarativeConfigProperties config,
       List<PolicyValidator> validators) {
     Objects.requireNonNull(config, "config cannot be null");
-    return createProvider(source, new PolicyProviderConfig(config), validators);
+    return createProvider(source, PolicyProviderConfig.create(config), validators);
   }
 
   /** Creates a provider with the shared provider configuration context. */

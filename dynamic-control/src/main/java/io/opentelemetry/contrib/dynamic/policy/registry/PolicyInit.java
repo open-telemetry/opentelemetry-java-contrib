@@ -156,7 +156,7 @@ public final class PolicyInit {
    * and service identity continue to come from the general {@code ConfigProperties} namespace.
    */
   private static PolicyProviderConfig createLegacyProviderConfig(ConfigProperties config) {
-    return new PolicyProviderConfig(
+    return PolicyProviderConfig.createWithOpampHeaders(
         LegacyConfigPropertiesBridge.create(
             config, DeclarativeConfigBridge.createComponentProperties(config, "")),
         LegacyConfigPropertiesBridge.getOpampHeaders(config));
@@ -182,7 +182,7 @@ public final class PolicyInit {
     }
     resolveAndInitializeConfiguredPolicyTypes(initConfig, createNoopAutoConfigurationCustomizer());
     try {
-      activateSources(initConfig, new PolicyProviderConfig(declarativeConfig));
+      activateSources(initConfig, PolicyProviderConfig.create(declarativeConfig));
     } catch (RuntimeException e) {
       logger.log(
           Level.WARNING,
