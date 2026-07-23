@@ -36,6 +36,7 @@ public final class TelemetryPolicySamplerComponentProvider implements ComponentP
   }
 
   @Override
+  @SuppressWarnings("deprecation") // The migration is tracked in issue #2989.
   public Sampler create(DeclarativeConfigProperties config) {
     logger.log(
         Level.INFO,
