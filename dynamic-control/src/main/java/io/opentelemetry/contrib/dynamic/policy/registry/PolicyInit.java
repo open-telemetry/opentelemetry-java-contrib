@@ -154,11 +154,13 @@ public final class PolicyInit {
    * <p>This is deliberately a component-properties bridge with an empty prefix, rather than the
    * instrumentation-config bridge. OpAMP does not have a declarative schema yet, so its endpoint
    * and service identity continue to come from the general {@code ConfigProperties} namespace.
+   * Map-shaped resource attributes and OpAMP headers are passed separately because they cannot be
+   * exposed by the bridge.
    */
   private static PolicyProviderConfig createLegacyProviderConfig(ConfigProperties config) {
-    return PolicyProviderConfig.createWithOpampHeaders(
-        LegacyConfigPropertiesBridge.create(
-            config, DeclarativeConfigBridge.createComponentProperties(config, "")),
+    return PolicyProviderConfig.createWithLegacyProperties(
+        DeclarativeConfigBridge.createComponentProperties(config, ""),
+        LegacyConfigPropertiesBridge.getResourceAttributes(config),
         LegacyConfigPropertiesBridge.getOpampHeaders(config));
   }
 
