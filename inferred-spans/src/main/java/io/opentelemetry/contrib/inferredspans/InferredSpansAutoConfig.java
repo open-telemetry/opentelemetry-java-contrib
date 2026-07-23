@@ -29,7 +29,7 @@ public class InferredSpansAutoConfig implements AutoConfigurationCustomizerProvi
                 InferredSpansConfig.createSpanProcessor(declarativeProperties));
           } else {
             log.finest(
-                "Not enabling inferred spans processor because otel.inferred.spans.enabled is not set");
+                "Not enabling inferred spans processor because otel.inferred.spans.enabled is unset or false");
           }
           return providerBuilder;
         });

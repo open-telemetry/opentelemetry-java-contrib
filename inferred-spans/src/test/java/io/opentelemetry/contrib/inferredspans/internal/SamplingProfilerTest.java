@@ -309,16 +309,16 @@ class SamplingProfilerTest {
     } finally {
       span.end();
     }
-    Thread.sleep(500);
+    Thread.sleep(200);
   }
 
   private static void cInferred() throws Exception {
     dInferred();
-    Thread.sleep(500);
+    Thread.sleep(200);
   }
 
   private static void dInferred() throws Exception {
-    Thread.sleep(500);
+    Thread.sleep(200);
   }
 
   private void setupProfiler(boolean enabled) {
