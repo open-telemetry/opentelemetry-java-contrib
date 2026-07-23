@@ -9,6 +9,57 @@
   become visible to the reader immediately. Orphan `*.tmp` files left behind by an unclean
   shutdown are recovered on the next storage open. The `minFileAgeForReadMillis` default changes
   from `33s` to `0` and is no longer required to be greater than `maxFileAgeForWriteMillis`.
+  ([#2897](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2897))
+
+### Dynamic control
+
+- Align to name and ID in spec for policies
+  ([#2926](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2926))
+- Add identity to existing policy classes
+  ([#2942](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2942))
+- Add deleted policy
+  ([#2943](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2943))
+- Apply deleted policy to telemetry policy deletion flow
+  ([#2944](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2944))
+- Make TelemetryPolicy an interface
+  ([#2948](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2948))
+- Refactor sourceKey to policyId to align to spec
+  ([#2949](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2949))
+- Add initializing from declarative config.
+  ([#2967](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2967))
+- Align aggregation to spec
+  ([#2960](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2960))
+- Add priority ordering to sources
+  ([#2970](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2970))
+- Add SourceKind to TelemetryPolicy
+  ([#2972](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2972))
+- Sampling rate is only changed if it has changed value
+  ([#2957](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2957))
+- SourceKind is now propagated across validation and policy creation
+  ([#2973](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2973))
+- Drop comparable policies according to priority for an update
+  ([#2974](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2974))
+- Add change checking for file & http sources
+  ([#2975](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2975))
+- Refactor OpampPolicyProvider for other PolicyProviders
+  ([#2987](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2987))
+
+### IBM MQ metrics
+
+- Queue manager uptime is now reported
+  ([#2835](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2835))
+- Update metric unit from 'microseconds' to 'us'
+  ([#2887](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2887))
+- Remove the in development notice of the IBM MQ metrics component and move it to beta
+  ([#2982](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2982))
+
+### OpAMP client
+
+- Add the ability to receive custom messages
+  ([#2990](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2990))
+
+
+
 ## Version 1.58.0 (2026-06-19)
 
 ### AWS X-Ray SDK support
