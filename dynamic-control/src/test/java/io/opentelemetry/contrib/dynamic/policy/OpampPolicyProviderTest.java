@@ -53,7 +53,8 @@ class OpampPolicyProviderTest {
     when(properties.getString("otel.service.name")).thenReturn("my-service");
     when(properties.get("otel.resource.attributes")).thenReturn(resourceAttributes);
 
-    assertThat(OpampPolicyProvider.getServiceName(properties)).isEqualTo("my-service");
+    assertThat(OpampPolicyProvider.getServiceName(PolicyProviderConfig.create(properties)))
+        .isEqualTo("my-service");
   }
 
   @Test
@@ -64,7 +65,22 @@ class OpampPolicyProviderTest {
     when(properties.get("otel.resource.attributes")).thenReturn(resourceAttributes);
     when(resourceAttributes.getString("service.name")).thenReturn("resource-service");
 
-    assertThat(OpampPolicyProvider.getServiceName(properties)).isEqualTo("resource-service");
+    assertThat(OpampPolicyProvider.getServiceName(PolicyProviderConfig.create(properties)))
+        .isEqualTo("resource-service");
+  }
+
+  @Test
+  void getServiceNameFallsBackToLegacyResourceAttributeMap() {
+    DeclarativeConfigProperties properties = mock(DeclarativeConfigProperties.class);
+    when(properties.getString("otel.service.name")).thenReturn(null);
+
+    assertThat(
+            OpampPolicyProvider.getServiceName(
+                PolicyProviderConfig.createWithLegacyProperties(
+                    properties,
+                    Collections.singletonMap("service.name", "legacy-service"),
+                    Collections.emptyMap())))
+        .isEqualTo("legacy-service");
   }
 
   @Test
@@ -74,7 +90,8 @@ class OpampPolicyProviderTest {
     when(properties.get("otel.resource.attributes"))
         .thenReturn(DeclarativeConfigProperties.empty());
 
-    assertThat(OpampPolicyProvider.getServiceName(properties)).isEqualTo("unknown_service:java");
+    assertThat(OpampPolicyProvider.getServiceName(PolicyProviderConfig.create(properties)))
+        .isEqualTo("unknown_service:java");
   }
 
   @Test
@@ -84,13 +101,27 @@ class OpampPolicyProviderTest {
     when(semconvProperties.get("otel.resource.attributes")).thenReturn(semconvResourceAttributes);
     when(semconvResourceAttributes.getString("deployment.environment.name")).thenReturn("prod");
     when(semconvResourceAttributes.getString("deployment.environment")).thenReturn("legacy");
-    assertThat(OpampPolicyProvider.getServiceEnvironment(semconvProperties)).isEqualTo("prod");
+    assertThat(
+            OpampPolicyProvider.getServiceEnvironment(
+                PolicyProviderConfig.create(semconvProperties)))
+        .isEqualTo("prod");
 
     DeclarativeConfigProperties legacyProperties = mock(DeclarativeConfigProperties.class);
     DeclarativeConfigProperties legacyResourceAttributes = mock(DeclarativeConfigProperties.class);
     when(legacyProperties.get("otel.resource.attributes")).thenReturn(legacyResourceAttributes);
     when(legacyResourceAttributes.getString("deployment.environment")).thenReturn("staging");
-    assertThat(OpampPolicyProvider.getServiceEnvironment(legacyProperties)).isEqualTo("staging");
+    assertThat(
+            OpampPolicyProvider.getServiceEnvironment(
+                PolicyProviderConfig.create(legacyProperties)))
+        .isEqualTo("staging");
+
+    assertThat(
+            OpampPolicyProvider.getServiceEnvironment(
+                PolicyProviderConfig.createWithLegacyProperties(
+                    legacyProperties,
+                    Collections.singletonMap("deployment.environment.name", "legacy-prod"),
+                    Collections.emptyMap())))
+        .isEqualTo("legacy-prod");
   }
 
   @Test
@@ -99,7 +130,8 @@ class OpampPolicyProviderTest {
     when(properties.get("otel.resource.attributes"))
         .thenReturn(DeclarativeConfigProperties.empty());
 
-    assertThat(OpampPolicyProvider.getServiceEnvironment(properties)).isNull();
+    assertThat(OpampPolicyProvider.getServiceEnvironment(PolicyProviderConfig.create(properties)))
+        .isNull();
   }
 
   @Test
@@ -125,7 +157,8 @@ class OpampPolicyProviderTest {
     headers.put("X-Test-Header", "test-value");
     OpampPolicyProvider provider =
         new OpampPolicyProvider(
-            PolicyProviderConfig.createWithOpampHeaders(properties, headers),
+            PolicyProviderConfig.createWithLegacyProperties(
+                properties, Collections.emptyMap(), headers),
             "vendor-specific",
             SourceFormat.KEYVALUE,
             Collections.emptyList(),

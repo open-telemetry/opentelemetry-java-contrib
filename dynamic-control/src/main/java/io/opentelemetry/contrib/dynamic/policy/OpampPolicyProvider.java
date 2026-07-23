@@ -123,8 +123,8 @@ public final class OpampPolicyProvider extends AbstractPolicyProvider {
     }
     this.endpoint = resolvedEndpoint;
     this.location = configuredLocation;
-    this.serviceName = getServiceName(properties);
-    this.serviceEnvironment = getServiceEnvironment(properties);
+    this.serviceName = getServiceName(config);
+    this.serviceEnvironment = getServiceEnvironment(config);
     this.headers = config.getOpampHeaders();
     this.format = format;
     this.sourceConverter = MappedPolicySourceConverter.create(mappings, validators);
@@ -353,13 +353,13 @@ public final class OpampPolicyProvider extends AbstractPolicyProvider {
    * <p>Resolution order: {@code otel.service.name}, then {@code service.name} from {@code
    * otel.resource.attributes}, then {@code unknown_service:java}.
    */
-  static String getServiceName(DeclarativeConfigProperties properties) {
+  static String getServiceName(PolicyProviderConfig config) {
+    DeclarativeConfigProperties properties = config.getProperties();
     String configuredServiceName = properties.getString(SERVICE_NAME);
     if (configuredServiceName != null) {
       return configuredServiceName;
     }
-    DeclarativeConfigProperties resourceAttributes = properties.get(RESOURCE_ATTRIBUTES);
-    String resourceServiceName = resourceAttributes.getString("service.name");
+    String resourceServiceName = getResourceAttribute(config, "service.name");
     if (resourceServiceName != null) {
       return resourceServiceName;
     }
@@ -372,13 +372,21 @@ public final class OpampPolicyProvider extends AbstractPolicyProvider {
    * <p>Resolution order: {@code deployment.environment.name}, then {@code deployment.environment}.
    */
   @Nullable
-  static String getServiceEnvironment(DeclarativeConfigProperties properties) {
-    DeclarativeConfigProperties resourceAttributes = properties.get(RESOURCE_ATTRIBUTES);
-    String semconvEnvironment = resourceAttributes.getString(DEPLOYMENT_ENVIRONMENT_NAME);
+  static String getServiceEnvironment(PolicyProviderConfig config) {
+    String semconvEnvironment = getResourceAttribute(config, DEPLOYMENT_ENVIRONMENT_NAME);
     if (semconvEnvironment != null) {
       return semconvEnvironment;
     }
-    return resourceAttributes.getString(DEPLOYMENT_ENVIRONMENT);
+    return getResourceAttribute(config, DEPLOYMENT_ENVIRONMENT);
+  }
+
+  @Nullable
+  private static String getResourceAttribute(PolicyProviderConfig config, String name) {
+    String value = config.getResourceAttributes().get(name);
+    if (value != null) {
+      return value;
+    }
+    return config.getProperties().get(RESOURCE_ATTRIBUTES).getString(name);
   }
 
   private static String normalizeEndpoint(String endpoint) {

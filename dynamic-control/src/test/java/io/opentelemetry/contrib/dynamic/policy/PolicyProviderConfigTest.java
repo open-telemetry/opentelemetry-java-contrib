@@ -17,15 +17,21 @@ import org.junit.jupiter.api.Test;
 class PolicyProviderConfigTest {
 
   @Test
-  void copiesAndProtectsOpampHeaders() {
+  void copiesAndProtectsLegacyMaps() {
     DeclarativeConfigProperties properties = mock(DeclarativeConfigProperties.class);
+    Map<String, String> resourceAttributes = new HashMap<>();
+    resourceAttributes.put("service.name", "legacy-service");
     Map<String, String> headers = new HashMap<>();
     headers.put("Authorization", "Bearer token");
 
-    PolicyProviderConfig config = PolicyProviderConfig.createWithOpampHeaders(properties, headers);
+    PolicyProviderConfig config =
+        PolicyProviderConfig.createWithLegacyProperties(properties, resourceAttributes, headers);
+    resourceAttributes.put("deployment.environment", "prod");
     headers.put("X-Changed", "after-construction");
 
     assertThat(config.getProperties()).isSameAs(properties);
+    assertThat(config.getResourceAttributes()).containsEntry("service.name", "legacy-service");
+    assertThat(config.getResourceAttributes()).doesNotContainKey("deployment.environment");
     assertThat(config.getOpampHeaders()).containsEntry("Authorization", "Bearer token");
     assertThat(config.getOpampHeaders()).doesNotContainKey("X-Changed");
     assertThatThrownBy(() -> config.getOpampHeaders().put("X-New", "value"))
@@ -33,9 +39,10 @@ class PolicyProviderConfigTest {
   }
 
   @Test
-  void defaultsToNoOpampHeaders() {
+  void defaultsToEmptyLegacyMaps() {
     DeclarativeConfigProperties properties = mock(DeclarativeConfigProperties.class);
 
+    assertThat(PolicyProviderConfig.create(properties).getResourceAttributes()).isEmpty();
     assertThat(PolicyProviderConfig.create(properties).getOpampHeaders()).isEmpty();
   }
 }
