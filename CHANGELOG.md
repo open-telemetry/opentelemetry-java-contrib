@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### :warning: Breaking changes
+
+- Declarative config YAML now only accepts integer millisecond values for duration properties.
+  Users should no longer specify `ms` as a suffix in duration literals (eg. `100ms` should
+  be given as just `100`. 
+  ([#2988](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2988))
+
 ### Disk buffering
 
 - Replace the read-after-write delay with atomic rename: the writer now appends to
