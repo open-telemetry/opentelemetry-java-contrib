@@ -55,6 +55,8 @@ import java.util.logging.Logger;
  */
 public final class PolicyInit {
   private static final Logger logger = Logger.getLogger(PolicyInit.class.getName());
+  private static final String OPAMP_HEADERS_CONFIG_PROPERTY = "otel.experimental.opamp.headers";
+  private static final String RESOURCE_ATTRIBUTES_CONFIG_PROPERTY = "otel.resource.attributes";
   private static final Map<String, Class<? extends TelemetryPolicy>> REGISTERED_POLICY_TYPES =
       new ConcurrentHashMap<>();
   private static final Map<Class<? extends TelemetryPolicy>, PolicyTypeInitializer>
@@ -160,8 +162,8 @@ public final class PolicyInit {
   private static PolicyProviderConfig createLegacyProviderConfig(ConfigProperties config) {
     return PolicyProviderConfig.createWithLegacyProperties(
         DeclarativeConfigBridge.createComponentProperties(config, ""),
-        LegacyConfigPropertiesBridge.getResourceAttributes(config),
-        LegacyConfigPropertiesBridge.getOpampHeaders(config));
+        config.getMap(RESOURCE_ATTRIBUTES_CONFIG_PROPERTY),
+        config.getMap(OPAMP_HEADERS_CONFIG_PROPERTY));
   }
 
   /**
