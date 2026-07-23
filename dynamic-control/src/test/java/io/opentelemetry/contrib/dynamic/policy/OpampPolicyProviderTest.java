@@ -125,12 +125,11 @@ class OpampPolicyProviderTest {
     headers.put("X-Test-Header", "test-value");
     OpampPolicyProvider provider =
         new OpampPolicyProvider(
-            properties,
+            new PolicyProviderConfig(properties, headers),
             "vendor-specific",
             SourceFormat.KEYVALUE,
             Collections.emptyList(),
-            Collections.emptyList(),
-            headers);
+            Collections.emptyList());
     server.enqueue(emptyServerResponse());
 
     try (Closeable ignored = provider.startWatching(policies -> {})) {

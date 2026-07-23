@@ -142,7 +142,10 @@ class SourceKindTest {
     assertThatThrownBy(() -> SourceKind.OPAMP.createProvider(null, config, validators))
         .isInstanceOf(NullPointerException.class)
         .hasMessage("source cannot be null");
-    assertThatThrownBy(() -> SourceKind.OPAMP.createProvider(source, null, validators))
+    assertThatThrownBy(
+            () ->
+                SourceKind.OPAMP.createProvider(
+                    source, (DeclarativeConfigProperties) null, validators))
         .isInstanceOf(NullPointerException.class)
         .hasMessage("config cannot be null");
     assertThatThrownBy(() -> SourceKind.OPAMP.createProvider(source, config, null))
