@@ -47,8 +47,8 @@ class LegacyConfigPropertiesBridgeTest {
         .isEqualTo("legacy-service");
     assertThat(properties.get("otel.resource.attributes").getPropertyKeys())
         .containsExactlyInAnyOrder("service.name", "deployment.environment");
-    assertThat(properties.get("otel.experimental.opamp.headers").getString("Authorization"))
-        .isEqualTo("Bearer token");
+    assertThat(LegacyConfigPropertiesBridge.getOpampHeaders(config))
+        .containsEntry("Authorization", "Bearer token");
   }
 
   private static DeclarativeConfigProperties componentProperties(ConfigProperties config) {
