@@ -2,7 +2,7 @@ plugins {
   `java-platform`
 }
 
-val otelInstrumentationVersion = "2.29.0-alpha"
+val otelInstrumentationVersion = "2.30.0-alpha"
 val semconvVersion = "1.43.0"
 
 javaPlatform {
@@ -15,7 +15,7 @@ dependencies {
   // (the constraints section below doesn't have this issue, and will only show up
   // as runtime dependencies if they are actually used as runtime dependencies)
   api(platform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${otelInstrumentationVersion}"))
-  api(platform("com.fasterxml.jackson:jackson-bom:2.22.0"))
+  api(platform("com.fasterxml.jackson:jackson-bom:2.22.1"))
   api(platform("com.google.protobuf:protobuf-bom:4.35.1"))
   api(platform("com.squareup.okhttp3:okhttp-bom:5.4.0"))
 
@@ -46,18 +46,18 @@ dependencies {
 
     api("com.google.code.findbugs:annotations:3.0.1u2")
     api("com.google.code.findbugs:jsr305:3.0.2")
-    api("com.uber.nullaway:nullaway:0.13.7")
+    api("com.uber.nullaway:nullaway:0.13.8")
     api("org.assertj:assertj-core:3.27.7")
     api("org.awaitility:awaitility:4.3.0")
     api("org.bouncycastle:bcpkix-jdk15on:1.70")
-    api("org.bouncycastle:bcpkix-jdk18on:1.84")
-    api("org.bouncycastle:bcprov-jdk18on:1.84")
+    api("org.bouncycastle:bcpkix-jdk18on:1.85")
+    api("org.bouncycastle:bcprov-jdk18on:1.85")
     api("org.junit-pioneer:junit-pioneer:1.9.1")
     api("org.skyscreamer:jsonassert:1.5.3")
     api("org.apache.kafka:kafka-clients:4.3.1")
     api("org.testcontainers:testcontainers-kafka:2.0.5")
     api("org.jctools:jctools-core:4.0.6")
-    api("tools.profiler:async-profiler:4.4")
+    api("tools.profiler:async-profiler:4.5")
     api("com.blogspot.mydailyjava:weak-lock-free:0.18")
     api("com.github.f4b6a3:uuid-creator:6.1.1")
   }

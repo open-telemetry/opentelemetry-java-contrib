@@ -14,6 +14,7 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.contrib.dynamic.policy.DeletedTelemetryPolicy;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicyIdentity;
+import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingDecision;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
@@ -33,7 +34,9 @@ class TraceSamplingRatePolicyImplementerTest {
     implementer.onPoliciesChanged(
         singletonList(
             new DeletedTelemetryPolicy(
-                TraceSamplingRatePolicy.DEFAULT_IDENTITY, TraceSamplingRatePolicy.POLICY_TYPE)));
+                TraceSamplingRatePolicy.DEFAULT_IDENTITY,
+                TraceSamplingRatePolicy.POLICY_TYPE,
+                SourceKind.CUSTOM)));
 
     assertThat(decisionFor(delegatingSampler)).isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
   }
@@ -44,9 +47,25 @@ class TraceSamplingRatePolicyImplementerTest {
     TraceSamplingRatePolicyImplementer implementer =
         new TraceSamplingRatePolicyImplementer(delegatingSampler);
 
-    implementer.onPoliciesChanged(singletonList(new TraceSamplingRatePolicy(1.0)));
+    implementer.onPoliciesChanged(
+        singletonList(new TraceSamplingRatePolicy(1.0, SourceKind.CUSTOM)));
 
     assertThat(decisionFor(delegatingSampler)).isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
+  }
+
+  @Test
+  void skipsRepeatedEquivalentProbability() {
+    CountingDelegatingSampler delegatingSampler =
+        new CountingDelegatingSampler(Sampler.alwaysOff());
+    TraceSamplingRatePolicyImplementer implementer =
+        new TraceSamplingRatePolicyImplementer(delegatingSampler);
+
+    implementer.onPoliciesChanged(
+        singletonList(new TraceSamplingRatePolicy(1.0, SourceKind.CUSTOM)));
+    implementer.onPoliciesChanged(
+        singletonList(new TraceSamplingRatePolicy(1.0, SourceKind.CUSTOM)));
+
+    assertThat(delegatingSampler.changedProbabilityCount).isEqualTo(1);
   }
 
   @Test
@@ -67,7 +86,9 @@ class TraceSamplingRatePolicyImplementerTest {
         new TraceSamplingRatePolicyImplementer(delegatingSampler);
 
     List<TelemetryPolicy> policies =
-        Arrays.asList(new TraceSamplingRatePolicy(0.0), new TraceSamplingRatePolicy(1.0));
+        Arrays.asList(
+            new TraceSamplingRatePolicy(0.0, SourceKind.CUSTOM),
+            new TraceSamplingRatePolicy(1.0, SourceKind.CUSTOM));
 
     implementer.onPoliciesChanged(policies);
 
@@ -86,13 +107,36 @@ class TraceSamplingRatePolicyImplementerTest {
     return result.getDecision();
   }
 
+  private static final class CountingDelegatingSampler extends DelegatingSampler {
+    private int changedProbabilityCount;
+
+    private CountingDelegatingSampler(Sampler initialDelegate) {
+      super(initialDelegate);
+    }
+
+    @Override
+    public synchronized boolean setSamplingProbability(double probability) {
+      boolean changed = super.setSamplingProbability(probability);
+      if (changed) {
+        changedProbabilityCount++;
+      }
+      return changed;
+    }
+  }
+
   private static final class TestTelemetryPolicy implements TelemetryPolicy {
     private final TelemetryPolicyIdentity identity;
     private final String type;
+    private final SourceKind sourceKind;
 
     private TestTelemetryPolicy(String type) {
+      this(type, SourceKind.CUSTOM);
+    }
+
+    private TestTelemetryPolicy(String type, SourceKind sourceKind) {
       this.identity = new TelemetryPolicyIdentity(type, "Test policy");
       this.type = type;
+      this.sourceKind = sourceKind;
     }
 
     @Override
@@ -103,6 +147,11 @@ class TraceSamplingRatePolicyImplementerTest {
     @Override
     public String getType() {
       return type;
+    }
+
+    @Override
+    public SourceKind getSourceKind() {
+      return sourceKind;
     }
   }
 }

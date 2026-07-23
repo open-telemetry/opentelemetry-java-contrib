@@ -43,10 +43,7 @@ public interface TelemetryPolicy {
    * <p>The source is used to resolve duplicate policy IDs across providers. Lower-priority sources
    * are dropped when a higher-priority source supplies the same policy identity.
    */
-  // TODO after "source" prioritization handling is complete, make non-default
-  default SourceKind getSourceKind() {
-    return SourceKind.CUSTOM;
-  }
+  SourceKind getSourceKind();
 
   /**
    * Returns whether this policy represents a deleted element.

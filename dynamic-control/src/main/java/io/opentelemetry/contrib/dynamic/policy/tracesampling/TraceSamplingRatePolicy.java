@@ -28,11 +28,6 @@ public final class TraceSamplingRatePolicy implements TelemetryPolicy {
   private final double probability;
   private final SourceKind sourceKind;
 
-  // TODO after "source" prioritization handling is complete, remove this constructor
-  public TraceSamplingRatePolicy(double probability) {
-    this(probability, SourceKind.CUSTOM);
-  }
-
   public TraceSamplingRatePolicy(double probability, SourceKind sourceKind) {
     this.identity = DEFAULT_IDENTITY;
     this.probability = normalizeProbability(probability);

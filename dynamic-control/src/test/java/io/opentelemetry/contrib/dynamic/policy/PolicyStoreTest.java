@@ -14,6 +14,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingRatePolicy;
 import java.util.Arrays;
 import java.util.Collections;
@@ -25,7 +26,7 @@ class PolicyStoreTest {
   @Test
   void updatePoliciesReturnsTrueOnFirstSet() {
     PolicyStore store = new PolicyStore();
-    List<TelemetryPolicy> policies = singletonList(new TraceSamplingRatePolicy(0.5));
+    List<TelemetryPolicy> policies = singletonList(traceSampling(0.5));
 
     assertThat(store.updatePolicies(policies)).isTrue();
     assertThat(store.getPolicies()).isEqualTo(policies);
@@ -34,15 +35,15 @@ class PolicyStoreTest {
   @Test
   void updatePoliciesAcceptsRepeatedEquivalentSnapshot() {
     PolicyStore store = new PolicyStore();
-    assertThat(store.updatePolicies(singletonList(new TraceSamplingRatePolicy(0.5)))).isTrue();
-    assertThat(store.updatePolicies(singletonList(new TraceSamplingRatePolicy(0.5)))).isTrue();
+    assertThat(store.updatePolicies(singletonList(traceSampling(0.5)))).isTrue();
+    assertThat(store.updatePolicies(singletonList(traceSampling(0.5)))).isTrue();
   }
 
   @Test
   void updatePoliciesReturnsTrueWhenProbabilityChanges() {
     PolicyStore store = new PolicyStore();
-    assertThat(store.updatePolicies(singletonList(new TraceSamplingRatePolicy(0.25)))).isTrue();
-    assertThat(store.updatePolicies(singletonList(new TraceSamplingRatePolicy(0.75)))).isTrue();
+    assertThat(store.updatePolicies(singletonList(traceSampling(0.25)))).isTrue();
+    assertThat(store.updatePolicies(singletonList(traceSampling(0.75)))).isTrue();
     assertThat(store.getPolicies()).hasSize(1);
     assertThat(((TraceSamplingRatePolicy) store.getPolicies().get(0)).getProbability())
         .isEqualTo(0.75);
@@ -80,6 +81,49 @@ class PolicyStoreTest {
   }
 
   @Test
+  void updatePoliciesResolvesDuplicatePolicyIdentitiesBySourcePriority() {
+    PolicyStore store = new PolicyStore();
+    TelemetryPolicy filePolicy =
+        new TestTelemetryPolicy(
+            new TelemetryPolicyIdentity("test-policy", "File policy"),
+            "test-policy",
+            SourceKind.FILE);
+    TelemetryPolicy httpPolicy =
+        new TestTelemetryPolicy(
+            new TelemetryPolicyIdentity("test-policy", "HTTP policy"),
+            "test-policy",
+            SourceKind.HTTP);
+    TelemetryPolicy opampPolicy =
+        new TestTelemetryPolicy(
+            new TelemetryPolicyIdentity("test-policy", "OpAMP policy"),
+            "test-policy",
+            SourceKind.OPAMP);
+
+    assertThat(store.updatePolicies(Arrays.asList(filePolicy, opampPolicy, httpPolicy))).isTrue();
+
+    assertThat(store.getPolicies()).containsExactly(opampPolicy);
+  }
+
+  @Test
+  void updatePoliciesUsesHttpWhenDuplicatePolicyHasNoOpampSource() {
+    PolicyStore store = new PolicyStore();
+    TelemetryPolicy filePolicy =
+        new TestTelemetryPolicy(
+            new TelemetryPolicyIdentity("test-policy", "File policy"),
+            "test-policy",
+            SourceKind.FILE);
+    TelemetryPolicy httpPolicy =
+        new TestTelemetryPolicy(
+            new TelemetryPolicyIdentity("test-policy", "HTTP policy"),
+            "test-policy",
+            SourceKind.HTTP);
+
+    assertThat(store.updatePolicies(Arrays.asList(filePolicy, httpPolicy))).isTrue();
+
+    assertThat(store.getPolicies()).containsExactly(httpPolicy);
+  }
+
+  @Test
   void getPoliciesReturnsEmptyWhenNeverUpdated() {
     assertThat(new PolicyStore().getPolicies()).isEqualTo(Collections.emptyList());
   }
@@ -87,7 +131,7 @@ class PolicyStoreTest {
   @Test
   void registerImplementerReceivesCurrentRelevantPolicies() {
     PolicyStore store = new PolicyStore();
-    store.updatePolicies(Arrays.asList(new TraceSamplingRatePolicy(0.5), unrelatedPolicy()));
+    store.updatePolicies(Arrays.asList(traceSampling(0.5), unrelatedPolicy()));
 
     PolicyImplementer implementer = mock(PolicyImplementer.class);
     PolicyValidator validator = mock(PolicyValidator.class);
@@ -107,7 +151,7 @@ class PolicyStoreTest {
 
     store.registerImplementer(implementer);
     clearInvocations(implementer);
-    store.updatePolicies(Arrays.asList(unrelatedPolicy(), new TraceSamplingRatePolicy(0.25)));
+    store.updatePolicies(Arrays.asList(unrelatedPolicy(), traceSampling(0.25)));
 
     verify(implementer)
         .onPoliciesChanged(argThat(policies -> containsTraceSamplingProbability(policies, 0.25)));
@@ -117,7 +161,7 @@ class PolicyStoreTest {
   void updatePoliciesNotifiesDeletedPolicyWhenPolicyDisappears() {
     PolicyStore store = new PolicyStore();
     PolicyImplementer implementer = traceSamplingImplementer();
-    TraceSamplingRatePolicy removedPolicy = new TraceSamplingRatePolicy(0.5);
+    TraceSamplingRatePolicy removedPolicy = traceSampling(0.5);
     store.updatePolicies(singletonList(removedPolicy));
     store.registerImplementer(implementer);
     clearInvocations(implementer);
@@ -142,8 +186,8 @@ class PolicyStoreTest {
   void updatePoliciesDoesNotNotifyDeletedPolicyWhenPolicyValueChangesWithSameIdentity() {
     PolicyStore store = new PolicyStore();
     PolicyImplementer implementer = traceSamplingImplementer();
-    TraceSamplingRatePolicy updatedPolicy = new TraceSamplingRatePolicy(0.75);
-    store.updatePolicies(singletonList(new TraceSamplingRatePolicy(0.5)));
+    TraceSamplingRatePolicy updatedPolicy = traceSampling(0.75);
+    store.updatePolicies(singletonList(traceSampling(0.5)));
     store.registerImplementer(implementer);
     clearInvocations(implementer);
 
@@ -183,7 +227,7 @@ class PolicyStoreTest {
     PolicyStore store = new PolicyStore();
     PolicyImplementer failingImplementer = traceSamplingImplementer();
     PolicyImplementer nextImplementer = traceSamplingImplementer();
-    List<TelemetryPolicy> updatedPolicies = singletonList(new TraceSamplingRatePolicy(0.25));
+    List<TelemetryPolicy> updatedPolicies = singletonList(traceSampling(0.25));
     doThrow(new IllegalStateException("boom"))
         .when(failingImplementer)
         .onPoliciesChanged(updatedPolicies);
@@ -202,7 +246,7 @@ class PolicyStoreTest {
   @Test
   void registerImplementerContinuesAfterPreviousImplementerThrows() {
     PolicyStore store = new PolicyStore();
-    List<TelemetryPolicy> currentPolicies = singletonList(new TraceSamplingRatePolicy(0.5));
+    List<TelemetryPolicy> currentPolicies = singletonList(traceSampling(0.5));
     assertThat(store.updatePolicies(currentPolicies)).isTrue();
 
     PolicyImplementer failingImplementer = traceSamplingImplementer();
@@ -220,6 +264,10 @@ class PolicyStoreTest {
 
   private static PolicyImplementer traceSamplingImplementer() {
     return implementerFor(TraceSamplingRatePolicy.POLICY_TYPE);
+  }
+
+  private static TraceSamplingRatePolicy traceSampling(double probability) {
+    return new TraceSamplingRatePolicy(probability, SourceKind.CUSTOM);
   }
 
   private static PolicyImplementer implementerFor(String policyType) {
@@ -247,10 +295,17 @@ class PolicyStoreTest {
   private static final class TestTelemetryPolicy implements TelemetryPolicy {
     private final TelemetryPolicyIdentity identity;
     private final String type;
+    private final SourceKind sourceKind;
 
     private TestTelemetryPolicy(TelemetryPolicyIdentity identity, String type) {
+      this(identity, type, SourceKind.CUSTOM);
+    }
+
+    private TestTelemetryPolicy(
+        TelemetryPolicyIdentity identity, String type, SourceKind sourceKind) {
       this.identity = identity;
       this.type = type;
+      this.sourceKind = sourceKind;
     }
 
     @Override
@@ -261,6 +316,11 @@ class PolicyStoreTest {
     @Override
     public String getType() {
       return type;
+    }
+
+    @Override
+    public SourceKind getSourceKind() {
+      return sourceKind;
     }
   }
 }
