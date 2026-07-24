@@ -229,7 +229,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: main
-          persist-credentials: false
+          # zizmor: ignore[artipacked] Credentials are required by the branch push below.
+          persist-credentials: true
 
       - name: Merge change log to main
         env:
@@ -293,10 +294,6 @@ jobs:
           message="Post-release updates for $VERSION"
           body="Post-release updates for \`$VERSION\`."
           branch="otelbot/update-apidiff-baseline-to-released-version-${VERSION}"
-
-          # the main branch was checked out with persist-credentials: false, so
-          # authenticate origin with the otelbot app token before pushing
-          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
 
           git checkout -b $branch
           git add CHANGELOG.md
