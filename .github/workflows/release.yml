@@ -294,6 +294,10 @@ jobs:
           body="Post-release updates for \`$VERSION\`."
           branch="otelbot/update-apidiff-baseline-to-released-version-${VERSION}"
 
+          # the main branch was checked out with persist-credentials: false, so
+          # authenticate origin with the otelbot app token before pushing
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+
           git checkout -b $branch
           git add CHANGELOG.md
           git add docs/apidiffs
