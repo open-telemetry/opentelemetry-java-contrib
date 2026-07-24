@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## Version 1.59.0 (2026-07-24)
 
 ### :warning: Breaking changes
 
