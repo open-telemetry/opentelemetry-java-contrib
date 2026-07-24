@@ -12,8 +12,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -33,15 +36,22 @@ import java.util.stream.Stream;
  *
  * <p>Empty lines and lines starting with <code>#</code> are ignored.
  */
+// TODO this needs changing to a full provider implementation or deleting
 final class LinePerPolicyFileProvider implements PolicyProvider {
   private static final Logger logger = Logger.getLogger(LinePerPolicyFileProvider.class.getName());
   private final Path file;
   private final List<PolicyValidator> validators;
+  private final Set<String> policyIds;
 
   public LinePerPolicyFileProvider(Path file, List<PolicyValidator> validators) {
     Objects.requireNonNull(file, "file cannot be null");
     this.file = file;
     this.validators = new ArrayList<>(validators);
+    Set<String> policyIds = new LinkedHashSet<>();
+    for (PolicyValidator validator : validators) {
+      policyIds.add(validator.getPolicyType());
+    }
+    this.policyIds = Collections.unmodifiableSet(policyIds);
   }
 
   @Override
@@ -69,7 +79,7 @@ final class LinePerPolicyFileProvider implements PolicyProvider {
               logger.info("Unsupported policy line format: " + trimmedLine);
               return;
             }
-            List<SourceWrapper> parsedSources = format.parse(trimmedLine);
+            List<SourceWrapper> parsedSources = format.parse(trimmedLine, policyIds);
             if (parsedSources == null || parsedSources.size() != 1) {
               logger.info("Invalid " + format.configValue() + " policy line: " + trimmedLine);
               return;
