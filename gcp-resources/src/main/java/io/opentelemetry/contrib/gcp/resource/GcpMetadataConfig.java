@@ -27,6 +27,7 @@ final class GcpMetadataConfig {
   static final GcpMetadataConfig DEFAULT_INSTANCE = new GcpMetadataConfig();
 
   private static final String DEFAULT_URL = "http://metadata.google.internal/computeMetadata/v1/";
+  private static final int MAX_METADATA_VALUE_CHARS = 4096;
   private final String url;
   private final Map<String, String> cachedAttributes = new ConcurrentHashMap<>();
 
@@ -152,7 +153,15 @@ final class GcpMetadataConfig {
         InputStream input = connection.getInputStream();
         try (BufferedReader reader =
             new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8))) {
-          return reader.readLine();
+          char[] buffer = new char[MAX_METADATA_VALUE_CHARS];
+          int total = 0;
+          for (int n;
+              total < buffer.length
+                  && (n = reader.read(buffer, total, buffer.length - total)) != -1; ) {
+            total += n;
+          }
+          String value = new String(buffer, 0, total).trim();
+          return value.isEmpty() ? null : value;
         }
       }
     } catch (IOException ignore) {
