@@ -12,6 +12,9 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 import com.google.auth.oauth2.GoogleCredentials;
+import com.google.auth.oauth2.IdTokenCredentials;
+import com.google.auth.oauth2.IdTokenProvider;
+import com.google.auth.oauth2.OAuth2Credentials;
 import com.google.auto.service.AutoService;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.contrib.gcp.auth.GoogleAuthException.Reason;
@@ -35,7 +38,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nonnull;
@@ -75,6 +77,9 @@ public class GcpAuthAutoConfigurationCustomizerProvider
   static final String SIGNAL_TYPE_ALL = "all";
   static final String SIGNAL_TYPE_NONE = "none";
 
+  static final String TOKEN_TYPE_ACCESS_TOKEN = "access_token";
+  static final String TOKEN_TYPE_ID_TOKEN = "id_token";
+
   /**
    * Customizes the provided {@link AutoConfigurationCustomizer} such that authenticated exports to
    * GCP Telemetry API are possible from the configured OTLP exporter.
@@ -103,22 +108,7 @@ public class GcpAuthAutoConfigurationCustomizerProvider
    */
   @Override
   public void customize(@Nonnull AutoConfigurationCustomizer autoConfiguration) {
-    Supplier<GoogleCredentials> credentialsSupplier =
-        new Supplier<GoogleCredentials>() {
-          @Nullable private GoogleCredentials credentials;
-
-          @Override
-          public synchronized GoogleCredentials get() {
-            if (credentials == null) {
-              try {
-                credentials = GoogleCredentials.getApplicationDefault();
-              } catch (IOException e) {
-                throw new GoogleAuthException(Reason.FAILED_ADC_RETRIEVAL, e);
-              }
-            }
-            return credentials;
-          }
-        };
+    LazyCredentialsSupplier credentialsSupplier = new LazyCredentialsSupplier();
     autoConfiguration
         .addSpanExporterCustomizer(
             (spanExporter, configProperties) ->
@@ -136,12 +126,86 @@ public class GcpAuthAutoConfigurationCustomizerProvider
     return Integer.MAX_VALUE - 1;
   }
 
+  /**
+   * Lazily initializes and caches the {@link OAuth2Credentials} used for authentication. The type
+   * of the credentials is determined by the configured {@link
+   * ConfigurableOption#GOOGLE_OTEL_AUTH_TOKEN_TYPE}.
+   */
+  private static class LazyCredentialsSupplier {
+    @Nullable private OAuth2Credentials credentials;
+
+    synchronized OAuth2Credentials get(ConfigProperties configProperties) {
+      if (credentials == null) {
+        credentials = createCredentials(configProperties);
+      }
+      return credentials;
+    }
+  }
+
+  // Creates the credentials used for authentication based on the configured token type. For the
+  // default token type (access_token) the Application Default Credentials are used as-is. For
+  // id_token, the Application Default Credentials are wrapped into IdTokenCredentials which mint
+  // Google-signed ID tokens for the configured audience.
+  private static OAuth2Credentials createCredentials(ConfigProperties configProperties) {
+    // Resolve and validate the configuration before any IO, so a misconfiguration (unsupported
+    // token type or missing audience) is reported deterministically instead of being masked by an
+    // Application Default Credentials retrieval failure.
+    boolean useIdToken = isIdTokenType(configProperties);
+    String audience =
+        useIdToken
+            ? ConfigurableOption.GOOGLE_OTEL_AUTH_ID_TOKEN_AUDIENCE.getConfiguredValue(
+                configProperties)
+            : null;
+
+    GoogleCredentials applicationDefaultCredentials;
+    try {
+      applicationDefaultCredentials = GoogleCredentials.getApplicationDefault();
+    } catch (IOException e) {
+      throw new GoogleAuthException(Reason.FAILED_ADC_RETRIEVAL, e);
+    }
+    if (!useIdToken) {
+      return applicationDefaultCredentials;
+    }
+    if (!(applicationDefaultCredentials instanceof IdTokenProvider)) {
+      throw new ConfigurationException(
+          String.format(
+              "GCP Authentication Extension not configured properly: the retrieved Application Default Credentials (%s) cannot mint ID tokens. Use a credential type implementing IdTokenProvider - for example the default service account of a GCP compute environment, a service account key, or impersonated credentials (gcloud auth application-default login --impersonate-service-account=<SERVICE_ACCOUNT>).",
+              applicationDefaultCredentials.getClass().getSimpleName()));
+    }
+    return IdTokenCredentials.newBuilder()
+        .setIdTokenProvider((IdTokenProvider) applicationDefaultCredentials)
+        .setTargetAudience(audience)
+        .build();
+  }
+
+  // Checks whether the extension is configured to attach ID tokens instead of access tokens.
+  private static boolean isIdTokenType(ConfigProperties configProperties) {
+    String tokenType =
+        ConfigurableOption.GOOGLE_OTEL_AUTH_TOKEN_TYPE.getConfiguredValueWithFallback(
+            configProperties, () -> TOKEN_TYPE_ACCESS_TOKEN);
+    switch (tokenType) {
+      case TOKEN_TYPE_ID_TOKEN:
+        return true;
+      case TOKEN_TYPE_ACCESS_TOKEN:
+        return false;
+      default:
+        throw new ConfigurationException(
+            String.format(
+                "GCP Authentication Extension not configured properly: %s has unsupported value '%s'. Supported values are '%s' (default) and '%s'.",
+                ConfigurableOption.GOOGLE_OTEL_AUTH_TOKEN_TYPE.getUserReadableName(),
+                tokenType,
+                TOKEN_TYPE_ACCESS_TOKEN,
+                TOKEN_TYPE_ID_TOKEN));
+    }
+  }
+
   private static SpanExporter customizeSpanExporter(
       SpanExporter exporter,
-      Supplier<GoogleCredentials> credentialsSupplier,
+      LazyCredentialsSupplier credentialsSupplier,
       ConfigProperties configProperties) {
     if (isSignalTargeted(SIGNAL_TYPE_TRACES, configProperties)) {
-      return addAuthorizationHeaders(exporter, credentialsSupplier.get(), configProperties);
+      return addAuthorizationHeaders(
+          exporter, credentialsSupplier.get(configProperties), configProperties);
     } else {
       String[] params = {
         SIGNAL_TYPE_TRACES, SIGNAL_TYPE_NONE, SIGNAL_TARGET_WARNING_FIX_SUGGESTION
@@ -156,10 +220,11 @@ public class GcpAuthAutoConfigurationCustomizerProvider
 
   private static MetricExporter customizeMetricExporter(
       MetricExporter exporter,
-      Supplier<GoogleCredentials> credentialsSupplier,
+      LazyCredentialsSupplier credentialsSupplier,
       ConfigProperties configProperties) {
     if (isSignalTargeted(SIGNAL_TYPE_METRICS, configProperties)) {
-      return addAuthorizationHeaders(exporter, credentialsSupplier.get(), configProperties);
+      return addAuthorizationHeaders(
+          exporter, credentialsSupplier.get(configProperties), configProperties);
     } else {
       String[] params = {
         SIGNAL_TYPE_METRICS, SIGNAL_TYPE_NONE, SIGNAL_TARGET_WARNING_FIX_SUGGESTION
@@ -188,7 +253,7 @@ public class GcpAuthAutoConfigurationCustomizerProvider
   // Adds authorization headers to the calls made by the OtlpGrpcSpanExporter and
   // OtlpHttpSpanExporter.
   private static SpanExporter addAuthorizationHeaders(
-      SpanExporter exporter, GoogleCredentials credentials, ConfigProperties configProperties) {
+      SpanExporter exporter, OAuth2Credentials credentials, ConfigProperties configProperties) {
     if (exporter instanceof OtlpHttpSpanExporter) {
       OtlpHttpSpanExporterBuilder builder =
           ((OtlpHttpSpanExporter) exporter)
@@ -206,7 +271,7 @@ public class GcpAuthAutoConfigurationCustomizerProvider
   // Adds authorization headers to the calls made by the OtlpGrpcMetricExporter and
   // OtlpHttpMetricExporter.
   private static MetricExporter addAuthorizationHeaders(
-      MetricExporter exporter, GoogleCredentials credentials, ConfigProperties configProperties) {
+      MetricExporter exporter, OAuth2Credentials credentials, ConfigProperties configProperties) {
     if (exporter instanceof OtlpHttpMetricExporter) {
       OtlpHttpMetricExporterBuilder builder =
           ((OtlpHttpMetricExporter) exporter)
@@ -222,7 +287,7 @@ public class GcpAuthAutoConfigurationCustomizerProvider
   }
 
   private static Map<String, String> getRequiredHeaderMap(
-      GoogleCredentials credentials, ConfigProperties configProperties) {
+      OAuth2Credentials credentials, ConfigProperties configProperties) {
     Map<String, List<String>> gcpHeaders;
     try {
       // this also refreshes the credentials, if required
@@ -241,8 +306,10 @@ public class GcpAuthAutoConfigurationCustomizerProvider
                             .filter(s -> !s.isEmpty()) // Filter empty strings
                             .collect(joining(","))));
     // Add quota user project header if not detected by the auth library and user provided it via
-    // system properties.
-    if (!flattenedHeaders.containsKey(QUOTA_USER_PROJECT_HEADER)) {
+    // system properties. The quota project concept only applies to requests against Google Cloud
+    // APIs authenticated with access tokens, so it is skipped when ID tokens are used.
+    if (!isIdTokenType(configProperties)
+        && !flattenedHeaders.containsKey(QUOTA_USER_PROJECT_HEADER)) {
       Optional<String> maybeConfiguredQuotaProjectId =
           ConfigurableOption.GOOGLE_CLOUD_QUOTA_PROJECT.getConfiguredValueAsOptional(
               configProperties);
@@ -256,17 +323,25 @@ public class GcpAuthAutoConfigurationCustomizerProvider
   // Updates the current resource with the attributes required for ingesting OTLP data on GCP.
   private static Resource customizeResource(
       Resource resource,
-      Supplier<GoogleCredentials> credentialsSupplier,
+      LazyCredentialsSupplier credentialsSupplier,
       ConfigProperties configProperties) {
     if (!isSignalTargeted(SIGNAL_TYPE_TRACES, configProperties)
         && !isSignalTargeted(SIGNAL_TYPE_METRICS, configProperties)) {
+      return resource;
+    }
+    // The gcp.project_id resource attribute is only required when ingesting telemetry to the GCP
+    // Telemetry API with access tokens. It is not required for ID token authenticated exports,
+    // which target arbitrary IAM-protected OTLP endpoints.
+    if (isIdTokenType(configProperties)) {
       return resource;
     }
     String gcpProjectId;
     try {
       gcpProjectId = ConfigurableOption.GOOGLE_CLOUD_PROJECT.getConfiguredValue(configProperties);
     } catch (ConfigurationException e) {
-      gcpProjectId = credentialsSupplier.get().getProjectId();
+      // This line is only reachable for the access_token type, for which the supplier always
+      // returns the GoogleCredentials retrieved as Application Default Credentials.
+      gcpProjectId = ((GoogleCredentials) credentialsSupplier.get(configProperties)).getProjectId();
       if (gcpProjectId == null || gcpProjectId.isEmpty()) {
         throw e;
       }
