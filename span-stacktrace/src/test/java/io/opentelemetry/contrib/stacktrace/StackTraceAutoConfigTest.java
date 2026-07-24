@@ -20,8 +20,13 @@ class StackTraceAutoConfigTest {
   @Test
   void defaultConfig() {
     DefaultConfigProperties config = DefaultConfigProperties.createFromMap(Collections.emptyMap());
-    assertThat(StackTraceAutoConfig.getMinDuration(config)).isEqualTo(5000000L);
-    Predicate<ReadableSpan> filterPredicate = StackTraceAutoConfig.getFilterPredicate(config);
+    assertThat(
+            StackTraceAutoConfig.getMinDuration(
+                StackTraceAutoConfig.createDeclarativeConfig(config)))
+        .isEqualTo(5000000L);
+    Predicate<ReadableSpan> filterPredicate =
+        StackTraceAutoConfig.getFilterPredicate(
+            StackTraceAutoConfig.createDeclarativeConfig(config));
     assertThat(filterPredicate).isNotNull();
   }
 
@@ -30,7 +35,10 @@ class StackTraceAutoConfigTest {
     Map<String, String> configMap = new HashMap<>();
     configMap.put("otel.java.experimental.span-stacktrace.min.duration", "42ms");
     DefaultConfigProperties config = DefaultConfigProperties.createFromMap(configMap);
-    assertThat(StackTraceAutoConfig.getMinDuration(config)).isEqualTo(42000000L);
+    assertThat(
+            StackTraceAutoConfig.getMinDuration(
+                StackTraceAutoConfig.createDeclarativeConfig(config)))
+        .isEqualTo(42000000L);
   }
 
   @Test
@@ -38,7 +46,10 @@ class StackTraceAutoConfigTest {
     Map<String, String> configMap = new HashMap<>();
     configMap.put("otel.java.experimental.span-stacktrace.min.duration", "-1");
     DefaultConfigProperties config = DefaultConfigProperties.createFromMap(configMap);
-    assertThat(StackTraceAutoConfig.getMinDuration(config)).isNegative();
+    assertThat(
+            StackTraceAutoConfig.getMinDuration(
+                StackTraceAutoConfig.createDeclarativeConfig(config)))
+        .isNegative();
   }
 
   @Test
@@ -46,7 +57,9 @@ class StackTraceAutoConfigTest {
     Map<String, String> configMap = new HashMap<>();
     configMap.put("otel.java.experimental.span-stacktrace.filter", MyFilter.class.getName());
     DefaultConfigProperties config = DefaultConfigProperties.createFromMap(configMap);
-    Predicate<ReadableSpan> filterPredicate = StackTraceAutoConfig.getFilterPredicate(config);
+    Predicate<ReadableSpan> filterPredicate =
+        StackTraceAutoConfig.getFilterPredicate(
+            StackTraceAutoConfig.createDeclarativeConfig(config));
     assertThat(filterPredicate).isInstanceOf(MyFilter.class);
 
     // default does not filter, so any negative value means we use the test filter
@@ -79,7 +92,9 @@ class StackTraceAutoConfigTest {
     Map<String, String> configMap = new HashMap<>();
     configMap.put("otel.java.experimental.span-stacktrace.filter", filterName);
     DefaultConfigProperties config = DefaultConfigProperties.createFromMap(configMap);
-    Predicate<ReadableSpan> filterPredicate = StackTraceAutoConfig.getFilterPredicate(config);
+    Predicate<ReadableSpan> filterPredicate =
+        StackTraceAutoConfig.getFilterPredicate(
+            StackTraceAutoConfig.createDeclarativeConfig(config));
     assertThat(filterPredicate).isNotNull();
     assertThat(filterPredicate.test(null)).isTrue();
   }

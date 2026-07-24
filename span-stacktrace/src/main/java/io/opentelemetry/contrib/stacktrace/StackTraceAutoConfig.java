@@ -9,6 +9,9 @@ import static java.util.logging.Level.FINE;
 import static java.util.logging.Level.SEVERE;
 
 import com.google.auto.service.AutoService;
+import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
+import io.opentelemetry.instrumentation.config.bridge.DeclarativeConfigBridge;
+import io.opentelemetry.instrumentation.config.bridge.DeclarativeConfigDurationUtil;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
@@ -26,44 +29,52 @@ public class StackTraceAutoConfig implements AutoConfigurationCustomizerProvider
 
   private static final Logger log = Logger.getLogger(StackTraceAutoConfig.class.getName());
 
-  static final String PREFIX = "otel.java.experimental.span-stacktrace.";
-  static final String CONFIG_MIN_DURATION = PREFIX + "min.duration";
   private static final Duration CONFIG_MIN_DURATION_DEFAULT = Duration.ofMillis(5);
-  private static final String CONFIG_FILTER = PREFIX + "filter";
 
   @Override
   public void customize(AutoConfigurationCustomizer config) {
     config.addTracerProviderCustomizer(
         (providerBuilder, properties) -> {
-          if (getMinDuration(properties) >= 0) {
-            providerBuilder.addSpanProcessor(create(properties));
+          DeclarativeConfigProperties declarativeConfig = createDeclarativeConfig(properties);
+          if (getMinDuration(declarativeConfig) >= 0) {
+            providerBuilder.addSpanProcessor(create(declarativeConfig));
           }
           return providerBuilder;
         });
   }
 
-  static StackTraceSpanProcessor create(ConfigProperties properties) {
+  static StackTraceSpanProcessor create(DeclarativeConfigProperties properties) {
     return new StackTraceSpanProcessor(getMinDuration(properties), getFilterPredicate(properties));
   }
 
+  static DeclarativeConfigProperties createDeclarativeConfig(ConfigProperties properties) {
+    return DeclarativeConfigBridge.createComponentProperties(
+        properties, "otel.java.experimental.span-stacktrace.");
+  }
+
   // package-private for testing
-  static long getMinDuration(ConfigProperties properties) {
-    long minDuration =
-        properties.getDuration(CONFIG_MIN_DURATION, CONFIG_MIN_DURATION_DEFAULT).toNanos();
-    if (minDuration < 0) {
+  static long getMinDuration(DeclarativeConfigProperties properties) {
+    Duration minDuration = DeclarativeConfigDurationUtil.getDuration(properties, "min_duration");
+    if (minDuration == null) {
+      minDuration = CONFIG_MIN_DURATION_DEFAULT;
+    }
+    long minDurationNanos = minDuration.toNanos();
+    if (minDurationNanos < 0) {
       log.fine("Stack traces capture is disabled");
     } else {
       log.log(
           FINE,
           "Stack traces will be added to spans with a minimum duration of {0} nanos",
-          minDuration);
+          minDurationNanos);
     }
-    return minDuration;
+    return minDurationNanos;
   }
 
-  // package private for testing
-  static Predicate<ReadableSpan> getFilterPredicate(ConfigProperties properties) {
-    String filterClass = properties.getString(CONFIG_FILTER);
+  static Predicate<ReadableSpan> getFilterPredicate(DeclarativeConfigProperties properties) {
+    return getFilterPredicate(properties.getString("filter"));
+  }
+
+  private static Predicate<ReadableSpan> getFilterPredicate(@Nullable String filterClass) {
     Predicate<ReadableSpan> filter = null;
     if (filterClass != null) {
       Class<?> filterType = getFilterType(filterClass);
