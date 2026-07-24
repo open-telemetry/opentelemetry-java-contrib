@@ -1,0 +1,71 @@
+name: Draft Release Notes
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: draft-release-notes
+
+permissions:
+  contents: read
+
+jobs:
+  draft-notes:
+    if: github.repository == 'open-telemetry/opentelemetry-java-contrib'
+    permissions:
+      contents: write  # for git push to PR branch
+    runs-on: ubuntu-latest
+    environment: protected
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
+        with:
+          python-version: '3.11'
+
+      - name: Install Copilot CLI
+        run: |
+          npm ci --prefix .github/scripts/copilot-cli
+          echo "$GITHUB_WORKSPACE/.github/scripts/copilot-cli/node_modules/.bin" >> "$GITHUB_PATH"
+
+      - name: Draft release notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
+        run: python3 .github/scripts/draft-release-notes/draft-release-notes.py
+
+      - name: Use CLA approved bot
+        run: .github/scripts/use-cla-approved-bot.sh
+
+      - uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
+        id: otelbot-token
+        with:
+          app-id: ${{ vars.OTELBOT_APP_ID }}
+          private-key: ${{ secrets.OTELBOT_PRIVATE_KEY }}
+          owner: open-telemetry
+          repositories: opentelemetry-java-contrib
+          permission-contents: write
+          permission-pull-requests: write
+
+      - name: Create pull request against main
+        env:
+          GH_TOKEN: ${{ steps.otelbot-token.outputs.token }}
+        run: |
+          message="Draft release notes"
+          body="Automated draft of the \`## Unreleased\` section of \`CHANGELOG.md\`. Review the diff to recover any hand-written content that should be retained."
+          branch="otelbot/draft-release-notes-${GITHUB_RUN_ID}"
+
+          git checkout -b "$branch"
+          git commit -a -m "$message"
+
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/open-telemetry/opentelemetry-java-contrib.git"
+          git push --set-upstream origin "$branch"
+
+          gh pr create --title "$message" \
+                       --body "$body" \
+                       --base main
