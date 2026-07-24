@@ -6,7 +6,7 @@
 
 - Declarative config YAML now only accepts integer millisecond values for duration properties.
   Users should no longer specify `ms` as a suffix in duration literals (eg. `100ms` should
-  be given as just `100`). 
+  be given as just `100`).
   ([#2988](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2988))
 
 ### Disk buffering
@@ -50,6 +50,11 @@
   ([#2975](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2975))
 - Refactor OpampPolicyProvider for other PolicyProviders
   ([#2987](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2987))
+
+### GCP resources
+
+- Add a limit on the metadata server response body size read into memory at once by the resource detector
+  ([#2883](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2883))
 
 ### IBM MQ metrics
 
