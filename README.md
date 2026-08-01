@@ -67,7 +67,6 @@ For more information about the maintainer role, see the [community repository](h
 ### Approvers
 
 * [Gregor Zeitlinger](https://github.com/zeitlinger), Grafana Labs
-* [John Watson](https://github.com/jkwatson), Sublime Security
 
 For more information about the approver role, see the [community repository](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#approver).
 
@@ -82,3 +81,10 @@ For more information about the emeritus role, see the [community repository](htt
 ### Thanks to all of our contributors
 
 [![Repo contributors](https://contrib.rocks/image?repo=open-telemetry/opentelemetry-java-contrib)](https://github.com/open-telemetry/opentelemetry-java-contrib/graphs/contributors)
+
+### Emeritus
+
+* [John Watson](https://github.com/jkwatson), Approver
+
+For more information about the emeritus role, see the
+[community repository](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#emeritus-maintainerapprovertriager).
