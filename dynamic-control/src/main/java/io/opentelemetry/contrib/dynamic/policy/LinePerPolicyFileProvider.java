@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.dynamic.policy;
 
+import io.opentelemetry.contrib.dynamic.policy.source.JsonSourceWrapper;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceFormat;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceWrapper;
@@ -80,7 +81,10 @@ final class LinePerPolicyFileProvider implements PolicyProvider {
               return;
             }
             List<SourceWrapper> parsedSources = format.parse(trimmedLine, policyIds);
-            if (parsedSources == null || parsedSources.size() != 1) {
+            if (parsedSources == null
+                || parsedSources.size() != 1
+                || (format == SourceFormat.JSONKEYVALUE
+                    && !JsonSourceWrapper.isSingleKeyObject(trimmedLine))) {
               logger.info("Invalid " + format.configValue() + " policy line: " + trimmedLine);
               return;
             }
