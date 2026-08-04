@@ -91,12 +91,11 @@ Here is a list of required and optional configuration available for the extensio
     key, or impersonated credentials. When `id_token` is used, the
     `GOOGLE_CLOUD_PROJECT` option is not required and the `gcp.project_id`
     resource attribute is not added.
+  * Can also be configured using `google.otel.auth.token.type` system property.
 
   The value names are consistent with the `token_type` option of the
   [Google Client Auth Extension](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension/googleclientauthextension)
   for the OpenTelemetry Collector.
-
-  * Can also be configured using `google.otel.auth.token.type` system property.
 
 * `GOOGLE_OTEL_AUTH_ID_TOKEN_AUDIENCE`: Environment variable that specifies
   the audience used when minting Google-signed ID tokens. Required when
