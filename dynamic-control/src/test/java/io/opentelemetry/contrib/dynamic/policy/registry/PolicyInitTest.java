@@ -26,8 +26,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+import mockwebserver3.MockResponse;
+import mockwebserver3.MockWebServer;
+import mockwebserver3.RecordedRequest;
+import mockwebserver3.junit5.StartStop;
+import okio.Buffer;
+import opamp.proto.ServerToAgent;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -35,6 +42,7 @@ import org.mockito.ArgumentCaptor;
 
 class PolicyInitTest {
   @TempDir Path tempDir;
+  @StartStop private final MockWebServer server = new MockWebServer();
 
   @AfterEach
   void tearDown() throws Exception {
@@ -80,23 +88,48 @@ class PolicyInitTest {
   }
 
   @Test
-  void initializesRegisteredPolicyTypeFromDeclarativeConfig() {
-    ConfigProperties config = mock(ConfigProperties.class);
+  void legacyAutoConfigurationPreservesOpampHeaders() throws Exception {
+    AutoConfigurationCustomizer customizer = mock(AutoConfigurationCustomizer.class);
+    PolicyInit.init(customizer);
+    Function<ConfigProperties, Map<String, String>> propertiesCustomizer =
+        capturePropertiesCustomizer(customizer);
 
+    Path configPath = tempDir.resolve("policy-init.json");
+    Files.write(configPath, minimalJsonInitConfig().getBytes(StandardCharsets.UTF_8));
+
+    ConfigProperties config = mock(ConfigProperties.class);
+    when(config.getString(PolicyInitConfig.POLICY_INIT_CONFIG_PROPERTY_YAML)).thenReturn(null);
+    when(config.getString(PolicyInitConfig.POLICY_INIT_CONFIG_PROPERTY_JSON))
+        .thenReturn(configPath.toString());
+    when(config.getString("otel.opamp.service.url")).thenReturn(server.url("/v1/opamp").toString());
+    when(config.getString("otel.service.name")).thenReturn("test-service");
+    when(config.getMap("otel.resource.attributes")).thenReturn(Collections.emptyMap());
+    when(config.getMap("otel.experimental.opamp.headers"))
+        .thenReturn(Collections.singletonMap("Authorization", "Bearer token"));
+    server.enqueue(emptyServerResponse());
+
+    Map<String, String> ignored = propertiesCustomizer.apply(config);
+
+    assertThat(ignored).isNotNull();
+    RecordedRequest request = server.takeRequest(5, TimeUnit.SECONDS);
+    assertThat(request).isNotNull();
+    assertThat(request.getHeaders().get("Authorization")).isEqualTo("Bearer token");
+  }
+
+  @Test
+  void initializesRegisteredPolicyTypeFromDeclarativeConfig() {
     PolicyInit.initFromDeclarativeConfig(
-        telemetryPolicyNodeConfig(TraceSamplingRatePolicy.POLICY_TYPE), config);
+        telemetryPolicyNodeConfig(TraceSamplingRatePolicy.POLICY_TYPE));
 
     assertThat(TraceSamplingRatePolicy.getInitializedSampler()).isNotNull();
   }
 
   @Test
   void throwsWhenDeclarativeConfigUsesUnknownPolicyType() {
-    ConfigProperties config = mock(ConfigProperties.class);
-
     assertThatThrownBy(
             () ->
                 PolicyInit.initFromDeclarativeConfig(
-                    telemetryPolicyNodeConfig("trace_sampling_rate_policy"), config))
+                    telemetryPolicyNodeConfig("trace_sampling_rate_policy")))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("Unknown policyType");
   }
@@ -114,10 +147,8 @@ class PolicyInitTest {
           initializeCount.incrementAndGet();
           return implementer;
         });
-    ConfigProperties config = mock(ConfigProperties.class);
-
-    PolicyInit.initFromDeclarativeConfig(telemetryPolicyNodeConfig(policyType), config);
-    PolicyInit.initFromDeclarativeConfig(telemetryPolicyNodeConfig(policyType), config);
+    PolicyInit.initFromDeclarativeConfig(telemetryPolicyNodeConfig(policyType));
+    PolicyInit.initFromDeclarativeConfig(telemetryPolicyNodeConfig(policyType));
 
     assertThat(initializeCount.get()).isEqualTo(1);
     verify(implementer, times(1)).onPoliciesChanged(Collections.emptyList());
@@ -160,6 +191,12 @@ class PolicyInitTest {
         + "\"mappings\":[{\"policyId\":\"sampling_rate\",\"policyType\":\""
         + TraceSamplingRatePolicy.POLICY_TYPE
         + "\"}]}]}";
+  }
+
+  private static MockResponse emptyServerResponse() {
+    Buffer body = new Buffer();
+    body.write(new ServerToAgent.Builder().build().encode());
+    return new MockResponse.Builder().code(200).body(body).build();
   }
 
   private static final class IdempotentTestPolicy implements TelemetryPolicy {

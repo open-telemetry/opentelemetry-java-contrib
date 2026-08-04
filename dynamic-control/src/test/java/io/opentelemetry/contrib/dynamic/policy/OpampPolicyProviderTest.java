@@ -9,18 +9,29 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
+import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
+import io.opentelemetry.contrib.dynamic.policy.source.SourceFormat;
+import java.io.Closeable;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import mockwebserver3.MockResponse;
+import mockwebserver3.MockWebServer;
+import mockwebserver3.RecordedRequest;
+import mockwebserver3.junit5.StartStop;
+import okio.Buffer;
+import opamp.proto.ServerToAgent;
 import org.junit.jupiter.api.Test;
 
 class OpampPolicyProviderTest {
 
+  @StartStop private final MockWebServer server = new MockWebServer();
+
   @Test
   void getEndpointReturnsNullWhenUnset() {
-    ConfigProperties properties = mock(ConfigProperties.class);
+    DeclarativeConfigProperties properties = mock(DeclarativeConfigProperties.class);
     when(properties.getString("otel.opamp.service.url")).thenReturn(null);
 
     assertThat(OpampPolicyProvider.getEndpoint(properties)).isNull();
@@ -28,7 +39,7 @@ class OpampPolicyProviderTest {
 
   @Test
   void getEndpointAppendsOpampPathWhenMissing() {
-    ConfigProperties properties = mock(ConfigProperties.class);
+    DeclarativeConfigProperties properties = mock(DeclarativeConfigProperties.class);
     when(properties.getString("otel.opamp.service.url")).thenReturn("https://example.com/base");
 
     assertThat(OpampPolicyProvider.getEndpoint(properties))
@@ -37,39 +48,90 @@ class OpampPolicyProviderTest {
 
   @Test
   void getServiceNameUsesPrimaryPropertyFirst() {
-    ConfigProperties properties = mock(ConfigProperties.class);
+    DeclarativeConfigProperties properties = mock(DeclarativeConfigProperties.class);
+    DeclarativeConfigProperties resourceAttributes = mock(DeclarativeConfigProperties.class);
     when(properties.getString("otel.service.name")).thenReturn("my-service");
-    when(properties.getMap("otel.resource.attributes")).thenReturn(Collections.emptyMap());
+    when(properties.get("otel.resource.attributes")).thenReturn(resourceAttributes);
 
-    assertThat(OpampPolicyProvider.getServiceName(properties)).isEqualTo("my-service");
+    assertThat(OpampPolicyProvider.getServiceName(PolicyProviderConfig.create(properties)))
+        .isEqualTo("my-service");
   }
 
   @Test
   void getServiceNameFallsBackToResourceAttribute() {
-    ConfigProperties properties = mock(ConfigProperties.class);
-    Map<String, String> resourceAttributes = new HashMap<>();
-    resourceAttributes.put("service.name", "resource-service");
+    DeclarativeConfigProperties properties = mock(DeclarativeConfigProperties.class);
+    DeclarativeConfigProperties resourceAttributes = mock(DeclarativeConfigProperties.class);
     when(properties.getString("otel.service.name")).thenReturn(null);
-    when(properties.getMap("otel.resource.attributes")).thenReturn(resourceAttributes);
+    when(properties.get("otel.resource.attributes")).thenReturn(resourceAttributes);
+    when(resourceAttributes.getString("service.name")).thenReturn("resource-service");
 
-    assertThat(OpampPolicyProvider.getServiceName(properties)).isEqualTo("resource-service");
+    assertThat(OpampPolicyProvider.getServiceName(PolicyProviderConfig.create(properties)))
+        .isEqualTo("resource-service");
+  }
+
+  @Test
+  void getServiceNameFallsBackToLegacyResourceAttributeMap() {
+    DeclarativeConfigProperties properties = mock(DeclarativeConfigProperties.class);
+    when(properties.getString("otel.service.name")).thenReturn(null);
+
+    assertThat(
+            OpampPolicyProvider.getServiceName(
+                PolicyProviderConfig.createWithLegacyProperties(
+                    properties,
+                    Collections.singletonMap("service.name", "legacy-service"),
+                    Collections.emptyMap())))
+        .isEqualTo("legacy-service");
+  }
+
+  @Test
+  void getServiceNameUsesUnknownServiceWhenResourceAttributesAreUnset() {
+    DeclarativeConfigProperties properties = mock(DeclarativeConfigProperties.class);
+    when(properties.getString("otel.service.name")).thenReturn(null);
+    when(properties.get("otel.resource.attributes"))
+        .thenReturn(DeclarativeConfigProperties.empty());
+
+    assertThat(OpampPolicyProvider.getServiceName(PolicyProviderConfig.create(properties)))
+        .isEqualTo("unknown_service:java");
   }
 
   @Test
   void getServiceEnvironmentUsesSemconvThenLegacy() {
-    ConfigProperties semconvProperties = mock(ConfigProperties.class);
-    Map<String, String> semconvResourceAttributes = new HashMap<>();
-    semconvResourceAttributes.put("deployment.environment.name", "prod");
-    semconvResourceAttributes.put("deployment.environment", "legacy");
-    when(semconvProperties.getMap("otel.resource.attributes"))
-        .thenReturn(semconvResourceAttributes);
-    assertThat(OpampPolicyProvider.getServiceEnvironment(semconvProperties)).isEqualTo("prod");
+    DeclarativeConfigProperties semconvProperties = mock(DeclarativeConfigProperties.class);
+    DeclarativeConfigProperties semconvResourceAttributes = mock(DeclarativeConfigProperties.class);
+    when(semconvProperties.get("otel.resource.attributes")).thenReturn(semconvResourceAttributes);
+    when(semconvResourceAttributes.getString("deployment.environment.name")).thenReturn("prod");
+    when(semconvResourceAttributes.getString("deployment.environment")).thenReturn("legacy");
+    assertThat(
+            OpampPolicyProvider.getServiceEnvironment(
+                PolicyProviderConfig.create(semconvProperties)))
+        .isEqualTo("prod");
 
-    ConfigProperties legacyProperties = mock(ConfigProperties.class);
-    Map<String, String> legacyResourceAttributes = new HashMap<>();
-    legacyResourceAttributes.put("deployment.environment", "staging");
-    when(legacyProperties.getMap("otel.resource.attributes")).thenReturn(legacyResourceAttributes);
-    assertThat(OpampPolicyProvider.getServiceEnvironment(legacyProperties)).isEqualTo("staging");
+    DeclarativeConfigProperties legacyProperties = mock(DeclarativeConfigProperties.class);
+    DeclarativeConfigProperties legacyResourceAttributes = mock(DeclarativeConfigProperties.class);
+    when(legacyProperties.get("otel.resource.attributes")).thenReturn(legacyResourceAttributes);
+    when(legacyResourceAttributes.getString("deployment.environment")).thenReturn("staging");
+    assertThat(
+            OpampPolicyProvider.getServiceEnvironment(
+                PolicyProviderConfig.create(legacyProperties)))
+        .isEqualTo("staging");
+
+    assertThat(
+            OpampPolicyProvider.getServiceEnvironment(
+                PolicyProviderConfig.createWithLegacyProperties(
+                    legacyProperties,
+                    Collections.singletonMap("deployment.environment.name", "legacy-prod"),
+                    Collections.emptyMap())))
+        .isEqualTo("legacy-prod");
+  }
+
+  @Test
+  void getServiceEnvironmentReturnsNullWhenResourceAttributesAreUnset() {
+    DeclarativeConfigProperties properties = mock(DeclarativeConfigProperties.class);
+    when(properties.get("otel.resource.attributes"))
+        .thenReturn(DeclarativeConfigProperties.empty());
+
+    assertThat(OpampPolicyProvider.getServiceEnvironment(PolicyProviderConfig.create(properties)))
+        .isNull();
   }
 
   @Test
@@ -79,5 +141,44 @@ class OpampPolicyProviderTest {
 
     assertThat(OpampPolicyProvider.getGlobalPollingIntervalForTest())
         .isEqualTo(Duration.ofSeconds(30));
+  }
+
+  @Test
+  void startWatchingAddsConfiguredHeadersToOpampRequests() throws Exception {
+    DeclarativeConfigProperties properties = mock(DeclarativeConfigProperties.class);
+    when(properties.getString("otel.opamp.service.url"))
+        .thenReturn(server.url("/v1/opamp").toString());
+    when(properties.getString("otel.service.name")).thenReturn("test-service");
+    when(properties.get("otel.resource.attributes"))
+        .thenReturn(DeclarativeConfigProperties.empty());
+
+    Map<String, String> headers = new HashMap<>();
+    headers.put("Authorization", "Bearer token");
+    headers.put("X-Test-Header", "test-value");
+    OpampPolicyProvider provider =
+        new OpampPolicyProvider(
+            PolicyProviderConfig.createWithLegacyProperties(
+                properties, Collections.emptyMap(), headers),
+            "vendor-specific",
+            SourceFormat.KEYVALUE,
+            Collections.emptyList(),
+            Collections.emptyList());
+    server.enqueue(emptyServerResponse());
+
+    try (Closeable ignored = provider.startWatching(policies -> {})) {
+      RecordedRequest request = server.takeRequest(5, TimeUnit.SECONDS);
+
+      assertThat(request).isNotNull();
+      assertThat(request.getHeaders().get("Authorization")).isEqualTo("Bearer token");
+      assertThat(request.getHeaders().get("X-Test-Header")).isEqualTo("test-value");
+    } finally {
+      OpampPolicyProvider.resetForTest();
+    }
+  }
+
+  private static MockResponse emptyServerResponse() {
+    Buffer body = new Buffer();
+    body.write(new ServerToAgent.Builder().build().encode());
+    return new MockResponse.Builder().code(200).body(body).build();
   }
 }

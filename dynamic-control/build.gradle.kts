@@ -39,6 +39,8 @@ dependencies {
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-incubator")
   testImplementation("io.opentelemetry.instrumentation:opentelemetry-declarative-config-bridge")
   testImplementation("org.assertj:assertj-core")
+  testImplementation("com.squareup.okhttp3:mockwebserver3")
+  testImplementation("com.squareup.okhttp3:mockwebserver3-junit5")
   testImplementation("org.mockito:mockito-inline")
   testImplementation("org.mockito:mockito-junit-jupiter")
 }
