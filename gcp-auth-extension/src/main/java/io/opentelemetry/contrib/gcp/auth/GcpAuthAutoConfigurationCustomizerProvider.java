@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.gcp.auth;
 
 import static io.opentelemetry.api.common.AttributeKey.stringKey;
 import static java.util.Arrays.stream;
+import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -174,6 +175,7 @@ public class GcpAuthAutoConfigurationCustomizerProvider
     return IdTokenCredentials.newBuilder()
         .setIdTokenProvider((IdTokenProvider) applicationDefaultCredentials)
         .setTargetAudience(audience)
+        .setOptions(singletonList(IdTokenProvider.Option.INCLUDE_EMAIL))
         .build();
   }
 

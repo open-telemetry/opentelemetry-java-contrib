@@ -20,6 +20,7 @@ import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.ComputeEngineCredentials;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auth.oauth2.IdToken;
+import com.google.auth.oauth2.IdTokenProvider;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableMap;
 import io.opentelemetry.api.common.AttributeKey;
@@ -1182,7 +1183,8 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
         Mockito.mock(ComputeEngineCredentials.class);
     Mockito.when(
             mockComputeEngineCredentials.idTokenWithAudience(
-                Mockito.eq("https://otelcol.example.com"), Mockito.any()))
+                Mockito.eq("https://otelcol.example.com"),
+                Mockito.argThat(options -> options.contains(IdTokenProvider.Option.INCLUDE_EMAIL))))
         .thenReturn(IdToken.create(fakeIdToken));
 
     OtlpHttpSpanExporter mockOtlpHttpSpanExporter = mock(OtlpHttpSpanExporter.class);
