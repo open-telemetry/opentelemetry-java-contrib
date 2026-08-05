@@ -58,8 +58,8 @@ enum ConfigurableOption {
 
   /**
    * Specifies the type of token that the extension attaches to the exported telemetry. Can be
-   * configured using the environment variable `GOOGLE_OTEL_AUTH_TOKEN_TYPE` or the system property
-   * `google.otel.auth.token.type`.
+   * configured using the environment variable `GOOGLE_AUTH_TOKEN_TYPE` or the system property
+   * `google.auth.token.type`.
    *
    * <p>Valid values are:
    *
@@ -69,27 +69,27 @@ enum ConfigurableOption {
    *       telemetry.googleapis.com}.
    *   <li>{@code id_token} - Google-signed OpenID Connect ID token minted from the Application
    *       Default Credentials for the audience configured via {@link
-   *       #GOOGLE_OTEL_AUTH_ID_TOKEN_AUDIENCE}. Required for exporting to OTLP endpoints protected
-   *       by IAM-based authentication, for example an OpenTelemetry Collector running on Cloud Run
-   *       or behind Identity-Aware Proxy.
+   *       #GOOGLE_AUTH_ID_TOKEN_AUDIENCE}. Required for exporting to OTLP endpoints protected by
+   *       IAM-based authentication, for example an OpenTelemetry Collector running on Cloud Run or
+   *       behind Identity-Aware Proxy.
    * </ul>
    *
    * <p>The value names are consistent with the {@code token_type} option of the <a
    * href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension/googleclientauthextension">Google
    * Client Auth Extension for the OpenTelemetry Collector</a>.
    */
-  GOOGLE_OTEL_AUTH_TOKEN_TYPE("Token Type for Google Authentication Extension"),
+  GOOGLE_AUTH_TOKEN_TYPE("Token Type for Google Authentication Extension"),
 
   /**
    * The audience used when minting Google-signed ID tokens. Required when {@link
-   * #GOOGLE_OTEL_AUTH_TOKEN_TYPE} is set to {@code id_token}, ignored otherwise. Can be configured
-   * using the environment variable `GOOGLE_OTEL_AUTH_ID_TOKEN_AUDIENCE` or the system property
-   * `google.otel.auth.id.token.audience`.
+   * #GOOGLE_AUTH_TOKEN_TYPE} is set to {@code id_token}, ignored otherwise. Can be configured using
+   * the environment variable `GOOGLE_AUTH_ID_TOKEN_AUDIENCE` or the system property
+   * `google.auth.id.token.audience`.
    *
    * <p>For Cloud Run, this is the URL of the receiving service or one of its configured custom
    * audiences. For Identity-Aware Proxy, this is the OAuth 2.0 client ID.
    */
-  GOOGLE_OTEL_AUTH_ID_TOKEN_AUDIENCE("Google ID Token Audience");
+  GOOGLE_AUTH_ID_TOKEN_AUDIENCE("Google ID Token Audience");
 
   private final String userReadableName;
   private final String environmentVariableName;

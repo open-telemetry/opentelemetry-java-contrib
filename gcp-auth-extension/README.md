@@ -72,7 +72,7 @@ Here is a list of required and optional configuration available for the extensio
 
   * Can also be configured using `google.otel.auth.target.signals` system property.
 
-* `GOOGLE_OTEL_AUTH_TOKEN_TYPE`: Environment variable that specifies the type
+* `GOOGLE_AUTH_TOKEN_TYPE`: Environment variable that specifies the type
   of token that the extension attaches to the exported telemetry.
   Valid values are `access_token` and `id_token`:
 
@@ -91,20 +91,20 @@ Here is a list of required and optional configuration available for the extensio
     key, or impersonated credentials. When `id_token` is used, the
     `GOOGLE_CLOUD_PROJECT` option is not required and the `gcp.project_id`
     resource attribute is not added.
-  * Can also be configured using `google.otel.auth.token.type` system property.
+  * Can also be configured using `google.auth.token.type` system property.
 
   The value names are consistent with the `token_type` option of the
   [Google Client Auth Extension](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension/googleclientauthextension)
   for the OpenTelemetry Collector.
 
-* `GOOGLE_OTEL_AUTH_ID_TOKEN_AUDIENCE`: Environment variable that specifies
+* `GOOGLE_AUTH_ID_TOKEN_AUDIENCE`: Environment variable that specifies
   the audience used when minting Google-signed ID tokens. Required when
-  `GOOGLE_OTEL_AUTH_TOKEN_TYPE` is set to `id_token`, ignored otherwise.
+  `GOOGLE_AUTH_TOKEN_TYPE` is set to `id_token`, ignored otherwise.
   For Cloud Run, this is the URL of the receiving service or one of its
   [custom audiences](https://cloud.google.com/run/docs/configuring/custom-audiences).
   For Identity-Aware Proxy, this is the OAuth 2.0 client ID.
 
-  * Can also be configured using `google.otel.auth.id.token.audience` system property.
+  * Can also be configured using `google.auth.id.token.audience` system property.
 
 ## Usage
 

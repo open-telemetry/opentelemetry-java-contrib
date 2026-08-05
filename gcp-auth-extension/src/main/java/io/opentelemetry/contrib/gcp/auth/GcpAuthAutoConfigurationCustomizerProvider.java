@@ -129,7 +129,7 @@ public class GcpAuthAutoConfigurationCustomizerProvider
   /**
    * Lazily initializes and caches the {@link OAuth2Credentials} used for authentication. The type
    * of the credentials is determined by the configured {@link
-   * ConfigurableOption#GOOGLE_OTEL_AUTH_TOKEN_TYPE}.
+   * ConfigurableOption#GOOGLE_AUTH_TOKEN_TYPE}.
    */
   private static class LazyCredentialsSupplier {
     @Nullable private OAuth2Credentials credentials;
@@ -153,8 +153,7 @@ public class GcpAuthAutoConfigurationCustomizerProvider
     boolean useIdToken = isIdTokenType(configProperties);
     String audience =
         useIdToken
-            ? ConfigurableOption.GOOGLE_OTEL_AUTH_ID_TOKEN_AUDIENCE.getConfiguredValue(
-                configProperties)
+            ? ConfigurableOption.GOOGLE_AUTH_ID_TOKEN_AUDIENCE.getConfiguredValue(configProperties)
             : null;
 
     GoogleCredentials applicationDefaultCredentials;
@@ -181,7 +180,7 @@ public class GcpAuthAutoConfigurationCustomizerProvider
   // Checks whether the extension is configured to attach ID tokens instead of access tokens.
   private static boolean isIdTokenType(ConfigProperties configProperties) {
     String tokenType =
-        ConfigurableOption.GOOGLE_OTEL_AUTH_TOKEN_TYPE.getConfiguredValueWithFallback(
+        ConfigurableOption.GOOGLE_AUTH_TOKEN_TYPE.getConfiguredValueWithFallback(
             configProperties, () -> TOKEN_TYPE_ACCESS_TOKEN);
     switch (tokenType) {
       case TOKEN_TYPE_ID_TOKEN:
@@ -192,7 +191,7 @@ public class GcpAuthAutoConfigurationCustomizerProvider
         throw new ConfigurationException(
             String.format(
                 "GCP Authentication Extension not configured properly: %s has unsupported value '%s'. Supported values are '%s' (default) and '%s'.",
-                ConfigurableOption.GOOGLE_OTEL_AUTH_TOKEN_TYPE.getUserReadableName(),
+                ConfigurableOption.GOOGLE_AUTH_TOKEN_TYPE.getUserReadableName(),
                 tokenType,
                 TOKEN_TYPE_ACCESS_TOKEN,
                 TOKEN_TYPE_ID_TOKEN));

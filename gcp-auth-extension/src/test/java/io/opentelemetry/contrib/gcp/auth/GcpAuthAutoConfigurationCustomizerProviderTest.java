@@ -1173,10 +1173,8 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
   // Mockito.lenient is used here because this method is used with parameterized tests where based
   @SuppressWarnings("CannotMockMethod")
   @Test
-  @SetSystemProperty(key = "google.otel.auth.token.type", value = "id_token")
-  @SetSystemProperty(
-      key = "google.otel.auth.id.token.audience",
-      value = "https://otelcol.example.com")
+  @SetSystemProperty(key = "google.auth.token.type", value = "id_token")
+  @SetSystemProperty(key = "google.auth.id.token.audience", value = "https://otelcol.example.com")
   @SetSystemProperty(key = "google.otel.auth.target.signals", value = "traces")
   void testTraceCustomizerOtlpHttpWithIdToken() throws IOException {
     String fakeIdToken = craftFakeIdToken();
@@ -1235,9 +1233,9 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
   }
 
   @Test
-  @SetSystemProperty(key = "google.otel.auth.token.type", value = "id_token")
+  @SetSystemProperty(key = "google.auth.token.type", value = "id_token")
   @SetSystemProperty(key = "google.otel.auth.target.signals", value = "traces")
-  @ClearSystemProperty(key = "google.otel.auth.id.token.audience")
+  @ClearSystemProperty(key = "google.auth.id.token.audience")
   void testIdTokenWithoutAudienceThrows() {
     OtlpHttpSpanExporter mockOtlpHttpSpanExporter = mock(OtlpHttpSpanExporter.class);
     Mockito.lenient()
@@ -1252,15 +1250,13 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
 
       assertThatThrownBy(() -> buildOpenTelemetrySdkWithExporter(mockOtlpHttpSpanExporter))
           .isInstanceOf(ConfigurationException.class)
-          .hasMessageContaining("GOOGLE_OTEL_AUTH_ID_TOKEN_AUDIENCE");
+          .hasMessageContaining("GOOGLE_AUTH_ID_TOKEN_AUDIENCE");
     }
   }
 
   @Test
-  @SetSystemProperty(key = "google.otel.auth.token.type", value = "id_token")
-  @SetSystemProperty(
-      key = "google.otel.auth.id.token.audience",
-      value = "https://otelcol.example.com")
+  @SetSystemProperty(key = "google.auth.token.type", value = "id_token")
+  @SetSystemProperty(key = "google.auth.id.token.audience", value = "https://otelcol.example.com")
   @SetSystemProperty(key = "google.otel.auth.target.signals", value = "traces")
   void testIdTokenWithNonIdTokenProviderCredentialsThrows() {
     OtlpHttpSpanExporter mockOtlpHttpSpanExporter = mock(OtlpHttpSpanExporter.class);
@@ -1282,7 +1278,7 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
   }
 
   @Test
-  @SetSystemProperty(key = "google.otel.auth.token.type", value = "unsupported_token")
+  @SetSystemProperty(key = "google.auth.token.type", value = "unsupported_token")
   @SetSystemProperty(key = "google.otel.auth.target.signals", value = "traces")
   void testUnsupportedTokenTypeThrows() {
     OtlpHttpSpanExporter mockOtlpHttpSpanExporter = mock(OtlpHttpSpanExporter.class);
