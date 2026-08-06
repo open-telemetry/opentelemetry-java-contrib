@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 
@@ -294,7 +295,7 @@ public final class JsonSourceWrapper implements SourceWrapper {
   }
 
   private static void logDroppedObject(JsonNode object) {
-    if (logger.isLoggable(java.util.logging.Level.FINE)) {
+    if (logger.isLoggable(Level.FINE)) {
       logger.fine("Ignoring invalid or unmapped JSON policy object: " + object);
     }
   }
