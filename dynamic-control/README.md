@@ -150,9 +150,12 @@ The config tree starts with `sources`. You can configure multiple sources.
 Each source must specify:
 
 * `kind`: where policy updates come from. Supported values: `opamp`, `file`, `http` and `custom`
-(currently only `opamp` creates an active provider, the others are no-op providers)
+  (currently `opamp` and `http` create active providers; `file` and `custom` are no-op providers)
   * `opamp`: the implemented OpAMP provider expects to read the OpAMP config map,
-finding the value at the key given by `location`. The contents of that value are parseable by the capability given in `format`
+    finding the value at the key given by `location`. The contents of that value are parseable by
+    the capability given in `format`
+  * `http`: the HTTP provider expects `location` to be an HTTP or HTTPS URL. It fetches the initial
+    payload on the first poll and fetches subsequent payloads when the endpoint response changes.
 * `format`: how the source payload is parsed. Supported values currently are `jsonkeyvalue` and `keyvalue`
   * `jsonkeyvalue`: expects the contents to be convertible as a string into a single or an array of
 simple json objects that are key and value, eg '{ "key": value}' or '[{ "key1": value1}, { "key2": value2}]'
@@ -160,6 +163,10 @@ simple json objects that are key and value, eg '{ "key": value}' or '[{ "key1": 
 line separated 'key=value' pairs (eg a properties file)
 * `mappings`: one or more mappings from policy IDs to dynamic-control policy types
 * `location`: optional source-specific selector. For `opamp`, this is the OpAMP config map key, for example `vendor`
+  For `http`, this is the policy endpoint URL.
+
+HTTP sources use the shared poll interval, which defaults to 30 seconds and can be configured with
+`otel.java.experimental.telemetry.policy.provider.poll.interval`.
 
 Each mapping must specify:
 
