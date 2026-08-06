@@ -89,7 +89,8 @@ public final class HttpPolicyProvider extends AbstractPolicyProvider {
     List<SourceWrapper> parsedSources =
         format.parse(policyText, sourceConverter.getMappedPolicyIds());
     if (parsedSources == null) {
-      logger.info("Ignoring invalid HTTP policy payload for key: " + key);
+      logger.info(
+          "Ignoring invalid HTTP policy payload for key: " + key + ", payload: " + policyText);
       return Collections.emptyList();
     }
     return sourceConverter.convert(parsedSources, SourceKind.HTTP);
