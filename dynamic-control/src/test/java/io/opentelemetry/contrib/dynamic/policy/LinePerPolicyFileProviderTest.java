@@ -76,6 +76,22 @@ class LinePerPolicyFileProviderTest {
   }
 
   @Test
+  void fetchPoliciesParsesFullJsonPolicyLines() throws Exception {
+    Path file =
+        writeLines(
+            "{\"id\":\"trace-sampling\",\"name\":\"Trace sampling rate\","
+                + "\"trace\":{\"match\":[{\"trace_field\":\"trace_id\",\"exists\":true}],"
+                + "\"keep\":{\"probability\":0.1}}}");
+    LinePerPolicyFileProvider provider =
+        new LinePerPolicyFileProvider(file, Collections.singletonList(acceptingValidator()));
+
+    List<TelemetryPolicy> policies = provider.fetchPolicies();
+
+    assertThat(policies).hasSize(1);
+    assertThat(policies.get(0).getType()).isEqualTo(TRACE_SAMPLING_TYPE);
+  }
+
+  @Test
   void fetchPoliciesRejectsJsonLineWithExtraKeys() throws Exception {
     Path file = writeLines("{\"trace-sampling\": 0.5, \"typo\": 1}");
     LinePerPolicyFileProvider provider =
