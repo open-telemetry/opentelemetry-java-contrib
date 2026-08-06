@@ -1,6 +1,6 @@
 # Dynamic Control
 
-[Maven](https://central.sonatype.com/artifact/io.opentelemetry.contrib/opentelemetry-dynamic-control)
+[![Maven](https://img.shields.io/maven-central/v/io.opentelemetry.contrib/opentelemetry-dynamic-control?label=Maven&color=orange)](https://central.sonatype.com/artifact/io.opentelemetry.contrib/opentelemetry-dynamic-control)
 
 Adding dynamic control of some specific features of the Java agent.
 
@@ -29,7 +29,6 @@ A concrete example helps to understand this flow:
 1. Message: A message is added (to OpAMP data structure) to specify a change to the trace "sampling rate"
 2. Provider: The OpampPolicyProvider reads the message from the OpAMP data structure received via OpAMP protocol
 3. Policy: The message is converted into a TraceSamplingRatePolicy, ie the policy that changes the sampling rate,
-
 with the target "traceid rate"
 4. Policy aggregator: The policy is combined with any other policy changes already applied or pending,
 handling source priority and potential merges of policies
@@ -55,8 +54,6 @@ echo "      - policyId: sampling_rate" >> config.yaml
 echo "        policyType: trace-sampling" >> config.yaml
 java -Dotel.javaagent.extensions=./opentelemetry-dynamic-control-all.jar -Dotel.java.experimental.telemetry.policy.init.yaml=./config.yaml -Dotel.opamp.service.url=http://127.0.0.1:4320/v1/opamp -javaagent:path/to/opentelemetry-javaagent.jar -Dotel.service.name=my-service -jar myapp.jar
 ```
-
-
 
 ## Building
 
@@ -123,8 +120,6 @@ telemetry_policy/development:
 
 ```
 
-
-
 ### Using as an auto-configured extension
 
 You can use either `otel.java.experimental.telemetry.policy.init.yaml`
@@ -147,21 +142,19 @@ sources:
 
 ```
 
-
-
 ### Config Available
 
 The config tree starts with `sources`. You can configure multiple sources.
 
 Each source must specify:
 
-- `kind`: where policy updates come from. Supported values: `opamp`, `file`, `http` and `custom`
+* `kind`: where policy updates come from. Supported values: `opamp`, `file`, `http` and `custom`
 (currently only `opamp` creates an active provider, the others are no-op providers)
   - `opamp`: the implemented OpAMP provider expects to read the OpAMP config map,
   finding the value at the key given by `location`. The contents of that value are parseable by the capability given in `format`
-- `format`: how the source payload is parsed. Supported values currently are `jsonkeyvalue` and `keyvalue`
-  - `keyvalue`: expects the contents to be convertible as a string into one or more line separated 'key=value' pairs (eg a properties file)
-  - `jsonkeyvalue`: expects the contents to be convertible as a string into a single or an array of simple json objects that are key and value, eg '{ "policyId": value}' or '[{ "policyId1": value1}, { "policyId2": value2}]' It also accepts full policy objects, or arrays mixing the two forms. A full policy requires a non-empty `id` and `name`, exactly one target (`log`, `metric`, `profile`, or `trace`), a non-empty target `match`
+* `format`: how the source payload is parsed. Supported values currently are `jsonkeyvalue` and `keyvalue`
+  * `keyvalue`: expects the contents to be convertible as a string into one or more line separated 'key=value' pairs (eg a properties file)
+  * `jsonkeyvalue`: expects the contents to be convertible as a string into a single or an array of simple json objects that are key and value, eg '{ "policyId": value}' or '[{ "policyId1": value1}, { "policyId2": value2}]' It also accepts full policy objects, or arrays mixing the two forms. A full policy requires a non-empty `id` and `name`, exactly one target (`log`, `metric`, `profile`, or `trace`), a non-empty target `match`
   array, and a target `keep` value. The `id` must match a configured `policyId`. For example:
 
 ```json
@@ -175,14 +168,14 @@ Each source must specify:
 }
 ```
 
-- `mappings`: one or more mappings from policy IDs to dynamic-control policy types
-- `location`: optional source-specific selector. For `opamp`, this is the OpAMP config map key, for example `vendor`
+* `mappings`: one or more mappings from policy IDs to dynamic-control policy types
+* `location`: optional source-specific selector. For `opamp`, this is the OpAMP config map key, for example `vendor`
 
 Each mapping must specify:
 
-- `policyId`: the key in the source payload, for example `sampling_rate` (this is an arbitrary string defined
+* `policyId`: the key in the source payload, for example `sampling_rate` (this is an arbitrary string defined
 by the user or already being used/sent from some source)
-- `policyType`: the dynamic-control policy type to update, currently only `trace-sampling` is valid
+* `policyType`: the dynamic-control policy type to update, currently only `trace-sampling` is valid
 
 Currently supported values in summary
 
@@ -197,15 +190,13 @@ sources:
 
 ```
 
-
-
 ### Policies supported
 
-- `trace-sampling`
-  - IMPORTANT: if this policy is included in the config, then the sampler installed is overridden
+* `trace-sampling`
+  * IMPORTANT: if this policy is included in the config, then the sampler installed is overridden
   and a consistent sampling sampler is installed
   (technically the ComposableSampler.parentThreshold(ComposableSampler.probability()) sampler)
-  - Expects a value between 0.0 and 1.0 (including both end values), and will apply that sampling rate
+  * Expects a value between 0.0 and 1.0 (including both end values), and will apply that sampling rate
   to the agent's sampler where 0.0 is 0% head sampling and 1.0 is 100% sampling
 
 
@@ -255,13 +246,13 @@ at the same time, the opamp change would be applied and the file change dropped.
 
 Telemetry policy uses `policyType`, `id`, and `name` for different purposes:
 
-- `policyId` in the pipeline initialization identifies the source payload key for a policy mapping.
-- `policyType` selects the Java policy implementation for that mapped policy ID. For example,
+* `policyId` in the pipeline initialization identifies the source payload key for a policy mapping.
+* `policyType` selects the Java policy implementation for that mapped policy ID. For example,
 `policyType: trace-sampling` tells dynamic control to validate matching source values as trace
 sampling policies and deliver them to the trace sampling implementer.
-- `id` identifies one policy instance within a policy type. It is used to distinguish updates,
+* `id` identifies one policy instance within a policy type. It is used to distinguish updates,
 removals, and duplicate policies of the same type.
-- `name` is a human-readable description of the policy identified by `id`.
+* `name` is a human-readable description of the policy identified by `id`.
 
 An example helps to understand the differences between these fields. `trace-sampling` is an existing
 policy type, detailed above, and because it uses a sampling rate applied globally, the id for it
@@ -324,7 +315,7 @@ the responsibility of the sender/updater to manage the IDs and matchers consiste
 
 ## Component owners
 
-- [Jack Shirazi](https://github.com/jackshirazi), Elastic
-- [Cesar Munoz](https://github.com/LikeTheSalad), Elastic
+* [Jack Shirazi](https://github.com/jackshirazi), Elastic
+* [Cesar Munoz](https://github.com/LikeTheSalad), Elastic
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).
