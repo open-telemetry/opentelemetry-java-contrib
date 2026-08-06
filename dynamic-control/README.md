@@ -149,9 +149,9 @@ The config tree starts with `sources`. You can configure multiple sources.
 Each source must specify:
 
 * `kind`: where policy updates come from. Supported values: `opamp`, `file`, `http` and `custom`
-(currently only `opamp` creates an active provider, the others are no-op providers)
-  - `opamp`: the implemented OpAMP provider expects to read the OpAMP config map,
-  finding the value at the key given by `location`. The contents of that value are parseable by the capability given in `format`
+  (currently only `opamp` creates an active provider, the others are no-op providers)
+  * `opamp`: the implemented OpAMP provider expects to read the OpAMP config map,
+    finding the value at the key given by `location`. The contents of that value are parseable by the capability given in `format`
 * `format`: how the source payload is parsed. Supported values currently are `jsonkeyvalue` and `keyvalue`
   * `keyvalue`: expects the contents to be convertible as a string into one or more line separated 'key=value' pairs (eg a properties file)
   * `jsonkeyvalue`: expects the contents to be convertible as a string into a single or an array of simple json objects that are key and value, eg '{ "policyId": value}' or '[{ "policyId1": value1}, { "policyId2": value2}]' It also accepts full policy objects, or arrays mixing the two forms. A full policy requires a non-empty `id` and `name`, exactly one target (`log`, `metric`, `profile`, or `trace`), a non-empty target `match`
