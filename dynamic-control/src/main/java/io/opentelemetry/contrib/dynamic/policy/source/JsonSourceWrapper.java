@@ -294,6 +294,8 @@ public final class JsonSourceWrapper implements SourceWrapper {
   }
 
   private static void logDroppedObject(JsonNode object) {
-    logger.fine("Ignoring invalid or unmapped JSON policy object: " + object);
+    if (logger.isLoggable(java.util.logging.Level.FINE)) {
+      logger.fine("Ignoring invalid or unmapped JSON policy object: " + object);
+    }
   }
 }
