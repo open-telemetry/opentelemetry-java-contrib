@@ -127,12 +127,12 @@ public final class JsonSourceWrapper implements SourceWrapper {
   /**
    * Parses JSON text into one wrapper per policy object.
    *
-   * <p>Input must be a JSON object containing policy ID/value pairs, a full policy object with an
-   * {@code id} field, or an array of single-policy objects. A full policy must have a non-empty
-   * {@code id} and {@code name}, exactly one supported target, a non-empty target {@code match}
-   * array, and a target {@code keep} value. Entries whose policy ID is not present in {@code
-   * mappedPolicyIds}, or whose shape is invalid, are skipped while valid entries continue through
-   * the pipeline. An empty JSON object or array yields an empty list.
+   * <p>Input must be a single-policy JSON object containing either exactly one policy ID/value
+   * pair, or a full policy object with an {@code id} field, or an array of single-policy objects. A
+   * full policy must have a non-empty {@code id} and {@code name}, exactly one supported target, a
+   * non-empty target {@code match} array, and a target {@code keep} value. Entries whose policy ID
+   * is not present in {@code mappedPolicyIds}, or whose shape is invalid, are skipped while valid
+   * entries continue through the pipeline. An empty JSON object or array yields an empty list.
    *
    * @return an empty list if the source contains no valid mapped policies; a non-empty list of
    *     wrappers for valid mapped policies; or {@code null} if the text is not valid JSON or its
