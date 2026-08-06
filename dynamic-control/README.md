@@ -194,12 +194,10 @@ sources:
 
 * `trace-sampling`
   * IMPORTANT: if this policy is included in the config, then the sampler installed is overridden
-  and a consistent sampling sampler is installed
-  (technically the ComposableSampler.parentThreshold(ComposableSampler.probability()) sampler)
+ and a consistent sampling sampler is installed
+ (technically the ComposableSampler.parentThreshold(ComposableSampler.probability()) sampler)
   * Expects a value between 0.0 and 1.0 (including both end values), and will apply that sampling rate
   to the agent's sampler where 0.0 is 0% head sampling and 1.0 is 100% sampling
-
-
 
 ### Config example
 
@@ -248,10 +246,10 @@ Telemetry policy uses `policyType`, `id`, and `name` for different purposes:
 
 * `policyId` in the pipeline initialization identifies the source payload key for a policy mapping.
 * `policyType` selects the Java policy implementation for that mapped policy ID. For example,
-`policyType: trace-sampling` tells dynamic control to validate matching source values as trace
-sampling policies and deliver them to the trace sampling implementer.
+ `policyType: trace-sampling` tells dynamic control to validate matching source values as trace
+ sampling policies and deliver them to the trace sampling implementer.
 * `id` identifies one policy instance within a policy type. It is used to distinguish updates,
-removals, and duplicate policies of the same type.
+ removals, and duplicate policies of the same type.
 * `name` is a human-readable description of the policy identified by `id`.
 
 An example helps to understand the differences between these fields. `trace-sampling` is an existing
