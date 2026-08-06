@@ -148,29 +148,38 @@ public class GcpAuthAutoConfigurationCustomizerProvider
   // id_token, the Application Default Credentials are wrapped into IdTokenCredentials which mint
   // Google-signed ID tokens for the configured audience.
   private static OAuth2Credentials createCredentials(ConfigProperties configProperties) {
-    // Resolve and validate the configuration before any IO, so a misconfiguration (unsupported
-    // token type or missing audience) is reported deterministically instead of being masked by an
-    // Application Default Credentials retrieval failure.
-    boolean useIdToken = isIdTokenType(configProperties);
-    String audience =
-        useIdToken
-            ? ConfigurableOption.GOOGLE_AUTH_ID_TOKEN_AUDIENCE.getConfiguredValue(configProperties)
-            : null;
-
     GoogleCredentials applicationDefaultCredentials;
     try {
       applicationDefaultCredentials = GoogleCredentials.getApplicationDefault();
     } catch (IOException e) {
       throw new GoogleAuthException(Reason.FAILED_ADC_RETRIEVAL, e);
     }
-    if (!useIdToken) {
+
+    if (!isIdTokenType(configProperties)) {
+      return applicationDefaultCredentials;
+    }
+
+    String audience =
+        ConfigurableOption.GOOGLE_AUTH_ID_TOKEN_AUDIENCE.getConfiguredValueWithFallback(
+            configProperties, () -> "");
+    if (audience.isEmpty()) {
+      String[] params = {
+        ConfigurableOption.GOOGLE_AUTH_TOKEN_TYPE.getEnvironmentVariable(),
+        TOKEN_TYPE_ID_TOKEN,
+        ConfigurableOption.GOOGLE_AUTH_ID_TOKEN_AUDIENCE.getEnvironmentVariable()
+      };
+      logger.log(
+          Level.WARNING,
+          "{0} is set to {1} but {2} is not set; falling back to access tokens.",
+          params);
       return applicationDefaultCredentials;
     }
     if (!(applicationDefaultCredentials instanceof IdTokenProvider)) {
-      throw new ConfigurationException(
-          String.format(
-              "GCP Authentication Extension not configured properly: the retrieved Application Default Credentials (%s) cannot mint ID tokens. Use a credential type implementing IdTokenProvider - for example the default service account of a GCP compute environment, a service account key, or impersonated credentials (gcloud auth application-default login --impersonate-service-account=<SERVICE_ACCOUNT>).",
-              applicationDefaultCredentials.getClass().getSimpleName()));
+      logger.log(
+          Level.WARNING,
+          "The retrieved Application Default Credentials ({0}) cannot mint ID tokens; falling back to access tokens. Use a credential type implementing IdTokenProvider, for example the default service account of a GCP compute environment, a service account key, or impersonated credentials.",
+          applicationDefaultCredentials.getClass().getSimpleName());
+      return applicationDefaultCredentials;
     }
     return IdTokenCredentials.newBuilder()
         .setIdTokenProvider((IdTokenProvider) applicationDefaultCredentials)
@@ -184,20 +193,7 @@ public class GcpAuthAutoConfigurationCustomizerProvider
     String tokenType =
         ConfigurableOption.GOOGLE_AUTH_TOKEN_TYPE.getConfiguredValueWithFallback(
             configProperties, () -> TOKEN_TYPE_ACCESS_TOKEN);
-    switch (tokenType) {
-      case TOKEN_TYPE_ID_TOKEN:
-        return true;
-      case TOKEN_TYPE_ACCESS_TOKEN:
-        return false;
-      default:
-        throw new ConfigurationException(
-            String.format(
-                "GCP Authentication Extension not configured properly: %s has unsupported value '%s'. Supported values are '%s' (default) and '%s'.",
-                ConfigurableOption.GOOGLE_AUTH_TOKEN_TYPE.getUserReadableName(),
-                tokenType,
-                TOKEN_TYPE_ACCESS_TOKEN,
-                TOKEN_TYPE_ID_TOKEN));
-    }
+    return TOKEN_TYPE_ID_TOKEN.equals(tokenType);
   }
 
   private static SpanExporter customizeSpanExporter(
