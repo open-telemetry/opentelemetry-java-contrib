@@ -39,6 +39,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nonnull;
@@ -109,17 +111,32 @@ public class GcpAuthAutoConfigurationCustomizerProvider
    */
   @Override
   public void customize(@Nonnull AutoConfigurationCustomizer autoConfiguration) {
-    LazyCredentialsSupplier credentialsSupplier = new LazyCredentialsSupplier();
+    AtomicReference<LazyCredentialsSupplier> supplierRef = new AtomicReference<>();
     autoConfiguration
         .addSpanExporterCustomizer(
             (spanExporter, configProperties) ->
-                customizeSpanExporter(spanExporter, credentialsSupplier, configProperties))
+                customizeSpanExporter(
+                    spanExporter,
+                    getOrCreateSupplier(supplierRef, configProperties),
+                    configProperties))
         .addMetricExporterCustomizer(
             (metricExporter, configProperties) ->
-                customizeMetricExporter(metricExporter, credentialsSupplier, configProperties))
+                customizeMetricExporter(
+                    metricExporter,
+                    getOrCreateSupplier(supplierRef, configProperties),
+                    configProperties))
         .addResourceCustomizer(
             (resource, configProperties) ->
-                customizeResource(resource, credentialsSupplier, configProperties));
+                customizeResource(
+                    resource,
+                    getOrCreateSupplier(supplierRef, configProperties),
+                    configProperties));
+  }
+
+  private static LazyCredentialsSupplier getOrCreateSupplier(
+      AtomicReference<LazyCredentialsSupplier> ref, ConfigProperties configProperties) {
+    return ref.updateAndGet(
+        existing -> existing != null ? existing : new LazyCredentialsSupplier(configProperties));
   }
 
   @Override
@@ -132,60 +149,66 @@ public class GcpAuthAutoConfigurationCustomizerProvider
    * of the credentials is determined by the configured {@link
    * ConfigurableOption#GOOGLE_AUTH_TOKEN_TYPE}.
    */
-  private static class LazyCredentialsSupplier {
+  private static class LazyCredentialsSupplier implements Supplier<OAuth2Credentials> {
+    private final ConfigProperties configProperties;
     @Nullable private OAuth2Credentials credentials;
 
-    synchronized OAuth2Credentials get(ConfigProperties configProperties) {
+    LazyCredentialsSupplier(ConfigProperties configProperties) {
+      this.configProperties = configProperties;
+    }
+
+    @Override
+    public synchronized OAuth2Credentials get() {
       if (credentials == null) {
-        credentials = createCredentials(configProperties);
+        credentials = createCredentials();
       }
       return credentials;
     }
-  }
 
-  // Creates the credentials used for authentication based on the configured token type. For the
-  // default token type (access_token) the Application Default Credentials are used as-is. For
-  // id_token, the Application Default Credentials are wrapped into IdTokenCredentials which mint
-  // Google-signed ID tokens for the configured audience.
-  private static OAuth2Credentials createCredentials(ConfigProperties configProperties) {
-    GoogleCredentials applicationDefaultCredentials;
-    try {
-      applicationDefaultCredentials = GoogleCredentials.getApplicationDefault();
-    } catch (IOException e) {
-      throw new GoogleAuthException(Reason.FAILED_ADC_RETRIEVAL, e);
-    }
+    // Creates the credentials used for authentication based on the configured token type. For the
+    // default token type (access_token) the Application Default Credentials are used as-is. For
+    // id_token, the Application Default Credentials are wrapped into IdTokenCredentials which mint
+    // Google-signed ID tokens for the configured audience.
+    private OAuth2Credentials createCredentials() {
+      GoogleCredentials applicationDefaultCredentials;
+      try {
+        applicationDefaultCredentials = GoogleCredentials.getApplicationDefault();
+      } catch (IOException e) {
+        throw new GoogleAuthException(Reason.FAILED_ADC_RETRIEVAL, e);
+      }
 
-    if (!isIdTokenType(configProperties)) {
-      return applicationDefaultCredentials;
-    }
+      if (!isIdTokenType(configProperties)) {
+        return applicationDefaultCredentials;
+      }
 
-    String audience =
-        ConfigurableOption.GOOGLE_AUTH_ID_TOKEN_AUDIENCE.getConfiguredValueWithFallback(
-            configProperties, () -> "");
-    if (audience.isEmpty()) {
-      String[] params = {
-        ConfigurableOption.GOOGLE_AUTH_TOKEN_TYPE.getEnvironmentVariable(),
-        TOKEN_TYPE_ID_TOKEN,
-        ConfigurableOption.GOOGLE_AUTH_ID_TOKEN_AUDIENCE.getEnvironmentVariable()
-      };
-      logger.log(
-          Level.WARNING,
-          "{0} is set to {1} but {2} is not set; falling back to access tokens.",
-          params);
-      return applicationDefaultCredentials;
+      String audience =
+          ConfigurableOption.GOOGLE_AUTH_ID_TOKEN_AUDIENCE.getConfiguredValueWithFallback(
+              configProperties, () -> "");
+      if (audience.isEmpty()) {
+        String[] params = {
+          ConfigurableOption.GOOGLE_AUTH_TOKEN_TYPE.getEnvironmentVariable(),
+          TOKEN_TYPE_ID_TOKEN,
+          ConfigurableOption.GOOGLE_AUTH_ID_TOKEN_AUDIENCE.getEnvironmentVariable()
+        };
+        logger.log(
+            Level.WARNING,
+            "{0} is set to {1} but {2} is not set; falling back to access tokens.",
+            params);
+        return applicationDefaultCredentials;
+      }
+      if (!(applicationDefaultCredentials instanceof IdTokenProvider)) {
+        logger.log(
+            Level.WARNING,
+            "The retrieved Application Default Credentials ({0}) cannot mint ID tokens; falling back to access tokens. Use a credential type implementing IdTokenProvider, for example the default service account of a GCP compute environment, a service account key, or impersonated credentials.",
+            applicationDefaultCredentials.getClass().getSimpleName());
+        return applicationDefaultCredentials;
+      }
+      return IdTokenCredentials.newBuilder()
+          .setIdTokenProvider((IdTokenProvider) applicationDefaultCredentials)
+          .setTargetAudience(audience)
+          .setOptions(singletonList(IdTokenProvider.Option.INCLUDE_EMAIL))
+          .build();
     }
-    if (!(applicationDefaultCredentials instanceof IdTokenProvider)) {
-      logger.log(
-          Level.WARNING,
-          "The retrieved Application Default Credentials ({0}) cannot mint ID tokens; falling back to access tokens. Use a credential type implementing IdTokenProvider, for example the default service account of a GCP compute environment, a service account key, or impersonated credentials.",
-          applicationDefaultCredentials.getClass().getSimpleName());
-      return applicationDefaultCredentials;
-    }
-    return IdTokenCredentials.newBuilder()
-        .setIdTokenProvider((IdTokenProvider) applicationDefaultCredentials)
-        .setTargetAudience(audience)
-        .setOptions(singletonList(IdTokenProvider.Option.INCLUDE_EMAIL))
-        .build();
   }
 
   // Checks whether the extension is configured to attach ID tokens instead of access tokens.
@@ -198,11 +221,10 @@ public class GcpAuthAutoConfigurationCustomizerProvider
 
   private static SpanExporter customizeSpanExporter(
       SpanExporter exporter,
-      LazyCredentialsSupplier credentialsSupplier,
+      Supplier<OAuth2Credentials> credentialsSupplier,
       ConfigProperties configProperties) {
     if (isSignalTargeted(SIGNAL_TYPE_TRACES, configProperties)) {
-      return addAuthorizationHeaders(
-          exporter, credentialsSupplier.get(configProperties), configProperties);
+      return addAuthorizationHeaders(exporter, credentialsSupplier.get(), configProperties);
     } else {
       String[] params = {
         SIGNAL_TYPE_TRACES, SIGNAL_TYPE_NONE, SIGNAL_TARGET_WARNING_FIX_SUGGESTION
@@ -217,11 +239,10 @@ public class GcpAuthAutoConfigurationCustomizerProvider
 
   private static MetricExporter customizeMetricExporter(
       MetricExporter exporter,
-      LazyCredentialsSupplier credentialsSupplier,
+      Supplier<OAuth2Credentials> credentialsSupplier,
       ConfigProperties configProperties) {
     if (isSignalTargeted(SIGNAL_TYPE_METRICS, configProperties)) {
-      return addAuthorizationHeaders(
-          exporter, credentialsSupplier.get(configProperties), configProperties);
+      return addAuthorizationHeaders(exporter, credentialsSupplier.get(), configProperties);
     } else {
       String[] params = {
         SIGNAL_TYPE_METRICS, SIGNAL_TYPE_NONE, SIGNAL_TARGET_WARNING_FIX_SUGGESTION
@@ -320,7 +341,7 @@ public class GcpAuthAutoConfigurationCustomizerProvider
   // Updates the current resource with the attributes required for ingesting OTLP data on GCP.
   private static Resource customizeResource(
       Resource resource,
-      LazyCredentialsSupplier credentialsSupplier,
+      Supplier<OAuth2Credentials> credentialsSupplier,
       ConfigProperties configProperties) {
     if (!isSignalTargeted(SIGNAL_TYPE_TRACES, configProperties)
         && !isSignalTargeted(SIGNAL_TYPE_METRICS, configProperties)) {
@@ -338,7 +359,7 @@ public class GcpAuthAutoConfigurationCustomizerProvider
     } catch (ConfigurationException e) {
       // This line is only reachable for the access_token type, for which the supplier always
       // returns the GoogleCredentials retrieved as Application Default Credentials.
-      gcpProjectId = ((GoogleCredentials) credentialsSupplier.get(configProperties)).getProjectId();
+      gcpProjectId = ((GoogleCredentials) credentialsSupplier.get()).getProjectId();
       if (gcpProjectId == null || gcpProjectId.isEmpty()) {
         throw e;
       }
