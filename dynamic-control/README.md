@@ -159,7 +159,6 @@ Each source must specify:
     finding the value at the key given by `location`. The contents of that value are parseable by
     the capability given in `format`
 * `format`: how the source payload is parsed. Supported values currently are `jsonkeyvalue` and `keyvalue`
-  (note protobuf and yaml are expected to be supported in future)
   * `keyvalue`: expects the contents to be convertible as a string into one or more line-separated
     `key=value` pairs (for example, a properties file)
   * `jsonkeyvalue`: expects the contents to be convertible as a string into a single simple JSON
