@@ -188,11 +188,14 @@ public class GcpAuthAutoConfigurationCustomizerProvider
         String[] params = {
           ConfigurableOption.GOOGLE_AUTH_TOKEN_TYPE.getEnvironmentVariable(),
           TOKEN_TYPE_ID_TOKEN,
-          ConfigurableOption.GOOGLE_AUTH_ID_TOKEN_AUDIENCE.getEnvironmentVariable()
+          ConfigurableOption.GOOGLE_AUTH_ID_TOKEN_AUDIENCE.getUserReadableName(),
+          ConfigurableOption.GOOGLE_AUTH_ID_TOKEN_AUDIENCE.getEnvironmentVariable(),
+          ConfigurableOption.GOOGLE_AUTH_ID_TOKEN_AUDIENCE.getSystemProperty()
         };
         logger.log(
             Level.WARNING,
-            "{0} is set to {1} but {2} is not set; falling back to access tokens.",
+            "{0} is set to {1} but {2} is not configured; falling back to access tokens."
+                + " Configure it by exporting environment variable {3} or system property {4}.",
             params);
         return applicationDefaultCredentials;
       }
