@@ -182,7 +182,11 @@ class SamplingProfilerTest {
           .timeout(Duration.ofSeconds(10))
           .until(() -> setup.profiler.getProfilingSessions() > currentSession);
       profilingActiveOnThread = setup.profiler.isProfilingActiveOnThread(Thread.currentThread());
+      int sessionBeforeInferred = setup.profiler.getProfilingSessions();
       aInferred(tracer);
+      await()
+          .timeout(Duration.ofSeconds(10))
+          .until(() -> setup.profiler.getProfilingSessions() > sessionBeforeInferred);
     } finally {
       tx.end();
     }
