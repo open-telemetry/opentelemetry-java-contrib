@@ -13,4 +13,12 @@ public interface SourceWrapper {
 
   @Nullable
   String getPolicyType();
+
+  /**
+   * Returns a copy of this source with its policy identifier replaced by {@code policyType}.
+   *
+   * @return the remapped source, or {@code null} if this source cannot be remapped
+   */
+  @Nullable
+  SourceWrapper withPolicyType(String policyType);
 }
