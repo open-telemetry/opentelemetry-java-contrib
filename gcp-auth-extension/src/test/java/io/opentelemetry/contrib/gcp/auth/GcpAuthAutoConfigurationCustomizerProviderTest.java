@@ -1171,7 +1171,6 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
     }
   }
 
-  // Mockito.lenient is used here because this method is used with parameterized tests where based
   @SuppressWarnings("CannotMockMethod")
   @Test
   @SetSystemProperty(key = "google.auth.token.type", value = "id_token")
@@ -1239,7 +1238,7 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
   @SetSystemProperty(key = "google.otel.auth.target.signals", value = "traces")
   @ClearSystemProperty(key = "google.auth.id.token.audience")
   void testIdTokenWithoutAudienceFallsBackToAccessToken() throws IOException {
-    assertConfiguredCredentialsFallBackToAccessToken();
+    assertConfiguredCredentialsForTraceFallbackToAccessToken();
   }
 
   @Test
@@ -1248,7 +1247,7 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
   @SetSystemProperty(key = "google.otel.auth.target.signals", value = "traces")
   void testIdTokenWithNonIdTokenProviderCredentialsFallsBackToAccessToken() throws IOException {
     // The mocked GoogleCredentials does not implement IdTokenProvider.
-    assertConfiguredCredentialsFallBackToAccessToken();
+    assertConfiguredCredentialsForTraceFallbackToAccessToken();
   }
 
   @Test
@@ -1256,11 +1255,12 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
   @SetSystemProperty(key = "google.otel.auth.target.signals", value = "traces")
   @SetSystemProperty(key = "google.cloud.project", value = "test-gcp-project")
   void testUnsupportedTokenTypeFallsBackToAccessToken() throws IOException {
-    assertConfiguredCredentialsFallBackToAccessToken();
+    assertConfiguredCredentialsForTraceFallbackToAccessToken();
   }
 
+  // Asserts a misconfigured id_token setup falls back to access tokens on the trace exporter.
   @SuppressWarnings("CannotMockMethod")
-  private void assertConfiguredCredentialsFallBackToAccessToken() throws IOException {
+  private void assertConfiguredCredentialsForTraceFallbackToAccessToken() throws IOException {
     AccessToken fakeAccessToken = new AccessToken("fake-access-token", Date.from(Instant.now()));
     Mockito.when(mockedGoogleCredentials.getRequestMetadata())
         .thenReturn(
@@ -1309,6 +1309,7 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
     return header + "." + payload + "." + signature;
   }
 
+  // Mockito.lenient is used here because this method is used with parameterized tests where based
   private void prepareMockBehaviorForGoogleCredentials() {
     AccessToken fakeAccessToken = new AccessToken("fake", Date.from(Instant.now()));
     try {

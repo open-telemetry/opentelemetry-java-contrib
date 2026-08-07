@@ -200,10 +200,15 @@ public class GcpAuthAutoConfigurationCustomizerProvider
         return applicationDefaultCredentials;
       }
       if (!(applicationDefaultCredentials instanceof IdTokenProvider)) {
+        String[] params = {
+          ConfigurableOption.GOOGLE_AUTH_TOKEN_TYPE.getEnvironmentVariable(),
+          TOKEN_TYPE_ID_TOKEN,
+          applicationDefaultCredentials.getClass().getSimpleName()
+        };
         logger.log(
             Level.WARNING,
-            "The retrieved Application Default Credentials ({0}) cannot mint ID tokens; falling back to access tokens. Use a credential type implementing IdTokenProvider, for example the default service account of a GCP compute environment, a service account key, or impersonated credentials.",
-            applicationDefaultCredentials.getClass().getSimpleName());
+            "{0} is set to {1} but the retrieved Application Default Credentials ({2}) cannot mint ID tokens; falling back to access tokens. Use a credential type implementing IdTokenProvider, for example the default service account of a GCP compute environment, a service account key, or impersonated credentials.",
+            params);
         return applicationDefaultCredentials;
       }
       return IdTokenCredentials.newBuilder()
