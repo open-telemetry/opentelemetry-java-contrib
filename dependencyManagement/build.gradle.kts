@@ -51,7 +51,7 @@ dependencies {
     api("org.awaitility:awaitility:4.3.0")
     api("org.bouncycastle:bcpkix-jdk15on:1.70")
     api("org.bouncycastle:bcpkix-jdk18on:1.85")
-    api("org.bouncycastle:bcprov-jdk18on:1.85")
+    api("org.bouncycastle:bcprov-jdk18on:1.85.2")
     api("org.junit-pioneer:junit-pioneer:1.9.1")
     api("org.skyscreamer:jsonassert:1.5.3")
     api("org.apache.kafka:kafka-clients:4.3.1")
