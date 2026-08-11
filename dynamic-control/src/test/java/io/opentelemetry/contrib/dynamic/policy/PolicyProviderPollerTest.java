@@ -159,6 +159,41 @@ class PolicyProviderPollerTest {
   }
 
   @Test
+  void registerUrlRetriesChangeWhenTargetFails() throws Exception {
+    AtomicReference<String> responseBody = new AtomicReference<>("trace-sampling=0.5");
+    AtomicInteger requestCount = new AtomicInteger();
+    URI url = startHttpServer(responseBody, requestCount);
+    AtomicInteger callbackAttempts = new AtomicInteger();
+    AtomicReference<String> callbackBody = new AtomicReference<>();
+    PolicyProviderPoller.registerUrl(
+        url,
+        (changedUrl, body) -> {
+          callbackBody.set(new String(body, StandardCharsets.UTF_8));
+          // Succeed on initial read (attempt 1); fail once on the change (attempt 2).
+          if (callbackAttempts.incrementAndGet() == 2) {
+            throw new IllegalStateException("test callback failure");
+          }
+        });
+
+    PolicyProviderPoller.poll();
+    assertThat(callbackAttempts.get()).isEqualTo(1);
+    assertThat(callbackBody.get()).isEqualTo("trace-sampling=0.5");
+
+    responseBody.set("trace-sampling=0.75");
+
+    PolicyProviderPoller.poll();
+    assertThat(callbackAttempts.get()).isEqualTo(2);
+    assertThat(callbackBody.get()).isEqualTo("trace-sampling=0.75");
+
+    PolicyProviderPoller.poll();
+    assertThat(callbackAttempts.get()).isEqualTo(3);
+    assertThat(callbackBody.get()).isEqualTo("trace-sampling=0.75");
+
+    PolicyProviderPoller.poll();
+    assertThat(callbackAttempts.get()).isEqualTo(3);
+  }
+
+  @Test
   void registerUrlRejectsNonHttpUrls() {
     assertThatThrownBy(
             () ->
