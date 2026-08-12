@@ -118,14 +118,13 @@ def main() -> int:
             continue
             
         reason: str | None = None
-        # Fallback to 'bullet' if the older output format is somehow retained
-        text = d.get("summary") or d.get("bullet")
+        text = d.get("bullet")
         mod_name = d.get("module", "Other")
 
         if decision != "include":
             reason = f"unknown decision {decision!r}"
         elif not text:
-            reason = "empty summary"
+            reason = "empty bullet"
             
         if reason is not None:
             print(f"#{pr}: skipping, {reason}", file=sys.stderr)
@@ -164,7 +163,7 @@ def main() -> int:
             elif section == "bug-fixes":
                 prefix = "**[Bug Fix]** "
                 
-            text = entry.get("summary") or entry.get("bullet")
+            text = entry.get("bullet")
             full_text = f"{prefix}{text}"
             
             out_lines.append(format_bullet(full_text, entry["pr"]))

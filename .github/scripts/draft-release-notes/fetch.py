@@ -232,17 +232,6 @@ def trim_pr_suffix(subject: str) -> str:
     return PR_SUFFIX_RE.sub("", subject).rstrip()
 
 
-def format_subject_as_entry(subject: str) -> str:
-    pr_number = extract_pr_number(subject)
-    summary = trim_pr_suffix(subject)
-    if pr_number is None:
-        return summary
-    return (
-        f"{summary}\n"
-        f"  ([#{pr_number}](https://github.com/{REPO}/pull/{pr_number}))"
-    )
-
-
 def count_deprecated_deltas(commit_hash: str) -> tuple[int, int]:
     result = run_command(
         ["git", "diff-tree", "-p", commit_hash, "--", SRC_MAIN_JAVA_PATHSPEC],
@@ -283,59 +272,6 @@ def build_candidates(range_spec: str) -> list[Candidate]:
             )
         )
     return candidates
-
-
-def get_since_date(range_spec: str) -> str:
-    if range_spec == "HEAD":
-        # Use the unfiltered oldest commit so we don't miss PRs merged before
-        # the oldest non-renovate commit in a first-release scenario.
-        result = run_command(["git", "rev-list", "--max-parents=0", "HEAD"])
-        oldest_commit = result.stdout.strip().splitlines()[0]
-    else:
-        match = re.fullmatch(r"(.+)\.\.(.+)", range_spec)
-        if match is None:
-            raise RuntimeError(f"Invalid range format: {range_spec}")
-        oldest_commit = run_command(["git", "rev-parse", match.group(1)]).stdout.strip()
-
-    result = run_command(["git", "show", "-s", "--format=%ci", oldest_commit])
-    return result.stdout.strip().split(" ", 1)[0]
-
-
-def fetch_labeled_prs(range_spec: str, label: str) -> list[dict[str, Any]]:
-    since_date = get_since_date(range_spec)
-    data = load_json(
-        [
-            "gh",
-            "pr",
-            "list",
-            "--repo",
-            REPO,
-            "--label",
-            label,
-            "--state",
-            "merged",
-            "--search",
-            f"merged:>={since_date}",
-            "--json",
-            "number,title",
-        ]
-    )
-    return [item for item in data if isinstance(item, dict)]
-
-
-def render_labeled_prs(title: str, items: list[dict[str, Any]]) -> list[str]:
-    if not items:
-        return []
-    lines = [title, ""]
-    for item in items:
-        pr_number = item.get("number")
-        pr_title = str(item.get("title", "")).strip()
-        if not isinstance(pr_number, int) or not pr_title:
-            continue
-        lines.append(f"- {pr_title}")
-        lines.append(f"  ([#{pr_number}](https://github.com/{REPO}/pull/{pr_number}))")
-    lines.append("")
-    return lines
 
 
 def get_patch_from_git(commit_hash: str) -> str:
@@ -488,8 +424,6 @@ def prepare_bundle(
     version: str,
     range_spec: str,
     candidates: list[Candidate],
-    breaking_prs: list[dict[str, Any]],
-    deprecation_prs: list[dict[str, Any]],
     refetch: bool = False,
 ) -> None:
     (bundle_dir / "prs").mkdir(parents=True, exist_ok=True)
@@ -575,12 +509,10 @@ def prepare_bundle(
     manifest = {
         "bundle_dir": str(bundle_dir.relative_to(REPO_ROOT)).replace("\\", "/"),
         "candidates": manifest_candidates,
-        "deprecation_prs": deprecation_prs,
         "generated_by": ".github/scripts/draft-release-notes/fetch.py",
         "range": range_spec,
         "repo": REPO,
         "version": version,
-        "breaking_change_prs": breaking_prs,
     }
     write_json(bundle_dir / "manifest.json", manifest)
     write_text(bundle_dir / "index.md", "\n".join(index_lines) + "\n")
@@ -788,69 +720,6 @@ def _append_index_entry(
     ])
 
 
-def render_draft_output(
-    breaking_prs: list[dict[str, Any]],
-    deprecation_prs: list[dict[str, Any]],
-    candidates: list[Candidate],
-) -> str:
-    lines = ["# Changelog", "", "## Unreleased", ""]
-    lines.extend(render_labeled_prs("### ⚠️ Breaking changes to non-stable APIs", breaking_prs))
-    lines.extend(render_labeled_prs("### 🚫 Deprecations", deprecation_prs))
-
-    lines.extend(
-        [
-            "### 🌟 New javaagent instrumentation",
-            "",
-            "### 🌟 New library instrumentation",
-            "",
-            "### 📈 Enhancements",
-            "",
-            "### 🛠️ Bug fixes",
-            "",
-            "### 🧰 Tooling",
-            "",
-        ]
-    )
-
-    breaking_candidates = [candidate for candidate in candidates if candidate.deprecated_removed]
-    if breaking_candidates:
-        lines.extend(["#### Possible breaking changes (diff removes @Deprecated)", ""])
-        for candidate in breaking_candidates:
-            lines.append(f"- {format_subject_as_entry(candidate.subject)}")
-        lines.append("")
-
-    deprecation_candidates = [candidate for candidate in candidates if candidate.deprecated_added]
-    if deprecation_candidates:
-        lines.extend(["#### Possible deprecations (diff adds @Deprecated)", ""])
-        for candidate in deprecation_candidates:
-            lines.append(f"- {format_subject_as_entry(candidate.subject)}")
-        lines.append("")
-
-    src_main_candidates = [
-        candidate
-        for candidate in candidates
-        if candidate.touches_src_main and not candidate.deprecated_added and not candidate.deprecated_removed
-    ]
-    if src_main_candidates:
-        lines.extend(["#### Changes with src/main updates", ""])
-        for candidate in src_main_candidates:
-            lines.append(f"- {format_subject_as_entry(candidate.subject)}")
-        lines.append("")
-
-    no_src_main_candidates = [
-        candidate
-        for candidate in candidates
-        if not candidate.touches_src_main and not candidate.deprecated_added and not candidate.deprecated_removed
-    ]
-    if no_src_main_candidates:
-        lines.extend(["#### Changes without src/main updates", ""])
-        for candidate in no_src_main_candidates:
-            lines.append(f"- {format_subject_as_entry(candidate.subject)}")
-        lines.append("")
-
-    return "\n".join(lines) + "\n"
-
-
 def do_draft(
     range_spec: str | None,
     bundle_dir: Path,
@@ -860,8 +729,6 @@ def do_draft(
     version = get_version()
     actual_range = range_spec or compute_default_range(version)
     candidates = build_candidates(actual_range)
-    breaking_prs = fetch_labeled_prs(actual_range, "breaking change")
-    deprecation_prs = fetch_labeled_prs(actual_range, "deprecation")
 
     if not skip_bundle:
         prepare_bundle(
@@ -869,8 +736,6 @@ def do_draft(
             version,
             actual_range,
             candidates,
-            breaking_prs,
-            deprecation_prs,
             refetch=refetch,
         )
         relative_bundle = bundle_dir.relative_to(REPO_ROOT).as_posix()
