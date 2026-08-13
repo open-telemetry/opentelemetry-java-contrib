@@ -39,8 +39,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nonnull;
@@ -111,32 +109,17 @@ public class GcpAuthAutoConfigurationCustomizerProvider
    */
   @Override
   public void customize(@Nonnull AutoConfigurationCustomizer autoConfiguration) {
-    AtomicReference<LazyCredentialsSupplier> supplierRef = new AtomicReference<>();
+    LazyOAuth2CredentialsHolder credentialsHolder = new LazyOAuth2CredentialsHolder();
     autoConfiguration
         .addSpanExporterCustomizer(
             (spanExporter, configProperties) ->
-                customizeSpanExporter(
-                    spanExporter,
-                    getOrCreateSupplier(supplierRef, configProperties),
-                    configProperties))
+                customizeSpanExporter(spanExporter, credentialsHolder, configProperties))
         .addMetricExporterCustomizer(
             (metricExporter, configProperties) ->
-                customizeMetricExporter(
-                    metricExporter,
-                    getOrCreateSupplier(supplierRef, configProperties),
-                    configProperties))
+                customizeMetricExporter(metricExporter, credentialsHolder, configProperties))
         .addResourceCustomizer(
             (resource, configProperties) ->
-                customizeResource(
-                    resource,
-                    getOrCreateSupplier(supplierRef, configProperties),
-                    configProperties));
-  }
-
-  private static LazyCredentialsSupplier getOrCreateSupplier(
-      AtomicReference<LazyCredentialsSupplier> ref, ConfigProperties configProperties) {
-    return ref.updateAndGet(
-        existing -> existing != null ? existing : new LazyCredentialsSupplier(configProperties));
+                customizeResource(resource, credentialsHolder, configProperties));
   }
 
   @Override
@@ -149,18 +132,12 @@ public class GcpAuthAutoConfigurationCustomizerProvider
    * of the credentials is determined by the configured {@link
    * ConfigurableOption#GOOGLE_AUTH_TOKEN_TYPE}.
    */
-  private static class LazyCredentialsSupplier implements Supplier<OAuth2Credentials> {
-    private final ConfigProperties configProperties;
+  private static class LazyOAuth2CredentialsHolder {
     @Nullable private OAuth2Credentials credentials;
 
-    LazyCredentialsSupplier(ConfigProperties configProperties) {
-      this.configProperties = configProperties;
-    }
-
-    @Override
-    public synchronized OAuth2Credentials get() {
+    synchronized OAuth2Credentials get(ConfigProperties configProperties) {
       if (credentials == null) {
-        credentials = createCredentials();
+        credentials = createCredentials(configProperties);
       }
       return credentials;
     }
@@ -169,7 +146,7 @@ public class GcpAuthAutoConfigurationCustomizerProvider
     // default token type (access_token) the Application Default Credentials are used as-is. For
     // id_token, the Application Default Credentials are wrapped into IdTokenCredentials which mint
     // Google-signed ID tokens for the configured audience.
-    private OAuth2Credentials createCredentials() {
+    private static OAuth2Credentials createCredentials(ConfigProperties configProperties) {
       GoogleCredentials applicationDefaultCredentials;
       try {
         applicationDefaultCredentials = GoogleCredentials.getApplicationDefault();
@@ -229,10 +206,11 @@ public class GcpAuthAutoConfigurationCustomizerProvider
 
   private static SpanExporter customizeSpanExporter(
       SpanExporter exporter,
-      Supplier<OAuth2Credentials> credentialsSupplier,
+      LazyOAuth2CredentialsHolder credentialsHolder,
       ConfigProperties configProperties) {
     if (isSignalTargeted(SIGNAL_TYPE_TRACES, configProperties)) {
-      return addAuthorizationHeaders(exporter, credentialsSupplier.get(), configProperties);
+      return addAuthorizationHeaders(
+          exporter, credentialsHolder.get(configProperties), configProperties);
     } else {
       String[] params = {
         SIGNAL_TYPE_TRACES, SIGNAL_TYPE_NONE, SIGNAL_TARGET_WARNING_FIX_SUGGESTION
@@ -247,10 +225,11 @@ public class GcpAuthAutoConfigurationCustomizerProvider
 
   private static MetricExporter customizeMetricExporter(
       MetricExporter exporter,
-      Supplier<OAuth2Credentials> credentialsSupplier,
+      LazyOAuth2CredentialsHolder credentialsHolder,
       ConfigProperties configProperties) {
     if (isSignalTargeted(SIGNAL_TYPE_METRICS, configProperties)) {
-      return addAuthorizationHeaders(exporter, credentialsSupplier.get(), configProperties);
+      return addAuthorizationHeaders(
+          exporter, credentialsHolder.get(configProperties), configProperties);
     } else {
       String[] params = {
         SIGNAL_TYPE_METRICS, SIGNAL_TYPE_NONE, SIGNAL_TARGET_WARNING_FIX_SUGGESTION
@@ -349,7 +328,7 @@ public class GcpAuthAutoConfigurationCustomizerProvider
   // Updates the current resource with the attributes required for ingesting OTLP data on GCP.
   private static Resource customizeResource(
       Resource resource,
-      Supplier<OAuth2Credentials> credentialsSupplier,
+      LazyOAuth2CredentialsHolder credentialsHolder,
       ConfigProperties configProperties) {
     if (!isSignalTargeted(SIGNAL_TYPE_TRACES, configProperties)
         && !isSignalTargeted(SIGNAL_TYPE_METRICS, configProperties)) {
@@ -365,9 +344,9 @@ public class GcpAuthAutoConfigurationCustomizerProvider
     try {
       gcpProjectId = ConfigurableOption.GOOGLE_CLOUD_PROJECT.getConfiguredValue(configProperties);
     } catch (ConfigurationException e) {
-      // This line is only reachable for the access_token type, for which the supplier always
+      // This line is only reachable for the access_token type, for which the holder always
       // returns the GoogleCredentials retrieved as Application Default Credentials.
-      gcpProjectId = ((GoogleCredentials) credentialsSupplier.get()).getProjectId();
+      gcpProjectId = ((GoogleCredentials) credentialsHolder.get(configProperties)).getProjectId();
       if (gcpProjectId == null || gcpProjectId.isEmpty()) {
         throw e;
       }
