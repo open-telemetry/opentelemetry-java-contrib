@@ -14,9 +14,15 @@ import static org.mockito.Mockito.verify;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 class TraceSamplingRatePolicyTest {
+
+  @AfterEach
+  void tearDown() {
+    TraceSamplingRatePolicy.resetForTest();
+  }
 
   @Test
   void constructorStoresProbabilityAndType() {
@@ -24,6 +30,7 @@ class TraceSamplingRatePolicyTest {
 
     assertThat(policy.getIdentity()).isEqualTo(TraceSamplingRatePolicy.DEFAULT_IDENTITY);
     assertThat(policy.getProbability()).isEqualTo(0.25);
+    assertThat(policy.getSamplingProbability()).isEqualTo(0.25);
     assertThat(policy.getType()).isEqualTo(TraceSamplingRatePolicy.POLICY_TYPE);
     assertThat(policy.getSourceKind()).isEqualTo(SourceKind.CUSTOM);
   }
