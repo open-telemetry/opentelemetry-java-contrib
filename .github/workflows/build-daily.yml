@@ -13,6 +13,7 @@ jobs:
   common:
     uses: ./.github/workflows/build-common.yml
     with:
+      cache-read-only: true
       no-build-cache: true
     secrets:
       DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
@@ -39,6 +40,8 @@ jobs:
 
       - name: Set up gradle
         uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+        with:
+          cache-read-only: true
 
       - name: Build and publish snapshots
         # Disable parallel due to Sonatype's HTTP 429 rate limiting
