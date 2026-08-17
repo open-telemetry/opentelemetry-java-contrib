@@ -23,6 +23,7 @@
     {
       // reduces the number of Renovate PRs
       // (patch updates are typically non-breaking)
+      // (OpenTelemetry updates are excluded so that dogfooding updates land individually)
       groupName: 'all patch and minor versions',
       matchUpdateTypes: [
         'patch',
@@ -30,10 +31,15 @@
       schedule: [
         '* 0-7 * * 2', // weekly, before 8am on Tuesday
       ],
+      matchPackageNames: [
+        '!io.opentelemetry:**',
+        '!io.opentelemetry.*:**',
+        '!open-telemetry/**',
+      ],
     },
     {
       // group minor updates into the same weekly PR
-      // (OpenTelemetry artifacts are excluded so that dogfooding updates land individually)
+      // (OpenTelemetry updates are excluded so that dogfooding updates land individually)
       groupName: 'all patch and minor versions',
       matchUpdateTypes: [
         'minor',
@@ -44,6 +50,7 @@
       matchPackageNames: [
         '!io.opentelemetry:**',
         '!io.opentelemetry.*:**',
+        '!open-telemetry/**',
       ],
     },
     {
@@ -57,6 +64,7 @@
       matchPackageNames: [
         '!io.opentelemetry:**',
         '!io.opentelemetry.*:**',
+        '!open-telemetry/**',
       ],
     },
     {
