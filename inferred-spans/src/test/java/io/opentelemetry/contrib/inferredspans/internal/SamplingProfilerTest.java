@@ -182,11 +182,13 @@ class SamplingProfilerTest {
           .timeout(Duration.ofSeconds(10))
           .until(() -> setup.profiler.getProfilingSessions() > currentSession);
       profilingActiveOnThread = setup.profiler.isProfilingActiveOnThread(Thread.currentThread());
-      int sessionBeforeInferred = setup.profiler.getProfilingSessions();
       aInferred(tracer);
+      // Capture the baseline after inferred work has completed. A session may start while
+      // aInferred() runs, so capturing it before the call could let the wait pass too early.
+      int sessionAfterInferred = setup.profiler.getProfilingSessions();
       await()
           .timeout(Duration.ofSeconds(10))
-          .until(() -> setup.profiler.getProfilingSessions() > sessionBeforeInferred);
+          .until(() -> setup.profiler.getProfilingSessions() > sessionAfterInferred);
     } finally {
       tx.end();
     }
