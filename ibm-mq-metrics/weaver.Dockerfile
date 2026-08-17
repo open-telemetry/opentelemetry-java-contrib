@@ -3,4 +3,4 @@
 # Dependabot can keep this file up to date with latest containers.
 
 # Weaver is used to generate markdown docs, and enforce policies on the model and run integration tests.
-FROM otel/weaver:v0.24.2@sha256:d1fb16d279f39810c340fbbf1cf9e5e995a3a9cefa531938e9012437e3bc00c1 AS weaver
+FROM otel/weaver:v0.25.1@sha256:9ad46ca9cd4fa5974b121f886aa3e9946a8ef8ea905001a96c018d21f9db87ca AS weaver

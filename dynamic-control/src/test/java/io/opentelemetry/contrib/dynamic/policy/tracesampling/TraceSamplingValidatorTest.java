@@ -12,7 +12,10 @@ import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceFormat;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceWrapper;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -20,6 +23,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 class TraceSamplingValidatorTest {
 
   private static final String TRACE_SAMPLING_POLICY_TYPE = TraceSamplingRatePolicy.POLICY_TYPE;
+  private static final Set<String> MAPPED_POLICY_IDS =
+      new HashSet<>(Arrays.asList(TRACE_SAMPLING_POLICY_TYPE, "other-policy", "other.key"));
 
   private final TraceSamplingValidator validator = new TraceSamplingValidator();
 
@@ -32,7 +37,8 @@ class TraceSamplingValidatorTest {
   void testValidate_ValidJson() {
     String json = jsonForProbability(0.5);
     TelemetryPolicy policy =
-        validator.validate(first(SourceFormat.JSONKEYVALUE.parse(json)), SourceKind.CUSTOM);
+        validator.validate(
+            first(SourceFormat.JSONKEYVALUE.parse(json, MAPPED_POLICY_IDS)), SourceKind.CUSTOM);
     assertThat(policy).isNotNull();
     assertThat(policy.getType()).isEqualTo(TRACE_SAMPLING_POLICY_TYPE);
     assertThat(policy).isInstanceOf(TraceSamplingRatePolicy.class);
@@ -46,7 +52,8 @@ class TraceSamplingValidatorTest {
   void validateStoresExplicitSourceKind() {
     String json = jsonForProbability(0.5);
     TelemetryPolicy policy =
-        validator.validate(first(SourceFormat.JSONKEYVALUE.parse(json)), SourceKind.OPAMP);
+        validator.validate(
+            first(SourceFormat.JSONKEYVALUE.parse(json, MAPPED_POLICY_IDS)), SourceKind.OPAMP);
 
     assertThat(policy).isNotNull();
     assertThat(policy.getSourceKind()).isEqualTo(SourceKind.OPAMP);
@@ -57,7 +64,8 @@ class TraceSamplingValidatorTest {
   void testValidate_ValidJson_BoundaryValues(double probability) {
     String json = jsonForProbability(probability);
     TelemetryPolicy policy =
-        validator.validate(first(SourceFormat.JSONKEYVALUE.parse(json)), SourceKind.CUSTOM);
+        validator.validate(
+            first(SourceFormat.JSONKEYVALUE.parse(json, MAPPED_POLICY_IDS)), SourceKind.CUSTOM);
     assertThat(policy).isNotNull();
     assertThat(policy.getType()).isEqualTo(TRACE_SAMPLING_POLICY_TYPE);
     assertThat(policy).isInstanceOf(TraceSamplingRatePolicy.class);
@@ -74,7 +82,8 @@ class TraceSamplingValidatorTest {
   void testValidate_ValidJson_LegacyObjectShapeWithProbabilityField() {
     String json = "{\"" + TRACE_SAMPLING_POLICY_TYPE + "\": {\"probability\": 0.5}}";
     TelemetryPolicy policy =
-        validator.validate(first(SourceFormat.JSONKEYVALUE.parse(json)), SourceKind.CUSTOM);
+        validator.validate(
+            first(SourceFormat.JSONKEYVALUE.parse(json, MAPPED_POLICY_IDS)), SourceKind.CUSTOM);
     assertThat(policy).isNotNull();
     assertThat(policy.getType()).isEqualTo(TRACE_SAMPLING_POLICY_TYPE);
     assertThat(policy).isInstanceOf(TraceSamplingRatePolicy.class);
@@ -89,7 +98,8 @@ class TraceSamplingValidatorTest {
     String json =
         "{\"" + TRACE_SAMPLING_POLICY_TYPE + "\": {\"probability\": " + probability + "}}";
     TelemetryPolicy policy =
-        validator.validate(first(SourceFormat.JSONKEYVALUE.parse(json)), SourceKind.CUSTOM);
+        validator.validate(
+            first(SourceFormat.JSONKEYVALUE.parse(json, MAPPED_POLICY_IDS)), SourceKind.CUSTOM);
     assertThat(policy).isNotNull();
     assertThat(((TraceSamplingRatePolicy) policy).getProbability())
         .isCloseTo(probability, within(1e-9));
@@ -103,7 +113,8 @@ class TraceSamplingValidatorTest {
   void testValidate_ValidJson_ProbabilityAsQuotedStringInLegacyObject() {
     String json = "{\"" + TRACE_SAMPLING_POLICY_TYPE + "\": {\"probability\": \"0.625\"}}";
     TelemetryPolicy policy =
-        validator.validate(first(SourceFormat.JSONKEYVALUE.parse(json)), SourceKind.CUSTOM);
+        validator.validate(
+            first(SourceFormat.JSONKEYVALUE.parse(json, MAPPED_POLICY_IDS)), SourceKind.CUSTOM);
     assertThat(policy).isNotNull();
     assertThat(((TraceSamplingRatePolicy) policy).getProbability()).isCloseTo(0.625, within(1e-9));
   }
@@ -112,7 +123,8 @@ class TraceSamplingValidatorTest {
   void testValidate_ValidJson_ProbabilityAsQuotedStringFlat() {
     String json = "{\"" + TRACE_SAMPLING_POLICY_TYPE + "\": \"0.375\"}";
     TelemetryPolicy policy =
-        validator.validate(first(SourceFormat.JSONKEYVALUE.parse(json)), SourceKind.CUSTOM);
+        validator.validate(
+            first(SourceFormat.JSONKEYVALUE.parse(json, MAPPED_POLICY_IDS)), SourceKind.CUSTOM);
     assertThat(policy).isNotNull();
     assertThat(((TraceSamplingRatePolicy) policy).getProbability()).isCloseTo(0.375, within(1e-9));
   }
@@ -120,7 +132,9 @@ class TraceSamplingValidatorTest {
   @Test
   void testValidate_InvalidJson_MissingPolicyType() {
     String json = "{\"other-policy\": 0.5}";
-    assertThat(validator.validate(first(SourceFormat.JSONKEYVALUE.parse(json)), SourceKind.CUSTOM))
+    assertThat(
+            validator.validate(
+                first(SourceFormat.JSONKEYVALUE.parse(json, MAPPED_POLICY_IDS)), SourceKind.CUSTOM))
         .isNull();
   }
 
@@ -128,14 +142,18 @@ class TraceSamplingValidatorTest {
   @ValueSource(doubles = {-0.1, 1.1})
   void testValidate_InvalidJson_ProbabilityOutOfRange(double probability) {
     String json = jsonForProbability(probability);
-    assertThat(validator.validate(first(SourceFormat.JSONKEYVALUE.parse(json)), SourceKind.CUSTOM))
+    assertThat(
+            validator.validate(
+                first(SourceFormat.JSONKEYVALUE.parse(json, MAPPED_POLICY_IDS)), SourceKind.CUSTOM))
         .isNull();
   }
 
   @Test
   void testValidate_InvalidJson_ValueNotNumber() {
     String json = "{\"" + TRACE_SAMPLING_POLICY_TYPE + "\": \"high\"}";
-    assertThat(validator.validate(first(SourceFormat.JSONKEYVALUE.parse(json)), SourceKind.CUSTOM))
+    assertThat(
+            validator.validate(
+                first(SourceFormat.JSONKEYVALUE.parse(json, MAPPED_POLICY_IDS)), SourceKind.CUSTOM))
         .isNull();
   }
 
@@ -143,7 +161,8 @@ class TraceSamplingValidatorTest {
   void testValidate_ValidKeyValue() {
     String keyValue = TRACE_SAMPLING_POLICY_TYPE + "=0.5";
     TelemetryPolicy policy =
-        validator.validate(first(SourceFormat.KEYVALUE.parse(keyValue)), SourceKind.CUSTOM);
+        validator.validate(
+            first(SourceFormat.KEYVALUE.parse(keyValue, MAPPED_POLICY_IDS)), SourceKind.CUSTOM);
     assertThat(policy).isNotNull();
     assertThat(policy.getType()).isEqualTo(TRACE_SAMPLING_POLICY_TYPE);
     assertThat(policy).isInstanceOf(TraceSamplingRatePolicy.class);
@@ -156,14 +175,17 @@ class TraceSamplingValidatorTest {
   void testValidate_InvalidKeyValue_WrongKey() {
     assertThat(
             validator.validate(
-                first(SourceFormat.KEYVALUE.parse("other.key=0.5")), SourceKind.CUSTOM))
+                first(SourceFormat.KEYVALUE.parse("other.key=0.5", MAPPED_POLICY_IDS)),
+                SourceKind.CUSTOM))
         .isNull();
   }
 
   @Test
   void testValidate_InvalidKeyValue_NotNumber() {
     String keyValue = TRACE_SAMPLING_POLICY_TYPE + "=invalid";
-    assertThat(validator.validate(first(SourceFormat.KEYVALUE.parse(keyValue)), SourceKind.CUSTOM))
+    assertThat(
+            validator.validate(
+                first(SourceFormat.KEYVALUE.parse(keyValue, MAPPED_POLICY_IDS)), SourceKind.CUSTOM))
         .isNull();
   }
 

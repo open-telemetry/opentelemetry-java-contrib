@@ -76,6 +76,17 @@ class LinePerPolicyFileProviderTest {
   }
 
   @Test
+  void fetchPoliciesRejectsJsonLineWithExtraKeys() throws Exception {
+    Path file = writeLines("{\"trace-sampling\": 0.5, \"typo\": 1}");
+    LinePerPolicyFileProvider provider =
+        new LinePerPolicyFileProvider(file, Collections.singletonList(acceptingValidator()));
+
+    List<TelemetryPolicy> policies = provider.fetchPolicies();
+
+    assertThat(policies).isEmpty();
+  }
+
+  @Test
   void fetchPoliciesSkipsUnknownOrRejectedPolicies() throws Exception {
     PolicyValidator rejectingValidator =
         new TestPolicyValidator(/* acceptJson= */ false, /* acceptKeyValue= */ false);

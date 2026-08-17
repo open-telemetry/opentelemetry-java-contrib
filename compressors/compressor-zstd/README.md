@@ -46,6 +46,6 @@ export OTEL_EXPORTER_OTLP_COMPRESSION=zstd
 
 ## Component owners
 
-* [Jack Berg](https://github.com/jack-berg), New Relic
+* [Jack Berg](https://github.com/jack-berg), Grafana Labs
 
 Learn more about component owners in [component_owners.yml](../../.github/component_owners.yml).

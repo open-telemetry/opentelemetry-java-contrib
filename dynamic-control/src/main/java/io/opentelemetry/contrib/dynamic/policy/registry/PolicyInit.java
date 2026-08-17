@@ -10,6 +10,7 @@ import io.opentelemetry.contrib.dynamic.policy.OpampPolicyProvider;
 import io.opentelemetry.contrib.dynamic.policy.PolicyImplementer;
 import io.opentelemetry.contrib.dynamic.policy.PolicyProvider;
 import io.opentelemetry.contrib.dynamic.policy.PolicyProviderConfig;
+import io.opentelemetry.contrib.dynamic.policy.PolicyProviderPoller;
 import io.opentelemetry.contrib.dynamic.policy.PolicyStore;
 import io.opentelemetry.contrib.dynamic.policy.PolicyTypeInitializer;
 import io.opentelemetry.contrib.dynamic.policy.PolicyValidator;
@@ -447,6 +448,7 @@ public final class PolicyInit {
   static void resetForTest() {
     shutdown();
     OpampPolicyProvider.resetForTest();
+    PolicyProviderPoller.reset();
   }
 
   private PolicyInit() {}
