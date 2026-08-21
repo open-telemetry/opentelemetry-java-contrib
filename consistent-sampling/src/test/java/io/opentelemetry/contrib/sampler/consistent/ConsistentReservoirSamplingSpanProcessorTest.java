@@ -362,6 +362,7 @@ class ConsistentReservoirSamplingSpanProcessorTest {
             .setSampler(mockSampler)
             .build();
 
+    when(mockSampler.shutdown()).thenReturn(CompletableResultCode.ofSuccess());
     when(mockSampler.shouldSample(any(), any(), any(), any(), any(), anyList()))
         .thenReturn(SamplingResult.drop());
     sdkTracerProvider.get("test").spanBuilder(SPAN_NAME_1).startSpan().end();
@@ -396,6 +397,7 @@ class ConsistentReservoirSamplingSpanProcessorTest {
             .build();
 
     createEndedSpan(SPAN_NAME_1, sdkTracerProvider);
+    when(mockSampler.shutdown()).thenReturn(CompletableResultCode.ofSuccess());
     when(mockSampler.shouldSample(any(), any(), any(), any(), any(), anyList()))
         .thenReturn(SamplingResult.recordAndSample());
     ReadableSpan span = createEndedSpan(SPAN_NAME_2, sdkTracerProvider);
