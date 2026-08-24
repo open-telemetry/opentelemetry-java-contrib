@@ -5,8 +5,6 @@
 
 package io.opentelemetry.contrib.dynamic.policy.tracesampling;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import io.opentelemetry.contrib.dynamic.policy.AbstractSourcePolicyValidator;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import java.util.logging.Logger;
@@ -17,8 +15,12 @@ import javax.annotation.Nullable;
  *
  * <p>This validator handles the "trace-sampling" policy type.
  */
-public final class TraceSamplingValidator extends AbstractSourcePolicyValidator {
+public final class TraceSamplingValidator extends AbstractTraceSamplingValidator {
   private static final Logger logger = Logger.getLogger(TraceSamplingValidator.class.getName());
+
+  public TraceSamplingValidator() {
+    super("probability");
+  }
 
   @Override
   public String getPolicyType() {
@@ -27,33 +29,7 @@ public final class TraceSamplingValidator extends AbstractSourcePolicyValidator 
 
   @Override
   @Nullable
-  protected TelemetryPolicy validateJsonValue(JsonNode valueNode, SourceKind sourceKind) {
-    JsonNode probabilityNode = valueNode;
-    if (valueNode.isObject()) {
-      probabilityNode = valueNode.get("probability");
-      if (probabilityNode == null) {
-        return null;
-      }
-    }
-    Double probability = parseDouble(probabilityNode);
-    if (probability == null) {
-      return null;
-    }
-    return createPolicy(probability, sourceKind);
-  }
-
-  @Override
-  @Nullable
-  protected TelemetryPolicy validateKeyValueValue(String value, SourceKind sourceKind) {
-    Double probability = parseDouble(value);
-    if (probability == null) {
-      return null;
-    }
-    return createPolicy(probability, sourceKind);
-  }
-
-  @Nullable
-  private static TelemetryPolicy createPolicy(double probability, SourceKind sourceKind) {
+  protected TelemetryPolicy createPolicy(double probability, SourceKind sourceKind) {
     try {
       return new TraceSamplingRatePolicy(probability, sourceKind);
     } catch (IllegalArgumentException e) {
