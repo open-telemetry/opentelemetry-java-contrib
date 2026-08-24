@@ -41,7 +41,7 @@ public final class TraceSamplingRatePolicy extends AbstractTraceSamplingPolicy {
    * overrides any other sampler
    */
   public static PolicyImplementer initialize(AutoConfigurationCustomizer autoConfiguration) {
-    return AbstractTraceSamplingPolicy.initialize(autoConfiguration);
+    return initialize(autoConfiguration, new TraceSamplingValidator());
   }
 
   public static void registerPolicyType() {

@@ -8,23 +8,17 @@ package io.opentelemetry.contrib.dynamic.policy.tracesampling;
 import io.opentelemetry.contrib.dynamic.policy.PolicyImplementer;
 import io.opentelemetry.contrib.dynamic.policy.PolicyValidator;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.logging.Logger;
 
 /**
- * Implements the {@code trace-sampling} policy by updating a {@link DelegatingSampler}.
+ * Implements trace sampling policies by updating a {@link DelegatingSampler}.
  *
- * <p>This implementer listens for validated {@link TelemetryPolicy} updates of type {@code
- * "trace-sampling"} and applies {@link TraceSamplingRatePolicy#getProbability()} to the delegate
- * sampler via {@link TraceSamplingRatePolicy#createSampler(double)}.
- *
- * <p>If a deleted policy of type {@code "trace-sampling"} is received, it is treated as policy
- * removal and the delegate is reset using {@code TraceSamplingRatePolicy.createSampler(1.0)}.
- *
- * <p>Validation is performed by {@link TraceSamplingValidator}; this implementer only consumes
- * policies produced by that validator.
+ * <p>Policy representations are converted to a normalized sampling probability before being
+ * applied.
  *
  * <p>This class is thread-safe. Calls to {@link #onPoliciesChanged(List)} can occur concurrently
  * with sampling operations on the associated {@link DelegatingSampler}.
@@ -37,6 +31,7 @@ public final class TraceSamplingRatePolicyImplementer implements PolicyImplement
       Collections.<PolicyValidator>singletonList(new TraceSamplingValidator());
 
   private final DelegatingSampler delegatingSampler;
+  private final List<PolicyValidator> validators;
 
   /**
    * Creates a new implementer that updates the provided {@link DelegatingSampler}.
@@ -44,31 +39,48 @@ public final class TraceSamplingRatePolicyImplementer implements PolicyImplement
    * @param delegatingSampler the sampler to update when policies change
    */
   public TraceSamplingRatePolicyImplementer(DelegatingSampler delegatingSampler) {
-    Objects.requireNonNull(delegatingSampler, "delegatingSampler cannot be null");
-    this.delegatingSampler = delegatingSampler;
+    this(delegatingSampler, VALIDATORS);
+  }
+
+  TraceSamplingRatePolicyImplementer(
+      DelegatingSampler delegatingSampler, List<PolicyValidator> validators) {
+    this.delegatingSampler =
+        Objects.requireNonNull(delegatingSampler, "delegatingSampler cannot be null");
+    this.validators =
+        Collections.unmodifiableList(
+            new ArrayList<>(Objects.requireNonNull(validators, "validators cannot be null")));
   }
 
   @Override
   public List<PolicyValidator> getValidators() {
-    return VALIDATORS;
+    return validators;
   }
 
   @Override
   public void onPoliciesChanged(List<TelemetryPolicy> policies) {
     for (TelemetryPolicy policy : policies) {
-      if (!TraceSamplingRatePolicy.POLICY_TYPE.equals(policy.getType())) {
+      if (!supports(policy.getType())) {
         continue;
       }
       if (policy.isDeleted()) {
         applySamplingProbability(1.0, "reset");
         continue;
       }
-      if (!(policy instanceof TraceSamplingRatePolicy)) {
+      if (!(policy instanceof AbstractTraceSamplingPolicy)) {
         continue;
       }
-      double ratio = ((TraceSamplingRatePolicy) policy).getProbability();
-      applySamplingProbability(ratio, "update");
+      double probability = ((AbstractTraceSamplingPolicy) policy).getSamplingProbability();
+      applySamplingProbability(probability, "update");
     }
+  }
+
+  private boolean supports(String policyType) {
+    for (PolicyValidator validator : validators) {
+      if (validator.getPolicyType().equals(policyType)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private void applySamplingProbability(double probability, String action) {

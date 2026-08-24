@@ -6,6 +6,7 @@
 package io.opentelemetry.contrib.dynamic.policy.tracesampling;
 
 import io.opentelemetry.contrib.dynamic.policy.PolicyImplementer;
+import io.opentelemetry.contrib.dynamic.policy.PolicyValidator;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicyIdentity;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
@@ -13,6 +14,7 @@ import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.extension.incubator.trace.samplers.ComposableSampler;
 import io.opentelemetry.sdk.extension.incubator.trace.samplers.CompositeSampler;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
+import java.util.Collections;
 import java.util.Objects;
 import javax.annotation.Nullable;
 
@@ -46,12 +48,18 @@ public abstract class AbstractTraceSamplingPolicy implements TelemetryPolicy {
     return samplingProbability;
   }
 
-  protected static PolicyImplementer initialize(AutoConfigurationCustomizer autoConfiguration) {
+  protected static synchronized PolicyImplementer initialize(
+      AutoConfigurationCustomizer autoConfiguration, PolicyValidator validator) {
     Objects.requireNonNull(autoConfiguration, "autoConfiguration cannot be null");
-    DelegatingSampler delegatingSampler = new DelegatingSampler(createSampler(1.0));
-    initializedSampler = delegatingSampler;
-    autoConfiguration.addSamplerCustomizer((sampler, config) -> delegatingSampler);
-    return new TraceSamplingRatePolicyImplementer(delegatingSampler);
+    Objects.requireNonNull(validator, "validator cannot be null");
+    if (initializedSampler == null) {
+      DelegatingSampler delegatingSampler = new DelegatingSampler(createSampler(1.0));
+      initializedSampler = delegatingSampler;
+      autoConfiguration.addSamplerCustomizer((sampler, config) -> delegatingSampler);
+    }
+    return new TraceSamplingRatePolicyImplementer(
+        Objects.requireNonNull(initializedSampler, "initializedSampler cannot be null"),
+        Collections.singletonList(validator));
   }
 
   /**
