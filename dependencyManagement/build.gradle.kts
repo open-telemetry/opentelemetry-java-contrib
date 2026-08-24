@@ -54,9 +54,6 @@ dependencies {
     api("org.bouncycastle:bcprov-jdk18on:1.85.2")
     api("org.junit-pioneer:junit-pioneer:1.9.1")
     api("org.skyscreamer:jsonassert:1.5.3")
-    api("at.yawk.lz4:lz4-java:1.11.2") {
-      because("CVE-2026-59949")
-    }
     api("org.apache.kafka:kafka-clients:4.3.1")
     api("org.testcontainers:testcontainers-kafka:2.0.5")
     api("org.jctools:jctools-core:4.0.7")
