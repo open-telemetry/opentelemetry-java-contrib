@@ -24,6 +24,7 @@ dependencies {
 
   runtimeOnly("com.fasterxml.jackson.core:jackson-core")
   runtimeOnly("com.fasterxml.jackson.core:jackson-databind")
+  runtimeOnly("at.yawk.lz4:lz4-java")
 
   implementation("io.opentelemetry:opentelemetry-exporter-otlp-common")
   implementation("com.google.protobuf:protobuf-java")
