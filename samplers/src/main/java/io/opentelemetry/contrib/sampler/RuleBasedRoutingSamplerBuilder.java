@@ -27,6 +27,11 @@ public final class RuleBasedRoutingSamplerBuilder {
   /**
    * Drop all spans when the value of the provided {@link AttributeKey} matches the provided
    * pattern.
+   *
+   * <p>Non-string attribute values are converted to a string using {@link String#valueOf(Object)}
+   * before the pattern is applied. Consequently, list or array-valued attributes are matched
+   * against their {@link String#valueOf(Object)} representation rather than their individual
+   * elements.
    */
   @CanIgnoreReturnValue
   public RuleBasedRoutingSamplerBuilder drop(AttributeKey<?> attributeKey, String pattern) {
@@ -36,6 +41,11 @@ public final class RuleBasedRoutingSamplerBuilder {
   /**
    * Use the provided sampler when the value of the provided {@link AttributeKey} matches the
    * provided pattern.
+   *
+   * <p>Non-string attribute values are converted to a string using {@link String#valueOf(Object)}
+   * before the pattern is applied. Consequently, list or array-valued attributes are matched
+   * against their {@link String#valueOf(Object)} representation rather than their individual
+   * elements.
    */
   @CanIgnoreReturnValue
   public RuleBasedRoutingSamplerBuilder customize(
@@ -51,6 +61,11 @@ public final class RuleBasedRoutingSamplerBuilder {
   /**
    * Record and sample all spans when the value of the provided {@link AttributeKey} matches the
    * provided pattern.
+   *
+   * <p>Non-string attribute values are converted to a string using {@link String#valueOf(Object)}
+   * before the pattern is applied. Consequently, list or array-valued attributes are matched
+   * against their {@link String#valueOf(Object)} representation rather than their individual
+   * elements.
    */
   @CanIgnoreReturnValue
   public RuleBasedRoutingSamplerBuilder recordAndSample(
