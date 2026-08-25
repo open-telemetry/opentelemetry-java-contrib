@@ -29,7 +29,7 @@ public final class RuleBasedRoutingSamplerBuilder {
    * pattern.
    */
   @CanIgnoreReturnValue
-  public RuleBasedRoutingSamplerBuilder drop(AttributeKey<String> attributeKey, String pattern) {
+  public RuleBasedRoutingSamplerBuilder drop(AttributeKey<?> attributeKey, String pattern) {
     return customize(attributeKey, pattern, Sampler.alwaysOff());
   }
 
@@ -39,7 +39,7 @@ public final class RuleBasedRoutingSamplerBuilder {
    */
   @CanIgnoreReturnValue
   public RuleBasedRoutingSamplerBuilder customize(
-      AttributeKey<String> attributeKey, String pattern, Sampler sampler) {
+      AttributeKey<?> attributeKey, String pattern, Sampler sampler) {
     rules.add(
         new SamplingRule(
             requireNonNull(attributeKey, "attributeKey must not be null"),
@@ -54,7 +54,7 @@ public final class RuleBasedRoutingSamplerBuilder {
    */
   @CanIgnoreReturnValue
   public RuleBasedRoutingSamplerBuilder recordAndSample(
-      AttributeKey<String> attributeKey, String pattern) {
+      AttributeKey<?> attributeKey, String pattern) {
     return customize(attributeKey, pattern, Sampler.alwaysOn());
   }
 

@@ -69,7 +69,8 @@ public final class RuleBasedRoutingSampler implements Sampler {
       if (samplingRule.attributeKey.getKey().equals(THREAD_NAME.getKey())) {
         attributeValue = Thread.currentThread().getName();
       } else {
-        attributeValue = attributes.get(samplingRule.attributeKey);
+        Object value = attributes.get(samplingRule.attributeKey);
+        attributeValue = value == null ? null : String.valueOf(value);
       }
       if (attributeValue == null) {
         continue;
