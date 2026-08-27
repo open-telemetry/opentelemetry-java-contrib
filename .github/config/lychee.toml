@@ -16,4 +16,5 @@ exclude = [
   "^https://developer\\.ibm\\.com/articles/mq-downloads/$",
   # groovy-lang.org is frequently unreachable / times out
   "^https?://[^/]*groovy-lang\\.org",
+  "^https://cloud-native.slack.com/", # slack requires auth
 ]
