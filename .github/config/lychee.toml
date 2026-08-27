@@ -19,5 +19,5 @@ exclude = [
   "^https?://www\\.ibm\\.com/(docs|support)/",
   # groovy-lang.org is frequently unreachable / times out
   "^https?://[^/]*groovy-lang\\.org",
-  "^https://cloud-native.slack.com/", # slack requires auth
+  "^https://cloud-native\\.slack\\.com/", # slack requires auth
 ]
