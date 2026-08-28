@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+### :warning: Breaking changes
+
+- Remove the deprecated `EventToSpanEventBridge` log processor and its declarative configuration
+  entry.
+  ([#3029](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3029))
+
+### Dynamic control
+
+- Fix policy parsing for JSON and line-based configurations so valid policies are accepted
+  consistently.
+  ([#3010](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3010))
+
+### GCP authentication extension
+
+- Add support for ID token authentication for GCP exports.
+  ([#2999](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2999))
+
 ## Version 1.59.0 (2026-07-24)
 
 ### :warning: Breaking changes
