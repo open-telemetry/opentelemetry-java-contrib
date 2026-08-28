@@ -1,6 +1,6 @@
 val stableVersion = "1.61.0-SNAPSHOT"
 val alphaVersion = "1.61.0-alpha-SNAPSHOT"
-val apidiffBaselineVersion = "1.59.0"
+val apidiffBaselineVersion = "1.60.0"
 val tagVersion by extra { "v$stableVersion" }
 
 allprojects {
