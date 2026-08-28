@@ -59,3 +59,5 @@ build-scan.txt
 
 # Node
 node_modules
+
+__pycache__/
