@@ -102,6 +102,6 @@ merge.py appends it. Do not prefix the bullet with the section name (the
 changelog conveys that through its headings). Match the voice of existing
 entries, for example:
 
-- `Add support for the JMX remote profile.`
-- `Fix a memory leak when the exporter is shut down while a batch is in flight.`
-- `Deprecate \`FooBuilder.setBar()\` in favor of \`FooBuilder.withBar()\`.`
+* `Add support for the JMX remote profile.`
+* `Fix a memory leak when the exporter is shut down while a batch is in flight.`
+* `Deprecate \`FooBuilder.setBar()\` in favor of \`FooBuilder.withBar()\`.`
