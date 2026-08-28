@@ -1,0 +1,112 @@
+name: Draft Release Notes
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: draft-release-notes
+
+permissions:
+  contents: read
+
+jobs:
+  draft-notes:
+    if: github.repository == 'open-telemetry/opentelemetry-java-contrib'
+    permissions:
+      contents: write  # for git push to PR branch
+      pull-requests: read  # for `gh pr list`/`gh pr view` in fetch.py
+      issues: read  # for `gh issue view` in fetch.py
+    runs-on: ubuntu-latest
+    environment: protected
+    steps:
+      - run: |
+          if [[ $GITHUB_REF_NAME != "main" ]]; then
+            echo this workflow should only be run against main
+            exit 1
+          fi
+
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          # history and tags are needed to resolve the previous release tag
+          # when computing the commit range
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
+
+      - name: Set up Node
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: '22'
+
+      - name: Install Copilot CLI
+        run: |
+          npm ci --prefix .github/scripts/copilot-cli
+          echo "$GITHUB_WORKSPACE/.github/scripts/copilot-cli/node_modules/.bin" >> "$GITHUB_PATH"
+
+      - name: Draft release notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
+        run: python3 .github/scripts/draft-release-notes/draft-release-notes.py
+
+      - name: Upload draft diagnostics artifact
+        if: always()
+        id: upload-diagnostics
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: draft-release-notes-diagnostics-${{ github.run_id }}
+          path: build/changelog-bundle/**
+
+      - name: Use CLA approved bot
+        run: .github/scripts/use-cla-approved-bot.sh
+
+      - uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
+        id: otelbot-token
+        with:
+          app-id: ${{ vars.OTELBOT_APP_ID }}
+          private-key: ${{ secrets.OTELBOT_PRIVATE_KEY }}
+          owner: open-telemetry
+          repositories: opentelemetry-java-contrib
+          permission-contents: write
+          permission-pull-requests: write
+
+      - name: Create pull request against main
+        env:
+          ARTIFACT_URL: ${{ steps.upload-diagnostics.outputs.artifact-url }}
+          # pull requests from secrets.GITHUB_TOKEN do not run workflows
+          GH_TOKEN: ${{ steps.otelbot-token.outputs.token }}
+        run: |
+          message="Draft release notes"
+          body=$(cat <<EOF
+          Automated draft of the \`## Unreleased\` section of \`CHANGELOG.md\`.
+
+          The entire \`## Unreleased\` block was regenerated from per-PR classifications. Any
+          existing entries are intentionally replaced, so review the diff to recover anything
+          hand-written that should be retained.
+
+          [Download draft diagnostics]($ARTIFACT_URL)
+          EOF
+          )
+          branch="otelbot/draft-release-notes-${GITHUB_RUN_ID}"
+
+          git checkout -b "$branch"
+
+          if git diff --quiet CHANGELOG.md; then
+            echo "No changelog changes to draft."
+            exit 0
+          fi
+
+          git add CHANGELOG.md
+          git commit -m "$message"
+
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/open-telemetry/opentelemetry-java-contrib.git"
+          git push --set-upstream origin "$branch"
+
+          gh pr create --title "$message" \
+                       --body "$body" \
+                       --base main
