@@ -62,6 +62,12 @@ MAX_DIFF_CHARS = 20_000
 # diff occupy two units each. Leaves headroom for flags and argv quoting.
 MAX_PROMPT_UTF16_UNITS = 24_000
 WINDOWS_COMMAND_LINE_UTF16_LIMIT = 32_767
+# Smallest excerpt worth spending budget on: enough for a file's `diff --git`
+# header plus the first hunk. When the budget cannot give every changed file at
+# least this much, the lowest-priority files are dropped entirely rather than
+# starving the user-facing ones down to bare headers.
+MIN_DIFF_SECTION_CHARS = 400
+DIFF_SECTION_TRUNCATION_MARKER = "\n...[remaining hunks truncated for length]...\n"
 # Retry a PR once before declaring it failed; most failures are transient
 # (timeout, truncated response, malformed JSON).
 MAX_LLM_ATTEMPTS = 2
@@ -191,15 +197,103 @@ def changed_paths(bundle: PrBundle) -> list[str]:
     return paths
 
 
+def split_diff_sections(diff: str) -> list[str]:
+    """Split a unified diff into one string per changed file."""
+    return [
+        section
+        for section in re.split(r"(?=^diff --git )", diff, flags=re.MULTILINE)
+        if section.startswith("diff --git ")
+    ]
+
+
 def strip_changelog_diff(diff: str) -> str:
     """Drop CHANGELOG.md from the diff so prior entries are not read as evidence."""
-    sections = re.split(r"(?=^diff --git )", diff, flags=re.MULTILINE)
     return "".join(
         section
-        for section in sections
-        if section.startswith("diff --git ")
-        and not section.startswith("diff --git a/CHANGELOG.md b/CHANGELOG.md")
+        for section in split_diff_sections(diff)
+        if not section.startswith("diff --git a/CHANGELOG.md b/CHANGELOG.md")
     )
+
+
+def section_path(section: str) -> str:
+    """The post-image path of a diff section, or "" if the header is unparseable."""
+    match = re.match(r"diff --git a/(?:\S+) b/(\S+)", section)
+    return match.group(1) if match else ""
+
+
+def section_priority(section: str) -> int:
+    """Rank a diff section by how likely it is to carry changelog evidence.
+
+    Lower sorts first. User-facing runtime sources decide the section and the
+    bullet, and a `@Deprecated` delta inside one is the only signal for the
+    deprecations section, so those excerpts must survive the budget even when a
+    PR also churns hundreds of test or generated files.
+    """
+    path = section_path(section)
+    user_facing = "/src/main/" in path
+    if user_facing and "@Deprecated" in section:
+        return 0
+    if user_facing:
+        return 1
+    if "/src/" in path:
+        return 2
+    return 3
+
+
+def compact_diff(diff: str, budget: int) -> str:
+    """Trim `diff` to `budget` characters, excerpting across all changed files.
+
+    Head-truncating the combined patch drops every hunk for the files that
+    happen to sort last, which silently hides breaking changes. Instead, give
+    each file section an even share of the budget in priority order, let slack
+    from sections smaller than their share flow to clipped ones, and reassemble
+    in the original file order. Each clipped section keeps its `diff --git`
+    header and leading hunks, so the model always sees which file it is reading.
+
+    The result can exceed `budget` slightly once truncation markers are added;
+    build_prompt() re-runs with a lower budget if the prompt still overflows.
+    """
+    if budget <= 0:
+        return ""
+    if len(diff) <= budget:
+        return diff
+    sections = split_diff_sections(diff)
+    if not sections:
+        # No parseable file headers (e.g. a bare `git show` preamble); fall back
+        # to head truncation since there are no sections to spread across.
+        return diff[:budget].rstrip("\n") + DIFF_SECTION_TRUNCATION_MARKER
+
+    order = sorted(
+        range(len(sections)), key=lambda i: (section_priority(sections[i]), i)
+    )
+    keep = order[: max(1, budget // MIN_DIFF_SECTION_CHARS)]
+
+    allocations = dict.fromkeys(range(len(sections)), 0)
+    remaining = budget
+    for position, i in enumerate(keep):
+        share = remaining // (len(keep) - position)
+        take = min(len(sections[i]), share)
+        allocations[i] = take
+        remaining -= take
+    # Sections clipped before the slack appeared get a second pass at it.
+    for i in keep:
+        if remaining <= 0:
+            break
+        deficit = len(sections[i]) - allocations[i]
+        if deficit <= 0:
+            continue
+        extra = min(deficit, remaining)
+        allocations[i] += extra
+        remaining -= extra
+
+    out = []
+    for i, section in enumerate(sections):
+        take = allocations[i]
+        if take >= len(section):
+            out.append(section)
+        elif take > 0:
+            out.append(section[:take].rstrip("\n") + DIFF_SECTION_TRUNCATION_MARKER)
+    return "".join(out)
 
 
 def classifier_fingerprint(bundle: PrBundle, rules: str) -> str:
@@ -242,10 +336,10 @@ def preclassify(bundle: PrBundle) -> dict | None:
 def build_prompt(bundle: PrBundle, rules: str) -> str:
     """Render the classification prompt, trimming the diff to fit the argv cap.
 
-    Upstream's compact_diff() excerpt selection keys on the API-diff snapshot
-    markers that opentelemetry-java-instrumentation emits; contrib has no such
-    snapshots, so the diff is head-truncated and the authoritative file list is
-    carried in files_summary instead.
+    Upstream's excerpt selection keys on the API-diff snapshot markers that
+    opentelemetry-java-instrumentation emits; contrib has no such snapshots, so
+    compact_diff() ranks file sections by path instead, and the authoritative
+    file list is carried in files_summary.
     """
     diff = strip_changelog_diff(bundle.diff)
     files = bundle.meta.get("files", [])
@@ -275,17 +369,17 @@ def build_prompt(bundle: PrBundle, rules: str) -> str:
             diff=diff_text,
         )
 
-    truncated_note = "\n  (diff truncated; changed files list above is authoritative)"
-    marker = "\n...[diff truncated for length]...\n"
+    truncated_note = "\n  (diff excerpted; changed files list above is authoritative)"
     base_units = utf16_units(render("", files_summary + truncated_note))
     budget = min(MAX_DIFF_CHARS, MAX_PROMPT_UTF16_UNITS - base_units - 200)
     if budget < 0:
         raise RuntimeError("classification rules and PR metadata exceed the prompt size limit")
     while budget >= 0:
-        if len(diff) > budget:
-            prompt = render(diff[:budget] + marker, files_summary + truncated_note)
-        else:
+        compacted = compact_diff(diff, budget)
+        if compacted == diff:
             prompt = render(diff, files_summary)
+        else:
+            prompt = render(compacted, files_summary + truncated_note)
         excess = utf16_units(prompt) - MAX_PROMPT_UTF16_UNITS
         if excess <= 0:
             return prompt
@@ -305,8 +399,8 @@ def invoke_cli(prompt_text: str, timeout: int) -> tuple[int, str, str]:
     --allow-all-tools is mandatory in non-interactive mode, but denial rules
     take precedence over it, so the --deny-tool flags still apply. The
     github-mcp-server builtin is loaded by default and would otherwise expose
-    an auto-approved GitHub API surface to a step holding a `contents: write`
-    token, so it is disabled explicitly.
+    an auto-approved GitHub API surface to a step holding a GitHub token, so it
+    is disabled explicitly.
 
     Model is overridable via $CLASSIFY_MODEL. The default bills zero premium
     requests; larger models bill one per PR.

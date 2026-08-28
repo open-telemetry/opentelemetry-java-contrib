@@ -105,6 +105,89 @@ class BuildPromptTest(unittest.TestCase):
             classify.utf16_units(prompt), classify.MAX_PROMPT_UTF16_UNITS
         )
 
+    def test_oversized_diff_keeps_hunks_from_a_late_user_facing_file(self):
+        # Regression: head-truncating the combined patch dropped every hunk for
+        # the files sorting last, hiding breaking changes from the classifier.
+        early = "diff --git a/z/src/test/java/T.java b/z/src/test/java/T.java\n" + (
+            "+filler\n" * 100_000
+        )
+        late = (
+            "diff --git a/m/src/main/java/Api.java b/m/src/main/java/Api.java\n"
+            "@@ -1,3 +1,3 @@\n"
+            "-  public void removedMethod();\n"
+        )
+        prompt = classify.build_prompt(
+            bundle(
+                title="T",
+                files=[{"path": "z/src/test/java/T.java"}, {"path": "m/src/main/java/Api.java"}],
+                _diff=early + late,
+            ),
+            "RULES",
+        )
+        self.assertLessEqual(
+            classify.utf16_units(prompt), classify.MAX_PROMPT_UTF16_UNITS
+        )
+        self.assertIn("removedMethod", prompt)
+
+
+class CompactDiffTest(unittest.TestCase):
+    SRC_MAIN = "diff --git a/m/src/main/java/A.java b/m/src/main/java/A.java\n" + "+a\n" * 500
+    DEPRECATED = (
+        "diff --git a/m/src/main/java/B.java b/m/src/main/java/B.java\n"
+        "+  @Deprecated\n" + "+b\n" * 500
+    )
+    TEST = "diff --git a/m/src/test/java/C.java b/m/src/test/java/C.java\n" + "+c\n" * 500
+    DOCS = "diff --git a/README.md b/README.md\n" + "+d\n" * 500
+
+    def test_returns_input_unchanged_when_it_fits(self):
+        diff = self.SRC_MAIN
+        self.assertEqual(classify.compact_diff(diff, len(diff)), diff)
+
+    def test_every_kept_file_contributes_an_excerpt(self):
+        diff = self.SRC_MAIN + self.DEPRECATED + self.TEST + self.DOCS
+        out = classify.compact_diff(diff, 2_000)
+        for path in ("A.java", "B.java", "C.java", "README.md"):
+            self.assertIn(path, out)
+
+    def test_preserves_original_file_order(self):
+        diff = self.DOCS + self.SRC_MAIN
+        out = classify.compact_diff(diff, 1_000)
+        self.assertLess(out.index("README.md"), out.index("A.java"))
+
+    def test_drops_lowest_priority_files_before_starving_user_facing_ones(self):
+        # Budget only affords two sections at MIN_DIFF_SECTION_CHARS each, so the
+        # deprecation and src/main excerpts must win over the test and docs ones.
+        diff = self.DOCS + self.TEST + self.SRC_MAIN + self.DEPRECATED
+        out = classify.compact_diff(diff, 2 * classify.MIN_DIFF_SECTION_CHARS)
+        self.assertIn("@Deprecated", out)
+        self.assertIn("A.java", out)
+        self.assertNotIn("README.md", out)
+        self.assertNotIn("C.java", out)
+
+    def test_head_truncates_when_there_are_no_file_headers(self):
+        out = classify.compact_diff("commit abcdef\n" + "x" * 5_000, 100)
+        self.assertIn(classify.DIFF_SECTION_TRUNCATION_MARKER.strip(), out)
+
+    def test_zero_budget_yields_empty_output(self):
+        self.assertEqual(classify.compact_diff(self.SRC_MAIN, 0), "")
+
+
+class SectionPriorityTest(unittest.TestCase):
+    def test_ranks_deprecation_above_plain_src_main_above_test_above_rest(self):
+        self.assertEqual(
+            [
+                classify.section_priority(CompactDiffTest.DEPRECATED),
+                classify.section_priority(CompactDiffTest.SRC_MAIN),
+                classify.section_priority(CompactDiffTest.TEST),
+                classify.section_priority(CompactDiffTest.DOCS),
+            ],
+            [0, 1, 2, 3],
+        )
+
+    def test_reads_the_post_image_path(self):
+        section = "diff --git a/old/src/main/java/A.java b/new/src/main/java/A.java\n"
+        self.assertEqual(classify.section_path(section), "new/src/main/java/A.java")
+
 
 class ValidateTest(unittest.TestCase):
     def ok(self, **over):

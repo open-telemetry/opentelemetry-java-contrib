@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -72,6 +74,52 @@ class RenderGeneratedBlockTest(unittest.TestCase):
 
     def test_empty_input_still_emits_unreleased_heading(self):
         self.assertEqual(merge.render_generated_block([], {}), "## Unreleased\n")
+
+
+class UnrenderableCommitsTest(unittest.TestCase):
+    """PR-less commits must never be dropped silently (bullets are PR-keyed)."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.original = merge.COMMITS_ROOT
+        merge.COMMITS_ROOT = Path(self.tmp.name) / "commits"
+        merge.COMMITS_ROOT.mkdir(parents=True)
+
+    def tearDown(self):
+        merge.COMMITS_ROOT = self.original
+        self.tmp.cleanup()
+
+    def write(self, name, meta):
+        d = merge.COMMITS_ROOT / name
+        d.mkdir()
+        (d / "meta.json").write_text(json.dumps(meta), encoding="utf-8")
+
+    def test_reports_pr_less_commit_touching_user_facing_source(self):
+        self.write("commit-abc123abc123", {
+            "commit_hash": "abc123abc123def", "pr": None,
+            "touches_src_main": True, "subject": "Fix a thing",
+        })
+        self.assertEqual(
+            [m["commit_hash"] for m in merge.unrenderable_commits()],
+            ["abc123abc123def"],
+        )
+
+    def test_ignores_commit_with_no_user_facing_source(self):
+        self.write("commit-abc123abc123", {
+            "commit_hash": "abc", "pr": None,
+            "touches_src_main": False, "subject": "Update docs",
+        })
+        self.assertEqual(merge.unrenderable_commits(), [])
+
+    def test_reports_unreadable_meta(self):
+        d = merge.COMMITS_ROOT / "commit-abc123abc123"
+        d.mkdir()
+        (d / "meta.json").write_text("{not json", encoding="utf-8")
+        self.assertEqual(len(merge.unrenderable_commits()), 1)
+
+    def test_missing_commits_dir_is_not_an_error(self):
+        merge.COMMITS_ROOT = Path(self.tmp.name) / "absent"
+        self.assertEqual(merge.unrenderable_commits(), [])
 
 
 class SpliceUnreleasedTest(unittest.TestCase):

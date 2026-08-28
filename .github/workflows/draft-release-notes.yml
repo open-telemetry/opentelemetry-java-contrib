@@ -13,7 +13,9 @@ jobs:
   draft-notes:
     if: github.repository == 'open-telemetry/opentelemetry-java-contrib'
     permissions:
-      contents: write  # for git push to PR branch
+      # the branch push and `gh pr create` below authenticate with the otelbot
+      # app token, not this one, so no write scope is needed here
+      contents: read
       pull-requests: read  # for `gh pr list`/`gh pr view` in fetch.py
       issues: read  # for `gh issue view` in fetch.py
     runs-on: ubuntu-latest
@@ -68,7 +70,7 @@ jobs:
       - uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
         id: otelbot-token
         with:
-          app-id: ${{ vars.OTELBOT_APP_ID }}
+          client-id: ${{ vars.OTELBOT_CLIENT_ID }}
           private-key: ${{ secrets.OTELBOT_PRIVATE_KEY }}
           owner: open-telemetry
           repositories: opentelemetry-java-contrib

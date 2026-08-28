@@ -13,6 +13,11 @@ and renders the `## Unreleased` block in this repo's changelog format:
 Any entry in a state other than `include`/`omit`, or an `include` without a
 bullet, is reported on stderr and excluded.
 
+Exits non-zero if any candidate cannot be rendered, which includes a PR-less
+commit bundle under build/changelog-bundle/commits/ that touches user-facing
+`/src/main/` sources. Bullets are PR-keyed, so such a commit has no link to
+render and must be added to the `## Unreleased` block by hand.
+
 The block contains only the `## Unreleased` heading and its sections. Release
 time rewrites that heading into `## Version X.Y.Z (date)` via the sed in
 .github/workflows/prepare-release-branch.yml, which requires the literal
@@ -32,7 +37,9 @@ import sys
 import textwrap
 from pathlib import Path
 
-BUNDLE_ROOT = Path("build/changelog-bundle/prs")
+BUNDLE_DIR = Path("build/changelog-bundle")
+BUNDLE_ROOT = BUNDLE_DIR / "prs"
+COMMITS_ROOT = BUNDLE_DIR / "commits"
 CHANGELOG = Path("CHANGELOG.md")
 
 BREAKING_HEADING = "### :warning: Breaking changes"
@@ -57,6 +64,33 @@ def load_decisions() -> list[dict]:
             continue
         obj.setdefault("pr", int(d.name))
         out.append(obj)
+    return out
+
+
+def unrenderable_commits() -> list[dict]:
+    """PR-less commit bundles carrying user-facing changes.
+
+    fetch.py bundles commits whose subject has no `(#NNN)` suffix under
+    commits/, but classification and rendering are PR-keyed: every bullet ends
+    in a PR link. main is protected, so such a commit is rare enough that it is
+    not worth a second link format — but it must never be dropped silently, so
+    report it and fail. Commits that touch no user-facing /src/main/ source
+    would be omitted by the classifier anyway, so they are ignored here.
+    """
+    out: list[dict] = []
+    if not COMMITS_ROOT.is_dir():
+        return out
+    for d in sorted(COMMITS_ROOT.iterdir()):
+        meta_path = d / "meta.json"
+        if not d.is_dir() or not meta_path.exists():
+            continue
+        try:
+            meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as e:
+            out.append({"commit_hash": d.name, "subject": f"meta.json unreadable: {e}"})
+            continue
+        if meta.get("pr") is None and meta.get("touches_src_main"):
+            out.append(meta)
     return out
 
 
@@ -182,6 +216,15 @@ def main() -> int:
 
     breaking, modules, errors = group_decisions(decisions)
     block = render_generated_block(breaking, modules)
+
+    for meta in unrenderable_commits():
+        commit_hash = str(meta.get("commit_hash") or "")[:12]
+        print(
+            f"ERROR: commit {commit_hash} touches user-facing src/main but has "
+            f"no PR number; add its bullet by hand: {meta.get('subject')}",
+            file=sys.stderr,
+        )
+        errors += 1
 
     if args.splice:
         if not CHANGELOG.exists():

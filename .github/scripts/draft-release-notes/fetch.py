@@ -21,7 +21,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Callable, TypeVar
 
 
 REPO = "open-telemetry/opentelemetry-java-contrib"
@@ -38,6 +38,8 @@ ISSUE_REF_RE = re.compile(
 GH_FETCH_WORKERS = 8
 GH_FETCH_RETRIES = 3
 GH_FETCH_RETRY_DELAY = 5.0
+
+T = TypeVar("T")
 
 
 @dataclass
@@ -357,9 +359,7 @@ def discussion_texts(pr_data: dict[str, Any]) -> list[str]:
     return texts
 
 
-def fetch_parallel(
-    fn: Callable[[int], dict[str, Any]], numbers: list[int]
-) -> dict[int, dict[str, Any]]:
+def fetch_parallel(fn: Callable[[int], T], numbers: list[int]) -> dict[int, T]:
     with ThreadPoolExecutor(max_workers=GH_FETCH_WORKERS) as ex:
         return dict(zip(numbers, ex.map(fn, numbers)))
 
@@ -379,19 +379,32 @@ def fetch_pr_data(pr_number: int) -> dict[str, Any]:
     )
 
 
-def fetch_ref_data(ref_number: int) -> dict[str, Any]:
-    return load_json_with_retry(
-        [
-            "gh",
-            "issue",
-            "view",
-            str(ref_number),
-            "--repo",
-            REPO,
-            "--json",
-            "number,title,author,body,comments,labels,state,url",
-        ]
-    )
+def fetch_ref_data(ref_number: int) -> dict[str, Any] | None:
+    """Fetch one referenced issue/PR, or None if it cannot be read.
+
+    Reference numbers are harvested from contributor-controlled discussion text
+    (PR body, comments, reviews), so a `#NNN` may point at a nonexistent or
+    inaccessible number in this repo. Losing one linked reference only costs the
+    classifier some optional context, so warn and omit it rather than aborting
+    the whole draft.
+    """
+    try:
+        return load_json_with_retry(
+            [
+                "gh",
+                "issue",
+                "view",
+                str(ref_number),
+                "--repo",
+                REPO,
+                "--json",
+                "number,title,author,body,comments,labels,state,url",
+            ]
+        )
+    except (subprocess.CalledProcessError, json.JSONDecodeError) as e:
+        detail = getattr(e, "stderr", None) or str(e)
+        warn(f"Skipping reference #{ref_number}: {str(detail).strip()}")
+        return None
 
 
 def _load_existing_meta(path: Path) -> dict[str, Any] | None:
@@ -465,7 +478,22 @@ def prepare_bundle(
     ]
     if refs_to_fetch:
         warn(f"Fetching metadata for {len(refs_to_fetch)} referenced issue(s)/PR(s)...")
-    ref_data_map = fetch_parallel(fetch_ref_data, refs_to_fetch)
+    fetched_refs = fetch_parallel(fetch_ref_data, refs_to_fetch)
+    ref_data_map = {n: data for n, data in fetched_refs.items() if data is not None}
+
+    # Drop references that could not be fetched. They have no bundle on disk, so
+    # leaving them in pr_refs would make _write_linked_refs take its
+    # reuse-from-disk path and emit an empty refs/<n>/ directory.
+    unavailable_refs = set(refs_to_fetch) - set(ref_data_map)
+    if unavailable_refs:
+        warn(
+            f"{len(unavailable_refs)} reference(s) could not be fetched and are "
+            "omitted: " + ", ".join(f"#{n}" for n in sorted(unavailable_refs))
+        )
+        pr_refs = {
+            pr: [n for n in refs if n not in unavailable_refs]
+            for pr, refs in pr_refs.items()
+        }
 
     manifest_candidates: list[dict[str, Any]] = []
     index_lines = [
