@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 1.60.0 (2026-08-28)
+
 ### :warning: Breaking changes
 
 - Remove the deprecated `EventToSpanEventBridge` log processor and its declarative configuration
