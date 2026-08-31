@@ -5,6 +5,8 @@
 
 package io.opentelemetry.contrib.azure.resource;
 
+import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.AZURE_RESOURCE_GROUP_NAME;
+import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.CLOUD_ACCOUNT_ID;
 import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.CLOUD_REGION;
 import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.CLOUD_RESOURCE_ID;
 import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.CloudPlatformIncubatingValues.AZURE_APP_SERVICE;
@@ -72,7 +74,17 @@ public final class AzureAppServiceResourceProvider extends CloudResourceProvider
     AttributesBuilder builder = AzureVmResourceProvider.azureAttributeBuilder(AZURE_APP_SERVICE);
     builder.put(SERVICE_NAME, name);
 
-    String resourceUri = resourceUri(name);
+    String websiteResourceGroup = env.get(WEBSITE_RESOURCE_GROUP);
+    if (!StringUtils.isNullOrEmpty(websiteResourceGroup)) {
+      builder.put(AZURE_RESOURCE_GROUP_NAME, websiteResourceGroup);
+    }
+
+    String subscriptionId = subscriptionId();
+    if (!StringUtils.isNullOrEmpty(subscriptionId)) {
+      builder.put(CLOUD_ACCOUNT_ID, subscriptionId);
+    }
+
+    String resourceUri = resourceUri(name, websiteResourceGroup, subscriptionId);
     if (resourceUri != null) {
       builder.put(CLOUD_RESOURCE_ID, resourceUri);
     }
@@ -83,17 +95,17 @@ public final class AzureAppServiceResourceProvider extends CloudResourceProvider
   }
 
   @Nullable
-  private String resourceUri(String websiteName) {
-    String websiteResourceGroup = env.get(WEBSITE_RESOURCE_GROUP);
+  private String subscriptionId() {
     String websiteOwnerName = env.get(WEBSITE_OWNER_NAME);
-
-    String subscriptionId;
     if (websiteOwnerName != null && websiteOwnerName.contains("+")) {
-      subscriptionId = websiteOwnerName.substring(0, websiteOwnerName.indexOf("+"));
-    } else {
-      subscriptionId = websiteOwnerName;
+      return websiteOwnerName.substring(0, websiteOwnerName.indexOf("+"));
     }
+    return websiteOwnerName;
+  }
 
+  @Nullable
+  private static String resourceUri(
+      String websiteName, @Nullable String websiteResourceGroup, @Nullable String subscriptionId) {
     if (StringUtils.isNullOrEmpty(websiteResourceGroup)
         || StringUtils.isNullOrEmpty(subscriptionId)) {
       return null;
