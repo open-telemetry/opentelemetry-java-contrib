@@ -112,6 +112,12 @@ testing {
 }
 
 tasks {
+  // don't fail build on
+  // warning: unknown enum constant ElementType.MODULE
+  named<JavaCompile>("compileTestJava") {
+    options.compilerArgs.removeAll(listOf("-Werror"))
+  }
+
   shadowJar {
     // Shaded version of this extension is required when using it as a OpenTelemetry Java Agent extension.
     // Shading bundles the dependencies required by this extension in the resulting JAR,
