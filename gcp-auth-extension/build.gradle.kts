@@ -24,7 +24,7 @@ dependencies {
   compileOnly("io.opentelemetry:opentelemetry-exporter-otlp")
 
   // Only dependencies added to `implementation` configuration will be picked up by Shadow plugin
-  implementation("com.google.auth:google-auth-library-oauth2-http:1.49.0")
+  implementation("com.google.auth:google-auth-library-oauth2-http:1.51.0")
 
   // Test dependencies
   testCompileOnly("com.google.auto.service:auto-service-annotations")
@@ -112,6 +112,12 @@ testing {
 }
 
 tasks {
+  // don't fail build on
+  // warning: unknown enum constant ElementType.MODULE
+  named<JavaCompile>("compileTestJava") {
+    options.compilerArgs.removeAll(listOf("-Werror"))
+  }
+
   shadowJar {
     // Shaded version of this extension is required when using it as a OpenTelemetry Java Agent extension.
     // Shading bundles the dependencies required by this extension in the resulting JAR,
