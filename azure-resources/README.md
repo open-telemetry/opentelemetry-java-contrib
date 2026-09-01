@@ -8,7 +8,7 @@ The following OpenTelemetry semantic conventions will be detected:
 
 | Resource attribute          | VM       | Functions       | App Service       | Containers           |
 | --------------------------- | -------- | --------------- | ----------------- | -------------------- |
-| cloud.account.id            |          |                 | auto              |                      |
+| cloud.account.id            |          | auto            | auto              |                      |
 | cloud.platform              | azure.vm | azure.functions | azure.app_service | azure.container_apps |
 | cloud.provider              | azure    | azure           | azure             | azure                |
 | cloud.resource_id           | auto     |                 | auto              |                      |
@@ -21,11 +21,11 @@ The following OpenTelemetry semantic conventions will be detected:
 | os.version                  | auto     |                 |                   |                      |
 | azure.vm.scaleset.name      | auto     |                 |                   |                      |
 | azure.vm.sku                | auto     |                 |                   |                      |
-| service.name                |          |                 | auto              | auto                 |
+| service.name                |          | auto            | auto              | auto                 |
 | service.version             |          |                 |                   | auto                 |
 | service.instance.id         |          |                 | auto              | auto                 |
 | azure.app.service.stamp     |          |                 | auto              |                      |
-| azure.resource_group.name   |          |                 | auto              |                      |
+| azure.resource_group.name   |          | auto            | auto              |                      |
 | faas.name                   |          | auto            |                   |                      |
 | faas.version                |          | auto            |                   |                      |
 | faas.instance               |          | auto            |                   |                      |
