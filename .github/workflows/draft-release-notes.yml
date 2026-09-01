@@ -28,7 +28,7 @@ jobs:
           fi
 
       - name: Checkout code
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # history and tags are needed to resolve the previous release tag
           # when computing the commit range
@@ -41,9 +41,9 @@ jobs:
           python-version: '3.14'
 
       - name: Set up Node
-        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: '22'
+          node-version: '24'
 
       - name: Install Copilot CLI
         run: |
@@ -59,7 +59,7 @@ jobs:
       - name: Upload draft diagnostics artifact
         if: always()
         id: upload-diagnostics
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: draft-release-notes-diagnostics-${{ github.run_id }}
           path: build/changelog-bundle/**
