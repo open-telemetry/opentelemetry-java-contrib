@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### JMX Scraper
+
+- Add `experimental-cassandra` target system, inheriting the aligned Cassandra metric
+  definitions from instrumentation.
+
 ## Version 1.60.0 (2026-08-28)
 
 ### :warning: Breaking changes
