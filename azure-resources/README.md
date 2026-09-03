@@ -11,9 +11,9 @@ The following OpenTelemetry semantic conventions will be detected:
 | cloud.account.id            |          | auto            | auto              |                      |
 | cloud.platform              | azure.vm | azure.functions | azure.app_service | azure.container_apps |
 | cloud.provider              | azure    | azure           | azure             | azure                |
-| cloud.resource_id           | auto     |                 | auto              |                      |
+| cloud.resource_id           | auto     | auto            | auto              |                      |
 | cloud.region                | auto     | auto            | auto              |                      |
-| deployment.environment.name |          |                 | auto              |                      |
+| deployment.environment.name |          | auto            | auto              |                      |
 | host.id                     | auto     |                 | auto              |                      |
 | host.name                   | auto     |                 |                   |                      |
 | host.type                   | auto     |                 |                   |                      |

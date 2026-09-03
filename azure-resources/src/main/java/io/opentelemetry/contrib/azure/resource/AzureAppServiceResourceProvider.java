@@ -36,7 +36,7 @@ public final class AzureAppServiceResourceProvider extends CloudResourceProvider
   private static final String WEBSITE_OWNER_NAME = "WEBSITE_OWNER_NAME";
   private static final String WEBSITE_RESOURCE_GROUP = "WEBSITE_RESOURCE_GROUP";
   static final String WEBSITE_SITE_NAME = "WEBSITE_SITE_NAME";
-  private static final String WEBSITE_SLOT_NAME = "WEBSITE_SLOT_NAME";
+  static final String WEBSITE_SLOT_NAME = "WEBSITE_SLOT_NAME";
 
   private static final Map<AttributeKey<String>, String> ENV_VAR_MAPPING = new HashMap<>();
 
@@ -104,7 +104,7 @@ public final class AzureAppServiceResourceProvider extends CloudResourceProvider
   }
 
   @Nullable
-  private static String resourceUri(
+  static String resourceUri(
       String websiteName, @Nullable String websiteResourceGroup, @Nullable String subscriptionId) {
     if (StringUtils.isNullOrEmpty(websiteResourceGroup)
         || StringUtils.isNullOrEmpty(subscriptionId)) {
