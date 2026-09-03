@@ -6,11 +6,12 @@
 package io.opentelemetry.contrib.dynamic.policy.source;
 
 import com.google.errorprone.annotations.Immutable;
+import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.contrib.dynamic.policy.OpampPolicyProvider;
 import io.opentelemetry.contrib.dynamic.policy.PolicyProvider;
+import io.opentelemetry.contrib.dynamic.policy.PolicyProviderConfig;
 import io.opentelemetry.contrib.dynamic.policy.PolicyValidator;
 import io.opentelemetry.contrib.dynamic.policy.registry.PolicySourceConfig;
-import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -79,7 +80,17 @@ public enum SourceKind {
    */
   @Nullable
   public PolicyProvider createProvider(
-      PolicySourceConfig source, ConfigProperties config, List<PolicyValidator> validators) {
+      PolicySourceConfig source,
+      DeclarativeConfigProperties config,
+      List<PolicyValidator> validators) {
+    Objects.requireNonNull(config, "config cannot be null");
+    return createProvider(source, PolicyProviderConfig.create(config), validators);
+  }
+
+  /** Creates a provider with the shared provider configuration context. */
+  @Nullable
+  public PolicyProvider createProvider(
+      PolicySourceConfig source, PolicyProviderConfig config, List<PolicyValidator> validators) {
     Objects.requireNonNull(source, "source cannot be null");
     Objects.requireNonNull(config, "config cannot be null");
     Objects.requireNonNull(validators, "validators cannot be null");
@@ -93,13 +104,13 @@ public enum SourceKind {
 
   @Nullable
   private static PolicyProvider createNoProvider(
-      PolicySourceConfig source, ConfigProperties config, List<PolicyValidator> validators) {
+      PolicySourceConfig source, PolicyProviderConfig config, List<PolicyValidator> validators) {
     return null;
   }
 
   @Nullable
   private static PolicyProvider createOpampProvider(
-      PolicySourceConfig source, ConfigProperties config, List<PolicyValidator> validators) {
+      PolicySourceConfig source, PolicyProviderConfig config, List<PolicyValidator> validators) {
     String location = source.getLocation();
     if (location == null || location.trim().isEmpty()) {
       return null;
@@ -121,7 +132,7 @@ public enum SourceKind {
   private interface ProviderCreator {
     @Nullable
     PolicyProvider create(
-        PolicySourceConfig source, ConfigProperties config, List<PolicyValidator> validators);
+        PolicySourceConfig source, PolicyProviderConfig config, List<PolicyValidator> validators);
   }
 
   /**
