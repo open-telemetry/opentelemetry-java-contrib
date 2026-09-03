@@ -90,6 +90,40 @@ class AzureFunctionsResourceProviderTest {
   }
 
   @Test
+  void malformedOwnerNameNoPlus() {
+    HashMap<String, String> map = new HashMap<>(DEFAULT_ENV_VARS);
+    map.put("WEBSITE_OWNER_NAME", "TEST_OWNER_NO_PLUS");
+
+    createResource(map)
+        .containsEntry(AZURE_RESOURCE_GROUP_NAME, TEST_WEBSITE_RESOURCE_GROUP)
+        .containsEntry(SERVICE_NAME, TEST_WEBSITE_SITE_NAME)
+        .doesNotContainKey(CLOUD_ACCOUNT_ID)
+        .doesNotContainKey(CLOUD_RESOURCE_ID);
+  }
+
+  @Test
+  void malformedOwnerNamePlusAtIndexZero() {
+    HashMap<String, String> map = new HashMap<>(DEFAULT_ENV_VARS);
+    map.put("WEBSITE_OWNER_NAME", "+TEST_OWNER");
+
+    createResource(map)
+        .containsEntry(AZURE_RESOURCE_GROUP_NAME, TEST_WEBSITE_RESOURCE_GROUP)
+        .doesNotContainKey(CLOUD_ACCOUNT_ID)
+        .doesNotContainKey(CLOUD_RESOURCE_ID);
+  }
+
+  @Test
+  void malformedOwnerNameEmptySubscriptionSegment() {
+    HashMap<String, String> map = new HashMap<>(DEFAULT_ENV_VARS);
+    map.put("WEBSITE_OWNER_NAME", "+");
+
+    createResource(map)
+        .containsEntry(AZURE_RESOURCE_GROUP_NAME, TEST_WEBSITE_RESOURCE_GROUP)
+        .doesNotContainKey(CLOUD_ACCOUNT_ID)
+        .doesNotContainKey(CLOUD_RESOURCE_ID);
+  }
+
+  @Test
   void noWebsiteSlot() {
     HashMap<String, String> map = new HashMap<>(DEFAULT_ENV_VARS);
     map.remove("WEBSITE_SLOT_NAME");

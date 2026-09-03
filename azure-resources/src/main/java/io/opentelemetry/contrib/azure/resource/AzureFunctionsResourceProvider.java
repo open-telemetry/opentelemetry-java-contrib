@@ -21,13 +21,11 @@ import static java.util.Objects.requireNonNull;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
-import io.opentelemetry.api.internal.StringUtils;
 import io.opentelemetry.sdk.resources.Resource;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.annotation.Nullable;
 
 public final class AzureFunctionsResourceProvider extends CloudResourceProvider {
 
@@ -36,8 +34,6 @@ public final class AzureFunctionsResourceProvider extends CloudResourceProvider 
 
   static final String FUNCTIONS_VERSION = "FUNCTIONS_EXTENSION_VERSION";
   private static final String FUNCTIONS_MEM_LIMIT = "WEBSITE_MEMORY_LIMIT_MB";
-  private static final String WEBSITE_OWNER_NAME = "WEBSITE_OWNER_NAME";
-  private static final String WEBSITE_RESOURCE_GROUP = "WEBSITE_RESOURCE_GROUP";
 
   private static final Map<AttributeKey<String>, String> ENV_VAR_MAPPING = new HashMap<>();
 
@@ -77,13 +73,14 @@ public final class AzureFunctionsResourceProvider extends CloudResourceProvider 
     AttributesBuilder builder = AzureVmResourceProvider.azureAttributeBuilder(AZURE_FUNCTIONS);
     builder.put(SERVICE_NAME, name);
 
-    String websiteResourceGroup = env.get(WEBSITE_RESOURCE_GROUP);
-    if (!StringUtils.isNullOrEmpty(websiteResourceGroup)) {
+    String websiteResourceGroup =
+        env.get(AzureAppServiceResourceProvider.WEBSITE_RESOURCE_GROUP);
+    if (websiteResourceGroup != null && !websiteResourceGroup.isEmpty()) {
       builder.put(AZURE_RESOURCE_GROUP_NAME, websiteResourceGroup);
     }
 
-    String subscriptionId = subscriptionId();
-    if (!StringUtils.isNullOrEmpty(subscriptionId)) {
+    String subscriptionId = AzureAppServiceResourceProvider.subscriptionId(env);
+    if (subscriptionId != null && !subscriptionId.isEmpty()) {
       builder.put(CLOUD_ACCOUNT_ID, subscriptionId);
     }
 
@@ -108,14 +105,5 @@ public final class AzureFunctionsResourceProvider extends CloudResourceProvider 
     AzureEnvVarPlatform.addAttributesFromEnv(ENV_VAR_MAPPING, env, builder);
 
     return builder.build();
-  }
-
-  @Nullable
-  private String subscriptionId() {
-    String websiteOwnerName = env.get(WEBSITE_OWNER_NAME);
-    if (websiteOwnerName != null && websiteOwnerName.contains("+")) {
-      return websiteOwnerName.substring(0, websiteOwnerName.indexOf("+"));
-    }
-    return websiteOwnerName;
   }
 }

@@ -19,7 +19,6 @@ import static java.util.Objects.requireNonNull;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
-import io.opentelemetry.api.internal.StringUtils;
 import io.opentelemetry.sdk.resources.Resource;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,8 +32,8 @@ public final class AzureAppServiceResourceProvider extends CloudResourceProvider
   private static final String WEBSITE_HOME_STAMPNAME = "WEBSITE_HOME_STAMPNAME";
   private static final String WEBSITE_HOSTNAME = "WEBSITE_HOSTNAME";
   static final String WEBSITE_INSTANCE_ID = "WEBSITE_INSTANCE_ID";
-  private static final String WEBSITE_OWNER_NAME = "WEBSITE_OWNER_NAME";
-  private static final String WEBSITE_RESOURCE_GROUP = "WEBSITE_RESOURCE_GROUP";
+  static final String WEBSITE_OWNER_NAME = "WEBSITE_OWNER_NAME";
+  static final String WEBSITE_RESOURCE_GROUP = "WEBSITE_RESOURCE_GROUP";
   static final String WEBSITE_SITE_NAME = "WEBSITE_SITE_NAME";
   static final String WEBSITE_SLOT_NAME = "WEBSITE_SLOT_NAME";
 
@@ -75,12 +74,12 @@ public final class AzureAppServiceResourceProvider extends CloudResourceProvider
     builder.put(SERVICE_NAME, name);
 
     String websiteResourceGroup = env.get(WEBSITE_RESOURCE_GROUP);
-    if (!StringUtils.isNullOrEmpty(websiteResourceGroup)) {
+    if (websiteResourceGroup != null && !websiteResourceGroup.isEmpty()) {
       builder.put(AZURE_RESOURCE_GROUP_NAME, websiteResourceGroup);
     }
 
-    String subscriptionId = subscriptionId();
-    if (!StringUtils.isNullOrEmpty(subscriptionId)) {
+    String subscriptionId = subscriptionId(env);
+    if (subscriptionId != null && !subscriptionId.isEmpty()) {
       builder.put(CLOUD_ACCOUNT_ID, subscriptionId);
     }
 
@@ -95,19 +94,26 @@ public final class AzureAppServiceResourceProvider extends CloudResourceProvider
   }
 
   @Nullable
-  private String subscriptionId() {
+  static String subscriptionId(Map<String, String> env) {
     String websiteOwnerName = env.get(WEBSITE_OWNER_NAME);
-    if (websiteOwnerName != null && websiteOwnerName.contains("+")) {
-      return websiteOwnerName.substring(0, websiteOwnerName.indexOf("+"));
+    if (websiteOwnerName == null) {
+      return null;
     }
-    return websiteOwnerName;
+    int plusIndex = websiteOwnerName.indexOf("+");
+    if (plusIndex <= 0) {
+      // No '+' delimiter, or '+' at index 0 (empty subscription segment).
+      return null;
+    }
+    return websiteOwnerName.substring(0, plusIndex);
   }
 
   @Nullable
   static String resourceUri(
       String websiteName, @Nullable String websiteResourceGroup, @Nullable String subscriptionId) {
-    if (StringUtils.isNullOrEmpty(websiteResourceGroup)
-        || StringUtils.isNullOrEmpty(subscriptionId)) {
+    if (websiteResourceGroup == null
+        || websiteResourceGroup.isEmpty()
+        || subscriptionId == null
+        || subscriptionId.isEmpty()) {
       return null;
     }
 
