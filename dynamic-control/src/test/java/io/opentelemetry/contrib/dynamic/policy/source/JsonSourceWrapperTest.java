@@ -249,16 +249,6 @@ class JsonSourceWrapperTest {
   }
 
   @Test
-  void isSingleKeyObjectRecognizesRawShape() {
-    assertThat(JsonSourceWrapper.isSingleKeyObject("{\"trace-sampling\": 0.5}")).isTrue();
-    assertThat(JsonSourceWrapper.isSingleKeyObject("{\"trace-sampling\": 0.5, \"typo\": 1}"))
-        .isFalse();
-    assertThat(JsonSourceWrapper.isSingleKeyObject("{}")).isFalse();
-    assertThat(JsonSourceWrapper.isSingleKeyObject("[{\"trace-sampling\": 0.5}]")).isFalse();
-    assertThat(JsonSourceWrapper.isSingleKeyObject("{invalid-json")).isFalse();
-  }
-
-  @Test
   void isSinglePolicyObjectRecognizesKeyedAndFullShapes() {
     assertThat(JsonSourceWrapper.isSinglePolicyObject("{\"trace-sampling\":0.5}")).isTrue();
     assertThat(JsonSourceWrapper.isSinglePolicyObject(fullTraceSamplingPolicy())).isTrue();
@@ -273,13 +263,6 @@ class JsonSourceWrapperTest {
   @Test
   void parseRejectsNullInput() {
     assertThatThrownBy(() -> JsonSourceWrapper.parse(null, emptySet()))
-        .isInstanceOf(NullPointerException.class)
-        .hasMessage("source cannot be null");
-  }
-
-  @Test
-  void isSingleKeyObjectRejectsNullInput() {
-    assertThatThrownBy(() -> JsonSourceWrapper.isSingleKeyObject(null))
         .isInstanceOf(NullPointerException.class)
         .hasMessage("source cannot be null");
   }
