@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### JMX Scraper
+
+- Add `experimental-cassandra` target system, inheriting the aligned Cassandra metric
+  definitions from instrumentation.
+  ([#3091](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3091))
+
 ## Version 1.60.0 (2026-08-28)
 
 ### :warning: Breaking changes
