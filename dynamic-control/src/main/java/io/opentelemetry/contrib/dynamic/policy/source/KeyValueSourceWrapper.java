@@ -35,6 +35,12 @@ public final class KeyValueSourceWrapper implements SourceWrapper {
     return key;
   }
 
+  @Override
+  public SourceWrapper withPolicyType(String policyType) {
+    return new KeyValueSourceWrapper(
+        Objects.requireNonNull(policyType, "policyType cannot be null"), value);
+  }
+
   public String getKey() {
     return key;
   }

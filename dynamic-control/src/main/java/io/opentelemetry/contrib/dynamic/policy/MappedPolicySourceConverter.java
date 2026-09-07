@@ -5,12 +5,7 @@
 
 package io.opentelemetry.contrib.dynamic.policy;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.opentelemetry.contrib.dynamic.policy.registry.PolicySourceMappingConfig;
-import io.opentelemetry.contrib.dynamic.policy.source.JsonSourceWrapper;
-import io.opentelemetry.contrib.dynamic.policy.source.KeyValueSourceWrapper;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceWrapper;
 import java.util.ArrayList;
@@ -26,8 +21,6 @@ import javax.annotation.Nullable;
  * Converts parsed source policy entries into validated telemetry policies using source mappings.
  */
 final class MappedPolicySourceConverter {
-  private static final ObjectMapper MAPPER = new ObjectMapper();
-
   private final Map<String, String> policyIdToPolicyType;
   private final List<PolicyValidator> validators;
 
@@ -77,7 +70,7 @@ final class MappedPolicySourceConverter {
     if (policyType == null) {
       return null;
     }
-    SourceWrapper normalizedSource = remapSourcePolicyType(source, policyType);
+    SourceWrapper normalizedSource = source.withPolicyType(policyType);
     if (normalizedSource == null) {
       return null;
     }
@@ -101,25 +94,5 @@ final class MappedPolicySourceConverter {
       mapping.put(item.getPolicyId(), item.getPolicyType());
     }
     return mapping;
-  }
-
-  @Nullable
-  private static SourceWrapper remapSourcePolicyType(
-      SourceWrapper source, String mappedPolicyType) {
-    if (source instanceof JsonSourceWrapper) {
-      JsonNode node = ((JsonSourceWrapper) source).asJsonNode();
-      if (!node.isObject() || node.size() != 1) {
-        return null;
-      }
-      JsonNode value = node.elements().next();
-      ObjectNode remappedNode = MAPPER.createObjectNode();
-      remappedNode.set(mappedPolicyType, value);
-      return new JsonSourceWrapper(remappedNode);
-    }
-    if (source instanceof KeyValueSourceWrapper) {
-      KeyValueSourceWrapper keyValue = (KeyValueSourceWrapper) source;
-      return new KeyValueSourceWrapper(mappedPolicyType, keyValue.getValue());
-    }
-    return source;
   }
 }

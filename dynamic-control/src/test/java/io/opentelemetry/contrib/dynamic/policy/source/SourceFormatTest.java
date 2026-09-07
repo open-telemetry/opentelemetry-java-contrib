@@ -87,9 +87,7 @@ class SourceFormatTest {
   void parseReturnsNullForInvalidInput() {
     assertThat(SourceFormat.JSONKEYVALUE.parse("{invalid-json", emptySet())).isNull();
     assertThat(SourceFormat.JSONKEYVALUE.parse("{}", emptySet())).isEmpty();
-    assertThat(SourceFormat.JSONKEYVALUE.parse("{\"a\": 1, \"b\": 2}", singleton("a")))
-        .extracting(SourceWrapper::getPolicyType)
-        .containsExactly("a");
+    assertThat(SourceFormat.JSONKEYVALUE.parse("{\"a\": 1, \"b\": 2}", singleton("a"))).isEmpty();
     assertThat(
             SourceFormat.JSONKEYVALUE.parse(
                 "[{\"trace-sampling\": 0.5}, {}]", singleton("trace-sampling")))

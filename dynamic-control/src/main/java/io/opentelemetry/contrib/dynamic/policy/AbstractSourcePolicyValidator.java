@@ -27,7 +27,7 @@ public abstract class AbstractSourcePolicyValidator implements PolicyValidator {
     SourceFormat format = source.getFormat();
     switch (format) {
       case JSONKEYVALUE:
-        return validateJsonSource(((JsonSourceWrapper) source).asJsonNode(), sourceKind);
+        return validateJsonSource((JsonSourceWrapper) source, sourceKind);
       case KEYVALUE:
         return validateKeyValueSource((KeyValueSourceWrapper) source, sourceKind);
     }
@@ -35,12 +35,12 @@ public abstract class AbstractSourcePolicyValidator implements PolicyValidator {
   }
 
   @Nullable
-  private TelemetryPolicy validateJsonSource(JsonNode node, SourceKind sourceKind) {
-    JsonNode valueNode = node.get(getPolicyType());
-    if (valueNode == null) {
+  private TelemetryPolicy validateJsonSource(JsonSourceWrapper source, SourceKind sourceKind) {
+    if (!getPolicyType().equals(source.getPolicyType())) {
       return null;
     }
-    return validateJsonValue(valueNode, sourceKind);
+    JsonNode valueNode = source.getPolicyValue();
+    return valueNode == null ? null : validateJsonValue(valueNode, sourceKind);
   }
 
   @Nullable
