@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.dynamic.policy;
 
+import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
@@ -127,9 +128,9 @@ public final class PolicyProviderPoller {
   /**
    * Registers an HTTP(S)-backed target that is invoked only after the URL response changes.
    *
-   * <p>The initial response state is captured on the first poll tick. Later poll ticks use
-   * conditional request headers when possible and invoke {@code onModified} only when the response
-   * status, validators, or body hash changes.
+   * <p>The initial response state is read and delivered on the first poll tick. Later poll ticks
+   * use conditional request headers when possible and invoke {@code onModified} only when the
+   * response status, validators, or body hash changes.
    *
    * @param url HTTP or HTTPS URL to monitor for changes
    * @param onModified callback invoked after a URL response change is detected
@@ -141,6 +142,24 @@ public final class PolicyProviderPoller {
     Objects.requireNonNull(onModified, "onModified cannot be null");
     validateHttpUrl(url);
     return register(new UrlPollingRegistration(url, onModified));
+  }
+
+  /**
+   * Applies the shared poll interval from auto-configuration when present.
+   *
+   * @param config auto-configuration properties
+   */
+  public static void configure(ConfigProperties config) {
+    Objects.requireNonNull(config, "config cannot be null");
+    Duration interval = config.getDuration(POLL_INTERVAL_PROPERTY);
+    if (interval == null) {
+      return;
+    }
+    try {
+      setGlobalPollInterval(interval);
+    } catch (IllegalArgumentException e) {
+      logger.log(Level.FINE, "Ignoring invalid policy provider poll interval: {0}", e.getMessage());
+    }
   }
 
   /**
@@ -482,6 +501,8 @@ public final class PolicyProviderPoller {
       }
       UrlState currentUrlState = currentResult.state;
       if (previousUrlState == null) {
+        onModified.onModified(url, currentResult.responseBody);
+        // Update only after successful handling so a callback failure is retried on the next poll.
         lastKnownUrlState.set(currentUrlState);
         return;
       }

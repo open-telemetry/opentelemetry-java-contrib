@@ -7,8 +7,11 @@ package io.opentelemetry.contrib.dynamic.policy;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.sun.net.httpserver.HttpServer;
+import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import java.io.Closeable;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -96,7 +99,7 @@ class PolicyProviderPollerTest {
   }
 
   @Test
-  void registerUrlInvokesTargetOnlyWhenResponseChanges() throws Exception {
+  void registerUrlInvokesTargetOnInitialReadAndWhenResponseChanges() throws Exception {
     AtomicReference<String> responseBody = new AtomicReference<>("trace-sampling=0.5");
     AtomicInteger requestCount = new AtomicInteger();
     URI url = startHttpServer(responseBody, requestCount);
@@ -114,17 +117,18 @@ class PolicyProviderPollerTest {
     PolicyProviderPoller.poll();
 
     assertThat(requestCount.get()).isEqualTo(1);
-    assertThat(pollCount.get()).isZero();
+    assertThat(pollCount.get()).isEqualTo(1);
+    assertThat(changedBody.get()).isEqualTo("trace-sampling=0.5");
 
     responseBody.set("trace-sampling=0.75");
     PolicyProviderPoller.poll();
 
-    assertThat(pollCount.get()).isEqualTo(1);
+    assertThat(pollCount.get()).isEqualTo(2);
     assertThat(changedBody.get()).isEqualTo("trace-sampling=0.75");
   }
 
   @Test
-  void registerUrlRetriesChangeWhenTargetFails() throws Exception {
+  void registerUrlRetriesInitialReadWhenTargetFails() throws Exception {
     AtomicReference<String> responseBody = new AtomicReference<>("trace-sampling=0.5");
     AtomicInteger requestCount = new AtomicInteger();
     URI url = startHttpServer(responseBody, requestCount);
@@ -140,21 +144,53 @@ class PolicyProviderPollerTest {
         });
 
     PolicyProviderPoller.poll();
-    assertThat(callbackAttempts.get()).isZero();
-    assertThat(callbackBody.get()).isNull();
+
+    assertThat(callbackAttempts.get()).isEqualTo(1);
+    assertThat(callbackBody.get()).isEqualTo("trace-sampling=0.5");
+
+    PolicyProviderPoller.poll();
+
+    assertThat(callbackAttempts.get()).isEqualTo(2);
+    assertThat(callbackBody.get()).isEqualTo("trace-sampling=0.5");
+
+    PolicyProviderPoller.poll();
+
+    assertThat(callbackAttempts.get()).isEqualTo(2);
+  }
+
+  @Test
+  void registerUrlRetriesChangeWhenTargetFails() throws Exception {
+    AtomicReference<String> responseBody = new AtomicReference<>("trace-sampling=0.5");
+    AtomicInteger requestCount = new AtomicInteger();
+    URI url = startHttpServer(responseBody, requestCount);
+    AtomicInteger callbackAttempts = new AtomicInteger();
+    AtomicReference<String> callbackBody = new AtomicReference<>();
+    PolicyProviderPoller.registerUrl(
+        url,
+        (changedUrl, body) -> {
+          callbackBody.set(new String(body, StandardCharsets.UTF_8));
+          // Succeed on initial read (attempt 1); fail once on the change (attempt 2).
+          if (callbackAttempts.incrementAndGet() == 2) {
+            throw new IllegalStateException("test callback failure");
+          }
+        });
+
+    PolicyProviderPoller.poll();
+    assertThat(callbackAttempts.get()).isEqualTo(1);
+    assertThat(callbackBody.get()).isEqualTo("trace-sampling=0.5");
 
     responseBody.set("trace-sampling=0.75");
 
     PolicyProviderPoller.poll();
-    assertThat(callbackAttempts.get()).isEqualTo(1);
-    assertThat(callbackBody.get()).isEqualTo("trace-sampling=0.75");
-
-    PolicyProviderPoller.poll();
     assertThat(callbackAttempts.get()).isEqualTo(2);
     assertThat(callbackBody.get()).isEqualTo("trace-sampling=0.75");
 
     PolicyProviderPoller.poll();
-    assertThat(callbackAttempts.get()).isEqualTo(2);
+    assertThat(callbackAttempts.get()).isEqualTo(3);
+    assertThat(callbackBody.get()).isEqualTo("trace-sampling=0.75");
+
+    PolicyProviderPoller.poll();
+    assertThat(callbackAttempts.get()).isEqualTo(3);
   }
 
   @Test
@@ -172,6 +208,44 @@ class PolicyProviderPollerTest {
     assertThatThrownBy(() -> PolicyProviderPoller.setGlobalPollInterval(Duration.ZERO))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("interval must be > 0");
+  }
+
+  @Test
+  void configureAppliesConfiguredPollInterval() {
+    ConfigProperties config = mock(ConfigProperties.class);
+    when(config.getDuration(PolicyProviderPoller.POLL_INTERVAL_PROPERTY))
+        .thenReturn(Duration.ofSeconds(5));
+
+    PolicyProviderPoller.configure(config);
+
+    assertThat(PolicyProviderPoller.getGlobalPollInterval()).isEqualTo(Duration.ofSeconds(5));
+  }
+
+  @Test
+  void configureRetainsCurrentIntervalWhenPropertyIsAbsent() {
+    ConfigProperties config = mock(ConfigProperties.class);
+    PolicyProviderPoller.setGlobalPollInterval(Duration.ofSeconds(5));
+
+    PolicyProviderPoller.configure(config);
+
+    assertThat(PolicyProviderPoller.getGlobalPollInterval()).isEqualTo(Duration.ofSeconds(5));
+  }
+
+  @Test
+  void configureIgnoresInvalidPollInterval() {
+    ConfigProperties config = mock(ConfigProperties.class);
+    when(config.getDuration(PolicyProviderPoller.POLL_INTERVAL_PROPERTY)).thenReturn(Duration.ZERO);
+
+    PolicyProviderPoller.configure(config);
+
+    assertThat(PolicyProviderPoller.getGlobalPollInterval()).isEqualTo(Duration.ofSeconds(30));
+  }
+
+  @Test
+  void configureRejectsNullConfig() {
+    assertThatThrownBy(() -> PolicyProviderPoller.configure(null))
+        .isInstanceOf(NullPointerException.class)
+        .hasMessage("config cannot be null");
   }
 
   private Path writePolicyFile(String fileName, String line) throws Exception {
