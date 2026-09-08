@@ -45,8 +45,7 @@ class PolicyStoreTest {
     assertThat(store.updatePolicies(singletonList(traceSampling(0.25)))).isTrue();
     assertThat(store.updatePolicies(singletonList(traceSampling(0.75)))).isTrue();
     assertThat(store.getPolicies()).hasSize(1);
-    assertThat(((TraceSamplingRatePolicy) store.getPolicies().get(0)).getProbability())
-        .isEqualTo(0.75);
+    assertThat(((TraceSamplingRatePolicy) store.getPolicies().get(0)).getRatio()).isEqualTo(0.75);
   }
 
   @Test
@@ -289,7 +288,7 @@ class PolicyStoreTest {
       return false;
     }
     TraceSamplingRatePolicy policy = (TraceSamplingRatePolicy) policies.get(0);
-    return Double.compare(policy.getProbability(), probability) == 0;
+    return Double.compare(policy.getRatio(), probability) == 0;
   }
 
   private static final class TestTelemetryPolicy implements TelemetryPolicy {

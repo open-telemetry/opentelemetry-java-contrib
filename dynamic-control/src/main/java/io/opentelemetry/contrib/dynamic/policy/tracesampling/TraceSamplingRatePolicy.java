@@ -13,16 +13,17 @@ import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import javax.annotation.Nullable;
 
+/** Trace sampling policy expressed as a ratio in the inclusive range {@code [0.0, 1.0]}. */
 public final class TraceSamplingRatePolicy extends AbstractTraceSamplingPolicy {
   public static final String POLICY_TYPE = "trace-sampling";
   public static final TelemetryPolicyIdentity DEFAULT_IDENTITY =
       new TelemetryPolicyIdentity("trace-sampling", "Trace sampling rate");
 
-  private final double probability;
+  private final double ratio;
 
-  public TraceSamplingRatePolicy(double probability, SourceKind sourceKind) {
-    super(DEFAULT_IDENTITY, probability, sourceKind);
-    this.probability = getSamplingProbability();
+  public TraceSamplingRatePolicy(double ratio, SourceKind sourceKind) {
+    super(DEFAULT_IDENTITY, normalizeRatio(ratio), sourceKind);
+    this.ratio = getSamplingProbability();
   }
 
   @Override
@@ -30,8 +31,12 @@ public final class TraceSamplingRatePolicy extends AbstractTraceSamplingPolicy {
     return POLICY_TYPE;
   }
 
+  public double getRatio() {
+    return ratio;
+  }
+
   public double getProbability() {
-    return probability;
+    return getRatio();
   }
 
   /**
@@ -58,6 +63,13 @@ public final class TraceSamplingRatePolicy extends AbstractTraceSamplingPolicy {
    */
   public static Sampler createSampler(double probability) {
     return AbstractTraceSamplingPolicy.createSampler(probability);
+  }
+
+  private static double normalizeRatio(double ratio) {
+    if (Double.isNaN(ratio) || ratio < 0.0 || ratio > 1.0) {
+      throw new IllegalArgumentException("ratio must be within [0.0, 1.0]");
+    }
+    return ratio == 0.0 ? 0.0 : ratio;
   }
 
   @Nullable
