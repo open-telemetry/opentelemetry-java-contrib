@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### AWS resources
+
+- Set `aws.ecs.task.id` on the ECS resource, extracted from the task ARN as the semantic
+  conventions require.
+  ([#3098](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3098))
+
 ### JMX Scraper
 
 - Add `experimental-cassandra` target system, inheriting the aligned Cassandra metric
