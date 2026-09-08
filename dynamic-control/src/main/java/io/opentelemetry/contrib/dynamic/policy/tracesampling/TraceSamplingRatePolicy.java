@@ -66,6 +66,7 @@ public final class TraceSamplingRatePolicy extends AbstractTraceSamplingPolicy {
     if (Double.isNaN(ratio) || ratio < 0.0 || ratio > 1.0) {
       throw new IllegalArgumentException("ratio must be within [0.0, 1.0]");
     }
+    // normalize -0.0
     return ratio == 0.0 ? 0.0 : ratio;
   }
 
