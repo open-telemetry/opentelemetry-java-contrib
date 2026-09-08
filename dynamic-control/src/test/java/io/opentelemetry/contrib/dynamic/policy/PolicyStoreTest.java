@@ -40,7 +40,7 @@ class PolicyStoreTest {
   }
 
   @Test
-  void updatePoliciesReturnsTrueWhenProbabilityChanges() {
+  void updatePoliciesReturnsTrueWhenRatioChanges() {
     PolicyStore store = new PolicyStore();
     assertThat(store.updatePolicies(singletonList(traceSampling(0.25)))).isTrue();
     assertThat(store.updatePolicies(singletonList(traceSampling(0.75)))).isTrue();
@@ -140,7 +140,7 @@ class PolicyStoreTest {
     store.registerImplementer(implementer);
 
     verify(implementer)
-        .onPoliciesChanged(argThat(policies -> containsTraceSamplingProbability(policies, 0.5)));
+        .onPoliciesChanged(argThat(policies -> containsTraceSamplingRatio(policies, 0.5)));
   }
 
   @Test
@@ -153,7 +153,7 @@ class PolicyStoreTest {
     store.updatePolicies(Arrays.asList(unrelatedPolicy(), traceSampling(0.25)));
 
     verify(implementer)
-        .onPoliciesChanged(argThat(policies -> containsTraceSamplingProbability(policies, 0.25)));
+        .onPoliciesChanged(argThat(policies -> containsTraceSamplingRatio(policies, 0.25)));
   }
 
   @Test
@@ -265,8 +265,8 @@ class PolicyStoreTest {
     return implementerFor(TraceSamplingRatePolicy.POLICY_TYPE);
   }
 
-  private static TraceSamplingRatePolicy traceSampling(double probability) {
-    return new TraceSamplingRatePolicy(probability, SourceKind.CUSTOM);
+  private static TraceSamplingRatePolicy traceSampling(double ratio) {
+    return new TraceSamplingRatePolicy(ratio, SourceKind.CUSTOM);
   }
 
   private static PolicyImplementer implementerFor(String policyType) {
@@ -282,13 +282,12 @@ class PolicyStoreTest {
         new TelemetryPolicyIdentity("other-policy", "Other policy"), "other-policy");
   }
 
-  private static boolean containsTraceSamplingProbability(
-      List<TelemetryPolicy> policies, double probability) {
+  private static boolean containsTraceSamplingRatio(List<TelemetryPolicy> policies, double ratio) {
     if (policies.size() != 1 || !(policies.get(0) instanceof TraceSamplingRatePolicy)) {
       return false;
     }
     TraceSamplingRatePolicy policy = (TraceSamplingRatePolicy) policies.get(0);
-    return Double.compare(policy.getRatio(), probability) == 0;
+    return Double.compare(policy.getRatio(), ratio) == 0;
   }
 
   private static final class TestTelemetryPolicy implements TelemetryPolicy {

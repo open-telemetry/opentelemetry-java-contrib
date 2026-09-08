@@ -19,11 +19,8 @@ public final class TraceSamplingRatePolicy extends AbstractTraceSamplingPolicy {
   public static final TelemetryPolicyIdentity DEFAULT_IDENTITY =
       new TelemetryPolicyIdentity("trace-sampling", "Trace sampling rate");
 
-  private final double ratio;
-
   public TraceSamplingRatePolicy(double ratio, SourceKind sourceKind) {
     super(DEFAULT_IDENTITY, normalizeRatio(ratio), sourceKind);
-    this.ratio = getSamplingProbability();
   }
 
   @Override
@@ -32,11 +29,11 @@ public final class TraceSamplingRatePolicy extends AbstractTraceSamplingPolicy {
   }
 
   public double getRatio() {
-    return ratio;
+    return getSamplingProbability();
   }
 
   public double getProbability() {
-    return getRatio();
+    return getSamplingProbability();
   }
 
   /**
@@ -55,14 +52,14 @@ public final class TraceSamplingRatePolicy extends AbstractTraceSamplingPolicy {
   }
 
   /**
-   * Creates the composed sampler used for this policy probability.
+   * Creates the composed sampler used for this policy ratio.
    *
-   * @param probability sampling probability in the inclusive range {@code [0.0, 1.0]}
-   * @return a sampler equivalent to the configured probability with parent-based behavior
-   * @throws IllegalArgumentException if probability is NaN or outside {@code [0.0, 1.0]}
+   * @param ratio sampling ratio (sampling probability) in the inclusive range {@code [0.0, 1.0]}
+   * @return a sampler equivalent to the configured ratio with parent-based behavior
+   * @throws IllegalArgumentException if ratio is NaN or outside {@code [0.0, 1.0]}
    */
-  public static Sampler createSampler(double probability) {
-    return AbstractTraceSamplingPolicy.createSampler(probability);
+  public static Sampler createSampler(double ratio) {
+    return AbstractTraceSamplingPolicy.createSampler(ratio);
   }
 
   private static double normalizeRatio(double ratio) {
