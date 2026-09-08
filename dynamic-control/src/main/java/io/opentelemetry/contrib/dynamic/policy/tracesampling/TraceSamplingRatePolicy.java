@@ -13,16 +13,14 @@ import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import javax.annotation.Nullable;
 
+/** Trace sampling policy expressed as a ratio in the inclusive range {@code [0.0, 1.0]}. */
 public final class TraceSamplingRatePolicy extends AbstractTraceSamplingPolicy {
   public static final String POLICY_TYPE = "trace-sampling";
   public static final TelemetryPolicyIdentity DEFAULT_IDENTITY =
       new TelemetryPolicyIdentity("trace-sampling", "Trace sampling rate");
 
-  private final double probability;
-
-  public TraceSamplingRatePolicy(double probability, SourceKind sourceKind) {
-    super(DEFAULT_IDENTITY, probability, sourceKind);
-    this.probability = getSamplingProbability();
+  public TraceSamplingRatePolicy(double ratio, SourceKind sourceKind) {
+    super(DEFAULT_IDENTITY, normalizeRatio(ratio), sourceKind);
   }
 
   @Override
@@ -30,8 +28,12 @@ public final class TraceSamplingRatePolicy extends AbstractTraceSamplingPolicy {
     return POLICY_TYPE;
   }
 
+  public double getRatio() {
+    return getSamplingProbability();
+  }
+
   public double getProbability() {
-    return probability;
+    return getSamplingProbability();
   }
 
   /**
@@ -50,14 +52,22 @@ public final class TraceSamplingRatePolicy extends AbstractTraceSamplingPolicy {
   }
 
   /**
-   * Creates the composed sampler used for this policy probability.
+   * Creates the composed sampler used for this policy ratio.
    *
-   * @param probability sampling probability in the inclusive range {@code [0.0, 1.0]}
-   * @return a sampler equivalent to the configured probability with parent-based behavior
-   * @throws IllegalArgumentException if probability is NaN or outside {@code [0.0, 1.0]}
+   * @param ratio sampling ratio (sampling probability) in the inclusive range {@code [0.0, 1.0]}
+   * @return a sampler equivalent to the configured ratio with parent-based behavior
+   * @throws IllegalArgumentException if ratio is NaN or outside {@code [0.0, 1.0]}
    */
-  public static Sampler createSampler(double probability) {
-    return AbstractTraceSamplingPolicy.createSampler(probability);
+  public static Sampler createSampler(double ratio) {
+    return AbstractTraceSamplingPolicy.createSampler(ratio);
+  }
+
+  private static double normalizeRatio(double ratio) {
+    if (Double.isNaN(ratio) || ratio < 0.0 || ratio > 1.0) {
+      throw new IllegalArgumentException("ratio must be within [0.0, 1.0]");
+    }
+    // normalize -0.0
+    return ratio == 0.0 ? 0.0 : ratio;
   }
 
   @Nullable
