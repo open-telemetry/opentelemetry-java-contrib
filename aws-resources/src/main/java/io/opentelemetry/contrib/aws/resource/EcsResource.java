@@ -10,6 +10,7 @@ import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.AWS_ECS
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.AWS_ECS_LAUNCHTYPE;
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.AWS_ECS_TASK_ARN;
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.AWS_ECS_TASK_FAMILY;
+import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.AWS_ECS_TASK_ID;
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.AWS_ECS_TASK_REVISION;
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.AWS_LOG_GROUP_ARNS;
 import static io.opentelemetry.contrib.aws.resource.IncubatingAttributes.AWS_LOG_GROUP_NAMES;
@@ -122,6 +123,21 @@ public final class EcsResource {
     return getArnPart(arn, ArnPart.REGION);
   }
 
+  /**
+   * The task metadata has no field for the task ID, so the conventions require it to be extracted
+   * from the task ARN, where it is the last path segment - of {@code task/<cluster>/<id>} in the
+   * current ARN format, or of {@code task/<id>} in the older one.
+   */
+  private static Optional<String> getTaskId(@Nullable String taskArn) {
+    if (taskArn == null) {
+      return Optional.empty();
+    }
+
+    String taskId = taskArn.substring(taskArn.lastIndexOf('/') + 1);
+
+    return taskId.isEmpty() ? Optional.empty() : Optional.of(taskId);
+  }
+
   private enum ArnPart {
     REGION(3),
     ACCOUNT(4);
@@ -211,6 +227,7 @@ public final class EcsResource {
         case "TaskARN":
           arn = value;
           attrBuilders.put(AWS_ECS_TASK_ARN, value);
+          getTaskId(value).ifPresent(taskId -> attrBuilders.put(AWS_ECS_TASK_ID, taskId));
           break;
         case "LaunchType":
           attrBuilders.put(AWS_ECS_LAUNCHTYPE, value.toLowerCase(Locale.ROOT));

@@ -14,6 +14,7 @@ import static io.opentelemetry.semconv.incubating.AwsIncubatingAttributes.AWS_EC
 import static io.opentelemetry.semconv.incubating.AwsIncubatingAttributes.AWS_ECS_LAUNCHTYPE;
 import static io.opentelemetry.semconv.incubating.AwsIncubatingAttributes.AWS_ECS_TASK_ARN;
 import static io.opentelemetry.semconv.incubating.AwsIncubatingAttributes.AWS_ECS_TASK_FAMILY;
+import static io.opentelemetry.semconv.incubating.AwsIncubatingAttributes.AWS_ECS_TASK_ID;
 import static io.opentelemetry.semconv.incubating.AwsIncubatingAttributes.AWS_ECS_TASK_REVISION;
 import static io.opentelemetry.semconv.incubating.AwsIncubatingAttributes.AWS_LOG_GROUP_ARNS;
 import static io.opentelemetry.semconv.incubating.AwsIncubatingAttributes.AWS_LOG_GROUP_NAMES;
@@ -86,6 +87,7 @@ class EcsResourceTest {
             entry(
                 AWS_ECS_TASK_ARN,
                 "arn:aws:ecs:us-east-2:012345678910:task/9781c248-0edd-4cdb-9a93-f63cb662a5d3"),
+            entry(AWS_ECS_TASK_ID, "9781c248-0edd-4cdb-9a93-f63cb662a5d3"),
             entry(AWS_ECS_TASK_FAMILY, "nginx"),
             entry(AWS_ECS_TASK_REVISION, "5"));
   }
@@ -137,6 +139,7 @@ class EcsResourceTest {
             entry(
                 AWS_ECS_TASK_ARN,
                 "arn:aws:ecs:us-west-2:111122223333:task/default/158d1c8083dd49d6b527399fd6414f5c"),
+            entry(AWS_ECS_TASK_ID, "158d1c8083dd49d6b527399fd6414f5c"),
             entry(AWS_ECS_LAUNCHTYPE, "ec2"),
             entry(AWS_ECS_TASK_FAMILY, "curltest"),
             entry(AWS_ECS_TASK_REVISION, "26"));
