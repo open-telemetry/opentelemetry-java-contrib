@@ -10,6 +10,7 @@ import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicyIdentity;
 import io.opentelemetry.contrib.dynamic.policy.registry.PolicyInit;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
+import io.opentelemetry.sdk.trace.samplers.Sampler;
 import javax.annotation.Nullable;
 
 /** Trace sampling policy expressed as a percentage in the inclusive range {@code [0.0, 100.0]}. */
@@ -29,6 +30,17 @@ public final class TraceSamplingPercentagePolicy extends AbstractTraceSamplingPo
 
   public double getPercentage() {
     return getSamplingProbability() * 100.0;
+  }
+
+  /**
+   * Creates the composed sampler used for this policy percentage.
+   *
+   * @param percentage sampling percentage in the inclusive range {@code [0.0, 100.0]}
+   * @return a sampler equivalent to the configured percentage with parent-based behavior
+   * @throws IllegalArgumentException if percentage is NaN or outside {@code [0.0, 100.0]}
+   */
+  public static Sampler createSampler(double percentage) {
+    return AbstractTraceSamplingPolicy.createSampler(normalizePercentage(percentage) / 100.0);
   }
 
   public static PolicyImplementer initialize(AutoConfigurationCustomizer autoConfiguration) {

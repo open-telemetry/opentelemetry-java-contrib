@@ -15,6 +15,7 @@ import static org.mockito.Mockito.verify;
 import io.opentelemetry.contrib.dynamic.policy.PolicyImplementer;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
+import io.opentelemetry.sdk.trace.samplers.Sampler;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -63,6 +64,30 @@ class TraceSamplingPercentagePolicyTest {
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("percentage must be within [0.0, 100.0]");
     assertThatThrownBy(() -> new TraceSamplingPercentagePolicy(100.001, SourceKind.CUSTOM))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("percentage must be within [0.0, 100.0]");
+  }
+
+  @Test
+  void createSamplerAcceptsPercentageRange() {
+    Sampler zero = TraceSamplingPercentagePolicy.createSampler(0.0);
+    Sampler fifty = TraceSamplingPercentagePolicy.createSampler(50.0);
+    Sampler oneHundred = TraceSamplingPercentagePolicy.createSampler(100.0);
+
+    assertThat(zero).isNotNull();
+    assertThat(fifty).isNotNull();
+    assertThat(oneHundred).isNotNull();
+  }
+
+  @Test
+  void createSamplerRejectsOutOfRangeOrNaNPercentages() {
+    assertThatThrownBy(() -> TraceSamplingPercentagePolicy.createSampler(Double.NaN))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("percentage must be within [0.0, 100.0]");
+    assertThatThrownBy(() -> TraceSamplingPercentagePolicy.createSampler(-0.01))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("percentage must be within [0.0, 100.0]");
+    assertThatThrownBy(() -> TraceSamplingPercentagePolicy.createSampler(100.01))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("percentage must be within [0.0, 100.0]");
   }
