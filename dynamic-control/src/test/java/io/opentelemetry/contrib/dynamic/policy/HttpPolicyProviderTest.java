@@ -187,5 +187,4 @@ class HttpPolicyProviderTest {
                 TraceSamplingRatePolicy.POLICY_TYPE, TraceSamplingRatePolicy.POLICY_TYPE)),
         Collections.singletonList(new TraceSamplingRateValidator()));
   }
-
 }
