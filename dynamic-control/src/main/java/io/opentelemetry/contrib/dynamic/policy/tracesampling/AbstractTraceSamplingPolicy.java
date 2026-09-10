@@ -67,7 +67,7 @@ public abstract class AbstractTraceSamplingPolicy implements TelemetryPolicy {
    *
    * @param probability sampling probability in the inclusive range {@code [0.0, 1.0]}
    */
-  public static Sampler createSampler(double probability) {
+  protected static Sampler createSampler(double probability) {
     probability = normalizeProbability(probability);
     return CompositeSampler.wrap(
         ComposableSampler.parentThreshold(ComposableSampler.probability(probability)));
