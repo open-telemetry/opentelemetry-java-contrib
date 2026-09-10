@@ -40,8 +40,8 @@ import java.util.logging.Logger;
  *
  * <p>This class reads the policy-init configuration that specifies how to wire up the policy
  * pipeline (providers reading policies, eg an OpAMP provider, implementers applying policies, eg a
- * TraceSamplingPolicyImplementer), resolves any {@code policyType} strings (eg
- * "trace_sampling_rate_policy") to registered policy classes (eg TraceSamplingRatePolicy),
+ * TraceSamplingRatePolicyImplementer), resolves any {@code policyType} strings (eg "sampling-rate")
+ * to registered policy classes (eg TraceSamplingRatePolicy),
  * initializes the implementer classes, and activates configured providers that read policies from
  * the source and stream policy updates into the shared {@link PolicyStore}.
  *
@@ -49,7 +49,8 @@ import java.util.logging.Logger;
  * agent config is changed
  *
  * <p>A specific example is: eg "change sampling rate" message -> OpampPolicyProvider ->
- * TraceSamplingRatePolicy -> PolicyStore -> TraceSamplingPolicyImplementer -> sampling rate changed
+ * TraceSamplingRatePolicy -> PolicyStore -> TraceSamplingRatePolicyImplementer -> sampling rate
+ * changed
  */
 public final class PolicyInit {
   private static final Logger logger = Logger.getLogger(PolicyInit.class.getName());
