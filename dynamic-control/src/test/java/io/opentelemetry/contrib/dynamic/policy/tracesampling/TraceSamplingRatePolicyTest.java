@@ -30,7 +30,6 @@ class TraceSamplingRatePolicyTest {
 
     assertThat(policy.getIdentity()).isEqualTo(TraceSamplingRatePolicy.DEFAULT_IDENTITY);
     assertThat(policy.getRatio()).isEqualTo(0.25);
-    assertThat(policy.getProbability()).isEqualTo(0.25);
     assertThat(policy.getSamplingProbability()).isEqualTo(0.25);
     assertThat(policy.getType()).isEqualTo(TraceSamplingRatePolicy.POLICY_TYPE);
     assertThat(policy.getSourceKind()).isEqualTo(SourceKind.CUSTOM);

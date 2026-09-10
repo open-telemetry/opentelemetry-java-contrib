@@ -15,9 +15,9 @@ import javax.annotation.Nullable;
 
 /** Trace sampling policy expressed as a ratio in the inclusive range {@code [0.0, 1.0]}. */
 public final class TraceSamplingRatePolicy extends AbstractTraceSamplingPolicy {
-  public static final String POLICY_TYPE = "trace-sampling";
+  public static final String POLICY_TYPE = "sampling-rate";
   public static final TelemetryPolicyIdentity DEFAULT_IDENTITY =
-      new TelemetryPolicyIdentity("trace-sampling", "Trace sampling rate");
+      new TelemetryPolicyIdentity("sampling-rate", "Trace sampling ratio");
 
   public TraceSamplingRatePolicy(double ratio, SourceKind sourceKind) {
     super(DEFAULT_IDENTITY, normalizeRatio(ratio), sourceKind);
@@ -32,18 +32,8 @@ public final class TraceSamplingRatePolicy extends AbstractTraceSamplingPolicy {
     return getSamplingProbability();
   }
 
-  public double getProbability() {
-    return getSamplingProbability();
-  }
-
-  /**
-   * Initializes runtime wiring for this policy type.
-   *
-   * <p>If the extension is configured to use this policy, this installs an opinionated sampler that
-   * overrides any other sampler
-   */
   public static PolicyImplementer initialize(AutoConfigurationCustomizer autoConfiguration) {
-    return initialize(autoConfiguration, new TraceSamplingValidator());
+    return initialize(autoConfiguration, new TraceSamplingRateValidator());
   }
 
   public static void registerPolicyType() {

@@ -24,49 +24,50 @@ class TraceSamplingRateValidatorTest {
   private final TraceSamplingRateValidator validator = new TraceSamplingRateValidator();
 
   @Test
-  void getPolicyTypeReturnsTraceSampling() {
-    assertThat(validator.getPolicyType()).isEqualTo("trace-sampling");
+  void getPolicyTypeReturnsSamplingRate() {
+    assertThat(validator.getPolicyType()).isEqualTo("sampling-rate");
   }
 
   @Test
   void validatesFlatJsonRatio() {
-    TraceSamplingRatePolicy policy = validateJson("{\"trace-sampling\": 0.25}", SourceKind.CUSTOM);
+    TraceSamplingRatePolicy policy = validateJson("{\"sampling-rate\": 0.25}", SourceKind.CUSTOM);
 
     assertThat(policy).isNotNull();
+    assertThat(policy.getRatio()).isEqualTo(0.25);
     assertThat(policy.getSamplingProbability()).isEqualTo(0.25);
-    assertThat(policy.getType()).isEqualTo("trace-sampling");
+    assertThat(policy.getType()).isEqualTo("sampling-rate");
   }
 
   @Test
   void validatesJsonRatioKeyword() {
     TraceSamplingRatePolicy policy =
-        validateJson("{\"trace-sampling\": {\"ratio\": 0.75}}", SourceKind.OPAMP);
+        validateJson("{\"sampling-rate\": {\"ratio\": 0.75}}", SourceKind.OPAMP);
 
     assertThat(policy).isNotNull();
-    assertThat(policy.getSamplingProbability()).isEqualTo(0.75);
+    assertThat(policy.getRatio()).isEqualTo(0.75);
     assertThat(policy.getSourceKind()).isEqualTo(SourceKind.OPAMP);
   }
 
   @Test
   void rejectsProbabilityKeyword() {
-    assertThat(validateJson("{\"trace-sampling\": {\"probability\": 0.5}}", SourceKind.CUSTOM))
+    assertThat(validateJson("{\"sampling-rate\": {\"probability\": 0.5}}", SourceKind.CUSTOM))
         .isNull();
   }
 
   @ParameterizedTest
   @ValueSource(doubles = {-0.1, 1.1})
   void rejectsOutOfRangeRatios(double ratio) {
-    assertThat(validateJson("{\"trace-sampling\": " + ratio + "}", SourceKind.CUSTOM)).isNull();
+    assertThat(validateJson("{\"sampling-rate\": " + ratio + "}", SourceKind.CUSTOM)).isNull();
   }
 
   @Test
   void validatesKeyValueRatio() {
     SourceWrapper source =
-        first(SourceFormat.KEYVALUE.parse("trace-sampling=0.5", MAPPED_POLICY_IDS));
+        first(SourceFormat.KEYVALUE.parse("sampling-rate=0.5", MAPPED_POLICY_IDS));
     TelemetryPolicy policy = validator.validate(source, SourceKind.CUSTOM);
 
     assertThat(policy).isInstanceOf(TraceSamplingRatePolicy.class);
-    assertThat(((TraceSamplingRatePolicy) policy).getSamplingProbability()).isEqualTo(0.5);
+    assertThat(((TraceSamplingRatePolicy) policy).getRatio()).isEqualTo(0.5);
   }
 
   private TraceSamplingRatePolicy validateJson(String json, SourceKind sourceKind) {

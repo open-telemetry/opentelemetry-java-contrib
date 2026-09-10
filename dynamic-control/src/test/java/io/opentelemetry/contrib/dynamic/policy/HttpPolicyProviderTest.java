@@ -13,7 +13,7 @@ import io.opentelemetry.contrib.dynamic.policy.registry.PolicySourceMappingConfi
 import io.opentelemetry.contrib.dynamic.policy.source.SourceFormat;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingRatePolicy;
-import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingValidator;
+import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingRateValidator;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -43,7 +43,7 @@ class HttpPolicyProviderTest {
   @Test
   void fetchPoliciesReturnsCurrentPoliciesWithoutReadingEndpoint() throws Exception {
     AtomicInteger requestCount = new AtomicInteger();
-    URI endpoint = startHttpServer(new AtomicReference<>("trace-sampling=0.5"), requestCount);
+    URI endpoint = startHttpServer(new AtomicReference<>("sampling-rate=0.5"), requestCount);
     HttpPolicyProvider provider = provider(endpoint, SourceFormat.KEYVALUE);
 
     List<TelemetryPolicy> policies = provider.fetchPolicies();
@@ -55,7 +55,7 @@ class HttpPolicyProviderTest {
   @Test
   void firstPollParsesKeyValueResponseBody() throws Exception {
     AtomicInteger requestCount = new AtomicInteger();
-    URI endpoint = startHttpServer(new AtomicReference<>("trace-sampling=0.5"), requestCount);
+    URI endpoint = startHttpServer(new AtomicReference<>("sampling-rate=0.5"), requestCount);
     HttpPolicyProvider provider = provider(endpoint, SourceFormat.KEYVALUE);
     AtomicReference<List<TelemetryPolicy>> latestPolicies = new AtomicReference<>();
     Closeable watch = provider.startWatching(latestPolicies::set);
@@ -68,7 +68,7 @@ class HttpPolicyProviderTest {
     List<TelemetryPolicy> policies = latestPolicies.get();
     assertThat(policies).hasSize(1);
     TraceSamplingRatePolicy policy = (TraceSamplingRatePolicy) policies.get(0);
-    assertThat(policy.getProbability()).isEqualTo(0.5);
+    assertThat(policy.getRatio()).isEqualTo(0.5);
     assertThat(policy.getSourceKind()).isEqualTo(SourceKind.HTTP);
     assertThat(provider.fetchPolicies()).isSameAs(policies);
     watch.close();
@@ -77,7 +77,7 @@ class HttpPolicyProviderTest {
   @Test
   void firstPollParsesJsonKeyValueResponseBody() throws Exception {
     URI endpoint =
-        startHttpServer(new AtomicReference<>("[{\"other-policy\":1},{\"trace-sampling\":0.25}]"));
+        startHttpServer(new AtomicReference<>("[{\"other-policy\":1},{\"sampling-rate\":0.25}]"));
     HttpPolicyProvider provider = provider(endpoint, SourceFormat.JSONKEYVALUE);
     AtomicReference<List<TelemetryPolicy>> latestPolicies = new AtomicReference<>();
     Closeable watch = provider.startWatching(latestPolicies::set);
@@ -87,7 +87,7 @@ class HttpPolicyProviderTest {
     List<TelemetryPolicy> policies = latestPolicies.get();
     assertThat(policies).hasSize(1);
     TraceSamplingRatePolicy policy = (TraceSamplingRatePolicy) policies.get(0);
-    assertThat(policy.getProbability()).isEqualTo(0.25);
+    assertThat(policy.getRatio()).isEqualTo(0.25);
     assertThat(policy.getSourceKind()).isEqualTo(SourceKind.HTTP);
     watch.close();
   }
@@ -101,7 +101,7 @@ class HttpPolicyProviderTest {
    *       startHttpServer(
    *           new AtomicReference<>(
    *               "[{\"other-policy\":1},"
-   *                   + "{\"id\":\"trace-sampling\","
+   *                   + "{\"id\":\"sampling-rate\","
    *                   + "\"name\":\"Trace sampling rate\","
    *                   + "\"trace\":{\"match\":[{\"trace_field\":\"trace_id\",\"exists\":true}],"
    *                   + "\"keep\":{\"ratio\":0.25}}}]"));
@@ -114,7 +114,7 @@ class HttpPolicyProviderTest {
    *   List<TelemetryPolicy> policies = latestPolicies.get();
    *   assertThat(policies).hasSize(1);
    *   TraceSamplingRatePolicy policy = (TraceSamplingRatePolicy) policies.get(0);
-   *   assertThat(policy.getProbability()).isEqualTo(0.25);
+   *   assertThat(policy.getRatio()).isEqualTo(0.25);
    *   assertThat(policy.getSourceKind()).isEqualTo(SourceKind.HTTP);
    *   watch.close();
    * }
@@ -122,7 +122,7 @@ class HttpPolicyProviderTest {
 
   @Test
   void startWatchingReloadsWhenResponseBodyChanges() throws Exception {
-    AtomicReference<String> responseBody = new AtomicReference<>("trace-sampling=0.5");
+    AtomicReference<String> responseBody = new AtomicReference<>("sampling-rate=0.5");
     URI endpoint = startHttpServer(responseBody);
     HttpPolicyProvider provider = provider(endpoint, SourceFormat.KEYVALUE);
     AtomicInteger updateCount = new AtomicInteger();
@@ -135,13 +135,13 @@ class HttpPolicyProviderTest {
             });
 
     PolicyProviderPoller.poll();
-    responseBody.set("trace-sampling=0.75");
+    responseBody.set("sampling-rate=0.75");
     PolicyProviderPoller.poll();
 
     assertThat(updateCount.get()).isEqualTo(2);
     assertThat(latestPolicies.get()).hasSize(1);
     TraceSamplingRatePolicy policy = (TraceSamplingRatePolicy) latestPolicies.get().get(0);
-    assertThat(policy.getProbability()).isEqualTo(0.75);
+    assertThat(policy.getRatio()).isEqualTo(0.75);
     watch.close();
   }
 
@@ -185,6 +185,7 @@ class HttpPolicyProviderTest {
         Collections.singletonList(
             new PolicySourceMappingConfig(
                 TraceSamplingRatePolicy.POLICY_TYPE, TraceSamplingRatePolicy.POLICY_TYPE)),
-        Collections.singletonList(new TraceSamplingValidator()));
+        Collections.singletonList(new TraceSamplingRateValidator()));
   }
+
 }
