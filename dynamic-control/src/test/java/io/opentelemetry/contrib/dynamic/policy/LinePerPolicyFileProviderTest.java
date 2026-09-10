@@ -39,7 +39,7 @@ class LinePerPolicyFileProviderTest {
 
   @Test
   void fetchPoliciesParsesJsonLines() throws Exception {
-    Path file = writeLines("{\"trace-sampling\": 0.5}");
+    Path file = writeLines("{\"sampling-rate\": 0.5}");
     LinePerPolicyFileProvider provider =
         new LinePerPolicyFileProvider(file, Collections.singletonList(acceptingValidator()));
 
@@ -52,7 +52,7 @@ class LinePerPolicyFileProviderTest {
 
   @Test
   void fetchPoliciesParsesKeyValueLines() throws Exception {
-    Path file = writeLines("trace-sampling=0.5");
+    Path file = writeLines("sampling-rate=0.5");
     LinePerPolicyFileProvider provider =
         new LinePerPolicyFileProvider(file, Collections.singletonList(acceptingValidator()));
 
@@ -65,7 +65,7 @@ class LinePerPolicyFileProviderTest {
 
   @Test
   void fetchPoliciesSkipsBlankLinesAndComments() throws Exception {
-    Path file = writeLines("", "   ", "# comment line", "trace-sampling=0.25");
+    Path file = writeLines("", "   ", "# comment line", "sampling-rate=0.25");
     LinePerPolicyFileProvider provider =
         new LinePerPolicyFileProvider(file, Collections.singletonList(acceptingValidator()));
 
@@ -79,9 +79,9 @@ class LinePerPolicyFileProviderTest {
   void fetchPoliciesParsesFullJsonPolicyLines() throws Exception {
     Path file =
         writeLines(
-            "{\"id\":\"trace-sampling\",\"name\":\"Trace sampling rate\","
+            "{\"id\":\"sampling-rate\",\"name\":\"Trace sampling rate\","
                 + "\"trace\":{\"match\":[{\"trace_field\":\"trace_id\",\"exists\":true}],"
-                + "\"keep\":{\"probability\":0.1}}}");
+                + "\"keep\":{\"ratio\":0.1}}}");
     LinePerPolicyFileProvider provider =
         new LinePerPolicyFileProvider(file, Collections.singletonList(acceptingValidator()));
 
@@ -93,7 +93,7 @@ class LinePerPolicyFileProviderTest {
 
   @Test
   void fetchPoliciesRejectsJsonLineWithExtraKeys() throws Exception {
-    Path file = writeLines("{\"trace-sampling\": 0.5, \"typo\": 1}");
+    Path file = writeLines("{\"sampling-rate\": 0.5, \"typo\": 1}");
     LinePerPolicyFileProvider provider =
         new LinePerPolicyFileProvider(file, Collections.singletonList(acceptingValidator()));
 
@@ -106,7 +106,7 @@ class LinePerPolicyFileProviderTest {
   void fetchPoliciesSkipsUnknownOrRejectedPolicies() throws Exception {
     PolicyValidator rejectingValidator =
         new TestPolicyValidator(/* acceptJson= */ false, /* acceptKeyValue= */ false);
-    Path file = writeLines("{\"trace-sampling\": 0.5}", "{\"other-policy\": 0.5}", "other.key=1");
+    Path file = writeLines("{\"sampling-rate\": 0.5}", "{\"other-policy\": 0.5}", "other.key=1");
     LinePerPolicyFileProvider provider =
         new LinePerPolicyFileProvider(file, Collections.singletonList(rejectingValidator));
 

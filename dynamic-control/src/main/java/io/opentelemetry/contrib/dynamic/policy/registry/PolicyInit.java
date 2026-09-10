@@ -40,10 +40,10 @@ import java.util.logging.Logger;
  *
  * <p>This class reads the policy-init configuration that specifies how to wire up the policy
  * pipeline (providers reading policies, eg an OpAMP provider, implementers applying policies, eg a
- * TraceSamplingRatePolicyImplementer), resolves any {@code policyType} strings (eg
- * "trace_sampling_rate_policy") to registered policy classes (eg TraceSamplingRatePolicy),
- * initializes the implementer classes, and activates configured providers that read policies from
- * the source and stream policy updates into the shared {@link PolicyStore}.
+ * TraceSamplingRatePolicyImplementer), resolves any {@code policyType} strings (eg "sampling-rate")
+ * to registered policy classes (eg TraceSamplingRatePolicy), initializes the implementer classes,
+ * and activates configured providers that read policies from the source and stream policy updates
+ * into the shared {@link PolicyStore}.
  *
  * <p>Generically the pipeline is: message -> provider -> policy -> policy handler -> implementer ->
  * agent config is changed
@@ -76,7 +76,7 @@ public final class PolicyInit {
 
   /**
    * Registers a policy type string to a concrete policy class and its initializer factory. eg map
-   * 'trace-sampling' to the class 'TraceSamplingRatePolicy', and register the initializer factory
+   * 'sampling-rate' to the class 'TraceSamplingRatePolicy', and register the initializer factory
    * 'TraceSamplingRatePolicy::initialize' for when the policy is present in the init config.
    *
    * <p>Example:
@@ -88,7 +88,7 @@ public final class PolicyInit {
    *     TraceSamplingRatePolicy::initialize);
    * }</pre>
    *
-   * @param policyType configured policy type identifier (for example {@code trace-sampling})
+   * @param policyType configured policy type identifier (for example {@code sampling-rate})
    * @param policyClass runtime class implementing that policy type
    * @param policyTypeInitializer initializer for the policy type that returns the associated
    *     implementer instance
@@ -189,7 +189,7 @@ public final class PolicyInit {
   /**
    * Resolves all mapped policy types to classes and invokes each policy-type initializer once.
    *
-   * <p>eg if the init config has {@code policyType: trace-sampling}, this resolves that policy type
+   * <p>eg if the init config has {@code policyType: sampling-rate}, this resolves that policy type
    * to its registered class, TraceSamplingRatePolicy, and runs the registered policy-type
    * initializer for that class, TraceSamplingRatePolicy::initialize.
    *
@@ -327,8 +327,8 @@ public final class PolicyInit {
    * {@link PolicyImplementer#getValidators()}.
    *
    * <p>Example: if a source policy maps to {@code TraceSamplingRatePolicy.class}, and its
-   * implementer returns a {@code TraceSamplingValidator}, that validator is included in the source
-   * validator list.
+   * implementer returns a {@code TraceSamplingRateValidator}, that validator is included in the
+   * source validator list.
    */
   private static List<PolicyValidator> createSourceValidators(PolicySourceConfig source) {
     Set<Class<? extends TelemetryPolicy>> mappedClasses =
@@ -373,8 +373,8 @@ public final class PolicyInit {
   /**
    * Collects mapped policy classes for one source mapping list.
    *
-   * <p>Example: if mappings contain policy type {@code trace-sampling} twice, both resolve to
-   * {@code TraceSamplingRatePolicy.class}, but the result contains that class only once.
+   * <p>Example: if mappings contain policy type {@code sampling-rate} twice, both resolve to {@code
+   * TraceSamplingRatePolicy.class}, but the result contains that class only once.
    */
   private static Set<Class<? extends TelemetryPolicy>> collectMappedPolicyClasses(
       List<PolicySourceMappingConfig> mappings) {

@@ -14,7 +14,7 @@ import io.opentelemetry.contrib.dynamic.policy.source.SourceFormat;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceWrapper;
 import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingRatePolicy;
-import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingValidator;
+import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingRateValidator;
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -26,22 +26,22 @@ class MappedPolicySourceConverterTest {
     MappedPolicySourceConverter converter =
         MappedPolicySourceConverter.create(
             Collections.singletonList(
-                new PolicySourceMappingConfig("external-trace-policy", "trace-sampling")),
-            Collections.singletonList(new TraceSamplingValidator()));
+                new PolicySourceMappingConfig("external-trace-policy", "sampling-rate")),
+            Collections.singletonList(new TraceSamplingRateValidator()));
     List<SourceWrapper> sources =
         SourceFormat.JSONKEYVALUE.parse(
             "{"
                 + "\"id\":\"external-trace-policy\","
                 + "\"name\":\"Trace sampling rate\","
                 + "\"trace\":{\"match\":[{\"trace_field\":\"trace_id\",\"exists\":true}],"
-                + "\"keep\":{\"probability\":0.1}}"
+                + "\"keep\":{\"ratio\":0.1}}"
                 + "}",
             converter.getMappedPolicyIds());
 
     TelemetryPolicy converted = converter.convert(sources.get(0), SourceKind.OPAMP);
 
     assertThat(converted).isInstanceOf(TraceSamplingRatePolicy.class);
-    assertThat(((TraceSamplingRatePolicy) converted).getProbability()).isCloseTo(0.1, within(1e-9));
+    assertThat(((TraceSamplingRatePolicy) converted).getRatio()).isCloseTo(0.1, within(1e-9));
     assertThat(((JsonSourceWrapper) sources.get(0)).asJsonNode().get("id").asText())
         .isEqualTo("external-trace-policy");
   }
