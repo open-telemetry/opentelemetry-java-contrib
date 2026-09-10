@@ -41,9 +41,9 @@ import java.util.logging.Logger;
  * <p>This class reads the policy-init configuration that specifies how to wire up the policy
  * pipeline (providers reading policies, eg an OpAMP provider, implementers applying policies, eg a
  * TraceSamplingRatePolicyImplementer), resolves any {@code policyType} strings (eg "sampling-rate")
- * to registered policy classes (eg TraceSamplingRatePolicy),
- * initializes the implementer classes, and activates configured providers that read policies from
- * the source and stream policy updates into the shared {@link PolicyStore}.
+ * to registered policy classes (eg TraceSamplingRatePolicy), initializes the implementer classes,
+ * and activates configured providers that read policies from the source and stream policy updates
+ * into the shared {@link PolicyStore}.
  *
  * <p>Generically the pipeline is: message -> provider -> policy -> policy handler -> implementer ->
  * agent config is changed
