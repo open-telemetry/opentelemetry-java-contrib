@@ -13,6 +13,7 @@ import io.opentelemetry.context.propagation.TextMapGetter;
 import io.opentelemetry.context.propagation.TextMapPropagator;
 import io.opentelemetry.context.propagation.TextMapSetter;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nullable;
@@ -38,6 +39,8 @@ public final class AwsXrayLambdaPropagator implements TextMapPropagator {
 
   private static final String AWS_TRACE_HEADER_ENV_KEY = "_X_AMZN_TRACE_ID";
   private static final String AWS_TRACE_HEADER_PROP = "com.amazonaws.xray.traceHeader";
+  private static final String AWS_TRACE_HEADER_PROP_LOWERCASE =
+      AWS_TRACE_HEADER_PROP.toLowerCase(Locale.ROOT);
   private final AwsXrayPropagator xrayPropagator = AwsXrayPropagator.getInstance();
   private static final AwsXrayLambdaPropagator INSTANCE = new AwsXrayLambdaPropagator();
 
@@ -67,7 +70,10 @@ public final class AwsXrayLambdaPropagator implements TextMapPropagator {
       return xrayContext;
     }
 
-    String traceHeader = System.getProperty(AWS_TRACE_HEADER_PROP);
+    String traceHeader = getTraceHeaderFromCarrier(carrier, getter);
+    if (isEmptyOrNull(traceHeader)) {
+      traceHeader = System.getProperty(AWS_TRACE_HEADER_PROP);
+    }
     if (isEmptyOrNull(traceHeader)) {
       traceHeader = System.getenv(AWS_TRACE_HEADER_ENV_KEY);
     }
@@ -83,6 +89,18 @@ public final class AwsXrayLambdaPropagator implements TextMapPropagator {
   @Override
   public String toString() {
     return "AwsXrayLambdaPropagator";
+  }
+
+  @Nullable
+  private static <C> String getTraceHeaderFromCarrier(
+      @Nullable C carrier, TextMapGetter<C> getter) {
+    if (carrier == null || getter == null) {
+      return null;
+    }
+    String traceHeader = getter.get(carrier, AWS_TRACE_HEADER_PROP);
+    return !isEmptyOrNull(traceHeader)
+        ? traceHeader
+        : getter.get(carrier, AWS_TRACE_HEADER_PROP_LOWERCASE);
   }
 
   private static boolean isEmptyOrNull(@Nullable String value) {
