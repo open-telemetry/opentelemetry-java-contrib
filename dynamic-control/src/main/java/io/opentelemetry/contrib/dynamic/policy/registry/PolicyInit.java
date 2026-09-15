@@ -14,6 +14,7 @@ import io.opentelemetry.contrib.dynamic.policy.PolicyStore;
 import io.opentelemetry.contrib.dynamic.policy.PolicyTypeInitializer;
 import io.opentelemetry.contrib.dynamic.policy.PolicyValidator;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
+import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingPercentagePolicy;
 import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingRatePolicy;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
@@ -72,6 +73,7 @@ public final class PolicyInit {
   static {
     // For now, policies will be registered here. TODO: move to a more dynamic way.
     TraceSamplingRatePolicy.registerPolicyType();
+    TraceSamplingPercentagePolicy.registerPolicyType();
   }
 
   /**

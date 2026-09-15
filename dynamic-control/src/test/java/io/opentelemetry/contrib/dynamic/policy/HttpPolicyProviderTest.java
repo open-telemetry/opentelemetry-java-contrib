@@ -12,6 +12,8 @@ import com.sun.net.httpserver.HttpServer;
 import io.opentelemetry.contrib.dynamic.policy.registry.PolicySourceMappingConfig;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceFormat;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
+import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingPercentagePolicy;
+import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingPercentageValidator;
 import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingRatePolicy;
 import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingRateValidator;
 import java.io.Closeable;
@@ -146,6 +148,24 @@ class HttpPolicyProviderTest {
   }
 
   @Test
+  void firstPollParsesPercentageResponseBody() throws Exception {
+    URI endpoint = startHttpServer(new AtomicReference<>("trace-sampling=25.0"));
+    HttpPolicyProvider provider = percentageProvider(endpoint, SourceFormat.KEYVALUE);
+    AtomicReference<List<TelemetryPolicy>> latestPolicies = new AtomicReference<>();
+    Closeable watch = provider.startWatching(latestPolicies::set);
+
+    PolicyProviderPoller.poll();
+
+    List<TelemetryPolicy> policies = latestPolicies.get();
+    assertThat(policies).hasSize(1);
+    TraceSamplingPercentagePolicy policy = (TraceSamplingPercentagePolicy) policies.get(0);
+    assertThat(policy.getPercentage()).isEqualTo(25.0);
+    assertThat(policy.getSamplingProbability()).isEqualTo(0.25);
+    assertThat(policy.getSourceKind()).isEqualTo(SourceKind.HTTP);
+    watch.close();
+  }
+
+  @Test
   void rejectsNonHttpEndpoint() {
     assertThatThrownBy(() -> provider(URI.create("file:///tmp/policies"), SourceFormat.KEYVALUE))
         .isInstanceOf(IllegalArgumentException.class)
@@ -186,5 +206,16 @@ class HttpPolicyProviderTest {
             new PolicySourceMappingConfig(
                 TraceSamplingRatePolicy.POLICY_TYPE, TraceSamplingRatePolicy.POLICY_TYPE)),
         Collections.singletonList(new TraceSamplingRateValidator()));
+  }
+
+  private static HttpPolicyProvider percentageProvider(URI endpoint, SourceFormat format) {
+    return new HttpPolicyProvider(
+        endpoint,
+        format,
+        Collections.singletonList(
+            new PolicySourceMappingConfig(
+                TraceSamplingPercentagePolicy.POLICY_TYPE,
+                TraceSamplingPercentagePolicy.POLICY_TYPE)),
+        Collections.singletonList(new TraceSamplingPercentageValidator()));
   }
 }

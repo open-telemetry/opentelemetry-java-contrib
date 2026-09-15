@@ -13,6 +13,8 @@ import io.opentelemetry.contrib.dynamic.policy.source.JsonSourceWrapper;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceFormat;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceWrapper;
+import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingPercentagePolicy;
+import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingPercentageValidator;
 import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingRatePolicy;
 import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingRateValidator;
 import java.util.Collections;
@@ -42,6 +44,32 @@ class MappedPolicySourceConverterTest {
 
     assertThat(converted).isInstanceOf(TraceSamplingRatePolicy.class);
     assertThat(((TraceSamplingRatePolicy) converted).getRatio()).isCloseTo(0.1, within(1e-9));
+    assertThat(((JsonSourceWrapper) sources.get(0)).asJsonNode().get("id").asText())
+        .isEqualTo("external-trace-policy");
+  }
+
+  @Test
+  void convertsAndRemapsPercentageFullPolicyObjectWithoutMutatingSource() {
+    MappedPolicySourceConverter converter =
+        MappedPolicySourceConverter.create(
+            Collections.singletonList(
+                new PolicySourceMappingConfig("external-trace-policy", "trace-sampling")),
+            Collections.singletonList(new TraceSamplingPercentageValidator()));
+    List<SourceWrapper> sources =
+        SourceFormat.JSONKEYVALUE.parse(
+            "{"
+                + "\"id\":\"external-trace-policy\","
+                + "\"name\":\"Trace sampling percentage\","
+                + "\"trace\":{\"match\":[{\"trace_field\":\"trace_id\",\"exists\":true}],"
+                + "\"keep\":{\"percentage\":10.0}}"
+                + "}",
+            converter.getMappedPolicyIds());
+
+    TelemetryPolicy converted = converter.convert(sources.get(0), SourceKind.OPAMP);
+
+    assertThat(converted).isInstanceOf(TraceSamplingPercentagePolicy.class);
+    assertThat(((TraceSamplingPercentagePolicy) converted).getPercentage())
+        .isCloseTo(10.0, within(1e-9));
     assertThat(((JsonSourceWrapper) sources.get(0)).asJsonNode().get("id").asText())
         .isEqualTo("external-trace-policy");
   }
