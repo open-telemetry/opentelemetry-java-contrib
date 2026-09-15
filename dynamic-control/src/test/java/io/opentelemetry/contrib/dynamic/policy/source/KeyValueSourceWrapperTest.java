@@ -26,6 +26,18 @@ class KeyValueSourceWrapperTest {
   }
 
   @Test
+  void withPolicyTypeRemapsKeyWithoutMutatingSource() {
+    KeyValueSourceWrapper source = new KeyValueSourceWrapper("external", "0.5");
+
+    KeyValueSourceWrapper remapped =
+        (KeyValueSourceWrapper) source.withPolicyType("trace-sampling");
+
+    assertThat(remapped.getKey()).isEqualTo("trace-sampling");
+    assertThat(remapped.getValue()).isEqualTo("0.5");
+    assertThat(source.getKey()).isEqualTo("external");
+  }
+
+  @Test
   void parseSupportsMultipleLinesAndSkipsBlanks() {
     String source = "\ntrace-sampling=0.5\r\nother-policy=1.0\n   \n";
 

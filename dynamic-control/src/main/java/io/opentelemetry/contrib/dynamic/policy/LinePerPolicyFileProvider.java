@@ -29,8 +29,8 @@ import java.util.stream.Stream;
  *
  * <ul>
  *   <li><b>{@link SourceFormat#JSONKEYVALUE JSONKEYVALUE}:</b> Lines starting with <code>{</code>
- *       use {@link SourceFormat#JSONKEYVALUE}: JSON text for a single top-level object with exactly
- *       one key (the policy type) and one value (the policy payload).
+ *       use {@link SourceFormat#JSONKEYVALUE}: JSON text for one keyed policy entry or one full
+ *       policy object with an {@code id}.
  *   <li><b>{@link SourceFormat#KEYVALUE KEYVALUE}:</b> Lines containing <code>=</code> are parsed
  *       as {@code policyType=value} and validated against the registered {@link PolicyValidator}s.
  * </ul>
@@ -84,7 +84,7 @@ final class LinePerPolicyFileProvider implements PolicyProvider {
             if (parsedSources == null
                 || parsedSources.size() != 1
                 || (format == SourceFormat.JSONKEYVALUE
-                    && !JsonSourceWrapper.isSingleKeyObject(trimmedLine))) {
+                    && !JsonSourceWrapper.isSinglePolicyObject(trimmedLine))) {
               logger.info("Invalid " + format.configValue() + " policy line: " + trimmedLine);
               return;
             }

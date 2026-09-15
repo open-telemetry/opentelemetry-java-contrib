@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.contrib.dynamic.policy.PolicyImplementer;
+import io.opentelemetry.contrib.dynamic.policy.PolicyProviderPoller;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicyIdentity;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
@@ -28,6 +29,7 @@ import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -93,6 +95,33 @@ class PolicyInitTest {
 
     assertThat(ignored).isNotNull();
     assertThat(TraceSamplingRatePolicy.getInitializedSampler()).isNotNull();
+  }
+
+  @Test
+  void legacyHttpSourceAppliesConfiguredPollInterval() throws Exception {
+    AutoConfigurationCustomizer customizer = mock(AutoConfigurationCustomizer.class);
+    PolicyInit.init(customizer);
+    Function<ConfigProperties, Map<String, String>> propertiesCustomizer =
+        capturePropertiesCustomizer(customizer);
+
+    Path configPath = tempDir.resolve("http-policy-init.json");
+    Files.write(
+        configPath,
+        minimalJsonInitConfig()
+            .replace("opamp", "http")
+            .replace("vendor", server.url("/policies").toString())
+            .getBytes(StandardCharsets.UTF_8));
+    ConfigProperties config = mock(ConfigProperties.class);
+    when(config.getString(PolicyInitConfig.POLICY_INIT_CONFIG_PROPERTY_JSON))
+        .thenReturn(configPath.toString());
+    when(config.getDuration(PolicyProviderPoller.POLL_INTERVAL_PROPERTY))
+        .thenReturn(Duration.ofSeconds(5));
+    server.enqueue(new MockResponse.Builder().body("{}").build());
+
+    assertThat(propertiesCustomizer.apply(config)).isEmpty();
+
+    assertThat(PolicyProviderPoller.getGlobalPollInterval()).isEqualTo(Duration.ofSeconds(5));
+    assertThat(server.takeRequest(10, TimeUnit.SECONDS)).isNotNull();
   }
 
   @Test

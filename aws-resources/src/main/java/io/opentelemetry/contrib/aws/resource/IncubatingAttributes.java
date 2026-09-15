@@ -69,6 +69,8 @@ class IncubatingAttributes {
       AttributeKey.stringKey("aws.ecs.task.arn");
   public static final AttributeKey<String> AWS_ECS_TASK_FAMILY =
       AttributeKey.stringKey("aws.ecs.task.family");
+  public static final AttributeKey<String> AWS_ECS_TASK_ID =
+      AttributeKey.stringKey("aws.ecs.task.id");
   public static final AttributeKey<String> AWS_ECS_TASK_REVISION =
       AttributeKey.stringKey("aws.ecs.task.revision");
   public static final AttributeKey<List<String>> AWS_LOG_GROUP_ARNS =

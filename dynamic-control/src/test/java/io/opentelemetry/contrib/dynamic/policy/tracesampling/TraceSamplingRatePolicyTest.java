@@ -14,16 +14,24 @@ import static org.mockito.Mockito.verify;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 class TraceSamplingRatePolicyTest {
 
+  @AfterEach
+  void tearDown() {
+    TraceSamplingRatePolicy.resetForTest();
+  }
+
   @Test
-  void constructorStoresProbabilityAndType() {
+  void constructorStoresRatioAndType() {
     TraceSamplingRatePolicy policy = new TraceSamplingRatePolicy(0.25, SourceKind.CUSTOM);
 
     assertThat(policy.getIdentity()).isEqualTo(TraceSamplingRatePolicy.DEFAULT_IDENTITY);
+    assertThat(policy.getRatio()).isEqualTo(0.25);
     assertThat(policy.getProbability()).isEqualTo(0.25);
+    assertThat(policy.getSamplingProbability()).isEqualTo(0.25);
     assertThat(policy.getType()).isEqualTo(TraceSamplingRatePolicy.POLICY_TYPE);
     assertThat(policy.getSourceKind()).isEqualTo(SourceKind.CUSTOM);
   }
@@ -33,7 +41,7 @@ class TraceSamplingRatePolicyTest {
     TraceSamplingRatePolicy policy = new TraceSamplingRatePolicy(0.25, SourceKind.OPAMP);
 
     assertThat(policy.getIdentity()).isEqualTo(TraceSamplingRatePolicy.DEFAULT_IDENTITY);
-    assertThat(policy.getProbability()).isEqualTo(0.25);
+    assertThat(policy.getRatio()).isEqualTo(0.25);
     assertThat(policy.getSourceKind()).isEqualTo(SourceKind.OPAMP);
   }
 
@@ -42,23 +50,23 @@ class TraceSamplingRatePolicyTest {
     TraceSamplingRatePolicy negativeZero = new TraceSamplingRatePolicy(-0.0, SourceKind.CUSTOM);
     TraceSamplingRatePolicy positiveZero = new TraceSamplingRatePolicy(0.0, SourceKind.CUSTOM);
 
-    assertThat(negativeZero.getProbability()).isEqualTo(0.0);
-    assertThat(Double.doubleToRawLongBits(negativeZero.getProbability()))
+    assertThat(negativeZero.getRatio()).isEqualTo(0.0);
+    assertThat(Double.doubleToRawLongBits(negativeZero.getRatio()))
         .isEqualTo(Double.doubleToRawLongBits(0.0));
-    assertThat(positiveZero.getProbability()).isEqualTo(0.0);
+    assertThat(positiveZero.getRatio()).isEqualTo(0.0);
   }
 
   @Test
-  void constructorRejectsOutOfRangeOrNaNProbabilities() {
+  void constructorRejectsOutOfRangeOrNaNRatios() {
     assertThatThrownBy(() -> new TraceSamplingRatePolicy(Double.NaN, SourceKind.CUSTOM))
         .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("probability must be within [0.0, 1.0]");
+        .hasMessage("ratio must be within [0.0, 1.0]");
     assertThatThrownBy(() -> new TraceSamplingRatePolicy(-0.001, SourceKind.CUSTOM))
         .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("probability must be within [0.0, 1.0]");
+        .hasMessage("ratio must be within [0.0, 1.0]");
     assertThatThrownBy(() -> new TraceSamplingRatePolicy(1.001, SourceKind.CUSTOM))
         .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("probability must be within [0.0, 1.0]");
+        .hasMessage("ratio must be within [0.0, 1.0]");
   }
 
   @Test

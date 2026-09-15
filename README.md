@@ -19,11 +19,14 @@ feature or via instrumentation, this project is hopefully for you.
 | beta    | [AWS Resources](./aws-resources/README.md)                        |
 | stable  | [AWS X-Ray SDK Support](./aws-xray/README.md)                     |
 | alpha   | [AWS X-Ray Propagator](./aws-xray-propagator/README.md)           |
+| alpha   | [Azure Resources](./azure-resources/README.md)                    |
 | alpha   | [Baggage Processors](./baggage-processor/README.md)               |
 | alpha   | [zstd Compressor](./compressors/compressor-zstd/README.md)        |
 | alpha   | [CEL-Based Sampler](./cel-sampler/README.md)                      |
+| alpha   | [CloudFoundry Resources](./cloudfoundry-resources/README.md)      |
 | alpha   | [Consistent Sampling](./consistent-sampling/README.md)            |
 | alpha   | [Disk Buffering](./disk-buffering/README.md)                      |
+| alpha   | [Dynamic Control](./dynamic-control/README.md)                    |
 | alpha   | [GCP Authentication Extension](./gcp-auth-extension/README.md)    |
 | beta    | [GCP Resources](./gcp-resources/README.md)                        |
 | beta    | [Inferred Spans](./inferred-spans/README.md)                      |
@@ -36,6 +39,7 @@ feature or via instrumentation, this project is hopefully for you.
 | alpha   | [OpenTelemetry Maven Extension](./maven-extension/README.md)      |
 | alpha   | [Micrometer MeterProvider](./micrometer-meter-provider/README.md) |
 | alpha   | [No-Op API](./noop-api/README.md)                                 |
+| alpha   | [OpAMP Client](./opamp-client/README.md)                          |
 | alpha   | [Intercept and Process Signals Globally](./processors/README.md)  |
 | alpha   | [Prometheus Client Bridge](./prometheus-client-bridge/README.md)  |
 | alpha   | [Resource Providers](./resource-providers/README.md)              |

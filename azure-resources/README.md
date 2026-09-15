@@ -8,6 +8,7 @@ The following OpenTelemetry semantic conventions will be detected:
 
 | Resource attribute          | VM       | Functions       | App Service       | Containers           |
 | --------------------------- | -------- | --------------- | ----------------- | -------------------- |
+| cloud.account.id            |          |                 | auto              |                      |
 | cloud.platform              | azure.vm | azure.functions | azure.app_service | azure.container_apps |
 | cloud.provider              | azure    | azure           | azure             | azure                |
 | cloud.resource_id           | auto     |                 | auto              |                      |
@@ -24,6 +25,7 @@ The following OpenTelemetry semantic conventions will be detected:
 | service.version             |          |                 |                   | auto                 |
 | service.instance.id         |          |                 | auto              | auto                 |
 | azure.app.service.stamp     |          |                 | auto              |                      |
+| azure.resource_group.name   |          |                 | auto              |                      |
 | faas.name                   |          | auto            |                   |                      |
 | faas.version                |          | auto            |                   |                      |
 | faas.instance               |          | auto            |                   |                      |

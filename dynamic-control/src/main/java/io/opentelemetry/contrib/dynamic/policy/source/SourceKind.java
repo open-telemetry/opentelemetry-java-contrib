@@ -7,11 +7,13 @@ package io.opentelemetry.contrib.dynamic.policy.source;
 
 import com.google.errorprone.annotations.Immutable;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
+import io.opentelemetry.contrib.dynamic.policy.HttpPolicyProvider;
 import io.opentelemetry.contrib.dynamic.policy.OpampPolicyProvider;
 import io.opentelemetry.contrib.dynamic.policy.PolicyProvider;
 import io.opentelemetry.contrib.dynamic.policy.PolicyProviderConfig;
 import io.opentelemetry.contrib.dynamic.policy.PolicyValidator;
 import io.opentelemetry.contrib.dynamic.policy.registry.PolicySourceConfig;
+import java.net.URI;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -32,7 +34,7 @@ public enum SourceKind {
   OPAMP("opamp", 1, SourceKind::createOpampProvider),
 
   /** Policies fetched from an HTTP/HTTPS endpoint. */
-  HTTP("http", 2, SourceKind::createNoProvider),
+  HTTP("http", 2, SourceKind::createHttpProvider),
 
   /** User-defined or extension provider. */
   CUSTOM("custom", 1_000, SourceKind::createNoProvider);
@@ -106,6 +108,25 @@ public enum SourceKind {
   private static PolicyProvider createNoProvider(
       PolicySourceConfig source, PolicyProviderConfig config, List<PolicyValidator> validators) {
     return null;
+  }
+
+  @Nullable
+  private static PolicyProvider createHttpProvider(
+      PolicySourceConfig source, PolicyProviderConfig config, List<PolicyValidator> validators) {
+    String location = source.getLocation();
+    if (location == null || location.trim().isEmpty()) {
+      return null;
+    }
+    try {
+      return new HttpPolicyProvider(
+          URI.create(location.trim()), source.getFormat(), source.getMappings(), validators);
+    } catch (IllegalArgumentException e) {
+      logger.log(
+          Level.FINE,
+          "Skipping HTTP provider creation due to invalid HTTP source configuration: {0}",
+          e.getMessage());
+      return null;
+    }
   }
 
   @Nullable

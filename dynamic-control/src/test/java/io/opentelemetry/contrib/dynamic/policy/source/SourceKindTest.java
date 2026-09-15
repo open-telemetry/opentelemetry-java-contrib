@@ -12,13 +12,21 @@ import static org.mockito.Mockito.when;
 
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.contrib.dynamic.policy.PolicyProvider;
+import io.opentelemetry.contrib.dynamic.policy.PolicyProviderPoller;
 import io.opentelemetry.contrib.dynamic.policy.PolicyValidator;
 import io.opentelemetry.contrib.dynamic.policy.registry.PolicySourceConfig;
+import io.opentelemetry.contrib.dynamic.policy.registry.PolicySourceMappingConfig;
 import java.util.Collections;
 import java.util.List;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 class SourceKindTest {
+
+  @AfterEach
+  void tearDown() {
+    PolicyProviderPoller.reset();
+  }
 
   @Test
   void configValuesAreStableLowercase() {
@@ -90,12 +98,44 @@ class SourceKindTest {
 
     assertThat(SourceKind.FILE.createProvider(source, config, validators)).isNull();
     assertThat(
-            SourceKind.HTTP.createProvider(source(SourceKind.HTTP, "ignored"), config, validators))
-        .isNull();
-    assertThat(
             SourceKind.CUSTOM.createProvider(
                 source(SourceKind.CUSTOM, "ignored"), config, validators))
         .isNull();
+  }
+
+  @Test
+  void httpCreateProviderReturnsNullWhenLocationMissing() {
+    DeclarativeConfigProperties config = mock(DeclarativeConfigProperties.class);
+    List<PolicyValidator> validators = Collections.emptyList();
+
+    assertThat(SourceKind.HTTP.createProvider(source(SourceKind.HTTP, null), config, validators))
+        .isNull();
+    assertThat(SourceKind.HTTP.createProvider(source(SourceKind.HTTP, "  "), config, validators))
+        .isNull();
+  }
+
+  @Test
+  void httpCreateProviderReturnsProviderWhenLocationPresent() {
+    DeclarativeConfigProperties config = mock(DeclarativeConfigProperties.class);
+
+    PolicyProvider provider =
+        SourceKind.HTTP.createProvider(
+            source(SourceKind.HTTP, "https://example.com/policies"),
+            config,
+            Collections.emptyList());
+
+    assertThat(provider).isNotNull();
+  }
+
+  @Test
+  void httpCreateProviderReturnsNullWhenLocationIsNotHttp() {
+    DeclarativeConfigProperties config = mock(DeclarativeConfigProperties.class);
+
+    PolicyProvider provider =
+        SourceKind.HTTP.createProvider(
+            source(SourceKind.HTTP, "file:///tmp/policies"), config, Collections.emptyList());
+
+    assertThat(provider).isNull();
   }
 
   @Test
@@ -154,7 +194,11 @@ class SourceKindTest {
   }
 
   private static PolicySourceConfig source(SourceKind kind, String location) {
-    return new PolicySourceConfig(kind, SourceFormat.KEYVALUE, location, Collections.emptyList());
+    return new PolicySourceConfig(
+        kind,
+        SourceFormat.KEYVALUE,
+        location,
+        Collections.singletonList(new PolicySourceMappingConfig("source-policy", "target-policy")));
   }
 
   private static DeclarativeConfigProperties opampConfig() {

@@ -80,7 +80,7 @@ public final class CelBasedSampler implements Sampler {
           }
         });
     this.fallback = requireNonNull(fallback, "fallback must not be null");
-    this.celRuntime = CelRuntimeFactory.standardCelRuntimeBuilder().build();
+    this.celRuntime = CelRuntimeFactory.plannerRuntimeBuilder().build();
   }
 
   /**

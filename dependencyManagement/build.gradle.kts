@@ -2,8 +2,8 @@ plugins {
   `java-platform`
 }
 
-val otelInstrumentationVersion = "2.30.0-alpha"
-val semconvVersion = "1.43.0"
+val otelInstrumentationVersion = "2.31.1-alpha"
+val semconvVersion = "1.44.0"
 
 javaPlatform {
   allowDependencies()
@@ -15,9 +15,9 @@ dependencies {
   // (the constraints section below doesn't have this issue, and will only show up
   // as runtime dependencies if they are actually used as runtime dependencies)
   api(platform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${otelInstrumentationVersion}"))
-  api(platform("com.fasterxml.jackson:jackson-bom:2.22.1"))
-  api(platform("com.google.protobuf:protobuf-bom:4.35.1"))
-  api(platform("com.squareup.okhttp3:okhttp-bom:5.4.0"))
+  api(platform("com.fasterxml.jackson:jackson-bom:2.22.2"))
+  api(platform("com.google.protobuf:protobuf-bom:4.36.1"))
+  api(platform("com.squareup.okhttp3:okhttp-bom:5.5.0"))
 
   constraints {
     api("io.opentelemetry.semconv:opentelemetry-semconv:${semconvVersion}")
@@ -38,15 +38,15 @@ dependencies {
     api("org.mockito:mockito-core:4.11.0")
     api("org.mockito:mockito-inline:4.11.0")
     api("org.mockito:mockito-junit-jupiter:4.11.0")
-    api("org.slf4j:slf4j-api:2.0.18")
-    api("org.slf4j:slf4j-simple:2.0.18")
-    api("org.slf4j:log4j-over-slf4j:2.0.18")
-    api("org.slf4j:jcl-over-slf4j:2.0.18")
-    api("org.slf4j:jul-to-slf4j:2.0.18")
+    api("org.slf4j:slf4j-api:2.0.19")
+    api("org.slf4j:slf4j-simple:2.0.19")
+    api("org.slf4j:log4j-over-slf4j:2.0.19")
+    api("org.slf4j:jcl-over-slf4j:2.0.19")
+    api("org.slf4j:jul-to-slf4j:2.0.19")
 
     api("com.google.code.findbugs:annotations:3.0.1u2")
     api("com.google.code.findbugs:jsr305:3.0.2")
-    api("com.uber.nullaway:nullaway:0.13.8")
+    api("com.uber.nullaway:nullaway:0.14.1")
     api("org.assertj:assertj-core:3.27.7")
     api("org.awaitility:awaitility:4.3.0")
     api("org.bouncycastle:bcpkix-jdk15on:1.70")
@@ -56,7 +56,7 @@ dependencies {
     api("org.skyscreamer:jsonassert:1.5.3")
     api("org.apache.kafka:kafka-clients:4.3.1")
     api("org.testcontainers:testcontainers-kafka:2.0.5")
-    api("org.jctools:jctools-core:4.0.6")
+    api("org.jctools:jctools-core:4.0.7")
     api("tools.profiler:async-profiler:4.5")
     api("com.blogspot.mydailyjava:weak-lock-free:0.18")
     api("com.github.f4b6a3:uuid-creator:6.1.1")

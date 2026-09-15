@@ -149,6 +149,12 @@ public final class PolicyInit {
             return Collections.emptyMap();
           }
           resolveAndInitializeConfiguredPolicyTypes(initConfig, autoConfiguration);
+          // The legacy duration property has no declarative schema. Apply it at this boundary
+          // rather than adapting declarative provider properties back to ConfigProperties.
+          if (initConfig.getSources().stream()
+              .anyMatch(source -> source.getKind() == SourceKind.HTTP)) {
+            PolicyProviderPoller.configure(config);
+          }
           activateSources(initConfig, createLegacyProviderConfig(config));
           return Collections.emptyMap();
         });

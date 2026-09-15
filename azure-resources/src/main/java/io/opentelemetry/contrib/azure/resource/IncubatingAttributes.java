@@ -10,7 +10,13 @@ import io.opentelemetry.api.common.AttributeKey;
 // copied from opentelemetry-semconv-incubating
 final class IncubatingAttributes {
 
+  // azure attributes
+  public static final AttributeKey<String> AZURE_RESOURCE_GROUP_NAME =
+      AttributeKey.stringKey("azure.resource_group.name");
+
   // cloud attributes
+  public static final AttributeKey<String> CLOUD_ACCOUNT_ID =
+      AttributeKey.stringKey("cloud.account.id");
   public static final AttributeKey<String> CLOUD_PLATFORM =
       AttributeKey.stringKey("cloud.platform");
   public static final AttributeKey<String> CLOUD_PROVIDER =

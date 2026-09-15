@@ -159,6 +159,30 @@ violate its configuration semantics. A spec-supported resource-access mechanism 
 limitation to be removed; the OpAMP/SDK integration needs to be established through the specification
 process first.
 
+#### Contributor notes: why not read the SDK service name directly?
+
+Reading `service.name` from the declarative YAML model is not equivalent to obtaining the SDK's
+resolved resource. Resource detectors and resource merging can contribute identity attributes that
+are not present in the YAML. Copying the model would therefore still risk OpAMP reporting a different
+identity from the telemetry it manages.
+
+The code bootstrapping declarative configuration can obtain the resolved resource from
+`DeclarativeConfigResult.getResource()`, but this extension does not receive that result. The existing
+`AutoConfigureListener.afterAutoConfigure(OpenTelemetrySdk)` callback receives the built SDK, which
+does not expose its resource. Waiting until SDK construction finishes is therefore not sufficient
+on its own.
+
+A resource-access API needs specification alignment rather than a Java-specific workaround. As
+[Jack Berg explains](https://github.com/open-telemetry/opentelemetry-java/pull/7832#issuecomment-5681643544),
+this is not opposition to resource access: the proposed entities `ResourceProvider` could provide a
+specification basis if it lands, while the interaction between OpAMP and SDKs still needs to be
+specified. Contributors working on OpAMP are encouraged to bring this use case into that process.
+
+Until a suitable API is available, keep OpAMP identity configuration separate and document the
+required duplication. Do not inject system properties into the SDK's declarative configuration to
+hide the limitation; that would change declarative configuration semantics rather than solve the
+resource-access problem.
+
 ### Using as an auto-configured extension
 
 You can use either `otel.java.experimental.telemetry.policy.init.yaml`
@@ -167,8 +191,12 @@ to specify the file containing a YAML configuration of the policies,
 or `otel.java.experimental.telemetry.policy.init.json`
 (or OTEL_JAVA_EXPERIMENTAL_TELEMETRY_POLICY_INIT_JSON environment variable)
 to specify the file containing a JSON configuration of the policies.
-For example `java -Dotel.javaagent.extensions=/path/to/jar
--Dotel.java.experimental.telemetry.policy.init.yaml=/path/to/yaml ...`
+For example:
+
+```text
+java -Dotel.javaagent.extensions=/path/to/jar -Dotel.java.experimental.telemetry.policy.init.yaml=/path/to/yaml ...
+```
+
 where /path/to/yaml is a file containing the config. eg
 
 ```yaml
@@ -189,14 +217,31 @@ The config tree starts with `sources`. You can configure multiple sources.
 Each source must specify:
 
 * `kind`: where policy updates come from. Supported values: `opamp`, `file`, `http` and `custom`
-(currently only `opamp` creates an active provider, the others are no-op providers)
+  (currently only `opamp` creates an active provider, the others are no-op providers)
   * `opamp`: the implemented OpAMP provider expects to read the OpAMP config map,
-finding the value at the key given by `location`. The contents of that value are parseable by the capability given in `format`
+    finding the value at the key given by `location`. The contents of that value are parseable by
+    the capability given in `format`
 * `format`: how the source payload is parsed. Supported values currently are `jsonkeyvalue` and `keyvalue`
-  * `jsonkeyvalue`: expects the contents to be convertible as a string into a single or an array of
-simple json objects that are key and value, eg '{ "key": value}' or '[{ "key1": value1}, { "key2": value2}]'
-  * `keyvalue`: expects the contents to be convertible as a string into one or more
-line separated 'key=value' pairs (eg a properties file)
+  * `keyvalue`: expects the contents to be convertible as a string into one or more line-separated
+    `key=value` pairs (for example, a properties file)
+  * `jsonkeyvalue`: expects the contents to be convertible as a string into a single simple JSON
+    object or an array of simple JSON objects that are key and value, for example
+    `{ "policyId": value}` or `[{ "policyId1": value1}, { "policyId2": value2}]`. It also accepts
+    full policy objects or arrays mixing the two forms. A full policy requires a non-empty `id` and
+    `name`, exactly one target (`log`, `metric`, `profile`, or `trace`), a non-empty target `match`
+    array, and a target `keep` value. The `id` must match a configured `policyId`. For example:
+
+```json
+{
+  "id": "trace-sampling",
+  "name": "Trace sampling rate",
+  "trace": {
+    "match": [{"trace_field": "trace_id", "exists": true}],
+    "keep": {"probability": 0.1}
+  }
+}
+```
+
 * `mappings`: one or more mappings from policy IDs to dynamic-control policy types
 * `location`: optional source-specific selector. For `opamp`, this is the OpAMP config map key, for example `vendor`
 
@@ -223,10 +268,10 @@ sources:
 
 * `trace-sampling`
   * IMPORTANT: if this policy is included in the config, then the sampler installed is overridden
-and a consistent sampling sampler is installed
-(technically the ComposableSampler.parentThreshold(ComposableSampler.probability()) sampler)
+    and a consistent sampling sampler is installed
+    (technically the ComposableSampler.parentThreshold(ComposableSampler.probability()) sampler)
   * Expects a value between 0.0 and 1.0 (including both end values), and will apply that sampling rate
-to the agent's sampler where 0.0 is 0% head sampling and 1.0 is 100% sampling
+    to the agent's sampler where 0.0 is 0% head sampling and 1.0 is 100% sampling
 
 ### Config example
 

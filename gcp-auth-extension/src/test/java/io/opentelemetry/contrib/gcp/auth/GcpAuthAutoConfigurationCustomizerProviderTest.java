@@ -17,7 +17,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.auth.oauth2.AccessToken;
+import com.google.auth.oauth2.ComputeEngineCredentials;
 import com.google.auth.oauth2.GoogleCredentials;
+import com.google.auth.oauth2.IdToken;
+import com.google.auth.oauth2.IdTokenProvider;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableMap;
 import io.opentelemetry.api.common.AttributeKey;
@@ -52,10 +55,12 @@ import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -75,6 +80,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junitpioneer.jupiter.ClearSystemProperty;
+import org.junitpioneer.jupiter.SetSystemProperty;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -1165,8 +1171,145 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
     }
   }
 
-  // Mockito.lenient is used here because this method is used with parameterized tests where based
   @SuppressWarnings("CannotMockMethod")
+  @Test
+  @SetSystemProperty(key = "google.auth.token.type", value = "id_token")
+  @SetSystemProperty(key = "google.auth.id.token.audience", value = "https://otelcol.example.com")
+  @SetSystemProperty(key = "google.otel.auth.target.signals", value = "traces")
+  void testTraceCustomizerOtlpHttpWithIdToken() throws IOException {
+    String fakeIdToken = craftFakeIdToken();
+    ComputeEngineCredentials mockComputeEngineCredentials =
+        Mockito.mock(ComputeEngineCredentials.class);
+    Mockito.when(
+            mockComputeEngineCredentials.idTokenWithAudience(
+                Mockito.eq("https://otelcol.example.com"),
+                Mockito.argThat(options -> options.contains(IdTokenProvider.Option.INCLUDE_EMAIL))))
+        .thenReturn(IdToken.create(fakeIdToken));
+
+    OtlpHttpSpanExporter mockOtlpHttpSpanExporter = mock(OtlpHttpSpanExporter.class);
+    OtlpHttpSpanExporterBuilder spyOtlpHttpSpanExporterBuilder =
+        Mockito.spy(OtlpHttpSpanExporter.builder());
+    when(spyOtlpHttpSpanExporterBuilder.build()).thenReturn(mockOtlpHttpSpanExporter);
+    when(mockOtlpHttpSpanExporter.shutdown()).thenReturn(CompletableResultCode.ofSuccess());
+    List<SpanData> exportedSpans = new ArrayList<>();
+    when(mockOtlpHttpSpanExporter.export(any()))
+        .thenAnswer(
+            invocationOnMock -> {
+              exportedSpans.addAll(invocationOnMock.getArgument(0));
+              return CompletableResultCode.ofSuccess();
+            });
+    Mockito.when(mockOtlpHttpSpanExporter.toBuilder()).thenReturn(spyOtlpHttpSpanExporterBuilder);
+
+    try (MockedStatic<GoogleCredentials> googleCredentialsMockedStatic =
+        Mockito.mockStatic(GoogleCredentials.class)) {
+      googleCredentialsMockedStatic
+          .when(GoogleCredentials::getApplicationDefault)
+          .thenReturn(mockComputeEngineCredentials);
+
+      OpenTelemetrySdk sdk = buildOpenTelemetrySdkWithExporter(mockOtlpHttpSpanExporter);
+      generateTestSpan(sdk);
+      CompletableResultCode code = sdk.shutdown();
+      CompletableResultCode joinResult = code.join(10, TimeUnit.SECONDS);
+      assertThat(joinResult.isSuccess()).isTrue();
+
+      Mockito.verify(mockOtlpHttpSpanExporter, Mockito.times(1)).toBuilder();
+      Mockito.verify(spyOtlpHttpSpanExporterBuilder, Mockito.times(1))
+          .setHeaders(traceHeaderSupplierCaptor.capture());
+      Map<String, String> headers = traceHeaderSupplierCaptor.getValue().get();
+      assertThat(headers)
+          .containsEntry("Authorization", "Bearer " + fakeIdToken)
+          .doesNotContainKey(QUOTA_USER_PROJECT_HEADER);
+
+      Mockito.verify(mockOtlpHttpSpanExporter, Mockito.atLeast(1)).export(Mockito.anyCollection());
+
+      // The gcp.project_id resource attribute is not added in id_token mode and the
+      // GOOGLE_CLOUD_PROJECT option is not required.
+      assertThat(exportedSpans)
+          .hasSizeGreaterThan(0)
+          .allSatisfy(
+              spanData ->
+                  assertThat(spanData.getResource().getAttributes().asMap())
+                      .doesNotContainKey(AttributeKey.stringKey(GCP_USER_PROJECT_ID_KEY)));
+    }
+  }
+
+  @Test
+  @SetSystemProperty(key = "google.auth.token.type", value = "id_token")
+  @SetSystemProperty(key = "google.otel.auth.target.signals", value = "traces")
+  @ClearSystemProperty(key = "google.auth.id.token.audience")
+  void testIdTokenWithoutAudienceFallsBackToAccessToken() throws IOException {
+    assertConfiguredCredentialsForTraceFallbackToAccessToken();
+  }
+
+  @Test
+  @SetSystemProperty(key = "google.auth.token.type", value = "id_token")
+  @SetSystemProperty(key = "google.auth.id.token.audience", value = "https://otelcol.example.com")
+  @SetSystemProperty(key = "google.otel.auth.target.signals", value = "traces")
+  void testIdTokenWithNonIdTokenProviderCredentialsFallsBackToAccessToken() throws IOException {
+    // The mocked GoogleCredentials does not implement IdTokenProvider.
+    assertConfiguredCredentialsForTraceFallbackToAccessToken();
+  }
+
+  @Test
+  @SetSystemProperty(key = "google.auth.token.type", value = "unsupported_token")
+  @SetSystemProperty(key = "google.otel.auth.target.signals", value = "traces")
+  @SetSystemProperty(key = "google.cloud.project", value = "test-gcp-project")
+  void testUnsupportedTokenTypeFallsBackToAccessToken() throws IOException {
+    assertConfiguredCredentialsForTraceFallbackToAccessToken();
+  }
+
+  // Asserts a misconfigured id_token setup falls back to access tokens on the trace exporter.
+  @SuppressWarnings("CannotMockMethod")
+  private void assertConfiguredCredentialsForTraceFallbackToAccessToken() throws IOException {
+    AccessToken fakeAccessToken = new AccessToken("fake-access-token", Date.from(Instant.now()));
+    Mockito.when(mockedGoogleCredentials.getRequestMetadata())
+        .thenReturn(
+            ImmutableMap.of(
+                "Authorization",
+                Collections.singletonList("Bearer " + fakeAccessToken.getTokenValue())));
+
+    OtlpHttpSpanExporter mockOtlpHttpSpanExporter = mock(OtlpHttpSpanExporter.class);
+    OtlpHttpSpanExporterBuilder spyOtlpHttpSpanExporterBuilder =
+        Mockito.spy(OtlpHttpSpanExporter.builder());
+    when(spyOtlpHttpSpanExporterBuilder.build()).thenReturn(mockOtlpHttpSpanExporter);
+    when(mockOtlpHttpSpanExporter.shutdown()).thenReturn(CompletableResultCode.ofSuccess());
+    when(mockOtlpHttpSpanExporter.export(any())).thenReturn(CompletableResultCode.ofSuccess());
+    Mockito.when(mockOtlpHttpSpanExporter.toBuilder()).thenReturn(spyOtlpHttpSpanExporterBuilder);
+
+    try (MockedStatic<GoogleCredentials> googleCredentialsMockedStatic =
+        Mockito.mockStatic(GoogleCredentials.class)) {
+      googleCredentialsMockedStatic
+          .when(GoogleCredentials::getApplicationDefault)
+          .thenReturn(mockedGoogleCredentials);
+
+      OpenTelemetrySdk sdk = buildOpenTelemetrySdkWithExporter(mockOtlpHttpSpanExporter);
+      generateTestSpan(sdk);
+      CompletableResultCode joinResult = sdk.shutdown().join(10, TimeUnit.SECONDS);
+      assertThat(joinResult.isSuccess()).isTrue();
+
+      Mockito.verify(spyOtlpHttpSpanExporterBuilder, Mockito.times(1))
+          .setHeaders(traceHeaderSupplierCaptor.capture());
+      Map<String, String> headers = traceHeaderSupplierCaptor.getValue().get();
+      assertThat(headers).containsEntry("Authorization", "Bearer fake-access-token");
+    }
+  }
+
+  // Crafts a syntactically valid, unsigned JWT with a far-future expiration so that it can be
+  // parsed by IdToken.create().
+  private static String craftFakeIdToken() {
+    Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
+    String header =
+        encoder.encodeToString(
+            "{\"alg\":\"RS256\",\"typ\":\"JWT\"}".getBytes(StandardCharsets.UTF_8));
+    String payload =
+        encoder.encodeToString(
+            "{\"aud\":\"https://otelcol.example.com\",\"exp\":4102444800,\"iat\":1700000000}"
+                .getBytes(StandardCharsets.UTF_8));
+    String signature = encoder.encodeToString("signature".getBytes(StandardCharsets.UTF_8));
+    return header + "." + payload + "." + signature;
+  }
+
+  // Mockito.lenient is used here because this method is used with parameterized tests where based
   private void prepareMockBehaviorForGoogleCredentials() {
     AccessToken fakeAccessToken = new AccessToken("fake", Date.from(Instant.now()));
     try {

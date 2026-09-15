@@ -6,37 +6,21 @@
 package io.opentelemetry.contrib.dynamic.policy.tracesampling;
 
 import io.opentelemetry.contrib.dynamic.policy.PolicyImplementer;
-import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicyIdentity;
 import io.opentelemetry.contrib.dynamic.policy.registry.PolicyInit;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
-import io.opentelemetry.sdk.extension.incubator.trace.samplers.ComposableSampler;
-import io.opentelemetry.sdk.extension.incubator.trace.samplers.CompositeSampler;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
-import java.util.Objects;
 import javax.annotation.Nullable;
 
-public final class TraceSamplingRatePolicy implements TelemetryPolicy {
+/** Trace sampling policy expressed as a ratio in the inclusive range {@code [0.0, 1.0]}. */
+public final class TraceSamplingRatePolicy extends AbstractTraceSamplingPolicy {
   public static final String POLICY_TYPE = "trace-sampling";
   public static final TelemetryPolicyIdentity DEFAULT_IDENTITY =
       new TelemetryPolicyIdentity("trace-sampling", "Trace sampling rate");
 
-  @Nullable private static volatile DelegatingSampler initializedSampler;
-
-  private final TelemetryPolicyIdentity identity;
-  private final double probability;
-  private final SourceKind sourceKind;
-
-  public TraceSamplingRatePolicy(double probability, SourceKind sourceKind) {
-    this.identity = DEFAULT_IDENTITY;
-    this.probability = normalizeProbability(probability);
-    this.sourceKind = Objects.requireNonNull(sourceKind, "sourceKind cannot be null");
-  }
-
-  @Override
-  public TelemetryPolicyIdentity getIdentity() {
-    return identity;
+  public TraceSamplingRatePolicy(double ratio, SourceKind sourceKind) {
+    super(DEFAULT_IDENTITY, normalizeRatio(ratio), sourceKind);
   }
 
   @Override
@@ -44,13 +28,12 @@ public final class TraceSamplingRatePolicy implements TelemetryPolicy {
     return POLICY_TYPE;
   }
 
-  @Override
-  public SourceKind getSourceKind() {
-    return sourceKind;
+  public double getRatio() {
+    return getSamplingProbability();
   }
 
   public double getProbability() {
-    return probability;
+    return getSamplingProbability();
   }
 
   /**
@@ -60,12 +43,7 @@ public final class TraceSamplingRatePolicy implements TelemetryPolicy {
    * overrides any other sampler
    */
   public static PolicyImplementer initialize(AutoConfigurationCustomizer autoConfiguration) {
-    Objects.requireNonNull(autoConfiguration, "autoConfiguration cannot be null");
-    Sampler initialDelegate = createSampler(1.0);
-    DelegatingSampler delegatingSampler = new DelegatingSampler(initialDelegate);
-    initializedSampler = delegatingSampler;
-    autoConfiguration.addSamplerCustomizer((sampler, config) -> delegatingSampler);
-    return new TraceSamplingRatePolicyImplementer(delegatingSampler);
+    return initialize(autoConfiguration, new TraceSamplingValidator());
   }
 
   public static void registerPolicyType() {
@@ -74,32 +52,30 @@ public final class TraceSamplingRatePolicy implements TelemetryPolicy {
   }
 
   /**
-   * Creates the composed sampler used for this policy probability.
+   * Creates the composed sampler used for this policy ratio.
    *
-   * @param probability sampling probability in the inclusive range {@code [0.0, 1.0]}
-   * @return a sampler equivalent to the configured probability with parent-based behavior
-   * @throws IllegalArgumentException if probability is NaN or outside {@code [0.0, 1.0]}
+   * @param ratio sampling ratio (sampling probability) in the inclusive range {@code [0.0, 1.0]}
+   * @return a sampler equivalent to the configured ratio with parent-based behavior
+   * @throws IllegalArgumentException if ratio is NaN or outside {@code [0.0, 1.0]}
    */
-  public static Sampler createSampler(double probability) {
-    probability = normalizeProbability(probability);
-    return CompositeSampler.wrap(
-        ComposableSampler.parentThreshold(ComposableSampler.probability(probability)));
+  public static Sampler createSampler(double ratio) {
+    return AbstractTraceSamplingPolicy.createSampler(ratio);
   }
 
-  private static double normalizeProbability(double probability) {
-    if (Double.isNaN(probability) || probability < 0.0 || probability > 1.0) {
-      throw new IllegalArgumentException("probability must be within [0.0, 1.0]");
+  private static double normalizeRatio(double ratio) {
+    if (Double.isNaN(ratio) || ratio < 0.0 || ratio > 1.0) {
+      throw new IllegalArgumentException("ratio must be within [0.0, 1.0]");
     }
-    // Normalize -0.0 to +0.0 so idempotent update checks stay intuitive.
-    return probability == 0.0 ? 0.0 : probability;
+    // normalize -0.0
+    return ratio == 0.0 ? 0.0 : ratio;
   }
 
   @Nullable
   public static DelegatingSampler getInitializedSampler() {
-    return initializedSampler;
+    return AbstractTraceSamplingPolicy.getInitializedSampler();
   }
 
   static void resetForTest() {
-    initializedSampler = null;
+    AbstractTraceSamplingPolicy.resetForTest();
   }
 }

@@ -2,6 +2,37 @@
 
 ## Unreleased
 
+### AWS resources
+
+- Set `aws.ecs.task.id` on the ECS resource, extracted from the task ARN as the semantic
+  conventions require.
+  ([#3098](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3098))
+
+### JMX Scraper
+
+- Add `experimental-cassandra` target system, inheriting the aligned Cassandra metric
+  definitions from instrumentation.
+  ([#3091](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3091))
+
+## Version 1.60.0 (2026-08-28)
+
+### :warning: Breaking changes
+
+- Remove the deprecated `EventToSpanEventBridge` log processor and its declarative configuration
+  entry.
+  ([#3029](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3029))
+
+### Dynamic control
+
+- Fix policy parsing for JSON and line-based configurations so valid policies are accepted
+  consistently.
+  ([#3010](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3010))
+
+### GCP authentication extension
+
+- Add support for ID token authentication for GCP exports.
+  ([#2999](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2999))
+
 ## Version 1.59.0 (2026-07-24)
 
 ### :warning: Breaking changes

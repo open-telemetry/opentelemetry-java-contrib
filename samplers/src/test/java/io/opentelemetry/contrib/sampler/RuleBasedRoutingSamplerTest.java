@@ -16,6 +16,7 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
@@ -196,6 +197,28 @@ class RuleBasedRoutingSamplerTest {
     SamplingResult samplingResult =
         sampler.shouldSample(parentContext, traceId, SPAN_NAME, SPAN_KIND, attributes, emptyList());
     assertThat(samplingResult.getDecision()).isEqualTo(SamplingDecision.DROP);
+  }
+
+  @Test
+  void testDropOnLongAttribute() {
+    AttributeKey<Long> statusCode = AttributeKey.longKey("http.response.status_code");
+    RuleBasedRoutingSampler sampler =
+        RuleBasedRoutingSampler.builder(SPAN_KIND, delegate).drop(statusCode, "404").build();
+    Attributes attributes = Attributes.of(statusCode, 404L);
+    SamplingResult samplingResult =
+        sampler.shouldSample(parentContext, traceId, SPAN_NAME, SPAN_KIND, attributes, emptyList());
+    assertThat(samplingResult.getDecision()).isEqualTo(SamplingDecision.DROP);
+  }
+
+  @Test
+  void testRecordAndSampleOnLongAttribute() {
+    AttributeKey<Long> port = AttributeKey.longKey("server.port");
+    RuleBasedRoutingSampler sampler =
+        RuleBasedRoutingSampler.builder(SPAN_KIND, delegate).recordAndSample(port, "8080").build();
+    Attributes attributes = Attributes.of(port, 8080L);
+    SamplingResult samplingResult =
+        sampler.shouldSample(parentContext, traceId, SPAN_NAME, SPAN_KIND, attributes, emptyList());
+    assertThat(samplingResult.getDecision()).isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
   }
 
   private SamplingResult shouldSample(Sampler sampler, String url) {
