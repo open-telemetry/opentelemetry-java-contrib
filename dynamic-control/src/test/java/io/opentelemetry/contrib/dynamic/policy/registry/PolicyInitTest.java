@@ -12,19 +12,24 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.contrib.dynamic.policy.PolicyImplementer;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicyIdentity;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingRatePolicy;
+import io.opentelemetry.sdk.autoconfigure.declarativeconfig.DeclarativeConfigResult;
+import io.opentelemetry.sdk.autoconfigure.declarativeconfig.DeclarativeConfiguration;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
+import java.io.ByteArrayInputStream;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -34,10 +39,13 @@ import mockwebserver3.MockWebServer;
 import mockwebserver3.RecordedRequest;
 import mockwebserver3.junit5.StartStop;
 import okio.Buffer;
+import opamp.proto.AgentToServer;
 import opamp.proto.ServerToAgent;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 
 class PolicyInitTest {
@@ -114,6 +122,90 @@ class PolicyInitTest {
     RecordedRequest request = server.takeRequest(5, TimeUnit.SECONDS);
     assertThat(request).isNotNull();
     assertThat(request.getHeaders().get("Authorization")).isEqualTo("Bearer token");
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {true, false})
+  void declarativeSdkAndOpampKeepSeparateIdentity(boolean explicitServiceName) throws Exception {
+    Map<String, String> properties = new HashMap<>();
+    properties.put("otel.opamp.service.url", server.url("/v1/opamp").toString());
+    properties.put("otel.service.name", explicitServiceName ? "opamp-service" : null);
+    properties.put(
+        "otel.resource.attributes",
+        "service.name=opamp-resource-service,deployment.environment.name=opamp-environment");
+    properties.put("otel.experimental.opamp.headers", "Authorization=Bearer token");
+    Map<String, String> previous = new HashMap<>();
+    properties.forEach(
+        (key, value) -> {
+          previous.put(key, System.getProperty(key));
+          if (value == null) {
+            System.clearProperty(key);
+          } else {
+            System.setProperty(key, value);
+          }
+        });
+    server.enqueue(emptyServerResponse());
+    try {
+      String yaml =
+          "file_format: '1.0'\n"
+              + "resource:\n"
+              + "  attributes:\n"
+              + "    - name: service.name\n"
+              + "      value: sdk-service\n"
+              + "    - name: deployment.environment.name\n"
+              + "      value: sdk-environment\n"
+              + "telemetry_policy/development:\n"
+              + "  sources:\n"
+              + "    - kind: opamp\n"
+              + "      format: jsonkeyvalue\n"
+              + "      location: vendor\n"
+              + "      mappings:\n"
+              + "        - policyId: sampling_rate\n"
+              + "          policyType: trace-sampling\n";
+      DeclarativeConfigResult result =
+          DeclarativeConfiguration.parseAndCreate(
+              new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+      try {
+        assertThat(result.getResource().getAttribute(AttributeKey.stringKey("service.name")))
+            .isEqualTo("sdk-service");
+        assertThat(
+                result
+                    .getResource()
+                    .getAttribute(AttributeKey.stringKey("deployment.environment.name")))
+            .isEqualTo("sdk-environment");
+        RecordedRequest request = server.takeRequest(5, TimeUnit.SECONDS);
+        assertThat(request).isNotNull();
+        assertThat(request.getHeaders().get("Authorization")).isEqualTo("Bearer token");
+        assertThat(request.getBody()).isNotNull();
+        AgentToServer message = AgentToServer.ADAPTER.decode(request.getBody());
+        assertThat(message.agent_description).isNotNull();
+        assertThat(message.agent_description.identifying_attributes)
+            .anySatisfy(
+                attribute -> {
+                  assertThat(attribute.key).isEqualTo("service.name");
+                  assertThat(attribute.value.string_value)
+                      .isEqualTo(explicitServiceName ? "opamp-service" : "opamp-resource-service");
+                });
+        assertThat(message.agent_description.non_identifying_attributes)
+            .anySatisfy(
+                attribute -> {
+                  assertThat(attribute.key).isEqualTo("deployment.environment.name");
+                  assertThat(attribute.value.string_value).isEqualTo("opamp-environment");
+                });
+      } finally {
+        result.getSdk().close();
+      }
+    } finally {
+      PolicyInit.resetForTest();
+      previous.forEach(
+          (key, value) -> {
+            if (value == null) {
+              System.clearProperty(key);
+            } else {
+              System.setProperty(key, value);
+            }
+          });
+    }
   }
 
   @Test

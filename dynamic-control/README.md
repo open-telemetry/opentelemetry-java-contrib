@@ -120,6 +120,45 @@ telemetry_policy/development:
 
 ```
 
+#### OpAMP settings and service identity
+
+OpAMP does not yet have a declarative configuration schema. Its connection settings and service
+identity are read separately from system properties or environment variables, even when the SDK
+uses declarative configuration:
+
+* Endpoint: `otel.opamp.service.url` / `OTEL_OPAMP_SERVICE_URL`
+* Headers: `otel.experimental.opamp.headers` / `OTEL_EXPERIMENTAL_OPAMP_HEADERS`
+* Service name: `otel.service.name` / `OTEL_SERVICE_NAME`, falling back to `service.name` in
+  `otel.resource.attributes` / `OTEL_RESOURCE_ATTRIBUTES`, then `unknown_service:java`
+* Deployment environment: `deployment.environment.name` (or the legacy `deployment.environment`)
+  in `otel.resource.attributes` / `OTEL_RESOURCE_ATTRIBUTES`
+
+System properties take precedence over environment variables. These settings configure only OpAMP
+on the declarative path; they are not injected into the SDK resource or the declarative policy model.
+
+**Configure the service name twice**: in the SDK resource and separately for OpAMP. For example,
+include the following in the declarative configuration alongside `telemetry_policy/development`:
+
+```yaml
+resource:
+  attributes:
+    - name: service.name
+      value: my-service
+    - name: deployment.environment.name
+      value: production
+```
+
+Also set `OTEL_SERVICE_NAME=my-service` and
+`OTEL_RESOURCE_ATTRIBUTES=deployment.environment.name=production` for OpAMP, plus its endpoint and
+any authentication headers.
+
+Keep both identities consistent. This duplication is a temporary workaround, not automatic access
+to the SDK's resolved resource: resource-detector results are not copied to OpAMP. Although duplicate
+configuration risks drift, merging ambient properties into the SDK's declarative configuration would
+violate its configuration semantics. A spec-supported resource-access mechanism would allow this
+limitation to be removed; the OpAMP/SDK integration needs to be established through the specification
+process first.
+
 ### Using as an auto-configured extension
 
 You can use either `otel.java.experimental.telemetry.policy.init.yaml`

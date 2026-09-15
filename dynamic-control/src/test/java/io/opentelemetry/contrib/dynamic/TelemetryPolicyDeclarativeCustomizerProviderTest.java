@@ -57,10 +57,10 @@ class TelemetryPolicyDeclarativeCustomizerProviderTest {
             .getAdditionalProperties()
             .get(TelemetryPolicySamplerComponentProvider.NAME);
     assertThat(samplerProperty).isNotNull();
-    assertThat(samplerProperty.getAdditionalProperties().get("resource_attributes"))
-        .isEqualTo(resourceAttributes());
-    assertThat(samplerProperty.getAdditionalProperties().get("otel.resource.attributes"))
-        .isEqualTo(resourceAttributes());
+    assertThat(samplerProperty.getAdditionalProperties()).containsOnlyKeys("sources");
+    assertThat(customized.getResource().getAttributes())
+        .extracting(AttributeNameValueModel::getName)
+        .contains("service.name");
 
     AutoConfigurationCustomizer autoConfiguration = mock(AutoConfigurationCustomizer.class);
     PolicyInit.init(autoConfiguration);
@@ -141,13 +141,6 @@ class TelemetryPolicyDeclarativeCustomizerProviderTest {
     Map<String, Object> telemetryPolicy = new LinkedHashMap<>();
     telemetryPolicy.put("sources", Collections.singletonList(source));
     return telemetryPolicy;
-  }
-
-  private static Map<String, String> resourceAttributes() {
-    Map<String, String> attributes = new LinkedHashMap<>();
-    attributes.put("service.name", "edot-otel");
-    attributes.put("deployment.environment.name", "dev");
-    return attributes;
   }
 
   private static void invokeStaticNoArg(Class<?> targetClass, String methodName) throws Exception {

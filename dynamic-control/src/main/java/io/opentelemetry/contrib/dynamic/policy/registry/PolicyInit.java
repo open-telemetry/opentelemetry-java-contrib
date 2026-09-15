@@ -6,6 +6,7 @@
 package io.opentelemetry.contrib.dynamic.policy.registry;
 
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
+import io.opentelemetry.common.ComponentLoader;
 import io.opentelemetry.contrib.dynamic.policy.OpampPolicyProvider;
 import io.opentelemetry.contrib.dynamic.policy.PolicyImplementer;
 import io.opentelemetry.contrib.dynamic.policy.PolicyProvider;
@@ -15,10 +16,12 @@ import io.opentelemetry.contrib.dynamic.policy.PolicyStore;
 import io.opentelemetry.contrib.dynamic.policy.PolicyTypeInitializer;
 import io.opentelemetry.contrib.dynamic.policy.PolicyValidator;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
+import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingRatePolicy;
 import io.opentelemetry.instrumentation.config.bridge.DeclarativeConfigBridge;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
+import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
 import java.io.Closeable;
 import java.io.IOException;
 import java.lang.reflect.Proxy;
@@ -187,7 +190,14 @@ public final class PolicyInit {
     }
     resolveAndInitializeConfiguredPolicyTypes(initConfig, createNoopAutoConfigurationCustomizer());
     try {
-      activateSources(initConfig, PolicyProviderConfig.create(declarativeConfig));
+      // OpAMP has no declarative schema yet. Read its settings independently, without
+      // merging ambient properties into the SDK model or the policy component configuration.
+      PolicyProviderConfig opampConfig =
+          createLegacyProviderConfig(
+              DefaultConfigProperties.create(
+                  Collections.emptyMap(),
+                  ComponentLoader.forClassLoader(PolicyInit.class.getClassLoader())));
+      activateSources(initConfig, PolicyProviderConfig.create(declarativeConfig), opampConfig);
     } catch (RuntimeException e) {
       logger.log(
           Level.WARNING,
@@ -292,6 +302,11 @@ public final class PolicyInit {
    * <p>This is idempotent; repeated calls after first activation are ignored.
    */
   private static void activateSources(PolicyInitConfig initConfig, PolicyProviderConfig config) {
+    activateSources(initConfig, config, config);
+  }
+
+  private static void activateSources(
+      PolicyInitConfig initConfig, PolicyProviderConfig config, PolicyProviderConfig opampConfig) {
     if (!sourcesActivated.compareAndSet(false, true)) {
       return;
     }
@@ -304,7 +319,11 @@ public final class PolicyInit {
             source.getKind().configValue());
         continue;
       }
-      PolicyProvider provider = source.getKind().createProvider(source, config, validators);
+      PolicyProvider provider =
+          source
+              .getKind()
+              .createProvider(
+                  source, source.getKind() == SourceKind.OPAMP ? opampConfig : config, validators);
       if (provider == null) {
         logger.log(
             Level.INFO,
