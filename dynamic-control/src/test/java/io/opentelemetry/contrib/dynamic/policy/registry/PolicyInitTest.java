@@ -19,6 +19,7 @@ import io.opentelemetry.contrib.dynamic.policy.PolicyProviderPoller;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicyIdentity;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
+import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingPercentagePolicy;
 import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingRatePolicy;
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.DeclarativeConfigResult;
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.DeclarativeConfiguration;
@@ -243,6 +244,14 @@ class PolicyInitTest {
         telemetryPolicyNodeConfig(TraceSamplingRatePolicy.POLICY_TYPE));
 
     assertThat(TraceSamplingRatePolicy.getInitializedSampler()).isNotNull();
+  }
+
+  @Test
+  void initializesPercentagePolicyTypeFromDeclarativeConfig() {
+    PolicyInit.initFromDeclarativeConfig(
+        telemetryPolicyNodeConfig(TraceSamplingPercentagePolicy.POLICY_TYPE));
+
+    assertThat(TraceSamplingPercentagePolicy.getInitializedSampler()).isNotNull();
   }
 
   @Test

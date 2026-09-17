@@ -14,6 +14,7 @@ import io.opentelemetry.contrib.dynamic.policy.registry.PolicyInitConfig;
 import io.opentelemetry.contrib.dynamic.policy.registry.PolicySourceConfig;
 import io.opentelemetry.contrib.dynamic.policy.registry.PolicySourceMappingConfig;
 import io.opentelemetry.contrib.dynamic.policy.registry.json.JsonNodePolicyInitConfigParser;
+import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingPercentagePolicy;
 import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingRatePolicy;
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.DeclarativeConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.DeclarativeConfigurationCustomizerProvider;
@@ -84,7 +85,8 @@ public final class TelemetryPolicyDeclarativeCustomizerProvider
       OpenTelemetryConfigurationModel model,
       Map<?, ?> telemetryPolicy,
       PolicyInitConfig initConfig) {
-    if (!containsPolicyType(initConfig, TraceSamplingRatePolicy.POLICY_TYPE)) {
+    if (!containsPolicyType(initConfig, TraceSamplingRatePolicy.POLICY_TYPE)
+        && !containsPolicyType(initConfig, TraceSamplingPercentagePolicy.POLICY_TYPE)) {
       return;
     }
     Object sources = telemetryPolicy.get("sources");

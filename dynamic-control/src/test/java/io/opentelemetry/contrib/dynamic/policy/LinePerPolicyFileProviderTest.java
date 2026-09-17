@@ -10,6 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceFormat;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceWrapper;
+import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingPercentagePolicy;
 import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingRatePolicy;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -23,6 +24,8 @@ import org.junit.jupiter.api.io.TempDir;
 class LinePerPolicyFileProviderTest {
 
   private static final String TRACE_SAMPLING_TYPE = TraceSamplingRatePolicy.POLICY_TYPE;
+  private static final String TRACE_SAMPLING_PERCENTAGE_TYPE =
+      TraceSamplingPercentagePolicy.POLICY_TYPE;
 
   @TempDir Path tempDir;
 
@@ -39,7 +42,7 @@ class LinePerPolicyFileProviderTest {
 
   @Test
   void fetchPoliciesParsesJsonLines() throws Exception {
-    Path file = writeLines("{\"trace-sampling\": 0.5}");
+    Path file = writeLines("{\"sampling-rate\": 0.5}");
     LinePerPolicyFileProvider provider =
         new LinePerPolicyFileProvider(file, Collections.singletonList(acceptingValidator()));
 
@@ -52,7 +55,7 @@ class LinePerPolicyFileProviderTest {
 
   @Test
   void fetchPoliciesParsesKeyValueLines() throws Exception {
-    Path file = writeLines("trace-sampling=0.5");
+    Path file = writeLines("sampling-rate=0.5");
     LinePerPolicyFileProvider provider =
         new LinePerPolicyFileProvider(file, Collections.singletonList(acceptingValidator()));
 
@@ -65,7 +68,7 @@ class LinePerPolicyFileProviderTest {
 
   @Test
   void fetchPoliciesSkipsBlankLinesAndComments() throws Exception {
-    Path file = writeLines("", "   ", "# comment line", "trace-sampling=0.25");
+    Path file = writeLines("", "   ", "# comment line", "sampling-rate=0.25");
     LinePerPolicyFileProvider provider =
         new LinePerPolicyFileProvider(file, Collections.singletonList(acceptingValidator()));
 
@@ -79,9 +82,9 @@ class LinePerPolicyFileProviderTest {
   void fetchPoliciesParsesFullJsonPolicyLines() throws Exception {
     Path file =
         writeLines(
-            "{\"id\":\"trace-sampling\",\"name\":\"Trace sampling rate\","
+            "{\"id\":\"sampling-rate\",\"name\":\"Trace sampling rate\","
                 + "\"trace\":{\"match\":[{\"trace_field\":\"trace_id\",\"exists\":true}],"
-                + "\"keep\":{\"probability\":0.1}}}");
+                + "\"keep\":{\"ratio\":0.1}}}");
     LinePerPolicyFileProvider provider =
         new LinePerPolicyFileProvider(file, Collections.singletonList(acceptingValidator()));
 
@@ -92,8 +95,21 @@ class LinePerPolicyFileProviderTest {
   }
 
   @Test
+  void fetchPoliciesParsesPercentagePolicyLines() throws Exception {
+    Path file = writeLines("trace-sampling=50.0");
+    LinePerPolicyFileProvider provider =
+        new LinePerPolicyFileProvider(file, Collections.singletonList(percentageValidator()));
+
+    List<TelemetryPolicy> policies = provider.fetchPolicies();
+
+    assertThat(policies).hasSize(1);
+    assertThat(policies.get(0).getType()).isEqualTo(TRACE_SAMPLING_PERCENTAGE_TYPE);
+    assertThat(policies.get(0).getSourceKind()).isEqualTo(SourceKind.FILE);
+  }
+
+  @Test
   void fetchPoliciesRejectsJsonLineWithExtraKeys() throws Exception {
-    Path file = writeLines("{\"trace-sampling\": 0.5, \"typo\": 1}");
+    Path file = writeLines("{\"sampling-rate\": 0.5, \"typo\": 1}");
     LinePerPolicyFileProvider provider =
         new LinePerPolicyFileProvider(file, Collections.singletonList(acceptingValidator()));
 
@@ -106,7 +122,7 @@ class LinePerPolicyFileProviderTest {
   void fetchPoliciesSkipsUnknownOrRejectedPolicies() throws Exception {
     PolicyValidator rejectingValidator =
         new TestPolicyValidator(/* acceptJson= */ false, /* acceptKeyValue= */ false);
-    Path file = writeLines("{\"trace-sampling\": 0.5}", "{\"other-policy\": 0.5}", "other.key=1");
+    Path file = writeLines("{\"sampling-rate\": 0.5}", "{\"other-policy\": 0.5}", "other.key=1");
     LinePerPolicyFileProvider provider =
         new LinePerPolicyFileProvider(file, Collections.singletonList(rejectingValidator));
 
@@ -125,18 +141,29 @@ class LinePerPolicyFileProviderTest {
     return new TestPolicyValidator(/* acceptJson= */ true, /* acceptKeyValue= */ true);
   }
 
+  private static PolicyValidator percentageValidator() {
+    return new TestPolicyValidator(
+        /* acceptJson= */ true, /* acceptKeyValue= */ true, TRACE_SAMPLING_PERCENTAGE_TYPE);
+  }
+
   private static class TestPolicyValidator implements PolicyValidator {
     private final boolean acceptJson;
     private final boolean acceptKeyValue;
+    private final String policyType;
 
     private TestPolicyValidator(boolean acceptJson, boolean acceptKeyValue) {
+      this(acceptJson, acceptKeyValue, TRACE_SAMPLING_TYPE);
+    }
+
+    private TestPolicyValidator(boolean acceptJson, boolean acceptKeyValue, String policyType) {
       this.acceptJson = acceptJson;
       this.acceptKeyValue = acceptKeyValue;
+      this.policyType = policyType;
     }
 
     @Override
     public String getPolicyType() {
-      return TRACE_SAMPLING_TYPE;
+      return policyType;
     }
 
     @Override
@@ -145,21 +172,21 @@ class LinePerPolicyFileProviderTest {
         if (!acceptJson) {
           return null;
         }
-        return testPolicy(sourceKind);
+        return testPolicy(policyType, sourceKind);
       }
       if (source.getFormat() == SourceFormat.KEYVALUE) {
         if (!acceptKeyValue) {
           return null;
         }
-        return testPolicy(sourceKind);
+        return testPolicy(policyType, sourceKind);
       }
       return null;
     }
   }
 
-  private static TelemetryPolicy testPolicy(SourceKind sourceKind) {
+  private static TelemetryPolicy testPolicy(String policyType, SourceKind sourceKind) {
     return new TestTelemetryPolicy(
-        new TelemetryPolicyIdentity("test-policy", "Test policy"), TRACE_SAMPLING_TYPE, sourceKind);
+        new TelemetryPolicyIdentity("test-policy", "Test policy"), policyType, sourceKind);
   }
 
   private static final class TestTelemetryPolicy implements TelemetryPolicy {

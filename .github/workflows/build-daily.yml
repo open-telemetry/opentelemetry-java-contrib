@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   common:
-    uses: ./.github/workflows/build-common.yml
+    uses: $/.github/workflows/build-common.yml
     with:
       cache-read-only: true
       no-build-cache: true
@@ -19,7 +19,7 @@ jobs:
       DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
 
   lint:
-    uses: ./.github/workflows/reusable-lint.yml
+    uses: $/.github/workflows/reusable-lint.yml
 
   publish-snapshots:
     environment: protected
@@ -33,7 +33,7 @@ jobs:
           persist-credentials: false
 
       - name: Set up JDK for running Gradle
-        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           distribution: temurin
           java-version: 21
@@ -62,7 +62,7 @@ jobs:
       - common
       - lint
       - publish-snapshots
-    uses: open-telemetry/shared-workflows/.github/workflows/workflow-failure-issue.yml@03559ef555db0eae5d85c3c6347d1530243e7aa7 # v0.13.0
+    uses: open-telemetry/shared-workflows/.github/workflows/workflow-failure-issue.yml@68c7b2f0ef9cd9c1e2b71d3018f63127be189578 # v0.14.0
     with:
       success: >-
         ${{
