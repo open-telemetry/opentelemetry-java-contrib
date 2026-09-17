@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   common:
-    uses: ./.github/workflows/build-common.yml
+    uses: $/.github/workflows/build-common.yml
     with:
       cache-read-only: true
       no-build-cache: true
@@ -19,7 +19,7 @@ jobs:
       DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
 
   lint:
-    uses: ./.github/workflows/reusable-lint.yml
+    uses: $/.github/workflows/reusable-lint.yml
 
   publish-snapshots:
     environment: protected
