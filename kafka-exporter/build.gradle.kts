@@ -24,7 +24,7 @@ dependencies {
 
   runtimeOnly("com.fasterxml.jackson.core:jackson-core")
   runtimeOnly("com.fasterxml.jackson.core:jackson-databind")
-  runtimeOnly("at.yawk.lz4:lz4-java:1.11.2") {
+  runtimeOnly("at.yawk.lz4:lz4-java:1.11.3") {
     because("CVE-2026-59949")
   }
 
