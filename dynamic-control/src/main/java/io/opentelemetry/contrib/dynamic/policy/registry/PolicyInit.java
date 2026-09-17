@@ -143,6 +143,7 @@ public final class PolicyInit {
           if (initConfig == null) {
             return Collections.emptyMap();
           }
+          rejectMutuallyExclusiveTraceSamplingTypes(initConfig);
           resolveAndInitializeConfiguredPolicyTypes(initConfig, autoConfiguration);
           activateSources(initConfig, config);
           return Collections.emptyMap();
@@ -169,6 +170,7 @@ public final class PolicyInit {
     if (initConfig == null) {
       return;
     }
+    rejectMutuallyExclusiveTraceSamplingTypes(initConfig);
     resolveAndInitializeConfiguredPolicyTypes(initConfig, createNoopAutoConfigurationCustomizer());
     try {
       activateSources(initConfig, config);
@@ -222,6 +224,34 @@ public final class PolicyInit {
             "Mapped policyType ''{0}'' to class ''{1}''",
             new Object[] {mappedPolicyType, policyClass.getName()});
       }
+    }
+  }
+
+  // This restriction is present because having both samplers active means they compete to set the
+  // sampling rate and they don't merge nicely. For example if one was removed, that would be
+  // considered deletion and sampling rate would be reset to 100% rather than fallback to the other.
+  // To relax the restriction, they would need to be reimplemented as cooperating policies acting
+  // effectively as one. This complicates the implementation and is unlikely to ever be needed in
+  // practice, so I've gone with this simpler approach
+  private static void rejectMutuallyExclusiveTraceSamplingTypes(PolicyInitConfig initConfig) {
+    boolean hasRatio = false;
+    boolean hasPercentage = false;
+    for (PolicySourceConfig source : initConfig.getSources()) {
+      for (PolicySourceMappingConfig mapping : source.getMappings()) {
+        if (TraceSamplingRatePolicy.POLICY_TYPE.equals(mapping.getPolicyType())) {
+          hasRatio = true;
+        } else if (TraceSamplingPercentagePolicy.POLICY_TYPE.equals(mapping.getPolicyType())) {
+          hasPercentage = true;
+        }
+      }
+    }
+    if (hasRatio && hasPercentage) {
+      throw new IllegalArgumentException(
+          "Configure only one trace sampling policy representation: '"
+              + TraceSamplingRatePolicy.POLICY_TYPE
+              + "' or '"
+              + TraceSamplingPercentagePolicy.POLICY_TYPE
+              + "'");
     }
   }
 
