@@ -44,8 +44,8 @@ class PolicyProviderPollerTest {
   @Test
   void registerStartsOneSharedSchedulerForMultipleTargets() throws Exception {
     PolicyProviderPoller.setGlobalPollInterval(Duration.ofMillis(10));
-    Path firstFile = writePolicyFile("first-policies.txt", "trace-sampling=0.5");
-    Path secondFile = writePolicyFile("second-policies.txt", "trace-sampling=0.25");
+    Path firstFile = writePolicyFile("first-policies.txt", "sampling-rate=0.5");
+    Path secondFile = writePolicyFile("second-policies.txt", "sampling-rate=0.25");
 
     Closeable first = PolicyProviderPoller.registerFile(firstFile, file -> {});
     Closeable second = PolicyProviderPoller.registerFile(secondFile, file -> {});
@@ -67,11 +67,11 @@ class PolicyProviderPollerTest {
 
   @Test
   void pollInvokesRegisteredFileTargetsWhenFileChanges() throws Exception {
-    Path file = writePolicyFile("policies.txt", "trace-sampling=0.5");
+    Path file = writePolicyFile("policies.txt", "sampling-rate=0.5");
     AtomicInteger pollCount = new AtomicInteger();
     PolicyProviderPoller.registerFile(file, changedFile -> pollCount.incrementAndGet());
 
-    Files.write(file, Collections.singletonList("trace-sampling=0.75"));
+    Files.write(file, Collections.singletonList("sampling-rate=0.75"));
     Files.setLastModifiedTime(
         file, FileTime.fromMillis(System.currentTimeMillis() + Duration.ofSeconds(2).toMillis()));
 
@@ -82,7 +82,7 @@ class PolicyProviderPollerTest {
 
   @Test
   void registerFileInvokesTargetOnlyWhenFileChanges() throws Exception {
-    Path file = writePolicyFile("policies.txt", "trace-sampling=0.5");
+    Path file = writePolicyFile("policies.txt", "sampling-rate=0.5");
     AtomicInteger pollCount = new AtomicInteger();
     PolicyProviderPoller.registerFile(file, changedFile -> pollCount.incrementAndGet());
 
@@ -90,7 +90,7 @@ class PolicyProviderPollerTest {
 
     assertThat(pollCount.get()).isZero();
 
-    Files.write(file, Collections.singletonList("trace-sampling=0.75"));
+    Files.write(file, Collections.singletonList("sampling-rate=0.75"));
     Files.setLastModifiedTime(
         file, FileTime.fromMillis(System.currentTimeMillis() + Duration.ofSeconds(2).toMillis()));
     PolicyProviderPoller.poll();
@@ -100,7 +100,7 @@ class PolicyProviderPollerTest {
 
   @Test
   void registerUrlInvokesTargetOnInitialReadAndWhenResponseChanges() throws Exception {
-    AtomicReference<String> responseBody = new AtomicReference<>("trace-sampling=0.5");
+    AtomicReference<String> responseBody = new AtomicReference<>("sampling-rate=0.5");
     AtomicInteger requestCount = new AtomicInteger();
     URI url = startHttpServer(responseBody, requestCount);
     AtomicInteger pollCount = new AtomicInteger();
@@ -118,18 +118,18 @@ class PolicyProviderPollerTest {
 
     assertThat(requestCount.get()).isEqualTo(1);
     assertThat(pollCount.get()).isEqualTo(1);
-    assertThat(changedBody.get()).isEqualTo("trace-sampling=0.5");
+    assertThat(changedBody.get()).isEqualTo("sampling-rate=0.5");
 
-    responseBody.set("trace-sampling=0.75");
+    responseBody.set("sampling-rate=0.75");
     PolicyProviderPoller.poll();
 
     assertThat(pollCount.get()).isEqualTo(2);
-    assertThat(changedBody.get()).isEqualTo("trace-sampling=0.75");
+    assertThat(changedBody.get()).isEqualTo("sampling-rate=0.75");
   }
 
   @Test
   void registerUrlRetriesInitialReadWhenTargetFails() throws Exception {
-    AtomicReference<String> responseBody = new AtomicReference<>("trace-sampling=0.5");
+    AtomicReference<String> responseBody = new AtomicReference<>("sampling-rate=0.5");
     AtomicInteger requestCount = new AtomicInteger();
     URI url = startHttpServer(responseBody, requestCount);
     AtomicInteger callbackAttempts = new AtomicInteger();
@@ -146,12 +146,12 @@ class PolicyProviderPollerTest {
     PolicyProviderPoller.poll();
 
     assertThat(callbackAttempts.get()).isEqualTo(1);
-    assertThat(callbackBody.get()).isEqualTo("trace-sampling=0.5");
+    assertThat(callbackBody.get()).isEqualTo("sampling-rate=0.5");
 
     PolicyProviderPoller.poll();
 
     assertThat(callbackAttempts.get()).isEqualTo(2);
-    assertThat(callbackBody.get()).isEqualTo("trace-sampling=0.5");
+    assertThat(callbackBody.get()).isEqualTo("sampling-rate=0.5");
 
     PolicyProviderPoller.poll();
 
@@ -160,7 +160,7 @@ class PolicyProviderPollerTest {
 
   @Test
   void registerUrlRetriesChangeWhenTargetFails() throws Exception {
-    AtomicReference<String> responseBody = new AtomicReference<>("trace-sampling=0.5");
+    AtomicReference<String> responseBody = new AtomicReference<>("sampling-rate=0.5");
     AtomicInteger requestCount = new AtomicInteger();
     URI url = startHttpServer(responseBody, requestCount);
     AtomicInteger callbackAttempts = new AtomicInteger();
@@ -177,17 +177,17 @@ class PolicyProviderPollerTest {
 
     PolicyProviderPoller.poll();
     assertThat(callbackAttempts.get()).isEqualTo(1);
-    assertThat(callbackBody.get()).isEqualTo("trace-sampling=0.5");
+    assertThat(callbackBody.get()).isEqualTo("sampling-rate=0.5");
 
-    responseBody.set("trace-sampling=0.75");
+    responseBody.set("sampling-rate=0.75");
 
     PolicyProviderPoller.poll();
     assertThat(callbackAttempts.get()).isEqualTo(2);
-    assertThat(callbackBody.get()).isEqualTo("trace-sampling=0.75");
+    assertThat(callbackBody.get()).isEqualTo("sampling-rate=0.75");
 
     PolicyProviderPoller.poll();
     assertThat(callbackAttempts.get()).isEqualTo(3);
-    assertThat(callbackBody.get()).isEqualTo("trace-sampling=0.75");
+    assertThat(callbackBody.get()).isEqualTo("sampling-rate=0.75");
 
     PolicyProviderPoller.poll();
     assertThat(callbackAttempts.get()).isEqualTo(3);

@@ -28,7 +28,7 @@ public final class TraceSamplingRatePolicyImplementer implements PolicyImplement
       Logger.getLogger(TraceSamplingRatePolicyImplementer.class.getName());
 
   private static final List<PolicyValidator> VALIDATORS =
-      Collections.<PolicyValidator>singletonList(new TraceSamplingValidator());
+      Collections.<PolicyValidator>singletonList(new TraceSamplingRateValidator());
 
   private final DelegatingSampler delegatingSampler;
   private final List<PolicyValidator> validators;

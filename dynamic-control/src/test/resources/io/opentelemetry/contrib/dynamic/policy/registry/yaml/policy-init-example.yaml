@@ -4,7 +4,7 @@ sources:
     location: vendor-specific
     mappings:
       - policyId: sampling_rate
-        policyType: trace-sampling
+        policyType: sampling-rate
       - policyId: send_logs
         policyType: log_export_enabled_policy
       - policyId: send_traces
