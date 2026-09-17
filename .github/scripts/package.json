@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Dependencies for GitHub Action workflows",
   "private": true,
+  "engines": {
+    "node": ">=22"
+  },
   "dependencies": {
     "@octokit/rest": "^22.0.0",
     "yaml": "2.9.1"
