@@ -51,7 +51,7 @@ echo "    format: jsonkeyvalue" >> config.yaml
 echo "    location: vendor" >> config.yaml
 echo "    mappings:" >> config.yaml
 echo "      - policyId: sampling_rate" >> config.yaml
-echo "        policyType: trace-sampling" >> config.yaml
+echo "        policyType: sampling-rate" >> config.yaml
 java -Dotel.javaagent.extensions=./opentelemetry-dynamic-control-all.jar -Dotel.java.experimental.telemetry.policy.init.yaml=./config.yaml -Dotel.opamp.service.url=http://127.0.0.1:4320/v1/opamp -javaagent:path/to/opentelemetry-javaagent.jar -Dotel.service.name=my-service -jar myapp.jar
 ```
 
@@ -116,7 +116,7 @@ telemetry_policy/development:
       location: vendor
       mappings:
         - policyId: sampling_rate
-          policyType: trace-sampling
+          policyType: sampling-rate
 
 ```
 
@@ -143,7 +143,7 @@ sources:
     location: vendor
     mappings:
       - policyId: sampling_rate
-        policyType: trace-sampling
+        policyType: sampling-rate
 
 ```
 
@@ -170,11 +170,11 @@ Each source must specify:
 
 ```json
 {
-  "id": "trace-sampling",
+  "id": "sampling-rate",
   "name": "Trace sampling rate",
   "trace": {
     "match": [{"trace_field": "trace_id", "exists": true}],
-    "keep": {"probability": 0.1}
+    "keep": {"ratio": 0.1}
   }
 }
 ```
@@ -186,7 +186,9 @@ Each mapping must specify:
 
 * `policyId`: the key in the source payload, for example `sampling_rate` (this is an arbitrary string defined
 by the user or already being used/sent from some source)
-* `policyType`: the dynamic-control policy type to update, currently only `trace-sampling` is valid
+* `policyType`: the dynamic-control policy type to update. Trace sampling supports
+  `sampling-rate` for ratios and `trace-sampling` for percentages. Configure only one of these two
+  representations at a time.
 
 Currently supported values in summary
 
@@ -197,18 +199,26 @@ sources:
     location: 'opamp config map key'|'file path'|'http url'|omit row
     mappings:
       - policyId: user-defined-string
-        policyType: trace-sampling
+        policyType: sampling-rate|trace-sampling
 
 ```
 
 ### Policies supported
 
-* `trace-sampling`
+* `sampling-rate`
   * IMPORTANT: if this policy is included in the config, then the sampler installed is overridden
     and a consistent sampling sampler is installed
     (technically the ComposableSampler.parentThreshold(ComposableSampler.probability()) sampler)
-  * Expects a value between 0.0 and 1.0 (including both end values), and will apply that sampling rate
+  * Expects a ratio between 0.0 and 1.0 (including both end values), and will apply that sampling rate
     to the agent's sampler where 0.0 is 0% head sampling and 1.0 is 100% sampling
+* `trace-sampling`
+  * Expects a percentage between 0.0 and 100.0 (including both end values), and converts it to the
+    sampler probability where 0.0 is 0% head sampling and 100.0 is 100% sampling
+  * This is mutually exclusive with `sampling-rate`
+
+Existing ratio configurations should move from `policyType: trace-sampling` with values like `0.5`
+to `policyType: sampling-rate` with the same values. Percentage configurations should use
+`policyType: trace-sampling` with values like `50.0`.
 
 ### Config example
 
@@ -222,15 +232,15 @@ sources:
     location: vendor
     mappings:
       - policyId: sampling_rate
-        policyType: trace-sampling
+        policyType: sampling-rate
   - kind: file
     format: keyvalue
     location: /path/to/here.conf
     mappings:
       - policyId: trace_rate
-        policyType: trace-sampling
+        policyType: sampling-rate
       - policyId: traceid_ratio
-        policyType: trace-sampling
+        policyType: sampling-rate
 
 ```
 
@@ -238,14 +248,14 @@ There are two sources. The first expects a message from an OpAMP server (`kind: 
 from which it will access the config map and extract the value at key `vendor` (`location: vendor`).
 The value is expected to be this json style key-value (`format: jsonkeyvalue`)
 object string (ignoring whitespace and numeric diffs) {"sampling_rate": 0.5} (key defined by `policyId: sampling_rate`).
-On receipt of this, the message is converted to a trace-sampling policy (`policyType: trace-sampling`)
+On receipt of this, the message is converted to a sampling-rate policy (`policyType: sampling-rate`)
 and the new sampling rate applied to the sampler.
 
 The second source expects a file (`kind: file`) at file path /path/to/here.conf (`location: /path/to/here.conf`)
 which when changed will be re-read. The contents are expected to be key=value entries,
 one per line (`format: keyvalue`). The only keys recognized are `trace_rate` (`policyId: trace_rate`)
 and `traceid_ratio` (`policyId: traceid_ratio`). When the value changes, the message is converted
-to a trace-sampling policy (`policyType: trace-sampling`)
+to a sampling-rate policy (`policyType: sampling-rate`)
 and the new sampling rate applied to the sampler.
 
 Because `opamp` source has higher priority than `file` source, if both sources generate a change
@@ -257,13 +267,13 @@ Telemetry policy uses `policyType`, `id`, and `name` for different purposes:
 
 * `policyId` in the pipeline initialization identifies the source payload key for a policy mapping.
 * `policyType` selects the Java policy implementation for that mapped policy ID. For example,
-  `policyType: trace-sampling` tells dynamic control to validate matching source values as trace
-  sampling policies and deliver them to the trace sampling implementer.
+  `policyType: sampling-rate` tells dynamic control to validate matching source values as trace
+  sampling ratios and deliver them to the trace sampling implementer.
 * `id` identifies one policy instance within a policy type. It is used to distinguish updates,
   removals, and duplicate policies of the same type.
 * `name` is a human-readable description of the policy identified by `id`.
 
-An example helps to understand the differences between these fields. `trace-sampling` is an existing
+An example helps to understand the differences between these fields. `sampling-rate` is an existing
 policy type, detailed above, and because it uses a sampling rate applied globally, the id for it
 would be irrelevant. A different implementation, say called `trace-sampling-per-span`, could
 allow different sampling rates to be applied to different types of spans. So you could sample
