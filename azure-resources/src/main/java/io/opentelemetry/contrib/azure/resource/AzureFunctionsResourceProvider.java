@@ -8,7 +8,6 @@ package io.opentelemetry.contrib.azure.resource;
 import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.AZURE_RESOURCE_GROUP_NAME;
 import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.CLOUD_ACCOUNT_ID;
 import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.CLOUD_REGION;
-import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.CLOUD_RESOURCE_ID;
 import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.CloudPlatformIncubatingValues.AZURE_FUNCTIONS;
 import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.FAAS_INSTANCE;
 import static io.opentelemetry.contrib.azure.resource.IncubatingAttributes.FAAS_MAX_MEMORY;
@@ -73,8 +72,7 @@ public final class AzureFunctionsResourceProvider extends CloudResourceProvider 
     AttributesBuilder builder = AzureVmResourceProvider.azureAttributeBuilder(AZURE_FUNCTIONS);
     builder.put(SERVICE_NAME, name);
 
-    String websiteResourceGroup =
-        env.get(AzureAppServiceResourceProvider.WEBSITE_RESOURCE_GROUP);
+    String websiteResourceGroup = env.get(AzureAppServiceResourceProvider.WEBSITE_RESOURCE_GROUP);
     if (websiteResourceGroup != null && !websiteResourceGroup.isEmpty()) {
       builder.put(AZURE_RESOURCE_GROUP_NAME, websiteResourceGroup);
     }
@@ -82,12 +80,6 @@ public final class AzureFunctionsResourceProvider extends CloudResourceProvider 
     String subscriptionId = AzureAppServiceResourceProvider.subscriptionId(env);
     if (subscriptionId != null && !subscriptionId.isEmpty()) {
       builder.put(CLOUD_ACCOUNT_ID, subscriptionId);
-    }
-
-    String resourceUri =
-        AzureAppServiceResourceProvider.resourceUri(name, websiteResourceGroup, subscriptionId);
-    if (resourceUri != null) {
-      builder.put(CLOUD_RESOURCE_ID, resourceUri);
     }
 
     String limit = env.get(FUNCTIONS_MEM_LIMIT);

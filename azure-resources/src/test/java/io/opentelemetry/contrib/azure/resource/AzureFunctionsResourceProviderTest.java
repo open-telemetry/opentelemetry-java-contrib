@@ -52,9 +52,7 @@ class AzureFunctionsResourceProviderTest {
         .containsEntry(CLOUD_PLATFORM, "azure.functions")
         .containsEntry(CLOUD_ACCOUNT_ID, "TEST_SUBSCRIPTION_ID")
         .containsEntry(AZURE_RESOURCE_GROUP_NAME, TEST_WEBSITE_RESOURCE_GROUP)
-        .containsEntry(
-            CLOUD_RESOURCE_ID,
-            "/subscriptions/TEST_SUBSCRIPTION_ID/resourceGroups/TEST_WEBSITE_RESOURCE_GROUP/providers/Microsoft.Web/sites/TEST_WEBSITE_SITE_NAME")
+        .doesNotContainKey(CLOUD_RESOURCE_ID)
         .containsEntry(DEPLOYMENT_ENVIRONMENT_NAME, TEST_WEBSITE_SLOT_NAME)
         .containsEntry(SERVICE_NAME, TEST_WEBSITE_SITE_NAME)
         .containsEntry(FAAS_NAME, TEST_WEBSITE_SITE_NAME)
