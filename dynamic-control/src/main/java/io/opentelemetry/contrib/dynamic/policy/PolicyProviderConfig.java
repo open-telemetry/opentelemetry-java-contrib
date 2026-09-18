@@ -6,20 +6,24 @@
 package io.opentelemetry.contrib.dynamic.policy;
 
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
+import io.opentelemetry.sdk.resources.Resource;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import javax.annotation.Nullable;
 
 /** Configuration context shared by policy providers. */
 public final class PolicyProviderConfig {
   private final DeclarativeConfigProperties properties;
   private final Map<String, String> resourceAttributes;
   private final Map<String, String> opampHeaders;
+  @Nullable private final Resource resource;
 
   /** Creates a configuration context without legacy map properties. */
   public static PolicyProviderConfig create(DeclarativeConfigProperties properties) {
-    return new PolicyProviderConfig(properties, Collections.emptyMap(), Collections.emptyMap());
+    return new PolicyProviderConfig(
+        properties, Collections.emptyMap(), Collections.emptyMap(), null);
   }
 
   /**
@@ -32,13 +36,26 @@ public final class PolicyProviderConfig {
       DeclarativeConfigProperties properties,
       Map<String, String> resourceAttributes,
       Map<String, String> opampHeaders) {
-    return new PolicyProviderConfig(properties, resourceAttributes, opampHeaders);
+    return new PolicyProviderConfig(properties, resourceAttributes, opampHeaders, null);
+  }
+
+  /** Returns a copy using the resolved SDK resource instead of legacy identity properties. */
+  public PolicyProviderConfig withResource(Resource resource) {
+    return new PolicyProviderConfig(
+        properties, resourceAttributes, opampHeaders, Objects.requireNonNull(resource, "resource"));
+  }
+
+  @Nullable
+  public Resource getResource() {
+    return resource;
   }
 
   private PolicyProviderConfig(
       DeclarativeConfigProperties properties,
       Map<String, String> resourceAttributes,
-      Map<String, String> opampHeaders) {
+      Map<String, String> opampHeaders,
+      @Nullable Resource resource) {
+    this.resource = resource;
     this.properties = Objects.requireNonNull(properties, "properties cannot be null");
     this.resourceAttributes = copyMap(resourceAttributes, "resourceAttributes");
     this.opampHeaders = copyMap(opampHeaders, "opampHeaders");

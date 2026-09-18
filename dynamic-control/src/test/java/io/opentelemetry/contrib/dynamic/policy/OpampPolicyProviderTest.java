@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceFormat;
+import io.opentelemetry.sdk.resources.Resource;
 import java.io.Closeable;
 import java.time.Duration;
 import java.util.Collections;
@@ -44,6 +45,23 @@ class OpampPolicyProviderTest {
 
     assertThat(OpampPolicyProvider.getEndpoint(properties))
         .isEqualTo("https://example.com/base/v1/opamp");
+  }
+
+  @Test
+  void resolvedResourceOverridesLegacyIdentityWithoutFillingMissingAttributes() {
+    DeclarativeConfigProperties properties = mock(DeclarativeConfigProperties.class);
+    when(properties.getString("otel.service.name")).thenReturn("legacy-service");
+    PolicyProviderConfig config =
+        PolicyProviderConfig.createWithLegacyProperties(
+            properties,
+            Collections.singletonMap("deployment.environment.name", "legacy-environment"),
+            Collections.emptyMap());
+
+    PolicyProviderConfig resolved =
+        config.withResource(Resource.builder().put("service.name", "sdk-service").build());
+    assertThat(OpampPolicyProvider.getServiceName(resolved)).isEqualTo("sdk-service");
+    assertThat(OpampPolicyProvider.getServiceEnvironment(resolved)).isNull();
+    assertThat(OpampPolicyProvider.getServiceName(config)).isEqualTo("legacy-service");
   }
 
   @Test

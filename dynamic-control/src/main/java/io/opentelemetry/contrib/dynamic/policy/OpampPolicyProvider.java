@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.dynamic.policy;
 
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.contrib.dynamic.policy.registry.PolicySourceMappingConfig;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceFormat;
@@ -16,6 +17,7 @@ import io.opentelemetry.opamp.client.internal.connectivity.http.OkHttpSender;
 import io.opentelemetry.opamp.client.internal.request.delay.PeriodicDelay;
 import io.opentelemetry.opamp.client.internal.request.service.HttpRequestService;
 import io.opentelemetry.opamp.client.internal.response.MessageData;
+import io.opentelemetry.sdk.resources.Resource;
 import java.io.Closeable;
 import java.io.IOException;
 import java.time.Duration;
@@ -342,10 +344,16 @@ public final class OpampPolicyProvider extends AbstractPolicyProvider {
   /**
    * Resolves service name from configuration.
    *
-   * <p>Resolution order: {@code otel.service.name}, then {@code service.name} from {@code
-   * otel.resource.attributes}, then {@code unknown_service:java}.
+   * <p>The resolved SDK resource takes precedence when available. Otherwise, resolution order:
+   * {@code otel.service.name}, then {@code service.name} from {@code otel.resource.attributes},
+   * then {@code unknown_service:java}.
    */
   static String getServiceName(PolicyProviderConfig config) {
+    Resource resource = config.getResource();
+    if (resource != null) {
+      String name = resource.getAttribute(AttributeKey.stringKey("service.name"));
+      return name == null ? "unknown_service:java" : name;
+    }
     DeclarativeConfigProperties properties = config.getProperties();
     String configuredServiceName = properties.getString(SERVICE_NAME);
     if (configuredServiceName != null) {
@@ -374,6 +382,10 @@ public final class OpampPolicyProvider extends AbstractPolicyProvider {
 
   @Nullable
   private static String getResourceAttribute(PolicyProviderConfig config, String name) {
+    Resource resource = config.getResource();
+    if (resource != null) {
+      return resource.getAttribute(AttributeKey.stringKey(name));
+    }
     String value = config.getResourceAttributes().get(name);
     if (value != null) {
       return value;

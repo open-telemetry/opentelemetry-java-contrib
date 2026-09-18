@@ -7,13 +7,16 @@ package io.opentelemetry.contrib.dynamic.policy.registry;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
+import io.opentelemetry.common.ComponentLoader;
 import io.opentelemetry.contrib.dynamic.policy.PolicyImplementer;
 import io.opentelemetry.contrib.dynamic.policy.PolicyProviderPoller;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
@@ -25,14 +28,18 @@ import io.opentelemetry.sdk.autoconfigure.declarativeconfig.DeclarativeConfigRes
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.DeclarativeConfiguration;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
+import io.opentelemetry.sdk.autoconfigure.spi.internal.ComponentProvider;
+import io.opentelemetry.sdk.resources.Resource;
 import java.io.ByteArrayInputStream;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -50,6 +57,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.MockedStatic;
 
 class PolicyInitTest {
   @TempDir Path tempDir;
@@ -155,14 +163,17 @@ class PolicyInitTest {
   }
 
   @ParameterizedTest
-  @ValueSource(booleans = {true, false})
-  void declarativeSdkAndOpampKeepSeparateIdentity(boolean explicitServiceName) throws Exception {
+  @ValueSource(strings = {"explicit", "resource", "none", "detected", "fallback"})
+  void declarativeOpampUsesResolvedIdentityWithLegacyFallback(String identitySource)
+      throws Exception {
     Map<String, String> properties = new HashMap<>();
     properties.put("otel.opamp.service.url", server.url("/v1/opamp").toString());
-    properties.put("otel.service.name", explicitServiceName ? "opamp-service" : null);
+    properties.put("otel.service.name", identitySource.equals("explicit") ? "opamp-service" : null);
     properties.put(
         "otel.resource.attributes",
-        "service.name=opamp-resource-service,deployment.environment.name=opamp-environment");
+        identitySource.equals("none")
+            ? null
+            : "service.name=opamp-resource-service,deployment.environment.name=opamp-environment");
     properties.put("otel.experimental.opamp.headers", "Authorization=Bearer token");
     Map<String, String> previous = new HashMap<>();
     properties.forEach(
@@ -179,9 +190,13 @@ class PolicyInitTest {
       String yaml =
           "file_format: '1.0'\n"
               + "resource:\n"
+              + "  detection/development:\n"
+              + "    detectors:\n"
+              + "      - test_identity: {}\n"
               + "  attributes:\n"
-              + "    - name: service.name\n"
-              + "      value: sdk-service\n"
+              + (identitySource.equals("detected")
+                  ? ""
+                  : "    - name: service.name\n      value: sdk-service\n")
               + "    - name: deployment.environment.name\n"
               + "      value: sdk-environment\n"
               + "telemetry_policy/development:\n"
@@ -193,11 +208,10 @@ class PolicyInitTest {
               + "        - policyId: sampling_rate\n"
               + "          policyType: trace-sampling\n";
       DeclarativeConfigResult result =
-          DeclarativeConfiguration.parseAndCreate(
-              new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+          createDeclarativeSdk(yaml, identitySource.equals("fallback"));
       try {
         assertThat(result.getResource().getAttribute(AttributeKey.stringKey("service.name")))
-            .isEqualTo("sdk-service");
+            .isEqualTo(identitySource.equals("detected") ? "detector-service" : "sdk-service");
         assertThat(
                 result
                     .getResource()
@@ -214,13 +228,22 @@ class PolicyInitTest {
                 attribute -> {
                   assertThat(attribute.key).isEqualTo("service.name");
                   assertThat(attribute.value.string_value)
-                      .isEqualTo(explicitServiceName ? "opamp-service" : "opamp-resource-service");
+                      .isEqualTo(
+                          identitySource.equals("fallback")
+                              ? "opamp-resource-service"
+                              : result
+                                  .getResource()
+                                  .getAttribute(AttributeKey.stringKey("service.name")));
                 });
         assertThat(message.agent_description.non_identifying_attributes)
             .anySatisfy(
                 attribute -> {
                   assertThat(attribute.key).isEqualTo("deployment.environment.name");
-                  assertThat(attribute.value.string_value).isEqualTo("opamp-environment");
+                  assertThat(attribute.value.string_value)
+                      .isEqualTo(
+                          identitySource.equals("fallback")
+                              ? "opamp-environment"
+                              : "sdk-environment");
                 });
       } finally {
         result.getSdk().close();
@@ -240,7 +263,7 @@ class PolicyInitTest {
 
   @Test
   void initializesRegisteredPolicyTypeFromDeclarativeConfig() {
-    PolicyInit.initFromDeclarativeConfig(
+    PolicyInit.prepareFromDeclarativeConfig(
         telemetryPolicyNodeConfig(TraceSamplingRatePolicy.POLICY_TYPE));
 
     assertThat(TraceSamplingRatePolicy.getInitializedSampler()).isNotNull();
@@ -248,7 +271,7 @@ class PolicyInitTest {
 
   @Test
   void initializesPercentagePolicyTypeFromDeclarativeConfig() {
-    PolicyInit.initFromDeclarativeConfig(
+    PolicyInit.prepareFromDeclarativeConfig(
         telemetryPolicyNodeConfig(TraceSamplingPercentagePolicy.POLICY_TYPE));
 
     assertThat(TraceSamplingPercentagePolicy.getInitializedSampler()).isNotNull();
@@ -258,7 +281,7 @@ class PolicyInitTest {
   void throwsWhenDeclarativeConfigUsesUnknownPolicyType() {
     assertThatThrownBy(
             () ->
-                PolicyInit.initFromDeclarativeConfig(
+                PolicyInit.prepareFromDeclarativeConfig(
                     telemetryPolicyNodeConfig("trace_sampling_rate_policy")))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("Unknown policyType");
@@ -277,8 +300,8 @@ class PolicyInitTest {
           initializeCount.incrementAndGet();
           return implementer;
         });
-    PolicyInit.initFromDeclarativeConfig(telemetryPolicyNodeConfig(policyType));
-    PolicyInit.initFromDeclarativeConfig(telemetryPolicyNodeConfig(policyType));
+    PolicyInit.prepareFromDeclarativeConfig(telemetryPolicyNodeConfig(policyType));
+    PolicyInit.prepareFromDeclarativeConfig(telemetryPolicyNodeConfig(policyType));
 
     assertThat(initializeCount.get()).isEqualTo(1);
     verify(implementer, times(1)).onPoliciesChanged(Collections.emptyList());
@@ -297,6 +320,54 @@ class PolicyInitTest {
     Method method = targetClass.getDeclaredMethod(methodName);
     method.setAccessible(true);
     method.invoke(null);
+  }
+
+  private static DeclarativeConfigResult createDeclarativeSdk(String yaml, boolean fallback) {
+    if (fallback) {
+      try (MockedStatic<SdkResourceAccess> access = mockStatic(SdkResourceAccess.class)) {
+        access.when(() -> SdkResourceAccess.getResource(any())).thenReturn(null);
+        return createDeclarativeSdk(yaml, /* fallback= */ false);
+      }
+    }
+    return DeclarativeConfiguration.create(
+        DeclarativeConfiguration.parse(
+            new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8))),
+        withIdentityDetector());
+  }
+
+  private static ComponentLoader withIdentityDetector() {
+    ComponentLoader delegate =
+        ComponentLoader.forClassLoader(PolicyInitTest.class.getClassLoader());
+    return new ComponentLoader() {
+      @Override
+      public <T> List<T> load(Class<T> spiClass) {
+        List<T> providers = new ArrayList<>(ComponentLoader.loadList(delegate, spiClass));
+        if (spiClass == ComponentProvider.class) {
+          providers.add(
+              spiClass.cast(
+                  new ComponentProvider() {
+                    @Override
+                    public String getName() {
+                      return "test_identity";
+                    }
+
+                    @Override
+                    public Class<Resource> getType() {
+                      return Resource.class;
+                    }
+
+                    @Override
+                    public Resource create(DeclarativeConfigProperties config) {
+                      return Resource.builder()
+                          .put("service.name", "detector-service")
+                          .put("deployment.environment.name", "detector-environment")
+                          .build();
+                    }
+                  }));
+        }
+        return providers;
+      }
+    };
   }
 
   private static DeclarativeConfigProperties telemetryPolicyNodeConfig(String policyType) {

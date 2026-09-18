@@ -5,6 +5,7 @@
 
 package io.opentelemetry.contrib.dynamic.policy.registry;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.common.ComponentLoader;
 import io.opentelemetry.contrib.dynamic.policy.OpampPolicyProvider;
@@ -20,9 +21,11 @@ import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingPercentagePolicy;
 import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingRatePolicy;
 import io.opentelemetry.instrumentation.config.bridge.DeclarativeConfigBridge;
+import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
+import io.opentelemetry.sdk.resources.Resource;
 import java.io.Closeable;
 import java.io.IOException;
 import java.lang.reflect.Proxy;
@@ -38,6 +41,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -185,8 +189,15 @@ public final class PolicyInit {
     declarativeInitConfig.set(Objects.requireNonNull(initConfig, "initConfig cannot be null"));
   }
 
-  /** Initializes dynamic-control policy wiring from declarative config component input. */
-  public static void initFromDeclarativeConfig(DeclarativeConfigProperties declarativeConfig) {
+  /**
+   * Initializes policy implementers and returns the source activation callback for the built SDK.
+   *
+   * <p>The sampler must be available during SDK construction, but OpAMP identity is only available
+   * after resource detection and SDK construction have completed.
+   */
+  @CanIgnoreReturnValue
+  public static Consumer<OpenTelemetrySdk> prepareFromDeclarativeConfig(
+      DeclarativeConfigProperties declarativeConfig) {
     Objects.requireNonNull(declarativeConfig, "declarativeConfig cannot be null");
     PolicyInitConfig initConfig =
         PolicyInitConfig.readFromTelemetryPolicyDeclarativeConfig(declarativeConfig);
@@ -194,24 +205,35 @@ public final class PolicyInit {
       initConfig = PolicyInitConfig.readFromDeclarativeConfigProperties(declarativeConfig);
     }
     if (initConfig == null) {
-      return;
+      return sdk -> {};
     }
     resolveAndInitializeConfiguredPolicyTypes(initConfig, createNoopAutoConfigurationCustomizer());
-    try {
-      // OpAMP has no declarative schema yet. Read its settings independently, without
-      // merging ambient properties into the SDK model or the policy component configuration.
-      PolicyProviderConfig opampConfig =
-          createLegacyProviderConfig(
-              DefaultConfigProperties.create(
-                  Collections.emptyMap(),
-                  ComponentLoader.forClassLoader(PolicyInit.class.getClassLoader())));
-      activateSources(initConfig, PolicyProviderConfig.create(declarativeConfig), opampConfig);
-    } catch (RuntimeException e) {
-      logger.log(
-          Level.WARNING,
-          "Failed to activate telemetry policy sources from declarative component config",
-          e);
-    }
+    PolicyInitConfig preparedConfig = initConfig;
+    return sdk -> {
+      try {
+        // Only connection settings remain property-based on the declarative path. Identity comes
+        // from the built SDK, with a logged legacy fallback if reflective access is unavailable.
+        PolicyProviderConfig opampConfig =
+            createLegacyProviderConfig(
+                DefaultConfigProperties.create(
+                    Collections.emptyMap(),
+                    ComponentLoader.forClassLoader(PolicyInit.class.getClassLoader())));
+        if (preparedConfig.getSources().stream()
+            .anyMatch(source -> source.getKind() == SourceKind.OPAMP)) {
+          Resource resource = SdkResourceAccess.getResource(sdk);
+          if (resource != null) {
+            opampConfig = opampConfig.withResource(resource);
+          }
+        }
+        activateSources(
+            preparedConfig, PolicyProviderConfig.create(declarativeConfig), opampConfig);
+      } catch (RuntimeException e) {
+        logger.log(
+            Level.WARNING,
+            "Failed to activate telemetry policy sources after SDK configuration",
+            e);
+      }
+    };
   }
 
   private static AutoConfigurationCustomizer createNoopAutoConfigurationCustomizer() {

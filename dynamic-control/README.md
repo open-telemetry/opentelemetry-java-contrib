@@ -122,22 +122,8 @@ telemetry_policy/development:
 
 #### OpAMP settings and service identity
 
-OpAMP does not yet have a declarative configuration schema. Its connection settings and service
-identity are read separately from system properties or environment variables, even when the SDK
-uses declarative configuration:
-
-* Endpoint: `otel.opamp.service.url` / `OTEL_OPAMP_SERVICE_URL`
-* Headers: `otel.experimental.opamp.headers` / `OTEL_EXPERIMENTAL_OPAMP_HEADERS`
-* Service name: `otel.service.name` / `OTEL_SERVICE_NAME`, falling back to `service.name` in
-  `otel.resource.attributes` / `OTEL_RESOURCE_ATTRIBUTES`, then `unknown_service:java`
-* Deployment environment: `deployment.environment.name` (or the legacy `deployment.environment`)
-  in `otel.resource.attributes` / `OTEL_RESOURCE_ATTRIBUTES`
-
-System properties take precedence over environment variables. These settings configure only OpAMP
-on the declarative path; they are not injected into the SDK resource or the declarative policy model.
-
-**Configure the service name twice**: in the SDK resource and separately for OpAMP. For example,
-include the following in the declarative configuration alongside `telemetry_policy/development`:
+On the declarative configuration path, OpAMP uses the resolved SDK resource for its service name
+and deployment environment. Configure these attributes once, in the SDK resource:
 
 ```yaml
 resource:
@@ -148,40 +134,47 @@ resource:
       value: production
 ```
 
-Also set `OTEL_SERVICE_NAME=my-service` and
-`OTEL_RESOURCE_ATTRIBUTES=deployment.environment.name=production` for OpAMP, plus its endpoint and
-any authentication headers.
+Resource-detector results and resource merging are included. Separate `OTEL_SERVICE_NAME` or
+`OTEL_RESOURCE_ATTRIBUTES` values do not override this resolved identity, and missing environment
+attributes are not filled from those properties.
 
-Keep both identities consistent. This duplication is a temporary workaround, not automatic access
-to the SDK's resolved resource: resource-detector results are not copied to OpAMP. Although duplicate
-configuration risks drift, merging ambient properties into the SDK's declarative configuration would
-violate its configuration semantics. A spec-supported resource-access mechanism would allow this
-limitation to be removed; the OpAMP/SDK integration needs to be established through the specification
-process first.
+OpAMP does not yet have a declarative configuration schema for its connection settings. Configure
+these separately through system properties or environment variables:
 
-#### Contributor notes: why not read the SDK service name directly?
+* Endpoint: `otel.opamp.service.url` / `OTEL_OPAMP_SERVICE_URL`
+* Headers: `otel.experimental.opamp.headers` / `OTEL_EXPERIMENTAL_OPAMP_HEADERS`
 
-Reading `service.name` from the declarative YAML model is not equivalent to obtaining the SDK's
-resolved resource. Resource detectors and resource merging can contribute identity attributes that
-are not present in the YAML. Copying the model would therefore still risk OpAMP reporting a different
-identity from the telemetry it manages.
+System properties take precedence over environment variables for these connection settings. They
+are not injected into the SDK resource or the declarative policy model.
 
-The code bootstrapping declarative configuration can obtain the resolved resource from
-`DeclarativeConfigResult.getResource()`, but this extension does not receive that result. The existing
-`AutoConfigureListener.afterAutoConfigure(OpenTelemetrySdk)` callback receives the built SDK, which
-does not expose its resource. Waiting until SDK construction finishes is therefore not sufficient
-on its own.
+#### Contributor notes: temporary reflective resource access
 
-A resource-access API needs specification alignment rather than a Java-specific workaround. As
+The sampler component prepares policy implementers during SDK construction and also implements
+`AutoConfigureListener`. Its `afterAutoConfigure(OpenTelemetrySdk)` callback starts policy sources
+only after the SDK has been built. The existing `ComponentProvider` SPI registration is sufficient
+for the SDK to discover the listener.
+
+The SDK has no supported resource getter available to this callback yet. `SdkResourceAccess`
+therefore temporarily reads the tracer provider's resolved resource through reflection. This path
+installs the policy sampler on that provider, so it uses the tracer resource rather than guessing
+between potentially different resources on other signals. Reading the parsed YAML model instead
+would miss detector results and resource merging.
+
+If reflective access fails, the extension logs a warning and falls back to legacy OpAMP identity
+settings: `otel.service.name` / `OTEL_SERVICE_NAME`, then `service.name` in
+`otel.resource.attributes` / `OTEL_RESOURCE_ATTRIBUTES`, then `unknown_service:java`. Deployment
+environment comes from `deployment.environment.name` (or legacy `deployment.environment`) in the
+resource-attributes property. In that fallback case, users must keep those values consistent with
+the SDK's declaratively configured identity. Legacy auto-configuration continues to use these
+properties as before.
+
+This reflection is an isolated compatibility workaround, not a supported SDK contract. Replace it
+when a suitable resource-access API is available. As
 [Jack Berg explains](https://github.com/open-telemetry/opentelemetry-java/pull/7832#issuecomment-5681643544),
-this is not opposition to resource access: the proposed entities `ResourceProvider` could provide a
-specification basis if it lands, while the interaction between OpAMP and SDKs still needs to be
-specified. Contributors working on OpAMP are encouraged to bring this use case into that process.
-
-Until a suitable API is available, keep OpAMP identity configuration separate and document the
-required duplication. Do not inject system properties into the SDK's declarative configuration to
-hide the limitation; that would change declarative configuration semantics rather than solve the
-resource-access problem.
+resource access needs specification alignment; the proposed entities `ResourceProvider` may provide
+a basis if it lands. Contributors working on OpAMP are encouraged to advance that integration in
+the specification process. Do not inject ambient properties into the SDK's declarative configuration
+to work around resource access.
 
 ### Using as an auto-configured extension
 

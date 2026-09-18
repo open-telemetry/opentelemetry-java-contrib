@@ -31,6 +31,7 @@ dependencies {
   testCompileOnly("com.google.auto.service:auto-service-annotations")
   testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
   testImplementation("org.junit.jupiter:junit-jupiter-api")
+  testImplementation("org.junit-pioneer:junit-pioneer")
   testCompileOnly("org.junit.jupiter:junit-jupiter-params")
 
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
