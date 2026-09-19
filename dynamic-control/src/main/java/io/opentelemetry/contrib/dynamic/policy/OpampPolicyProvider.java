@@ -5,6 +5,8 @@
 
 package io.opentelemetry.contrib.dynamic.policy;
 
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.contrib.dynamic.policy.registry.PolicySourceMappingConfig;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceFormat;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
@@ -15,13 +17,12 @@ import io.opentelemetry.opamp.client.internal.connectivity.http.OkHttpSender;
 import io.opentelemetry.opamp.client.internal.request.delay.PeriodicDelay;
 import io.opentelemetry.opamp.client.internal.request.service.HttpRequestService;
 import io.opentelemetry.opamp.client.internal.response.MessageData;
-import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
+import io.opentelemetry.sdk.resources.Resource;
 import java.io.Closeable;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -51,7 +52,6 @@ public final class OpampPolicyProvider extends AbstractPolicyProvider {
   private static final Logger logger = Logger.getLogger(OpampPolicyProvider.class.getName());
 
   private static final String OPAMP_ENDPOINT = "otel.opamp.service.url";
-  private static final String OPAMP_HEADERS = "otel.experimental.opamp.headers";
   private static final String SERVICE_NAME = "otel.service.name";
   private static final String RESOURCE_ATTRIBUTES = "otel.resource.attributes";
   private static final String DEPLOYMENT_ENVIRONMENT_NAME = "deployment.environment.name";
@@ -74,9 +74,9 @@ public final class OpampPolicyProvider extends AbstractPolicyProvider {
   private final AtomicReference<Thread> shutdownHookRef = new AtomicReference<>();
 
   /**
-   * Creates a provider for one OpAMP-backed policy source.
+   * Creates a provider for one OpAMP-backed policy source without legacy OpAMP headers.
    *
-   * @param properties auto-configuration properties used to resolve endpoint/service identity
+   * @param properties declarative properties used to resolve endpoint/service identity
    * @param configuredLocation source location key used to select one OpAMP config entry
    * @param format payload format parser for the selected source
    * @param mappings policy-id-to-policy-type mappings for this source
@@ -84,25 +84,44 @@ public final class OpampPolicyProvider extends AbstractPolicyProvider {
    * @throws IllegalArgumentException if required configuration such as OpAMP endpoint is missing
    */
   public OpampPolicyProvider(
-      ConfigProperties properties,
+      DeclarativeConfigProperties properties,
       String configuredLocation,
       SourceFormat format,
       List<PolicySourceMappingConfig> mappings,
       List<PolicyValidator> validators) {
-    Objects.requireNonNull(properties, "properties cannot be null");
+    this(PolicyProviderConfig.create(properties), configuredLocation, format, mappings, validators);
+  }
+
+  /**
+   * Creates a provider with the shared provider configuration context.
+   *
+   * @param config declarative properties and any legacy OpAMP headers
+   * @param configuredLocation source location key used to select one OpAMP config entry
+   * @param format payload format parser for the selected source
+   * @param mappings policy-id-to-policy-type mappings for this source
+   * @param validators validators used to materialize typed {@link TelemetryPolicy} instances
+   */
+  public OpampPolicyProvider(
+      PolicyProviderConfig config,
+      String configuredLocation,
+      SourceFormat format,
+      List<PolicySourceMappingConfig> mappings,
+      List<PolicyValidator> validators) {
+    Objects.requireNonNull(config, "config cannot be null");
     Objects.requireNonNull(configuredLocation, "configuredLocation cannot be null");
     Objects.requireNonNull(format, "format cannot be null");
     Objects.requireNonNull(mappings, "mappings cannot be null");
     Objects.requireNonNull(validators, "validators cannot be null");
+    DeclarativeConfigProperties properties = config.getProperties();
     String resolvedEndpoint = getEndpoint(properties);
     if (resolvedEndpoint == null) {
       throw new IllegalArgumentException("Missing OpAMP endpoint property: " + OPAMP_ENDPOINT);
     }
     this.endpoint = resolvedEndpoint;
     this.location = configuredLocation;
-    this.serviceName = getServiceName(properties);
-    this.serviceEnvironment = getServiceEnvironment(properties);
-    this.headers = Collections.unmodifiableMap(new HashMap<>(properties.getMap(OPAMP_HEADERS)));
+    this.serviceName = getServiceName(config);
+    this.serviceEnvironment = getServiceEnvironment(config);
+    this.headers = config.getOpampHeaders();
     this.format = format;
     this.sourceConverter = MappedPolicySourceConverter.create(mappings, validators);
     this.pollingDelay =
@@ -134,7 +153,7 @@ public final class OpampPolicyProvider extends AbstractPolicyProvider {
       return this::stop;
     }
 
-    headers.forEach((k, v) -> logger.info("OpAMP header: " + k));
+    headers.forEach((key, value) -> logger.info("OpAMP header: " + key));
 
     logger.info("Starting OpAMP client for: " + serviceName + " on endpoint " + endpoint);
     OkHttpClient.Builder okHttpClientBuilder = new OkHttpClient().newBuilder();
@@ -143,7 +162,12 @@ public final class OpampPolicyProvider extends AbstractPolicyProvider {
         .add(
             chain -> {
               Request.Builder modifiedRequest = chain.request().newBuilder();
-              headers.forEach(modifiedRequest::addHeader);
+              headers.forEach(
+                  (key, value) -> {
+                    if (value != null) {
+                      modifiedRequest.addHeader(key, value);
+                    }
+                  });
               return chain.proceed(modifiedRequest.build());
             });
     HttpRequestService requestService =
@@ -309,7 +333,7 @@ public final class OpampPolicyProvider extends AbstractPolicyProvider {
    * <p>Returns {@code null} when unset.
    */
   @Nullable
-  static String getEndpoint(ConfigProperties properties) {
+  static String getEndpoint(DeclarativeConfigProperties properties) {
     String endpoint = properties.getString(OPAMP_ENDPOINT);
     if (endpoint == null || endpoint.isEmpty()) {
       return null;
@@ -320,16 +344,22 @@ public final class OpampPolicyProvider extends AbstractPolicyProvider {
   /**
    * Resolves service name from configuration.
    *
-   * <p>Resolution order: {@code otel.service.name}, then {@code service.name} from {@code
-   * otel.resource.attributes}, then {@code unknown_service:java}.
+   * <p>The resolved SDK resource takes precedence when available. Otherwise, resolution order:
+   * {@code otel.service.name}, then {@code service.name} from {@code otel.resource.attributes},
+   * then {@code unknown_service:java}.
    */
-  static String getServiceName(ConfigProperties properties) {
+  static String getServiceName(PolicyProviderConfig config) {
+    Resource resource = config.getResource();
+    if (resource != null) {
+      String name = resource.getAttribute(AttributeKey.stringKey("service.name"));
+      return name == null ? "unknown_service:java" : name;
+    }
+    DeclarativeConfigProperties properties = config.getProperties();
     String configuredServiceName = properties.getString(SERVICE_NAME);
     if (configuredServiceName != null) {
       return configuredServiceName;
     }
-    Map<String, String> resourceMap = properties.getMap(RESOURCE_ATTRIBUTES);
-    String resourceServiceName = resourceMap.get("service.name");
+    String resourceServiceName = getResourceAttribute(config, "service.name");
     if (resourceServiceName != null) {
       return resourceServiceName;
     }
@@ -342,13 +372,25 @@ public final class OpampPolicyProvider extends AbstractPolicyProvider {
    * <p>Resolution order: {@code deployment.environment.name}, then {@code deployment.environment}.
    */
   @Nullable
-  static String getServiceEnvironment(ConfigProperties properties) {
-    Map<String, String> resourceMap = properties.getMap(RESOURCE_ATTRIBUTES);
-    String semconvEnvironment = resourceMap.get(DEPLOYMENT_ENVIRONMENT_NAME);
+  static String getServiceEnvironment(PolicyProviderConfig config) {
+    String semconvEnvironment = getResourceAttribute(config, DEPLOYMENT_ENVIRONMENT_NAME);
     if (semconvEnvironment != null) {
       return semconvEnvironment;
     }
-    return resourceMap.get(DEPLOYMENT_ENVIRONMENT);
+    return getResourceAttribute(config, DEPLOYMENT_ENVIRONMENT);
+  }
+
+  @Nullable
+  private static String getResourceAttribute(PolicyProviderConfig config, String name) {
+    Resource resource = config.getResource();
+    if (resource != null) {
+      return resource.getAttribute(AttributeKey.stringKey(name));
+    }
+    String value = config.getResourceAttributes().get(name);
+    if (value != null) {
+      return value;
+    }
+    return config.getProperties().get(RESOURCE_ATTRIBUTES).getString(name);
   }
 
   private static String normalizeEndpoint(String endpoint) {
