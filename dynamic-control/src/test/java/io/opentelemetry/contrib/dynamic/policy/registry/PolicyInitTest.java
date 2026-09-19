@@ -25,6 +25,7 @@ import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -101,6 +102,16 @@ class PolicyInitTest {
   }
 
   @Test
+  void rejectsConfigWithBothTraceSamplingRepresentations() {
+    ConfigProperties config = mock(ConfigProperties.class);
+
+    assertThatThrownBy(
+            () -> PolicyInit.initFromDeclarativeConfig(twoTraceSamplingTypesConfig(), config))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("Configure only one trace sampling policy representation");
+  }
+
+  @Test
   void throwsWhenDeclarativeConfigUsesUnknownPolicyType() {
     ConfigProperties config = mock(ConfigProperties.class);
 
@@ -163,6 +174,30 @@ class PolicyInitTest {
         .thenReturn(Collections.singletonList(mapping));
     when(mapping.getString(PolicyInitConfig.POLICY_ID_DECLARATIVE_KEY)).thenReturn("sampling_rate");
     when(mapping.getString(PolicyInitConfig.POLICY_TYPE_DECLARATIVE_KEY)).thenReturn(policyType);
+    return telemetryPolicy;
+  }
+
+  private static DeclarativeConfigProperties twoTraceSamplingTypesConfig() {
+    DeclarativeConfigProperties telemetryPolicy = mock(DeclarativeConfigProperties.class);
+    DeclarativeConfigProperties source = mock(DeclarativeConfigProperties.class);
+    DeclarativeConfigProperties ratioMapping = mock(DeclarativeConfigProperties.class);
+    DeclarativeConfigProperties percentageMapping = mock(DeclarativeConfigProperties.class);
+
+    when(telemetryPolicy.getStructuredList(PolicyInitConfig.SOURCES_DECLARATIVE_KEY))
+        .thenReturn(Collections.singletonList(source));
+    when(source.getString(PolicyInitConfig.KIND_DECLARATIVE_KEY)).thenReturn("opamp");
+    when(source.getString(PolicyInitConfig.FORMAT_DECLARATIVE_KEY)).thenReturn("jsonkeyvalue");
+    when(source.getString(PolicyInitConfig.LOCATION_DECLARATIVE_KEY)).thenReturn("vendor");
+    when(source.getStructuredList(PolicyInitConfig.MAPPINGS_DECLARATIVE_KEY))
+        .thenReturn(Arrays.asList(ratioMapping, percentageMapping));
+    when(ratioMapping.getString(PolicyInitConfig.POLICY_ID_DECLARATIVE_KEY))
+        .thenReturn("sampling_rate");
+    when(ratioMapping.getString(PolicyInitConfig.POLICY_TYPE_DECLARATIVE_KEY))
+        .thenReturn(TraceSamplingRatePolicy.POLICY_TYPE);
+    when(percentageMapping.getString(PolicyInitConfig.POLICY_ID_DECLARATIVE_KEY))
+        .thenReturn("sampling_percentage");
+    when(percentageMapping.getString(PolicyInitConfig.POLICY_TYPE_DECLARATIVE_KEY))
+        .thenReturn(TraceSamplingPercentagePolicy.POLICY_TYPE);
     return telemetryPolicy;
   }
 
