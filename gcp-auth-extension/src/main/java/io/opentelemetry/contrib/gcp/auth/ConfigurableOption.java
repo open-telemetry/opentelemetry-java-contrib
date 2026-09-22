@@ -45,6 +45,7 @@ enum ConfigurableOption {
    * <ul>
    *   <li>{@code metrics} - Enables authentication for metric exports.
    *   <li>{@code traces} - Enables authentication for trace exports.
+   *   <li>{@code logs} - Enables authentication for logs exports.
    *   <li>{@code all} - Enables authentication for all exports.
    *   <li>{@code none} - Disables authentication for all exports. If set alongside other signal
    *       types, it takes precedence and all other signal types will be ignored.
