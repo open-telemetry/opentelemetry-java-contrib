@@ -78,7 +78,7 @@ public class DelegatingSampler implements Sampler {
     if (Double.compare(samplingProbability, probability) == 0) {
       return false;
     }
-    delegate = TraceSamplingRatePolicy.createSampler(probability);
+    delegate = AbstractTraceSamplingPolicy.createSampler(probability);
     samplingProbability = probability;
     return true;
   }
