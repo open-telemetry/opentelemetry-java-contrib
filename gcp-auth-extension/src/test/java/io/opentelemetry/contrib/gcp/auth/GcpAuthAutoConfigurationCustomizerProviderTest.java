@@ -64,7 +64,6 @@ import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
@@ -104,6 +103,7 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
   private static final String DUMMY_GCP_RESOURCE_PROJECT_ID = "my-gcp-resource-project-id";
   private static final String DUMMY_GCP_QUOTA_PROJECT_ID = "my-gcp-quota-project-id";
   private static final Random TEST_RANDOM = new Random();
+  private static final long WORK_LOOP_VALUE = 42L;
 
   @Mock private GoogleCredentials mockedGoogleCredentials;
 
@@ -525,6 +525,23 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
     }
   }
 
+  @Test
+  void testCustomizerFailWithMissingResourceProjectWhenLogsTargeted() {
+    System.setProperty(
+        ConfigurableOption.GOOGLE_OTEL_AUTH_TARGET_SIGNALS.getSystemProperty(), SIGNAL_TYPE_LOGS);
+    OtlpGrpcLogRecordExporter mockOtlpGrpcLogRecordExporter =
+        Mockito.mock(OtlpGrpcLogRecordExporter.class);
+    try (MockedStatic<GoogleCredentials> googleCredentialsMockedStatic =
+        Mockito.mockStatic(GoogleCredentials.class)) {
+      googleCredentialsMockedStatic
+          .when(GoogleCredentials::getApplicationDefault)
+          .thenReturn(mockedGoogleCredentials);
+
+      assertThatThrownBy(() -> buildOpenTelemetrySdkWithExporter(mockOtlpGrpcLogRecordExporter))
+          .isInstanceOf(ConfigurationException.class);
+    }
+  }
+
   @ParameterizedTest
   @MethodSource("provideQuotaBehaviorTestCases")
   @SuppressWarnings("CannotMockMethod")
@@ -877,6 +894,27 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
                         "otlp"))
                 .setExpectedIsMetricsSignalModified(false)
                 .setExpectedIsTraceSignalModified(true)
+                .setExpectedIsLogsSignalModified(true)
+                .build()),
+        Arguments.of(
+            TargetSignalBehavior.builder()
+                .setConfiguredTargetSignals("metrics, logs")
+                .setUserSpecifiedOtelProperties(
+                    ImmutableMap.of(
+                        "otel.exporter.otlp.metrics.endpoint",
+                        "https://localhost:4813/v1/metrics",
+                        "otel.exporter.otlp.traces.endpoint",
+                        "https://localhost:4813/v1/traces",
+                        "otel.exporter.otlp.logs.endpoint",
+                        "https://localhost:4813/v1/logs",
+                        "otel.traces.exporter",
+                        "otlp",
+                        "otel.metrics.exporter",
+                        "otlp",
+                        "otel.logs.exporter",
+                        "otlp"))
+                .setExpectedIsMetricsSignalModified(true)
+                .setExpectedIsTraceSignalModified(false)
                 .setExpectedIsLogsSignalModified(true)
                 .build()),
         Arguments.of(
@@ -1763,8 +1801,7 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
   private static void generateTestSpan(OpenTelemetrySdk openTelemetrySdk) {
     Span span = openTelemetrySdk.getTracer("test").spanBuilder("sample").startSpan();
     try (Scope ignored = span.makeCurrent()) {
-      long workOutput = busyloop();
-      span.setAttribute("work_loop", workOutput);
+      span.setAttribute("work_loop", WORK_LOOP_VALUE);
     } finally {
       span.end();
     }
@@ -1778,31 +1815,17 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
             .setDescription("sample counter")
             .setUnit("1")
             .build();
-    long workOutput = busyloop();
     long randomValue = TEST_RANDOM.nextInt(1000);
-    longCounter.add(randomValue, Attributes.of(AttributeKey.longKey("work_loop"), workOutput));
+    longCounter.add(randomValue, Attributes.of(AttributeKey.longKey("work_loop"), WORK_LOOP_VALUE));
   }
 
   private static void generateTestLogRecord(OpenTelemetrySdk openTelemetrySdk) {
-    long workOutput = busyloop();
     openTelemetrySdk
         .getSdkLoggerProvider()
         .get("test")
         .logRecordBuilder()
         .setBody("sample log record")
-        .setAllAttributes(Attributes.of(AttributeKey.longKey("work_loop"), workOutput))
+        .setAllAttributes(Attributes.of(AttributeKey.longKey("work_loop"), WORK_LOOP_VALUE))
         .emit();
-  }
-
-  // loop to simulate work done
-  private static long busyloop() {
-    Instant start = Instant.now();
-    Instant end;
-    long counter = 0;
-    do {
-      counter++;
-      end = Instant.now();
-    } while (Duration.between(start, end).toMillis() < 1000);
-    return counter;
   }
 }
