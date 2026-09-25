@@ -11,7 +11,6 @@ import io.opentelemetry.contrib.dynamic.policy.registry.PolicyInit;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
-import javax.annotation.Nullable;
 
 /** Trace sampling policy expressed as a percentage in the inclusive range {@code [0.0, 100.0]}. */
 public final class TraceSamplingPercentagePolicy extends AbstractTraceSamplingPolicy {
@@ -52,11 +51,6 @@ public final class TraceSamplingPercentagePolicy extends AbstractTraceSamplingPo
         POLICY_TYPE,
         TraceSamplingPercentagePolicy.class,
         TraceSamplingPercentagePolicy::initialize);
-  }
-
-  @Nullable
-  public static DelegatingSampler getInitializedSampler() {
-    return AbstractTraceSamplingPolicy.getInitializedSampler();
   }
 
   static void resetForTest() {

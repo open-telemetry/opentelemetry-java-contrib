@@ -17,6 +17,7 @@ import io.opentelemetry.contrib.dynamic.policy.PolicyImplementer;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicyIdentity;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
+import io.opentelemetry.contrib.dynamic.policy.tracesampling.AbstractTraceSamplingPolicy;
 import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingPercentagePolicy;
 import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingRatePolicy;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
@@ -56,7 +57,7 @@ class PolicyInitTest {
     when(config.getString(PolicyInitConfig.POLICY_INIT_CONFIG_PROPERTY_JSON)).thenReturn(null);
     Map<String, String> ignored = propertiesCustomizer.apply(config);
 
-    assertThat(TraceSamplingRatePolicy.getInitializedSampler()).isNull();
+    assertThat(AbstractTraceSamplingPolicy.getInitializedSampler()).isNull();
     assertThat(ignored).isNotNull();
   }
 
@@ -78,7 +79,7 @@ class PolicyInitTest {
     Map<String, String> ignored = propertiesCustomizer.apply(config);
 
     assertThat(ignored).isNotNull();
-    assertThat(TraceSamplingRatePolicy.getInitializedSampler()).isNotNull();
+    assertThat(AbstractTraceSamplingPolicy.getInitializedSampler()).isNotNull();
   }
 
   @Test
@@ -88,7 +89,7 @@ class PolicyInitTest {
     PolicyInit.initFromDeclarativeConfig(
         telemetryPolicyNodeConfig(TraceSamplingRatePolicy.POLICY_TYPE), config);
 
-    assertThat(TraceSamplingRatePolicy.getInitializedSampler()).isNotNull();
+    assertThat(AbstractTraceSamplingPolicy.getInitializedSampler()).isNotNull();
   }
 
   @Test
@@ -98,7 +99,7 @@ class PolicyInitTest {
     PolicyInit.initFromDeclarativeConfig(
         telemetryPolicyNodeConfig(TraceSamplingPercentagePolicy.POLICY_TYPE), config);
 
-    assertThat(TraceSamplingPercentagePolicy.getInitializedSampler()).isNotNull();
+    assertThat(AbstractTraceSamplingPolicy.getInitializedSampler()).isNotNull();
   }
 
   @Test
