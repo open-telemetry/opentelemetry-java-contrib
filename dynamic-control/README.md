@@ -120,6 +120,62 @@ telemetry_policy/development:
 
 ```
 
+#### OpAMP settings and service identity
+
+On the declarative configuration path, OpAMP uses the resolved SDK resource for its service name
+and deployment environment. Configure these attributes once, in the SDK resource:
+
+```yaml
+resource:
+  attributes:
+    - name: service.name
+      value: my-service
+    - name: deployment.environment.name
+      value: production
+```
+
+Resource-detector results and resource merging are included. Separate `OTEL_SERVICE_NAME` or
+`OTEL_RESOURCE_ATTRIBUTES` values do not override this resolved identity, and missing environment
+attributes are not filled from those properties.
+
+OpAMP does not yet have a declarative configuration schema for its connection settings. Configure
+these separately through system properties or environment variables:
+
+* Endpoint: `otel.opamp.service.url` / `OTEL_OPAMP_SERVICE_URL`
+* Headers: `otel.experimental.opamp.headers` / `OTEL_EXPERIMENTAL_OPAMP_HEADERS`
+
+System properties take precedence over environment variables for these connection settings. They
+are not injected into the SDK resource or the declarative policy model.
+
+#### Contributor notes: temporary reflective resource access
+
+The sampler component prepares policy implementers during SDK construction and also implements
+`AutoConfigureListener`. Its `afterAutoConfigure(OpenTelemetrySdk)` callback starts policy sources
+only after the SDK has been built. The existing `ComponentProvider` SPI registration is sufficient
+for the SDK to discover the listener.
+
+The SDK has no supported resource getter available to this callback yet. `SdkResourceAccess`
+therefore temporarily reads the tracer provider's resolved resource through reflection. This path
+installs the policy sampler on that provider, so it uses the tracer resource rather than guessing
+between potentially different resources on other signals. Reading the parsed YAML model instead
+would miss detector results and resource merging.
+
+If reflective access fails, the extension logs a warning and falls back to legacy OpAMP identity
+settings: `otel.service.name` / `OTEL_SERVICE_NAME`, then `service.name` in
+`otel.resource.attributes` / `OTEL_RESOURCE_ATTRIBUTES`, then `unknown_service:java`. Deployment
+environment comes from `deployment.environment.name` (or legacy `deployment.environment`) in the
+resource-attributes property. In that fallback case, users must keep those values consistent with
+the SDK's declaratively configured identity. Legacy auto-configuration continues to use these
+properties as before.
+
+This reflection is an isolated compatibility workaround, not a supported SDK contract. Replace it
+when a suitable resource-access API is available. As
+[Jack Berg explains](https://github.com/open-telemetry/opentelemetry-java/pull/7832#issuecomment-5681643544),
+resource access needs specification alignment; the proposed entities `ResourceProvider` may provide
+a basis if it lands. Contributors working on OpAMP are encouraged to advance that integration in
+the specification process. Do not inject ambient properties into the SDK's declarative configuration
+to work around resource access.
+
 ### Using as an auto-configured extension
 
 You can use either `otel.java.experimental.telemetry.policy.init.yaml`

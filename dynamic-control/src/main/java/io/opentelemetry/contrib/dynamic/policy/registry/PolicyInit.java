@@ -5,19 +5,27 @@
 
 package io.opentelemetry.contrib.dynamic.policy.registry;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
+import io.opentelemetry.common.ComponentLoader;
 import io.opentelemetry.contrib.dynamic.policy.OpampPolicyProvider;
 import io.opentelemetry.contrib.dynamic.policy.PolicyImplementer;
 import io.opentelemetry.contrib.dynamic.policy.PolicyProvider;
+import io.opentelemetry.contrib.dynamic.policy.PolicyProviderConfig;
 import io.opentelemetry.contrib.dynamic.policy.PolicyProviderPoller;
 import io.opentelemetry.contrib.dynamic.policy.PolicyStore;
 import io.opentelemetry.contrib.dynamic.policy.PolicyTypeInitializer;
 import io.opentelemetry.contrib.dynamic.policy.PolicyValidator;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
+import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingPercentagePolicy;
 import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingRatePolicy;
+import io.opentelemetry.instrumentation.config.bridge.DeclarativeConfigBridge;
+import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
+import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
+import io.opentelemetry.sdk.resources.Resource;
 import java.io.Closeable;
 import java.io.IOException;
 import java.lang.reflect.Proxy;
@@ -33,6 +41,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -55,6 +64,8 @@ import java.util.logging.Logger;
  */
 public final class PolicyInit {
   private static final Logger logger = Logger.getLogger(PolicyInit.class.getName());
+  private static final String OPAMP_HEADERS_CONFIG_PROPERTY = "otel.experimental.opamp.headers";
+  private static final String RESOURCE_ATTRIBUTES_CONFIG_PROPERTY = "otel.resource.attributes";
   private static final Map<String, Class<? extends TelemetryPolicy>> REGISTERED_POLICY_TYPES =
       new ConcurrentHashMap<>();
   private static final Map<Class<? extends TelemetryPolicy>, PolicyTypeInitializer>
@@ -145,9 +156,31 @@ public final class PolicyInit {
           }
           rejectMutuallyExclusiveTraceSamplingTypes(initConfig);
           resolveAndInitializeConfiguredPolicyTypes(initConfig, autoConfiguration);
-          activateSources(initConfig, config);
+          // The legacy duration property has no declarative schema. Apply it at this boundary
+          // rather than adapting declarative provider properties back to ConfigProperties.
+          if (initConfig.getSources().stream()
+              .anyMatch(source -> source.getKind() == SourceKind.HTTP)) {
+            PolicyProviderPoller.configure(config);
+          }
+          activateSources(initConfig, createLegacyProviderConfig(config));
           return Collections.emptyMap();
         });
+  }
+
+  /**
+   * Exposes the legacy flat configuration as general declarative properties for source providers.
+   *
+   * <p>This is deliberately a component-properties bridge with an empty prefix, rather than the
+   * instrumentation-config bridge. OpAMP does not have a declarative schema yet, so its endpoint
+   * and service identity continue to come from the general {@code ConfigProperties} namespace.
+   * Map-shaped resource attributes and OpAMP headers are passed separately because they cannot be
+   * exposed by the bridge.
+   */
+  private static PolicyProviderConfig createLegacyProviderConfig(ConfigProperties config) {
+    return PolicyProviderConfig.createWithLegacyProperties(
+        DeclarativeConfigBridge.createComponentProperties(config, ""),
+        config.getMap(RESOURCE_ATTRIBUTES_CONFIG_PROPERTY),
+        config.getMap(OPAMP_HEADERS_CONFIG_PROPERTY));
   }
 
   /**
@@ -157,29 +190,52 @@ public final class PolicyInit {
     declarativeInitConfig.set(Objects.requireNonNull(initConfig, "initConfig cannot be null"));
   }
 
-  /** Initializes dynamic-control policy wiring from declarative config component input. */
-  public static void initFromDeclarativeConfig(
-      DeclarativeConfigProperties declarativeConfig, ConfigProperties config) {
+  /**
+   * Initializes policy implementers and returns the source activation callback for the built SDK.
+   *
+   * <p>The sampler must be available during SDK construction, but OpAMP identity is only available
+   * after resource detection and SDK construction have completed.
+   */
+  @CanIgnoreReturnValue
+  public static Consumer<OpenTelemetrySdk> prepareFromDeclarativeConfig(
+      DeclarativeConfigProperties declarativeConfig) {
     Objects.requireNonNull(declarativeConfig, "declarativeConfig cannot be null");
-    Objects.requireNonNull(config, "config cannot be null");
     PolicyInitConfig initConfig =
         PolicyInitConfig.readFromTelemetryPolicyDeclarativeConfig(declarativeConfig);
     if (initConfig == null) {
       initConfig = PolicyInitConfig.readFromDeclarativeConfigProperties(declarativeConfig);
     }
     if (initConfig == null) {
-      return;
+      return sdk -> {};
     }
     rejectMutuallyExclusiveTraceSamplingTypes(initConfig);
     resolveAndInitializeConfiguredPolicyTypes(initConfig, createNoopAutoConfigurationCustomizer());
-    try {
-      activateSources(initConfig, config);
-    } catch (RuntimeException e) {
-      logger.log(
-          Level.WARNING,
-          "Failed to activate telemetry policy sources from declarative component config",
-          e);
-    }
+    PolicyInitConfig preparedConfig = initConfig;
+    return sdk -> {
+      try {
+        // Only connection settings remain property-based on the declarative path. Identity comes
+        // from the built SDK, with a logged legacy fallback if reflective access is unavailable.
+        PolicyProviderConfig opampConfig =
+            createLegacyProviderConfig(
+                DefaultConfigProperties.create(
+                    Collections.emptyMap(),
+                    ComponentLoader.forClassLoader(PolicyInit.class.getClassLoader())));
+        if (preparedConfig.getSources().stream()
+            .anyMatch(source -> source.getKind() == SourceKind.OPAMP)) {
+          Resource resource = SdkResourceAccess.getResource(sdk);
+          if (resource != null) {
+            opampConfig = opampConfig.withResource(resource);
+          }
+        }
+        activateSources(
+            preparedConfig, PolicyProviderConfig.create(declarativeConfig), opampConfig);
+      } catch (RuntimeException e) {
+        logger.log(
+            Level.WARNING,
+            "Failed to activate telemetry policy sources after SDK configuration",
+            e);
+      }
+    };
   }
 
   private static AutoConfigurationCustomizer createNoopAutoConfigurationCustomizer() {
@@ -305,7 +361,12 @@ public final class PolicyInit {
    *
    * <p>This is idempotent; repeated calls after first activation are ignored.
    */
-  private static void activateSources(PolicyInitConfig initConfig, ConfigProperties config) {
+  private static void activateSources(PolicyInitConfig initConfig, PolicyProviderConfig config) {
+    activateSources(initConfig, config, config);
+  }
+
+  private static void activateSources(
+      PolicyInitConfig initConfig, PolicyProviderConfig config, PolicyProviderConfig opampConfig) {
     if (!sourcesActivated.compareAndSet(false, true)) {
       return;
     }
@@ -318,7 +379,11 @@ public final class PolicyInit {
             source.getKind().configValue());
         continue;
       }
-      PolicyProvider provider = source.getKind().createProvider(source, config, validators);
+      PolicyProvider provider =
+          source
+              .getKind()
+              .createProvider(
+                  source, source.getKind() == SourceKind.OPAMP ? opampConfig : config, validators);
       if (provider == null) {
         logger.log(
             Level.INFO,
