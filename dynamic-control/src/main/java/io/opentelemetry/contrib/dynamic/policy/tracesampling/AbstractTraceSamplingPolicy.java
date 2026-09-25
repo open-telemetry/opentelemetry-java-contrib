@@ -57,7 +57,7 @@ public abstract class AbstractTraceSamplingPolicy implements TelemetryPolicy {
       initializedSampler = delegatingSampler;
       autoConfiguration.addSamplerCustomizer((sampler, config) -> delegatingSampler);
     }
-    return new TraceSamplingRatePolicyImplementer(
+    return new TraceSamplingPolicyImplementer(
         Objects.requireNonNull(initializedSampler, "initializedSampler cannot be null"),
         Collections.singletonList(validator));
   }
