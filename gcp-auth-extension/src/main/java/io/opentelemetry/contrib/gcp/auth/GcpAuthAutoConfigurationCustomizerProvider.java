@@ -19,10 +19,14 @@ import com.google.auth.oauth2.OAuth2Credentials;
 import com.google.auto.service.AutoService;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.contrib.gcp.auth.GoogleAuthException.Reason;
+import io.opentelemetry.exporter.otlp.http.logs.OtlpHttpLogRecordExporter;
+import io.opentelemetry.exporter.otlp.http.logs.OtlpHttpLogRecordExporterBuilder;
 import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporter;
 import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporterBuilder;
 import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporter;
 import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporterBuilder;
+import io.opentelemetry.exporter.otlp.logs.OtlpGrpcLogRecordExporter;
+import io.opentelemetry.exporter.otlp.logs.OtlpGrpcLogRecordExporterBuilder;
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporterBuilder;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
@@ -31,6 +35,7 @@ import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException;
+import io.opentelemetry.sdk.logs.export.LogRecordExporter;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
@@ -51,8 +56,8 @@ import javax.annotation.Nullable;
  * <p>This class is registered as a service provider using {@link AutoService} and is responsible
  * for customizing the OpenTelemetry configuration for GCP specific behavior. It retrieves Google
  * Application Default Credentials (ADC) and adds them as authorization headers to the configured
- * {@link SpanExporter}. It also sets default properties and resource attributes for GCP
- * integration.
+ * {@link SpanExporter}, {@link MetricExporter} and {@link LogRecordExporter}. It also sets default
+ * properties and resource attributes for GCP integration.
  *
  * @see AutoConfigurationCustomizerProvider
  * @see GoogleCredentials
@@ -75,6 +80,7 @@ public class GcpAuthAutoConfigurationCustomizerProvider
 
   static final String SIGNAL_TYPE_TRACES = "traces";
   static final String SIGNAL_TYPE_METRICS = "metrics";
+  static final String SIGNAL_TYPE_LOGS = "logs";
   static final String SIGNAL_TYPE_ALL = "all";
   static final String SIGNAL_TYPE_NONE = "none";
 
@@ -92,7 +98,8 @@ public class GcpAuthAutoConfigurationCustomizerProvider
    *   <li>Verifies whether the configured OTLP endpoint (base or signal specific) is a known GCP
    *       endpoint.
    *   <li>If the configured base OTLP endpoint is a known GCP Telemetry API endpoint, customizes
-   *       both the configured OTLP {@link SpanExporter} and {@link MetricExporter}.
+   *       the configured OTLP {@link SpanExporter}, {@link MetricExporter} and {@link
+   *       LogRecordExporter}.
    *   <li>If the configured signal specific endpoint is a known GCP Telemetry API endpoint,
    *       customizes only the signal specific exporter.
    * </ul>
@@ -117,6 +124,9 @@ public class GcpAuthAutoConfigurationCustomizerProvider
         .addMetricExporterCustomizer(
             (metricExporter, configProperties) ->
                 customizeMetricExporter(metricExporter, credentialsHolder, configProperties))
+        .addLogRecordExporterCustomizer(
+            (logRecordExporter, configProperties) ->
+                customizeLogRecordExporter(logRecordExporter, credentialsHolder, configProperties))
         .addResourceCustomizer(
             (resource, configProperties) ->
                 customizeResource(resource, credentialsHolder, configProperties));
@@ -242,6 +252,23 @@ public class GcpAuthAutoConfigurationCustomizerProvider
     return exporter;
   }
 
+  private static LogRecordExporter customizeLogRecordExporter(
+      LogRecordExporter exporter,
+      LazyOAuth2CredentialsHolder credentialsHolder,
+      ConfigProperties configProperties) {
+    if (isSignalTargeted(SIGNAL_TYPE_LOGS, configProperties)) {
+      return addAuthorizationHeaders(
+          exporter, credentialsHolder.get(configProperties), configProperties);
+    } else {
+      String[] params = {SIGNAL_TYPE_LOGS, SIGNAL_TYPE_NONE, SIGNAL_TARGET_WARNING_FIX_SUGGESTION};
+      logger.log(
+          Level.WARNING,
+          "GCP Authentication Extension is not configured for signal type: {0} or is configured with signal type: {1}. {2}",
+          params);
+    }
+    return exporter;
+  }
+
   // Checks if the auth extension is configured to target the passed signal for authentication.
   private static boolean isSignalTargeted(String checkSignal, ConfigProperties configProperties) {
     String userSpecifiedTargetedSignals =
@@ -291,6 +318,26 @@ public class GcpAuthAutoConfigurationCustomizerProvider
     return exporter;
   }
 
+  // Adds authorization headers to the calls made by the OtlpGrpcLogRecordExporter and
+  // OtlpHttpLogRecordExporter.
+  private static LogRecordExporter addAuthorizationHeaders(
+      LogRecordExporter exporter,
+      OAuth2Credentials credentials,
+      ConfigProperties configProperties) {
+    if (exporter instanceof OtlpHttpLogRecordExporter) {
+      OtlpHttpLogRecordExporterBuilder builder =
+          ((OtlpHttpLogRecordExporter) exporter)
+              .toBuilder().setHeaders(() -> getRequiredHeaderMap(credentials, configProperties));
+      return builder.build();
+    } else if (exporter instanceof OtlpGrpcLogRecordExporter) {
+      OtlpGrpcLogRecordExporterBuilder builder =
+          ((OtlpGrpcLogRecordExporter) exporter)
+              .toBuilder().setHeaders(() -> getRequiredHeaderMap(credentials, configProperties));
+      return builder.build();
+    }
+    return exporter;
+  }
+
   private static Map<String, String> getRequiredHeaderMap(
       OAuth2Credentials credentials, ConfigProperties configProperties) {
     Map<String, List<String>> gcpHeaders;
@@ -331,7 +378,8 @@ public class GcpAuthAutoConfigurationCustomizerProvider
       LazyOAuth2CredentialsHolder credentialsHolder,
       ConfigProperties configProperties) {
     if (!isSignalTargeted(SIGNAL_TYPE_TRACES, configProperties)
-        && !isSignalTargeted(SIGNAL_TYPE_METRICS, configProperties)) {
+        && !isSignalTargeted(SIGNAL_TYPE_METRICS, configProperties)
+        && !isSignalTargeted(SIGNAL_TYPE_LOGS, configProperties)) {
       return resource;
     }
     // The gcp.project_id resource attribute is only required when ingesting telemetry to the GCP
