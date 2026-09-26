@@ -27,6 +27,9 @@ dependencies {
   runtimeOnly("at.yawk.lz4:lz4-java:1.11.3") {
     because("CVE-2026-59949")
   }
+  runtimeOnly("com.github.luben:zstd-jni:1.5.7-20") {
+    because("CVE-2026-87795, CVE-2026-87823, CVE-2026-89045")
+  }
 
   implementation("io.opentelemetry:opentelemetry-exporter-otlp-common")
   implementation("com.google.protobuf:protobuf-java")
