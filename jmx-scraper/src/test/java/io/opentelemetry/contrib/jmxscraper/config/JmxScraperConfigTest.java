@@ -229,7 +229,8 @@ class JmxScraperConfigTest {
     JmxScraperConfig config = fromConfig(TestUtil.configProperties(properties));
 
     // jvm metrics should have both stable and unstable rules, so two resources are expected.
-    // this test can be removed once we stop relying on resources path
+    // This assertion will fail until the instrumentation implementation is merged.
+    // This test can be removed once we stop relying on resources path.
     assertThat(config.getTargetSystemRules("jvm"))
         .hasSize(2);
 
