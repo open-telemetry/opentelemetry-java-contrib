@@ -228,12 +228,22 @@ class JmxScraperConfigTest {
     properties.setProperty(JMX_TARGET_SYSTEM, "jvm");
     JmxScraperConfig config = fromConfig(TestUtil.configProperties(properties));
 
-    // jvm metrics should have both stable and unstable rules, so two resources are expected.
-    // This assertion will fail until the instrumentation implementation is merged.
-    // This test can be removed once we stop relying on resources path.
-    assertThat(config.getTargetSystemRules("jvm"))
-        .hasSize(2);
+    boolean withRegistry = false;
+    try {
+      Class.forName("io.opentelemetry.instrumentation.jmx.internal.InternalMetricsDefinitions");
+      withRegistry = true;
+    } catch (Exception e) {
+      // silently ignored
+    }
 
+    // This test can be removed once we stop relying on resource paths.
+    if (withRegistry) {
+      // jvm metrics should have both stable and unstable rules, so two resources are expected.
+      assertThat(config.getTargetSystemRules("jvm"))
+          .containsExactlyInAnyOrder("jmx/rules/jvm.yaml", "jmx/rules/jvm_unstable.yaml");
+    } else {
+      assertThat(config.getTargetSystemRules("jvm")).containsExactly("jmx/rules/jvm.yaml");
+    }
   }
 
   private static void shouldNotResolveYaml(JmxScraperConfig config, String target) {
