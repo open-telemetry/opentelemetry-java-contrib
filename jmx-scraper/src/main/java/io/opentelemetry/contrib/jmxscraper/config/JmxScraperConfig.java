@@ -132,7 +132,7 @@ public final class JmxScraperConfig {
 
   private static void probeInstrumentation(String system, Set<String> set) {
     probeResource(String.format("jmx/rules/%s.yaml", system), set);
-    probeResource(String.format("jmx/rules/%s_stable.yaml", system), set);
+    probeResource(String.format("jmx/rules/%s_unstable.yaml", system), set);
   }
 
   private static void probeLegacy(String system, Set<String> set) {

@@ -222,6 +222,19 @@ class JmxScraperConfigTest {
             "jmx/rules/fake-test-system-instrumentation-only_unstable.yaml");
   }
 
+  @Test
+  void testInstrumentationJvmMetrics() {
+    Properties properties = (Properties) validProperties.clone();
+    properties.setProperty(JMX_TARGET_SYSTEM, "jvm");
+    JmxScraperConfig config = fromConfig(TestUtil.configProperties(properties));
+
+    // jvm metrics should have both stable and unstable rules, so two resources are expected.
+    // this test can be removed once we stop relying on resources path
+    assertThat(config.getTargetSystemRules("jvm"))
+        .hasSize(2);
+
+  }
+
   private static void shouldNotResolveYaml(JmxScraperConfig config, String target) {
     assertThatThrownBy(() -> config.getTargetSystemRules(target))
         .describedAs("should not support system")
