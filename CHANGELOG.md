@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### GCP authentication extension
+
+- Add support for the `logs` signal type, enabling authenticated OTLP log record exports.
+  ([#3121](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3121))
+
 ### AWS resources
 
 - Set `aws.ecs.task.id` on the ECS resource, extracted from the task ARN as the semantic
