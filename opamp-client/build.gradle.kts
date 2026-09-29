@@ -8,7 +8,7 @@ plugins {
   id("otel.java-conventions")
   id("otel.publish-conventions")
   id("otel.animalsniffer-conventions")
-  id("com.squareup.wire") version "7.0.3"
+  id("com.squareup.wire") version "7.1.0"
 }
 
 description = "Client implementation of the OpAMP spec."

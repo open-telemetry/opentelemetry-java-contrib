@@ -6,7 +6,7 @@ plugins {
   id("otel.animalsniffer-conventions")
   id("com.gradleup.shadow")
   id("me.champeau.jmh") version "0.7.3"
-  id("com.squareup.wire") version "7.0.3"
+  id("com.squareup.wire") version "7.1.0"
 }
 
 description = "Exporter implementations that store signals on disk"
