@@ -57,7 +57,7 @@ dependencies {
     api("org.apache.kafka:kafka-clients:4.3.1")
     // transitive deps of kafka-clients, pinned for CVE fixes (see kafka-exporter/build.gradle.kts)
     // remove once kafka-clients depends on fixed versions
-    api("at.yawk.lz4:lz4-java:1.11.3")
+    api("at.yawk.lz4:lz4-java:1.12.0")
     api("com.github.luben:zstd-jni:1.5.7-20")
     api("org.testcontainers:testcontainers-kafka:2.0.5")
     api("org.jctools:jctools-core:4.0.7")
