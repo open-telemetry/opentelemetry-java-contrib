@@ -24,10 +24,10 @@ dependencies {
 
   runtimeOnly("com.fasterxml.jackson.core:jackson-core")
   runtimeOnly("com.fasterxml.jackson.core:jackson-databind")
-  runtimeOnly("at.yawk.lz4:lz4-java:1.11.3") {
+  runtimeOnly("at.yawk.lz4:lz4-java") {
     because("CVE-2026-59949")
   }
-  runtimeOnly("com.github.luben:zstd-jni:1.5.7-20") {
+  runtimeOnly("com.github.luben:zstd-jni") {
     because("CVE-2026-87795, CVE-2026-87823, CVE-2026-89045")
   }
 
