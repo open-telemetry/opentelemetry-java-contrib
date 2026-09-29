@@ -13,6 +13,7 @@ import static java.util.Locale.ROOT;
 
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -99,54 +100,53 @@ public final class JmxScraperConfig {
   }
 
   /**
-   * Resolves the target system yaml from configuration
+   * Get the list of target system rules.
    *
-   * @param system target system
-   * @return input stream on target system yaml definitions
-   * @throws ConfigurationException when no yaml for system is available
+   * @param system system identifier
+   * @return set of target system rules
+   * @throws ConfigurationException when no matching rules are found
    */
-  public InputStream getTargetSystemYaml(String system) {
-    InputStream yaml;
+  public Set<String> getTargetSystemRules(String system) {
+    Set<String> set = new HashSet<>();
     switch (targetSystemSource) {
       case LEGACY:
-        yaml = getTargetSystemYaml(system, TargetSystemSource.LEGACY);
+        probeLegacy(system, set);
         break;
       case INSTRUMENTATION:
-        yaml = getTargetSystemYaml(system, TargetSystemSource.INSTRUMENTATION);
+        probeInstrumentation(system, set);
         break;
       case AUTO:
-        yaml = getTargetSystemYaml(system, TargetSystemSource.INSTRUMENTATION);
-        if (yaml == null) {
-          yaml = getTargetSystemYaml(system, TargetSystemSource.LEGACY);
+        probeInstrumentation(system, set);
+        if (set.isEmpty()) {
+          probeLegacy(system, set);
         }
         break;
-      default:
-        throw new IllegalStateException("unsupported target system source: " + targetSystemSource);
     }
-
-    if (yaml == null) {
+    if (set.isEmpty()) {
       throw new ConfigurationException(
           "unsupported target system: '" + system + "', source: " + targetSystemSource);
     }
-    return yaml;
+
+    return set;
   }
 
-  @Nullable
-  private static InputStream getTargetSystemYaml(String system, TargetSystemSource source) {
-    String path;
-    switch (source) {
-      case LEGACY:
-        path = String.format("%s.yaml", system);
-        break;
-      case INSTRUMENTATION:
-        path = String.format("jmx/rules/%s.yaml", system);
-        break;
-      case AUTO:
-      default:
-        throw new IllegalArgumentException("invalid source" + source);
-    }
+  private static void probeInstrumentation(String system, Set<String> set) {
+    probeResource(String.format("jmx/rules/%s.yaml", system), set);
+    probeResource(String.format("jmx/rules/%s_stable.yaml", system), set);
+  }
 
-    return JmxScraperConfig.class.getClassLoader().getResourceAsStream(path);
+  private static void probeLegacy(String system, Set<String> set) {
+    probeResource(String.format("%s.yaml", system), set);
+  }
+
+  private static void probeResource(String path, Set<String> set) {
+    try (InputStream resource = JmxScraperConfig.class.getClassLoader().getResourceAsStream(path)) {
+      if (resource != null) {
+        set.add(path);
+      }
+    } catch (IOException e) {
+      throw new IllegalStateException("unable to probe resource: " + path, e);
+    }
   }
 
   public Duration getSamplingInterval() {
@@ -230,9 +230,9 @@ public final class JmxScraperConfig {
     scraperConfig.realm = config.getString("otel.jmx.realm");
     scraperConfig.registrySsl = config.getBoolean("otel.jmx.remote.registry.ssl", false);
 
-    // checks target system is supported by resolving the yaml resource, throws exception on
+    // checks target system is supported by resolving the yaml resources, throws exception on
     // missing/error
-    scraperConfig.targetSystems.forEach(scraperConfig::getTargetSystemYaml);
+    scraperConfig.targetSystems.forEach(s -> scraperConfig.getTargetSystemRules(s));
 
     String source = config.getString(JMX_TARGET_SOURCE, TargetSystemSource.AUTO.name());
     scraperConfig.targetSystemSource = TargetSystemSource.fromString(source);
