@@ -179,7 +179,7 @@ class JmxScraperConfigTest {
     assertThat(config.getTargetSystemRules("fake-test-system-instrumentation-only"))
         .containsExactlyInAnyOrder(
             "jmx/rules/fake-test-system-instrumentation-only.yaml",
-            "jmx/rules/fake-test-system-instrumentation-only_stable.yaml");
+            "jmx/rules/fake-test-system-instrumentation-only_unstable.yaml");
   }
 
   @Test
@@ -219,7 +219,7 @@ class JmxScraperConfigTest {
     assertThat(config.getTargetSystemRules("fake-test-system-instrumentation-only"))
         .containsExactlyInAnyOrder(
             "jmx/rules/fake-test-system-instrumentation-only.yaml",
-            "jmx/rules/fake-test-system-instrumentation-only_stable.yaml");
+            "jmx/rules/fake-test-system-instrumentation-only_unstable.yaml");
   }
 
   private static void shouldNotResolveYaml(JmxScraperConfig config, String target) {
