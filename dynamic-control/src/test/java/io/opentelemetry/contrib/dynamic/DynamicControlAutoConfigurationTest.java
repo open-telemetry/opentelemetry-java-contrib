@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.opentelemetry.contrib.dynamic.policy.registry.PolicyInit;
+import io.opentelemetry.contrib.dynamic.policy.tracesampling.AbstractTraceSamplingPolicy;
 import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingRatePolicy;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
@@ -57,7 +58,7 @@ class DynamicControlAutoConfigurationTest {
     Map<String, String> overrides = propertiesCustomizer.apply(properties);
 
     assertThat(overrides).isEmpty();
-    assertThat(TraceSamplingRatePolicy.getInitializedSampler()).isNotNull();
+    assertThat(AbstractTraceSamplingPolicy.getInitializedSampler()).isNotNull();
   }
 
   @Test

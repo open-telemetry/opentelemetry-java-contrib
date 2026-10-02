@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.contrib.dynamic.policy.registry.PolicyInit;
+import io.opentelemetry.contrib.dynamic.policy.tracesampling.AbstractTraceSamplingPolicy;
 import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingRatePolicy;
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -31,7 +32,7 @@ class TelemetryPolicySamplerComponentProviderTest {
         new TelemetryPolicySamplerComponentProvider();
     provider.create(telemetryPolicyNodeConfig());
 
-    assertThat(TraceSamplingRatePolicy.getInitializedSampler()).isNotNull();
+    assertThat(AbstractTraceSamplingPolicy.getInitializedSampler()).isNotNull();
   }
 
   @Test
@@ -40,7 +41,7 @@ class TelemetryPolicySamplerComponentProviderTest {
         new TelemetryPolicySamplerComponentProvider();
     provider.create(mock(DeclarativeConfigProperties.class));
 
-    assertThat(TraceSamplingRatePolicy.getInitializedSampler()).isNull();
+    assertThat(AbstractTraceSamplingPolicy.getInitializedSampler()).isNull();
   }
 
   private static DeclarativeConfigProperties telemetryPolicyNodeConfig() {

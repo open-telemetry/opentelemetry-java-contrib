@@ -11,7 +11,6 @@ import io.opentelemetry.contrib.dynamic.policy.registry.PolicyInit;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
-import javax.annotation.Nullable;
 
 /** Trace sampling policy expressed as a ratio in the inclusive range {@code [0.0, 1.0]}. */
 public final class TraceSamplingRatePolicy extends AbstractTraceSamplingPolicy {
@@ -58,11 +57,6 @@ public final class TraceSamplingRatePolicy extends AbstractTraceSamplingPolicy {
     }
     // normalize -0.0
     return ratio == 0.0 ? 0.0 : ratio;
-  }
-
-  @Nullable
-  public static DelegatingSampler getInitializedSampler() {
-    return AbstractTraceSamplingPolicy.getInitializedSampler();
   }
 
   static void resetForTest() {

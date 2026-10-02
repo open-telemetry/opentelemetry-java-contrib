@@ -8,7 +8,7 @@ package io.opentelemetry.contrib.dynamic;
 import com.google.auto.service.AutoService;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.contrib.dynamic.policy.registry.PolicyInit;
-import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingRatePolicy;
+import io.opentelemetry.contrib.dynamic.policy.tracesampling.AbstractTraceSamplingPolicy;
 import io.opentelemetry.instrumentation.config.bridge.DeclarativeConfigPropertiesBridgeBuilder;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.ComponentProvider;
@@ -49,11 +49,7 @@ public final class TelemetryPolicySamplerComponentProvider implements ComponentP
     } catch (IllegalArgumentException e) {
       logger.log(Level.WARNING, "Failed to initialize telemetry policy from component config", e);
     }
-    // TODO: install specifically a delegating sampler, and allow it to be dynamically updated by
-    // the policy configuration
-    // but for now just use the existing sampling rate sampler which is a specifically configured
-    // delegating sampler
-    Sampler initialized = TraceSamplingRatePolicy.getInitializedSampler();
+    Sampler initialized = AbstractTraceSamplingPolicy.getInitializedSampler();
     return initialized == null ? Sampler.parentBased(Sampler.alwaysOn()) : initialized;
   }
 

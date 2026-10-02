@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.opentelemetry.contrib.dynamic.policy.registry.PolicyInit;
+import io.opentelemetry.contrib.dynamic.policy.tracesampling.AbstractTraceSamplingPolicy;
 import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingRatePolicy;
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.DeclarativeConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.AttributeNameValueModel;
@@ -72,7 +73,7 @@ class TelemetryPolicyDeclarativeCustomizerProviderTest {
     when(config.getString(POLICY_INIT_CONFIG_PROPERTY_JSON)).thenReturn(null);
 
     assertThat(propertiesCustomizer.apply(config)).isNotNull();
-    assertThat(TraceSamplingRatePolicy.getInitializedSampler()).isNotNull();
+    assertThat(AbstractTraceSamplingPolicy.getInitializedSampler()).isNotNull();
   }
 
   @Test
