@@ -7,36 +7,62 @@ package io.opentelemetry.contrib.dynamic.policy.registry;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
+import io.opentelemetry.common.ComponentLoader;
 import io.opentelemetry.contrib.dynamic.policy.PolicyImplementer;
+import io.opentelemetry.contrib.dynamic.policy.PolicyProviderPoller;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicyIdentity;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingPercentagePolicy;
 import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingRatePolicy;
+import io.opentelemetry.sdk.autoconfigure.declarativeconfig.DeclarativeConfigResult;
+import io.opentelemetry.sdk.autoconfigure.declarativeconfig.DeclarativeConfiguration;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
+import io.opentelemetry.sdk.autoconfigure.spi.internal.ComponentProvider;
+import io.opentelemetry.sdk.resources.Resource;
+import java.io.ByteArrayInputStream;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+import mockwebserver3.MockResponse;
+import mockwebserver3.MockWebServer;
+import mockwebserver3.RecordedRequest;
+import mockwebserver3.junit5.StartStop;
+import okio.Buffer;
+import opamp.proto.AgentToServer;
+import opamp.proto.ServerToAgent;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.MockedStatic;
 
 class PolicyInitTest {
   @TempDir Path tempDir;
+  @StartStop private final MockWebServer server = new MockWebServer();
 
   @AfterEach
   void tearDown() throws Exception {
@@ -82,43 +108,189 @@ class PolicyInitTest {
   }
 
   @Test
-  void initializesRegisteredPolicyTypeFromDeclarativeConfig() {
-    ConfigProperties config = mock(ConfigProperties.class);
+  void legacyHttpSourceAppliesConfiguredPollInterval() throws Exception {
+    AutoConfigurationCustomizer customizer = mock(AutoConfigurationCustomizer.class);
+    PolicyInit.init(customizer);
+    Function<ConfigProperties, Map<String, String>> propertiesCustomizer =
+        capturePropertiesCustomizer(customizer);
 
-    PolicyInit.initFromDeclarativeConfig(
-        telemetryPolicyNodeConfig(TraceSamplingRatePolicy.POLICY_TYPE), config);
+    Path configPath = tempDir.resolve("http-policy-init.json");
+    Files.write(
+        configPath,
+        minimalJsonInitConfig()
+            .replace("opamp", "http")
+            .replace("vendor", server.url("/policies").toString())
+            .getBytes(StandardCharsets.UTF_8));
+    ConfigProperties config = mock(ConfigProperties.class);
+    when(config.getString(PolicyInitConfig.POLICY_INIT_CONFIG_PROPERTY_JSON))
+        .thenReturn(configPath.toString());
+    when(config.getDuration(PolicyProviderPoller.POLL_INTERVAL_PROPERTY))
+        .thenReturn(Duration.ofSeconds(5));
+    server.enqueue(new MockResponse.Builder().body("{}").build());
+
+    assertThat(propertiesCustomizer.apply(config)).isEmpty();
+
+    assertThat(PolicyProviderPoller.getGlobalPollInterval()).isEqualTo(Duration.ofSeconds(5));
+    assertThat(server.takeRequest(10, TimeUnit.SECONDS)).isNotNull();
+  }
+
+  @Test
+  void legacyAutoConfigurationPreservesOpampHeaders() throws Exception {
+    AutoConfigurationCustomizer customizer = mock(AutoConfigurationCustomizer.class);
+    PolicyInit.init(customizer);
+    Function<ConfigProperties, Map<String, String>> propertiesCustomizer =
+        capturePropertiesCustomizer(customizer);
+
+    Path configPath = tempDir.resolve("policy-init.json");
+    Files.write(configPath, minimalJsonInitConfig().getBytes(StandardCharsets.UTF_8));
+
+    ConfigProperties config = mock(ConfigProperties.class);
+    when(config.getString(PolicyInitConfig.POLICY_INIT_CONFIG_PROPERTY_YAML)).thenReturn(null);
+    when(config.getString(PolicyInitConfig.POLICY_INIT_CONFIG_PROPERTY_JSON))
+        .thenReturn(configPath.toString());
+    when(config.getString("otel.opamp.service.url")).thenReturn(server.url("/v1/opamp").toString());
+    when(config.getString("otel.service.name")).thenReturn("test-service");
+    when(config.getMap("otel.resource.attributes")).thenReturn(Collections.emptyMap());
+    when(config.getMap("otel.experimental.opamp.headers"))
+        .thenReturn(Collections.singletonMap("Authorization", "Bearer token"));
+    server.enqueue(emptyServerResponse());
+
+    Map<String, String> ignored = propertiesCustomizer.apply(config);
+
+    assertThat(ignored).isNotNull();
+    RecordedRequest request = server.takeRequest(5, TimeUnit.SECONDS);
+    assertThat(request).isNotNull();
+    assertThat(request.getHeaders().get("Authorization")).isEqualTo("Bearer token");
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"explicit", "resource", "none", "detected", "fallback"})
+  void declarativeOpampUsesResolvedIdentityWithLegacyFallback(String identitySource)
+      throws Exception {
+    Map<String, String> properties = new HashMap<>();
+    properties.put("otel.opamp.service.url", server.url("/v1/opamp").toString());
+    properties.put("otel.service.name", identitySource.equals("explicit") ? "opamp-service" : null);
+    properties.put(
+        "otel.resource.attributes",
+        identitySource.equals("none")
+            ? null
+            : "service.name=opamp-resource-service,deployment.environment.name=opamp-environment");
+    properties.put("otel.experimental.opamp.headers", "Authorization=Bearer token");
+    Map<String, String> previous = new HashMap<>();
+    properties.forEach(
+        (key, value) -> {
+          previous.put(key, System.getProperty(key));
+          if (value == null) {
+            System.clearProperty(key);
+          } else {
+            System.setProperty(key, value);
+          }
+        });
+    server.enqueue(emptyServerResponse());
+    try {
+      String yaml =
+          "file_format: '1.0'\n"
+              + "resource:\n"
+              + "  detection/development:\n"
+              + "    detectors:\n"
+              + "      - test_identity: {}\n"
+              + "  attributes:\n"
+              + (identitySource.equals("detected")
+                  ? ""
+                  : "    - name: service.name\n      value: sdk-service\n")
+              + "    - name: deployment.environment.name\n"
+              + "      value: sdk-environment\n"
+              + "telemetry_policy/development:\n"
+              + "  sources:\n"
+              + "    - kind: opamp\n"
+              + "      format: jsonkeyvalue\n"
+              + "      location: vendor\n"
+              + "      mappings:\n"
+              + "        - policyId: sampling_rate\n"
+              + "          policyType: trace-sampling\n";
+      DeclarativeConfigResult result =
+          createDeclarativeSdk(yaml, identitySource.equals("fallback"));
+      try {
+        assertThat(result.getResource().getAttribute(AttributeKey.stringKey("service.name")))
+            .isEqualTo(identitySource.equals("detected") ? "detector-service" : "sdk-service");
+        assertThat(
+                result
+                    .getResource()
+                    .getAttribute(AttributeKey.stringKey("deployment.environment.name")))
+            .isEqualTo("sdk-environment");
+        RecordedRequest request = server.takeRequest(5, TimeUnit.SECONDS);
+        assertThat(request).isNotNull();
+        assertThat(request.getHeaders().get("Authorization")).isEqualTo("Bearer token");
+        assertThat(request.getBody()).isNotNull();
+        AgentToServer message = AgentToServer.ADAPTER.decode(request.getBody());
+        assertThat(message.agent_description).isNotNull();
+        assertThat(message.agent_description.identifying_attributes)
+            .anySatisfy(
+                attribute -> {
+                  assertThat(attribute.key).isEqualTo("service.name");
+                  assertThat(attribute.value.string_value)
+                      .isEqualTo(
+                          identitySource.equals("fallback")
+                              ? "opamp-resource-service"
+                              : result
+                                  .getResource()
+                                  .getAttribute(AttributeKey.stringKey("service.name")));
+                });
+        assertThat(message.agent_description.non_identifying_attributes)
+            .anySatisfy(
+                attribute -> {
+                  assertThat(attribute.key).isEqualTo("deployment.environment.name");
+                  assertThat(attribute.value.string_value)
+                      .isEqualTo(
+                          identitySource.equals("fallback")
+                              ? "opamp-environment"
+                              : "sdk-environment");
+                });
+      } finally {
+        result.getSdk().close();
+      }
+    } finally {
+      PolicyInit.resetForTest();
+      previous.forEach(
+          (key, value) -> {
+            if (value == null) {
+              System.clearProperty(key);
+            } else {
+              System.setProperty(key, value);
+            }
+          });
+    }
+  }
+
+  @Test
+  void initializesRegisteredPolicyTypeFromDeclarativeConfig() {
+    PolicyInit.prepareFromDeclarativeConfig(
+        telemetryPolicyNodeConfig(TraceSamplingRatePolicy.POLICY_TYPE));
 
     assertThat(TraceSamplingRatePolicy.getInitializedSampler()).isNotNull();
   }
 
   @Test
   void initializesPercentagePolicyTypeFromDeclarativeConfig() {
-    ConfigProperties config = mock(ConfigProperties.class);
-
-    PolicyInit.initFromDeclarativeConfig(
-        telemetryPolicyNodeConfig(TraceSamplingPercentagePolicy.POLICY_TYPE), config);
+    PolicyInit.prepareFromDeclarativeConfig(
+        telemetryPolicyNodeConfig(TraceSamplingPercentagePolicy.POLICY_TYPE));
 
     assertThat(TraceSamplingPercentagePolicy.getInitializedSampler()).isNotNull();
   }
 
   @Test
   void rejectsConfigWithBothTraceSamplingRepresentations() {
-    ConfigProperties config = mock(ConfigProperties.class);
-
-    assertThatThrownBy(
-            () -> PolicyInit.initFromDeclarativeConfig(twoTraceSamplingTypesConfig(), config))
+    assertThatThrownBy(() -> PolicyInit.prepareFromDeclarativeConfig(twoTraceSamplingTypesConfig()))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("Configure only one trace sampling policy representation");
   }
 
   @Test
   void throwsWhenDeclarativeConfigUsesUnknownPolicyType() {
-    ConfigProperties config = mock(ConfigProperties.class);
-
     assertThatThrownBy(
             () ->
-                PolicyInit.initFromDeclarativeConfig(
-                    telemetryPolicyNodeConfig("trace_sampling_rate_policy"), config))
+                PolicyInit.prepareFromDeclarativeConfig(
+                    telemetryPolicyNodeConfig("trace_sampling_rate_policy")))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("Unknown policyType");
   }
@@ -136,10 +308,8 @@ class PolicyInitTest {
           initializeCount.incrementAndGet();
           return implementer;
         });
-    ConfigProperties config = mock(ConfigProperties.class);
-
-    PolicyInit.initFromDeclarativeConfig(telemetryPolicyNodeConfig(policyType), config);
-    PolicyInit.initFromDeclarativeConfig(telemetryPolicyNodeConfig(policyType), config);
+    PolicyInit.prepareFromDeclarativeConfig(telemetryPolicyNodeConfig(policyType));
+    PolicyInit.prepareFromDeclarativeConfig(telemetryPolicyNodeConfig(policyType));
 
     assertThat(initializeCount.get()).isEqualTo(1);
     verify(implementer, times(1)).onPoliciesChanged(Collections.emptyList());
@@ -158,6 +328,54 @@ class PolicyInitTest {
     Method method = targetClass.getDeclaredMethod(methodName);
     method.setAccessible(true);
     method.invoke(null);
+  }
+
+  private static DeclarativeConfigResult createDeclarativeSdk(String yaml, boolean fallback) {
+    if (fallback) {
+      try (MockedStatic<SdkResourceAccess> access = mockStatic(SdkResourceAccess.class)) {
+        access.when(() -> SdkResourceAccess.getResource(any())).thenReturn(null);
+        return createDeclarativeSdk(yaml, /* fallback= */ false);
+      }
+    }
+    return DeclarativeConfiguration.create(
+        DeclarativeConfiguration.parse(
+            new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8))),
+        withIdentityDetector());
+  }
+
+  private static ComponentLoader withIdentityDetector() {
+    ComponentLoader delegate =
+        ComponentLoader.forClassLoader(PolicyInitTest.class.getClassLoader());
+    return new ComponentLoader() {
+      @Override
+      public <T> List<T> load(Class<T> spiClass) {
+        List<T> providers = new ArrayList<>(ComponentLoader.loadList(delegate, spiClass));
+        if (spiClass == ComponentProvider.class) {
+          providers.add(
+              spiClass.cast(
+                  new ComponentProvider() {
+                    @Override
+                    public String getName() {
+                      return "test_identity";
+                    }
+
+                    @Override
+                    public Class<Resource> getType() {
+                      return Resource.class;
+                    }
+
+                    @Override
+                    public Resource create(DeclarativeConfigProperties config) {
+                      return Resource.builder()
+                          .put("service.name", "detector-service")
+                          .put("deployment.environment.name", "detector-environment")
+                          .build();
+                    }
+                  }));
+        }
+        return providers;
+      }
+    };
   }
 
   private static DeclarativeConfigProperties telemetryPolicyNodeConfig(String policyType) {
@@ -206,6 +424,12 @@ class PolicyInitTest {
         + "\"mappings\":[{\"policyId\":\"sampling_rate\",\"policyType\":\""
         + TraceSamplingRatePolicy.POLICY_TYPE
         + "\"}]}]}";
+  }
+
+  private static MockResponse emptyServerResponse() {
+    Buffer body = new Buffer();
+    body.write(new ServerToAgent.Builder().build().encode());
+    return new MockResponse.Builder().code(200).body(body).build();
   }
 
   private static final class IdempotentTestPolicy implements TelemetryPolicy {

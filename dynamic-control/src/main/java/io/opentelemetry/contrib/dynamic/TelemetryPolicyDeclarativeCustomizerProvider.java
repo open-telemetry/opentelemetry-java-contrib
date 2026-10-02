@@ -18,15 +18,10 @@ import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingPercen
 import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingRatePolicy;
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.DeclarativeConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.DeclarativeConfigurationCustomizerProvider;
-import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.AttributeNameValueModel;
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.OpenTelemetryConfigurationModel;
-import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.ResourceModel;
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.SamplerModel;
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.SamplerPropertyModel;
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.TracerProviderModel;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -110,10 +105,7 @@ public final class TelemetryPolicyDeclarativeCustomizerProvider
     }
     sampler.withAdditionalProperty(
         TelemetryPolicySamplerComponentProvider.NAME,
-        new SamplerPropertyModel()
-            .withAdditionalProperty("sources", sources)
-            .withAdditionalProperty("resource_attributes", resourceAttributes(model))
-            .withAdditionalProperty("otel.resource.attributes", resourceAttributes(model)));
+        new SamplerPropertyModel().withAdditionalProperty("sources", sources));
   }
 
   private static boolean containsPolicyType(PolicyInitConfig initConfig, String policyType) {
@@ -125,20 +117,5 @@ public final class TelemetryPolicyDeclarativeCustomizerProvider
       }
     }
     return false;
-  }
-
-  private static Map<String, String> resourceAttributes(OpenTelemetryConfigurationModel model) {
-    ResourceModel resource = model.getResource();
-    if (resource == null || resource.getAttributes() == null) {
-      return Collections.emptyMap();
-    }
-    Map<String, String> attributes = new LinkedHashMap<>();
-    List<AttributeNameValueModel> resourceAttributes = resource.getAttributes();
-    for (AttributeNameValueModel attribute : resourceAttributes) {
-      if (attribute.getName() != null && attribute.getValue() != null) {
-        attributes.put(attribute.getName(), String.valueOf(attribute.getValue()));
-      }
-    }
-    return Collections.unmodifiableMap(attributes);
   }
 }
