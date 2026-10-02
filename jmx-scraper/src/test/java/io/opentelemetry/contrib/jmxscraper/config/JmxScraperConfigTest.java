@@ -20,7 +20,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException;
-import java.io.InputStream;
 import java.time.Duration;
 import java.util.Locale;
 import java.util.Properties;
@@ -169,13 +168,18 @@ class JmxScraperConfigTest {
     JmxScraperConfig config = fromConfig(TestUtil.configProperties(properties));
 
     // should resolve to instrumentation when available in both
-    shouldResolveToInstrumentationYaml(config, "fake-test-system-both");
+    assertThat(config.getTargetSystemRules("fake-test-system-both"))
+        .containsExactly("jmx/rules/fake-test-system-both.yaml");
 
     // should resolve to legacy yaml when not available in instrumentation
-    shouldResolveToLegacyYaml(config, "fake-test-system-legacy-only");
+    assertThat(config.getTargetSystemRules("fake-test-system-legacy-only"))
+        .containsExactly("fake-test-system-legacy-only.yaml");
 
     // should resolve to instrumentation when only defined there
-    shouldResolveToInstrumentationYaml(config, "fake-test-system-instrumentation-only");
+    assertThat(config.getTargetSystemRules("fake-test-system-instrumentation-only"))
+        .containsExactlyInAnyOrder(
+            "jmx/rules/fake-test-system-instrumentation-only.yaml",
+            "jmx/rules/fake-test-system-instrumentation-only_unstable.yaml");
   }
 
   @Test
@@ -187,9 +191,11 @@ class JmxScraperConfigTest {
 
     JmxScraperConfig config = fromConfig(TestUtil.configProperties(properties));
 
-    shouldResolveToLegacyYaml(config, "fake-test-system-both");
+    assertThat(config.getTargetSystemRules("fake-test-system-both"))
+        .containsExactly("fake-test-system-both.yaml");
 
-    shouldResolveToLegacyYaml(config, "fake-test-system-legacy-only");
+    assertThat(config.getTargetSystemRules("fake-test-system-legacy-only"))
+        .containsExactly("fake-test-system-legacy-only.yaml");
 
     // should not support system only defined in instrumentation
     shouldNotResolveYaml(config, "fake-test-system-instrumentation-only");
@@ -204,32 +210,44 @@ class JmxScraperConfigTest {
 
     JmxScraperConfig config = fromConfig(TestUtil.configProperties(properties));
 
-    shouldResolveToInstrumentationYaml(config, "fake-test-system-both");
+    assertThat(config.getTargetSystemRules("fake-test-system-both"))
+        .containsExactlyInAnyOrder("jmx/rules/fake-test-system-both.yaml");
 
     // should not support system only defined in legacy
     shouldNotResolveYaml(config, "fake-test-system-legacy-only");
 
-    shouldResolveToInstrumentationYaml(config, "fake-test-system-instrumentation-only");
+    assertThat(config.getTargetSystemRules("fake-test-system-instrumentation-only"))
+        .containsExactlyInAnyOrder(
+            "jmx/rules/fake-test-system-instrumentation-only.yaml",
+            "jmx/rules/fake-test-system-instrumentation-only_unstable.yaml");
   }
 
-  private static InputStream getYaml(String path) {
-    return JmxScraperConfigTest.class.getClassLoader().getResourceAsStream(path);
-  }
+  @Test
+  void testInstrumentationJvmMetrics() {
+    Properties properties = (Properties) validProperties.clone();
+    properties.setProperty(JMX_TARGET_SYSTEM, "jvm");
+    JmxScraperConfig config = fromConfig(TestUtil.configProperties(properties));
 
-  private static void shouldResolveToInstrumentationYaml(JmxScraperConfig config, String target) {
-    assertThat(config.getTargetSystemYaml(target))
-        .describedAs("should resolve to instrumentation yaml")
-        .hasSameContentAs(getYaml("jmx/rules/" + target + ".yaml"));
-  }
+    boolean withRegistry = false;
+    try {
+      Class.forName("io.opentelemetry.instrumentation.jmx.internal.InternalMetricsDefinitions");
+      withRegistry = true;
+    } catch (Exception e) {
+      // silently ignored
+    }
 
-  private static void shouldResolveToLegacyYaml(JmxScraperConfig config, String target) {
-    assertThat(config.getTargetSystemYaml(target))
-        .describedAs("should resolve to legacy yaml")
-        .hasSameContentAs(getYaml(target + ".yaml"));
+    // This test can be removed once we stop relying on resource paths.
+    if (withRegistry) {
+      // jvm metrics should have both stable and unstable rules, so two resources are expected.
+      assertThat(config.getTargetSystemRules("jvm"))
+          .containsExactlyInAnyOrder("jmx/rules/jvm.yaml", "jmx/rules/jvm_unstable.yaml");
+    } else {
+      assertThat(config.getTargetSystemRules("jvm")).containsExactly("jmx/rules/jvm.yaml");
+    }
   }
 
   private static void shouldNotResolveYaml(JmxScraperConfig config, String target) {
-    assertThatThrownBy(() -> config.getTargetSystemYaml(target))
+    assertThatThrownBy(() -> config.getTargetSystemRules(target))
         .describedAs("should not support system")
         .isInstanceOf(ConfigurationException.class)
         .hasMessageStartingWith("unsupported target system");
