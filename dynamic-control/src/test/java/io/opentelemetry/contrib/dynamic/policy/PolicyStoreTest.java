@@ -15,6 +15,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
+import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingPercentagePolicy;
 import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingRatePolicy;
 import java.util.Arrays;
 import java.util.Collections;
@@ -46,6 +47,17 @@ class PolicyStoreTest {
     assertThat(store.updatePolicies(singletonList(traceSampling(0.75)))).isTrue();
     assertThat(store.getPolicies()).hasSize(1);
     assertThat(((TraceSamplingRatePolicy) store.getPolicies().get(0)).getRatio()).isEqualTo(0.75);
+  }
+
+  @Test
+  void updatePoliciesStoresChangedPercentage() {
+    PolicyStore store = new PolicyStore();
+    assertThat(store.updatePolicies(singletonList(traceSamplingPercentage(25.0)))).isTrue();
+    assertThat(store.updatePolicies(singletonList(traceSamplingPercentage(75.0)))).isTrue();
+
+    assertThat(store.getPolicies()).hasSize(1);
+    assertThat(((TraceSamplingPercentagePolicy) store.getPolicies().get(0)).getPercentage())
+        .isEqualTo(75.0);
   }
 
   @Test
@@ -196,6 +208,32 @@ class PolicyStoreTest {
   }
 
   @Test
+  void percentageUpdatesAndRemovalNotifyConfiguredImplementer() {
+    PolicyStore store = new PolicyStore();
+    PolicyImplementer implementer = implementerFor(TraceSamplingPercentagePolicy.POLICY_TYPE);
+    TraceSamplingPercentagePolicy initial = traceSamplingPercentage(25.0);
+    TraceSamplingPercentagePolicy updated = traceSamplingPercentage(75.0);
+    store.updatePolicies(singletonList(initial));
+    store.registerImplementer(implementer);
+    clearInvocations(implementer);
+
+    assertThat(store.updatePolicies(singletonList(updated))).isTrue();
+    verify(implementer).onPoliciesChanged(singletonList(updated));
+    clearInvocations(implementer);
+
+    assertThat(store.updatePolicies(Collections.emptyList())).isTrue();
+    verify(implementer)
+        .onPoliciesChanged(
+            argThat(
+                policies ->
+                    policies.size() == 1
+                        && policies.get(0) instanceof DeletedTelemetryPolicy
+                        && policies.get(0).isDeleted()
+                        && policies.get(0).getIdentity().equals(updated.getIdentity())
+                        && policies.get(0).getType().equals(updated.getType())));
+  }
+
+  @Test
   void updatePoliciesNotifiesDeletedPolicyForAnyIdentityBearingPolicy() {
     PolicyStore store = new PolicyStore();
     PolicyImplementer implementer = implementerFor("test-policy");
@@ -267,6 +305,10 @@ class PolicyStoreTest {
 
   private static TraceSamplingRatePolicy traceSampling(double ratio) {
     return new TraceSamplingRatePolicy(ratio, SourceKind.CUSTOM);
+  }
+
+  private static TraceSamplingPercentagePolicy traceSamplingPercentage(double percentage) {
+    return new TraceSamplingPercentagePolicy(percentage, SourceKind.CUSTOM);
   }
 
   private static PolicyImplementer implementerFor(String policyType) {
