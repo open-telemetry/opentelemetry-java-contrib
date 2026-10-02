@@ -23,9 +23,9 @@ import java.util.logging.Logger;
  * <p>This class is thread-safe. Calls to {@link #onPoliciesChanged(List)} can occur concurrently
  * with sampling operations on the associated {@link DelegatingSampler}.
  */
-public final class TraceSamplingRatePolicyImplementer implements PolicyImplementer {
+public final class TraceSamplingPolicyImplementer implements PolicyImplementer {
   private static final Logger logger =
-      Logger.getLogger(TraceSamplingRatePolicyImplementer.class.getName());
+      Logger.getLogger(TraceSamplingPolicyImplementer.class.getName());
 
   private static final List<PolicyValidator> VALIDATORS =
       Collections.<PolicyValidator>singletonList(new TraceSamplingRateValidator());
@@ -38,11 +38,11 @@ public final class TraceSamplingRatePolicyImplementer implements PolicyImplement
    *
    * @param delegatingSampler the sampler to update when policies change
    */
-  public TraceSamplingRatePolicyImplementer(DelegatingSampler delegatingSampler) {
+  public TraceSamplingPolicyImplementer(DelegatingSampler delegatingSampler) {
     this(delegatingSampler, VALIDATORS);
   }
 
-  TraceSamplingRatePolicyImplementer(
+  TraceSamplingPolicyImplementer(
       DelegatingSampler delegatingSampler, List<PolicyValidator> validators) {
     this.delegatingSampler =
         Objects.requireNonNull(delegatingSampler, "delegatingSampler cannot be null");
