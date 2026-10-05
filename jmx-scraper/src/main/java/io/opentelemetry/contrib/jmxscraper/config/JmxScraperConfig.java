@@ -10,6 +10,7 @@ import static java.util.Collections.emptySet;
 import static java.util.Collections.unmodifiableList;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Locale.ROOT;
+import static java.util.stream.Collectors.toList;
 
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigurationException;
@@ -220,6 +221,26 @@ public final class JmxScraperConfig {
       throw new ConfigurationException(
           "at least one of '" + JMX_TARGET_SYSTEM + "' or '" + JMX_CONFIG + "' must be set");
     }
+
+    // preserve compatibility with 'experimental-' prefix for target system identifiers.
+    // those should be removed once the 'legacy' target system source is removed.
+    targetSystem =
+        targetSystem.stream()
+            .map(
+                s -> {
+                  if (s.startsWith("experimental-")) {
+                    String normalized = s.substring("experimental-".length());
+                    logger.warning(
+                        "target system identifier '"
+                            + s
+                            + "' is deprecated, use '"
+                            + normalized
+                            + "'");
+                    return normalized;
+                  }
+                  return s;
+                })
+            .collect(toList());
 
     scraperConfig.jmxConfig = unmodifiableList(jmxConfig);
     scraperConfig.targetSystems = unmodifiableSet(new HashSet<>(targetSystem));

@@ -246,6 +246,15 @@ class JmxScraperConfigTest {
     }
   }
 
+  @Test
+  void testExperimentalTargetSystemPrefix() {
+    Properties properties = (Properties) validProperties.clone();
+    properties.setProperty(JMX_TARGET_SYSTEM, "experimental-kafka-connect,experimental-cassandra");
+    JmxScraperConfig config = fromConfig(TestUtil.configProperties(properties));
+
+    assertThat(config.getTargetSystems()).containsExactlyInAnyOrder("kafka-connect", "cassandra");
+  }
+
   private static void shouldNotResolveYaml(JmxScraperConfig config, String target) {
     assertThatThrownBy(() -> config.getTargetSystemRules(target))
         .describedAs("should not support system")
