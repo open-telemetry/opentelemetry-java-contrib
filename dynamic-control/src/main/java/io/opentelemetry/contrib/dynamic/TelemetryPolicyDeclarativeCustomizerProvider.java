@@ -22,7 +22,6 @@ import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.AttributeNameV
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.OpenTelemetryConfigurationModel;
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.ResourceModel;
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.SamplerModel;
-import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.SamplerPropertyModel;
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.TracerProviderModel;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -59,10 +58,10 @@ public final class TelemetryPolicyDeclarativeCustomizerProvider
   @CanIgnoreReturnValue
   private static OpenTelemetryConfigurationModel registerTopLevelTelemetryPolicy(
       OpenTelemetryConfigurationModel model) {
-    if (model == null || model.getAdditionalProperties() == null) {
+    if (model == null || model.getExtensionProperties() == null) {
       return model;
     }
-    Map<String, Object> additionalProperties = model.getAdditionalProperties();
+    Map<String, Object> additionalProperties = model.getExtensionProperties();
     Object telemetryPolicy = additionalProperties.remove(TELEMETRY_POLICY_TOP_LEVEL_KEY);
     if (telemetryPolicy == null) {
       return model;
@@ -101,19 +100,19 @@ public final class TelemetryPolicyDeclarativeCustomizerProvider
     TracerProviderModel tracerProvider = model.getTracerProvider();
     if (tracerProvider == null) {
       tracerProvider = new TracerProviderModel();
-      model.withTracerProvider(tracerProvider);
+      model.setTracerProvider(tracerProvider);
     }
     SamplerModel sampler = tracerProvider.getSampler();
     if (sampler == null) {
       sampler = new SamplerModel();
-      tracerProvider.withSampler(sampler);
+      tracerProvider.setSampler(sampler);
     }
-    sampler.withAdditionalProperty(
-        TelemetryPolicySamplerComponentProvider.NAME,
-        new SamplerPropertyModel()
-            .withAdditionalProperty("sources", sources)
-            .withAdditionalProperty("resource_attributes", resourceAttributes(model))
-            .withAdditionalProperty("otel.resource.attributes", resourceAttributes(model)));
+    Map<String, Object> additionalProperties = new LinkedHashMap<>();
+    additionalProperties.put("sources", sources);
+    additionalProperties.put("resource_attributes", resourceAttributes(model));
+    additionalProperties.put("otel.resource.attributes", resourceAttributes(model));
+    sampler.setExtensionProperty(
+        TelemetryPolicySamplerComponentProvider.NAME, additionalProperties);
   }
 
   private static boolean containsPolicyType(PolicyInitConfig initConfig, String policyType) {

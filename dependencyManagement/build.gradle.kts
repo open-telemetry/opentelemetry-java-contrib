@@ -2,7 +2,7 @@ plugins {
   `java-platform`
 }
 
-val otelInstrumentationVersion = "2.31.1-alpha"
+val otelInstrumentationVersion = "2.32.0-alpha"
 val semconvVersion = "1.44.0"
 
 javaPlatform {
@@ -31,7 +31,7 @@ dependencies {
     api("com.google.errorprone:error_prone_core:2.50.0")
     api("com.google.errorprone:error_prone_test_helpers:2.50.0")
     api("io.github.netmikey.logunit:logunit-jul:2.0.0")
-    api("io.opentelemetry.proto:opentelemetry-proto:1.11.0-alpha")
+    api("io.opentelemetry.proto:opentelemetry-proto:1.11.1-alpha")
     api("io.prometheus:simpleclient:0.16.0")
     api("io.prometheus:simpleclient_common:0.16.0")
     api("io.prometheus:simpleclient_httpserver:0.16.0")
@@ -55,6 +55,10 @@ dependencies {
     api("org.junit-pioneer:junit-pioneer:1.9.1")
     api("org.skyscreamer:jsonassert:1.5.3")
     api("org.apache.kafka:kafka-clients:4.3.1")
+    // transitive deps of kafka-clients, pinned for CVE fixes (see kafka-exporter/build.gradle.kts)
+    // remove once kafka-clients depends on fixed versions
+    api("at.yawk.lz4:lz4-java:1.12.0")
+    api("com.github.luben:zstd-jni:1.5.7-20")
     api("org.testcontainers:testcontainers-kafka:2.0.5")
     api("org.jctools:jctools-core:4.0.7")
     api("tools.profiler:async-profiler:4.5")

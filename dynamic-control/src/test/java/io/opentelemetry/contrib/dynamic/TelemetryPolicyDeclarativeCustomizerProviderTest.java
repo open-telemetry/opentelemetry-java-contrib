@@ -12,12 +12,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.opentelemetry.contrib.dynamic.policy.registry.PolicyInit;
+import io.opentelemetry.contrib.dynamic.policy.tracesampling.AbstractTraceSamplingPolicy;
 import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingRatePolicy;
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.DeclarativeConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.AttributeNameValueModel;
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.OpenTelemetryConfigurationModel;
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.ResourceModel;
-import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.SamplerPropertyModel;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import java.lang.reflect.Method;
@@ -50,17 +50,17 @@ class TelemetryPolicyDeclarativeCustomizerProviderTest {
     OpenTelemetryConfigurationModel customized =
         modelCustomizer.apply(topLevelTelemetryPolicyModel(TraceSamplingRatePolicy.POLICY_TYPE));
     assertThat(customized).isNotNull();
-    SamplerPropertyModel samplerProperty =
+    Object samplerProperty =
         customized
             .getTracerProvider()
             .getSampler()
-            .getAdditionalProperties()
+            .getExtensionProperties()
             .get(TelemetryPolicySamplerComponentProvider.NAME);
     assertThat(samplerProperty).isNotNull();
-    assertThat(samplerProperty.getAdditionalProperties().get("resource_attributes"))
-        .isEqualTo(resourceAttributes());
-    assertThat(samplerProperty.getAdditionalProperties().get("otel.resource.attributes"))
-        .isEqualTo(resourceAttributes());
+    assertThat(samplerProperty).isInstanceOf(Map.class);
+    Map<?, ?> samplerPropertyMap = (Map<?, ?>) samplerProperty;
+    assertThat(samplerPropertyMap.get("resource_attributes")).isEqualTo(resourceAttributes());
+    assertThat(samplerPropertyMap.get("otel.resource.attributes")).isEqualTo(resourceAttributes());
 
     AutoConfigurationCustomizer autoConfiguration = mock(AutoConfigurationCustomizer.class);
     PolicyInit.init(autoConfiguration);
@@ -72,7 +72,7 @@ class TelemetryPolicyDeclarativeCustomizerProviderTest {
     when(config.getString(POLICY_INIT_CONFIG_PROPERTY_JSON)).thenReturn(null);
 
     assertThat(propertiesCustomizer.apply(config)).isNotNull();
-    assertThat(TraceSamplingRatePolicy.getInitializedSampler()).isNotNull();
+    assertThat(AbstractTraceSamplingPolicy.getInitializedSampler()).isNotNull();
   }
 
   @Test
@@ -81,7 +81,7 @@ class TelemetryPolicyDeclarativeCustomizerProviderTest {
         captureModelCustomizer();
 
     OpenTelemetryConfigurationModel model = new OpenTelemetryConfigurationModel();
-    model.withAdditionalProperty(
+    model.setExtensionProperty(
         TelemetryPolicyDeclarativeCustomizerProvider.TELEMETRY_POLICY_TOP_LEVEL_KEY,
         Collections.singletonMap("sources", "not-an-array"));
 
@@ -113,17 +113,17 @@ class TelemetryPolicyDeclarativeCustomizerProviderTest {
 
   private static OpenTelemetryConfigurationModel topLevelTelemetryPolicyModel(String policyType) {
     OpenTelemetryConfigurationModel model = new OpenTelemetryConfigurationModel();
-    model.withAdditionalProperty(
+    model.setExtensionProperty(
         TelemetryPolicyDeclarativeCustomizerProvider.TELEMETRY_POLICY_TOP_LEVEL_KEY,
         telemetryPolicy(policyType));
-    model.withResource(
+    model.setResource(
         new ResourceModel()
-            .withAttributes(
+            .setAttributes(
                 Arrays.asList(
-                    new AttributeNameValueModel().withName("service.name").withValue("edot-otel"),
+                    new AttributeNameValueModel().setName("service.name").setValue("edot-otel"),
                     new AttributeNameValueModel()
-                        .withName("deployment.environment.name")
-                        .withValue("dev"))));
+                        .setName("deployment.environment.name")
+                        .setValue("dev"))));
     return model;
   }
 
