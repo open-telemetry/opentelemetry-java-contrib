@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Disk buffering
+
+- Add `DiscardedFileListener`, set with `FileStorageConfiguration.Builder.setDiscardedFileListener`,
+  to be notified when a stored file is deleted before all of its data was read: expired, removed to
+  stay within the folder size limit, or corrupted.
+  ([#3144](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3144))
+
 ### GCP authentication extension
 
 - Add support for the `logs` signal type, enabling authenticated OTLP log record exports.

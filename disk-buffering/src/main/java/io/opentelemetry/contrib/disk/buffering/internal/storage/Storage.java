@@ -14,6 +14,7 @@ import io.opentelemetry.contrib.disk.buffering.internal.storage.files.ReadableFi
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.WritableFile;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.WritableResult;
+import io.opentelemetry.contrib.disk.buffering.storage.impl.DiscardedFileListener.Reason;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collection;
@@ -138,11 +139,19 @@ public final class Storage<T> implements Closeable {
         } catch (DeserializationException e) {
           // Data corrupted, clear file.
           readableFile.clear();
+          folderManager
+              .getConfiguration()
+              .getDiscardedFileListener()
+              .onDiscarded(readableFile.getFile(), Reason.CORRUPTED);
         }
       }
     } catch (IOException e) {
       // Proto data corrupted, clear file.
       readableFile.clear();
+      folderManager
+          .getConfiguration()
+          .getDiscardedFileListener()
+          .onDiscarded(readableFile.getFile(), Reason.CORRUPTED);
     }
 
     // Search for newer files than the current one.
