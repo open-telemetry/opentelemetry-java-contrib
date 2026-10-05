@@ -22,6 +22,7 @@ import io.opentelemetry.contrib.dynamic.policy.PolicyProviderPoller;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicyIdentity;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
+import io.opentelemetry.contrib.dynamic.policy.tracesampling.AbstractTraceSamplingPolicy;
 import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingPercentagePolicy;
 import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingRatePolicy;
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.DeclarativeConfigResult;
@@ -82,7 +83,7 @@ class PolicyInitTest {
     when(config.getString(PolicyInitConfig.POLICY_INIT_CONFIG_PROPERTY_JSON)).thenReturn(null);
     Map<String, String> ignored = propertiesCustomizer.apply(config);
 
-    assertThat(TraceSamplingRatePolicy.getInitializedSampler()).isNull();
+    assertThat(AbstractTraceSamplingPolicy.getInitializedSampler()).isNull();
     assertThat(ignored).isNotNull();
   }
 
@@ -104,7 +105,7 @@ class PolicyInitTest {
     Map<String, String> ignored = propertiesCustomizer.apply(config);
 
     assertThat(ignored).isNotNull();
-    assertThat(TraceSamplingRatePolicy.getInitializedSampler()).isNotNull();
+    assertThat(AbstractTraceSamplingPolicy.getInitializedSampler()).isNotNull();
   }
 
   @Test
@@ -267,7 +268,7 @@ class PolicyInitTest {
     PolicyInit.prepareFromDeclarativeConfig(
         telemetryPolicyNodeConfig(TraceSamplingRatePolicy.POLICY_TYPE));
 
-    assertThat(TraceSamplingRatePolicy.getInitializedSampler()).isNotNull();
+    assertThat(AbstractTraceSamplingPolicy.getInitializedSampler()).isNotNull();
   }
 
   @Test
@@ -275,7 +276,7 @@ class PolicyInitTest {
     PolicyInit.prepareFromDeclarativeConfig(
         telemetryPolicyNodeConfig(TraceSamplingPercentagePolicy.POLICY_TYPE));
 
-    assertThat(TraceSamplingPercentagePolicy.getInitializedSampler()).isNotNull();
+    assertThat(AbstractTraceSamplingPolicy.getInitializedSampler()).isNotNull();
   }
 
   @Test

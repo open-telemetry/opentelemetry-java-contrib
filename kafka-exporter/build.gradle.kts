@@ -14,7 +14,7 @@ otelJava {
 dependencies {
   api("io.opentelemetry:opentelemetry-sdk-trace")
   api("io.opentelemetry:opentelemetry-sdk-common")
-  api("io.opentelemetry.proto:opentelemetry-proto:1.11.0-alpha")
+  api("io.opentelemetry.proto:opentelemetry-proto:1.11.1-alpha")
   api("org.apache.kafka:kafka-clients")
 
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
@@ -24,8 +24,11 @@ dependencies {
 
   runtimeOnly("com.fasterxml.jackson.core:jackson-core")
   runtimeOnly("com.fasterxml.jackson.core:jackson-databind")
-  runtimeOnly("at.yawk.lz4:lz4-java:1.11.3") {
+  runtimeOnly("at.yawk.lz4:lz4-java") {
     because("CVE-2026-59949")
+  }
+  runtimeOnly("com.github.luben:zstd-jni") {
+    because("CVE-2026-87795, CVE-2026-87823, CVE-2026-89045")
   }
 
   implementation("io.opentelemetry:opentelemetry-exporter-otlp-common")

@@ -6,7 +6,7 @@ plugins {
   id("otel.animalsniffer-conventions")
   id("com.gradleup.shadow")
   id("me.champeau.jmh") version "0.7.3"
-  id("com.squareup.wire") version "6.4.7"
+  id("com.squareup.wire") version "7.1.0"
 }
 
 description = "Exporter implementations that store signals on disk"
@@ -22,7 +22,7 @@ dependencies {
   testImplementation("org.mockito:mockito-inline")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
 
-  protos("io.opentelemetry.proto:opentelemetry-proto:1.11.0-alpha@jar")
+  protos("io.opentelemetry.proto:opentelemetry-proto:1.11.1-alpha@jar")
 }
 
 jmh {

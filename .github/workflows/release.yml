@@ -98,7 +98,7 @@ jobs:
           java-version: 25
 
       - name: Set up gradle
-        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+        uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
         with:
           cache-read-only: true
 
@@ -183,7 +183,7 @@ jobs:
           cp ibm-mq-metrics/build/libs/opentelemetry-ibm-mq-metrics-$VERSION-alpha-all.jar opentelemetry-ibm-mq-metrics-all.jar
           cp ibm-mq-metrics/build/libs/opentelemetry-ibm-mq-metrics-$VERSION-alpha-all.jar.asc opentelemetry-ibm-mq-metrics-all.jar.asc
 
-      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+      - uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
           subject-path: |
             opentelemetry-jmx-metrics.jar
@@ -265,7 +265,7 @@ jobs:
           java-version: 25
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+        uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
         with:
           cache-read-only: true
 

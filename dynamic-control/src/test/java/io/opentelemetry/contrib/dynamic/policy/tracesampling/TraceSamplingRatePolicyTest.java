@@ -81,7 +81,7 @@ class TraceSamplingRatePolicyTest {
 
     TraceSamplingRatePolicy.initialize(customizer);
 
-    assertThat(TraceSamplingRatePolicy.getInitializedSampler()).isNotNull();
+    assertThat(AbstractTraceSamplingPolicy.getInitializedSampler()).isNotNull();
     verify(customizer).addSamplerCustomizer(any());
   }
 

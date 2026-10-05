@@ -23,13 +23,13 @@ import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-class TraceSamplingRatePolicyImplementerTest {
+class TraceSamplingPolicyImplementerTest {
 
   @Test
   void deletedTraceSamplingPolicyFallsBackToAlwaysOn() {
     DelegatingSampler delegatingSampler = new DelegatingSampler(Sampler.alwaysOff());
-    TraceSamplingRatePolicyImplementer implementer =
-        new TraceSamplingRatePolicyImplementer(delegatingSampler);
+    TraceSamplingPolicyImplementer implementer =
+        new TraceSamplingPolicyImplementer(delegatingSampler);
 
     implementer.onPoliciesChanged(
         singletonList(
@@ -44,8 +44,8 @@ class TraceSamplingRatePolicyImplementerTest {
   @Test
   void appliesProbabilityToDelegate() {
     DelegatingSampler delegatingSampler = new DelegatingSampler(Sampler.alwaysOff());
-    TraceSamplingRatePolicyImplementer implementer =
-        new TraceSamplingRatePolicyImplementer(delegatingSampler);
+    TraceSamplingPolicyImplementer implementer =
+        new TraceSamplingPolicyImplementer(delegatingSampler);
 
     implementer.onPoliciesChanged(
         singletonList(new TraceSamplingRatePolicy(1.0, SourceKind.CUSTOM)));
@@ -57,8 +57,8 @@ class TraceSamplingRatePolicyImplementerTest {
   void skipsRepeatedEquivalentProbability() {
     CountingDelegatingSampler delegatingSampler =
         new CountingDelegatingSampler(Sampler.alwaysOff());
-    TraceSamplingRatePolicyImplementer implementer =
-        new TraceSamplingRatePolicyImplementer(delegatingSampler);
+    TraceSamplingPolicyImplementer implementer =
+        new TraceSamplingPolicyImplementer(delegatingSampler);
 
     implementer.onPoliciesChanged(
         singletonList(new TraceSamplingRatePolicy(1.0, SourceKind.CUSTOM)));
@@ -71,8 +71,8 @@ class TraceSamplingRatePolicyImplementerTest {
   @Test
   void ignoresUnrelatedPolicyTypes() {
     DelegatingSampler delegatingSampler = new DelegatingSampler(Sampler.alwaysOff());
-    TraceSamplingRatePolicyImplementer implementer =
-        new TraceSamplingRatePolicyImplementer(delegatingSampler);
+    TraceSamplingPolicyImplementer implementer =
+        new TraceSamplingPolicyImplementer(delegatingSampler);
 
     implementer.onPoliciesChanged(singletonList(new TestTelemetryPolicy("other-policy")));
 
@@ -82,8 +82,8 @@ class TraceSamplingRatePolicyImplementerTest {
   @Test
   void lastTraceSamplingPolicyWins() {
     DelegatingSampler delegatingSampler = new DelegatingSampler(Sampler.alwaysOff());
-    TraceSamplingRatePolicyImplementer implementer =
-        new TraceSamplingRatePolicyImplementer(delegatingSampler);
+    TraceSamplingPolicyImplementer implementer =
+        new TraceSamplingPolicyImplementer(delegatingSampler);
 
     List<TelemetryPolicy> policies =
         Arrays.asList(

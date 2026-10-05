@@ -32,7 +32,7 @@ A concrete example helps to understand this flow:
 with the target "traceid rate"
 4. Policy aggregator: The policy is combined with any other policy changes already applied or pending,
 handling source priority and potential merges of policies
-5. Implementer: TraceSamplingRatePolicyImplementer takes the policy with the new traceid sampling rate
+5. Implementer: TraceSamplingPolicyImplementer takes the policy with the new traceid sampling rate
 and applies it to the sampler
 
 ## Quick Unix example
