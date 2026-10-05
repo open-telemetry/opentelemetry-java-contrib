@@ -14,9 +14,6 @@ import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.getConfiguration;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
@@ -274,8 +271,12 @@ class StorageTest {
     // Read
     assertThat(storage.readNext(DESERIALIZER)).isNull();
     assertThat(destinationDir.list()).containsExactly("4000"); // it tries 3 times max per call.
-    verify(folderManager.getConfiguration().getDiscardedFileListener(), times(3))
-        .onDiscarded(any(), eq(Reason.CORRUPTED));
+    verify(folderManager.getConfiguration().getDiscardedFileListener())
+        .onDiscarded(new File(destinationDir, "1000"), Reason.CORRUPTED);
+    verify(folderManager.getConfiguration().getDiscardedFileListener())
+        .onDiscarded(new File(destinationDir, "2000"), Reason.CORRUPTED);
+    verify(folderManager.getConfiguration().getDiscardedFileListener())
+        .onDiscarded(new File(destinationDir, "3000"), Reason.CORRUPTED);
   }
 
   private void forwardToReadTime() {
