@@ -7,11 +7,13 @@ package io.opentelemetry.contrib.dynamic.policy.tracesampling;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.contrib.dynamic.policy.DeletedTelemetryPolicy;
+import io.opentelemetry.contrib.dynamic.policy.PolicyValidator;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicyIdentity;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
@@ -29,7 +31,7 @@ class TraceSamplingPolicyImplementerTest {
   void deletedTraceSamplingPolicyFallsBackToAlwaysOn() {
     DelegatingSampler delegatingSampler = new DelegatingSampler(Sampler.alwaysOff());
     TraceSamplingPolicyImplementer implementer =
-        new TraceSamplingPolicyImplementer(delegatingSampler);
+        new TraceSamplingPolicyImplementer(delegatingSampler, new TraceSamplingRateValidator());
 
     implementer.onPoliciesChanged(
         singletonList(
@@ -45,7 +47,7 @@ class TraceSamplingPolicyImplementerTest {
   void appliesProbabilityToDelegate() {
     DelegatingSampler delegatingSampler = new DelegatingSampler(Sampler.alwaysOff());
     TraceSamplingPolicyImplementer implementer =
-        new TraceSamplingPolicyImplementer(delegatingSampler);
+        new TraceSamplingPolicyImplementer(delegatingSampler, new TraceSamplingRateValidator());
 
     implementer.onPoliciesChanged(
         singletonList(new TraceSamplingRatePolicy(1.0, SourceKind.CUSTOM)));
@@ -58,7 +60,7 @@ class TraceSamplingPolicyImplementerTest {
     CountingDelegatingSampler delegatingSampler =
         new CountingDelegatingSampler(Sampler.alwaysOff());
     TraceSamplingPolicyImplementer implementer =
-        new TraceSamplingPolicyImplementer(delegatingSampler);
+        new TraceSamplingPolicyImplementer(delegatingSampler, new TraceSamplingRateValidator());
 
     implementer.onPoliciesChanged(
         singletonList(new TraceSamplingRatePolicy(1.0, SourceKind.CUSTOM)));
@@ -72,7 +74,7 @@ class TraceSamplingPolicyImplementerTest {
   void ignoresUnrelatedPolicyTypes() {
     DelegatingSampler delegatingSampler = new DelegatingSampler(Sampler.alwaysOff());
     TraceSamplingPolicyImplementer implementer =
-        new TraceSamplingPolicyImplementer(delegatingSampler);
+        new TraceSamplingPolicyImplementer(delegatingSampler, new TraceSamplingRateValidator());
 
     implementer.onPoliciesChanged(singletonList(new TestTelemetryPolicy("other-policy")));
 
@@ -83,7 +85,7 @@ class TraceSamplingPolicyImplementerTest {
   void lastTraceSamplingPolicyWins() {
     DelegatingSampler delegatingSampler = new DelegatingSampler(Sampler.alwaysOff());
     TraceSamplingPolicyImplementer implementer =
-        new TraceSamplingPolicyImplementer(delegatingSampler);
+        new TraceSamplingPolicyImplementer(delegatingSampler, new TraceSamplingRateValidator());
 
     List<TelemetryPolicy> policies =
         Arrays.asList(
@@ -93,6 +95,17 @@ class TraceSamplingPolicyImplementerTest {
     implementer.onPoliciesChanged(policies);
 
     assertThat(decisionFor(delegatingSampler)).isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
+  }
+
+  @Test
+  void exposesSingletonImmutableValidatorList() {
+    PolicyValidator validator = new TraceSamplingPercentageValidator();
+    TraceSamplingPolicyImplementer implementer =
+        new TraceSamplingPolicyImplementer(new DelegatingSampler(Sampler.alwaysOff()), validator);
+
+    assertThat(implementer.getValidators()).containsExactly(validator);
+    assertThatThrownBy(() -> implementer.getValidators().add(new TraceSamplingRateValidator()))
+        .isInstanceOf(UnsupportedOperationException.class);
   }
 
   private static SamplingDecision decisionFor(DelegatingSampler sampler) {
