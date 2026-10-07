@@ -44,6 +44,23 @@ class TraceSamplingPolicyImplementerTest {
   }
 
   @Test
+  void deletedSamplingPercentagePolicyFallsBackToAlwaysOn() {
+    DelegatingSampler delegatingSampler = new DelegatingSampler(Sampler.alwaysOff());
+    TraceSamplingPolicyImplementer implementer =
+        new TraceSamplingPolicyImplementer(
+            delegatingSampler, new TraceSamplingPercentageValidator());
+
+    implementer.onPoliciesChanged(
+        singletonList(
+            new DeletedTelemetryPolicy(
+                TraceSamplingPercentagePolicy.DEFAULT_IDENTITY,
+                TraceSamplingPercentagePolicy.POLICY_TYPE,
+                SourceKind.CUSTOM)));
+
+    assertThat(decisionFor(delegatingSampler)).isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
+  }
+
+  @Test
   void appliesProbabilityToDelegate() {
     DelegatingSampler delegatingSampler = new DelegatingSampler(Sampler.alwaysOff());
     TraceSamplingPolicyImplementer implementer =
@@ -51,6 +68,19 @@ class TraceSamplingPolicyImplementerTest {
 
     implementer.onPoliciesChanged(
         singletonList(new TraceSamplingRatePolicy(1.0, SourceKind.CUSTOM)));
+
+    assertThat(decisionFor(delegatingSampler)).isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
+  }
+
+  @Test
+  void appliesPercentageToDelegate() {
+    DelegatingSampler delegatingSampler = new DelegatingSampler(Sampler.alwaysOff());
+    TraceSamplingPolicyImplementer implementer =
+        new TraceSamplingPolicyImplementer(
+            delegatingSampler, new TraceSamplingPercentageValidator());
+
+    implementer.onPoliciesChanged(
+        singletonList(new TraceSamplingPercentagePolicy(100.0, SourceKind.CUSTOM)));
 
     assertThat(decisionFor(delegatingSampler)).isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
   }
