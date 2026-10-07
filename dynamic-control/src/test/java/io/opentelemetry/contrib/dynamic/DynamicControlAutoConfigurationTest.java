@@ -6,12 +6,14 @@
 package io.opentelemetry.contrib.dynamic;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.opentelemetry.contrib.dynamic.policy.registry.PolicyInit;
 import io.opentelemetry.contrib.dynamic.policy.tracesampling.AbstractTraceSamplingPolicy;
+import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingPercentagePolicy;
 import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingRatePolicy;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
@@ -50,7 +52,10 @@ class DynamicControlAutoConfigurationTest {
         capturePropertiesCustomizer(customizer);
 
     Path configPath = tempDir.resolve("policy-init.yaml");
-    Files.write(configPath, minimalYamlInitConfig().getBytes(StandardCharsets.UTF_8));
+    Files.write(
+        configPath,
+        minimalYamlInitConfig(TraceSamplingRatePolicy.POLICY_TYPE)
+            .getBytes(StandardCharsets.UTF_8));
     ConfigProperties properties = mock(ConfigProperties.class);
     when(properties.getString(POLICY_INIT_CONFIG_PROPERTY_YAML)).thenReturn(configPath.toString());
     when(properties.getString(POLICY_INIT_CONFIG_PROPERTY_JSON)).thenReturn(null);
@@ -59,6 +64,46 @@ class DynamicControlAutoConfigurationTest {
 
     assertThat(overrides).isEmpty();
     assertThat(AbstractTraceSamplingPolicy.getInitializedSampler()).isNotNull();
+  }
+
+  @Test
+  void classicYamlPropertyInitializesPercentagePolicy() throws Exception {
+    DynamicControlAutoConfiguration config = new DynamicControlAutoConfiguration();
+    AutoConfigurationCustomizer customizer = mock(AutoConfigurationCustomizer.class);
+    config.customize(customizer);
+    Function<ConfigProperties, Map<String, String>> propertiesCustomizer =
+        capturePropertiesCustomizer(customizer);
+
+    Path configPath = tempDir.resolve("percentage-policy-init.yaml");
+    Files.write(
+        configPath,
+        minimalYamlInitConfig(TraceSamplingPercentagePolicy.POLICY_TYPE)
+            .getBytes(StandardCharsets.UTF_8));
+    ConfigProperties properties = mock(ConfigProperties.class);
+    when(properties.getString(POLICY_INIT_CONFIG_PROPERTY_YAML)).thenReturn(configPath.toString());
+    when(properties.getString(POLICY_INIT_CONFIG_PROPERTY_JSON)).thenReturn(null);
+
+    assertThat(propertiesCustomizer.apply(properties)).isEmpty();
+    assertThat(AbstractTraceSamplingPolicy.getInitializedSampler()).isNotNull();
+  }
+
+  @Test
+  void classicYamlPropertyRejectsBothTraceSamplingRepresentations() throws Exception {
+    DynamicControlAutoConfiguration config = new DynamicControlAutoConfiguration();
+    AutoConfigurationCustomizer customizer = mock(AutoConfigurationCustomizer.class);
+    config.customize(customizer);
+    Function<ConfigProperties, Map<String, String>> propertiesCustomizer =
+        capturePropertiesCustomizer(customizer);
+
+    Path configPath = tempDir.resolve("mutually-exclusive-policy-init.yaml");
+    Files.write(configPath, mutuallyExclusiveYamlInitConfig().getBytes(StandardCharsets.UTF_8));
+    ConfigProperties properties = mock(ConfigProperties.class);
+    when(properties.getString(POLICY_INIT_CONFIG_PROPERTY_YAML)).thenReturn(configPath.toString());
+    when(properties.getString(POLICY_INIT_CONFIG_PROPERTY_JSON)).thenReturn(null);
+
+    assertThatThrownBy(() -> propertiesCustomizer.apply(properties))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("Configure only one trace sampling policy representation");
   }
 
   @Test
@@ -78,7 +123,19 @@ class DynamicControlAutoConfigurationTest {
     return captor.getValue();
   }
 
-  private static String minimalYamlInitConfig() {
+  private static String minimalYamlInitConfig(String policyType) {
+    return "sources:\n"
+        + "  - kind: opamp\n"
+        + "    format: jsonkeyvalue\n"
+        + "    location: vendor\n"
+        + "    mappings:\n"
+        + "      - policyId: sampling_rate\n"
+        + "        policyType: "
+        + policyType
+        + "\n";
+  }
+
+  private static String mutuallyExclusiveYamlInitConfig() {
     return "sources:\n"
         + "  - kind: opamp\n"
         + "    format: jsonkeyvalue\n"
@@ -87,6 +144,10 @@ class DynamicControlAutoConfigurationTest {
         + "      - policyId: sampling_rate\n"
         + "        policyType: "
         + TraceSamplingRatePolicy.POLICY_TYPE
+        + "\n"
+        + "      - policyId: sampling_percentage\n"
+        + "        policyType: "
+        + TraceSamplingPercentagePolicy.POLICY_TYPE
         + "\n";
   }
 
