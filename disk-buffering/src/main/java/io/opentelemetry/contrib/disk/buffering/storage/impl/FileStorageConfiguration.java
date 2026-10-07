@@ -53,6 +53,9 @@ public abstract class FileStorageConfiguration {
    */
   public abstract boolean getDeleteItemsOnIteration();
 
+  /** Notified when a file is deleted before all of its data was read. Does nothing by default. */
+  public abstract DiscardedFileListener getDiscardedFileListener();
+
   public static FileStorageConfiguration getDefault() {
     return builder().build();
   }
@@ -64,7 +67,8 @@ public abstract class FileStorageConfiguration {
         .setMaxFileAgeForWriteMillis(SECONDS.toMillis(30))
         .setMinFileAgeForReadMillis(0)
         .setMaxFileAgeForReadMillis(HOURS.toMillis(18))
-        .setDeleteItemsOnIteration(true);
+        .setDeleteItemsOnIteration(true)
+        .setDiscardedFileListener((file, reason) -> {});
   }
 
   @AutoValue.Builder
@@ -80,6 +84,8 @@ public abstract class FileStorageConfiguration {
     public abstract Builder setMaxFolderSize(int value);
 
     public abstract Builder setDeleteItemsOnIteration(boolean value);
+
+    public abstract Builder setDiscardedFileListener(DiscardedFileListener value);
 
     abstract FileStorageConfiguration autoBuild();
 

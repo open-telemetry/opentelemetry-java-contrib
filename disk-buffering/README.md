@@ -178,6 +178,8 @@ public boolean exportSpansFromDisk(SpanExporter networkExporter, long timeout) {
 
 Note that even with explicit deletion, disk usage is still bounded by the configured max folder size and max file
 age, so stale files are automatically purged when there's not enough space available before new data is written.
+Set a `DiscardedFileListener` with `setDiscardedFileListener` to be notified when a file is deleted before all of
+its data was read.
 
 ### More details on the writing and reading processes
 
