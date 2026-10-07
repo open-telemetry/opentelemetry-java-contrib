@@ -48,7 +48,7 @@ public final class TraceSamplingRatePolicy extends AbstractTraceSamplingPolicy {
    * @throws IllegalArgumentException if ratio is NaN or outside {@code [0.0, 1.0]}
    */
   public static Sampler createSampler(double ratio) {
-    return AbstractTraceSamplingPolicy.createSampler(ratio);
+    return AbstractTraceSamplingPolicy.createSampler(normalizeRatio(ratio));
   }
 
   private static double normalizeRatio(double ratio) {
