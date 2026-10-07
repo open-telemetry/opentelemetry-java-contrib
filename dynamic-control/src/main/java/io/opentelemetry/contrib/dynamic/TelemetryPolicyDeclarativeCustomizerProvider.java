@@ -115,17 +115,6 @@ public final class TelemetryPolicyDeclarativeCustomizerProvider
         TelemetryPolicySamplerComponentProvider.NAME, additionalProperties);
   }
 
-  private static boolean containsPolicyType(PolicyInitConfig initConfig, String policyType) {
-    for (PolicySourceConfig source : initConfig.getSources()) {
-      for (PolicySourceMappingConfig mapping : source.getMappings()) {
-        if (policyType.equals(mapping.getPolicyType())) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
   private static Map<String, String> resourceAttributes(OpenTelemetryConfigurationModel model) {
     ResourceModel resource = model.getResource();
     if (resource == null || resource.getAttributes() == null) {
@@ -139,5 +128,16 @@ public final class TelemetryPolicyDeclarativeCustomizerProvider
       }
     }
     return Collections.unmodifiableMap(attributes);
+  }
+
+  private static boolean containsPolicyType(PolicyInitConfig initConfig, String policyType) {
+    for (PolicySourceConfig source : initConfig.getSources()) {
+      for (PolicySourceMappingConfig mapping : source.getMappings()) {
+        if (policyType.equals(mapping.getPolicyType())) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 }

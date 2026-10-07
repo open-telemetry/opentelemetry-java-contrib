@@ -90,17 +90,7 @@ public final class PolicyInitConfig {
     if (telemetryPolicyConfig == null) {
       return null;
     }
-    List<DeclarativeConfigProperties> sourceConfigs =
-        telemetryPolicyConfig.getStructuredList(SOURCES_DECLARATIVE_KEY);
-    if (sourceConfigs == null || sourceConfigs.isEmpty()) {
-      throw new IllegalArgumentException("Config must contain a non-empty 'sources' array.");
-    }
-
-    List<PolicySourceConfig> sources = new ArrayList<>();
-    for (DeclarativeConfigProperties sourceConfig : sourceConfigs) {
-      sources.add(parseDeclarativeSource(sourceConfig));
-    }
-    return new PolicyInitConfig(sources);
+    return readFromTelemetryPolicyDeclarativeConfig(telemetryPolicyConfig);
   }
 
   /**
@@ -181,7 +171,11 @@ public final class PolicyInitConfig {
   }
 
   /**
-   * Reads policy-init configuration based on config properties.
+   * Reads legacy file-based policy-init configuration from auto-configuration properties.
+   *
+   * <p>This is intentionally the legacy {@link ConfigProperties} boundary. Declarative component
+   * configuration is read through {@link DeclarativeConfigProperties}; the bridge is used when the
+   * legacy auto-configuration path activates sources.
    *
    * <p>YAML takes precedence over JSON when both are present. If both are present, and the YAML
    * file is invalid, the JSON file is still ignored. If the file parsed is invalid, a warning is
@@ -196,25 +190,19 @@ public final class PolicyInitConfig {
   public static PolicyInitConfig readFromConfigProperties(ConfigProperties config) {
     Objects.requireNonNull(config, "config cannot be null");
     String mappingPathYaml = config.getString(POLICY_INIT_CONFIG_PROPERTY_YAML);
-    if (mappingPathYaml == null || mappingPathYaml.trim().isEmpty()) {
-      String mappingPathJson = config.getString(POLICY_INIT_CONFIG_PROPERTY_JSON);
-      if (mappingPathJson == null || mappingPathJson.trim().isEmpty()) {
-        return null;
-      } else {
-        try (InputStream in = Files.newInputStream(Paths.get(mappingPathJson.trim()))) {
-          return JsonPolicyInitConfigReader.read(in);
-        } catch (IOException | RuntimeException e) {
-          logReadFailure(mappingPathJson.trim(), e);
-          return null;
-        }
-      }
-    } else {
-      try (InputStream in = Files.newInputStream(Paths.get(mappingPathYaml.trim()))) {
-        return YamlPolicyInitConfigReader.read(in);
-      } catch (IOException | RuntimeException e) {
-        logReadFailure(mappingPathYaml.trim(), e);
-        return null;
-      }
+    boolean yaml = mappingPathYaml != null && !mappingPathYaml.trim().isEmpty();
+    String mappingPath =
+        yaml ? mappingPathYaml : config.getString(POLICY_INIT_CONFIG_PROPERTY_JSON);
+    if (mappingPath == null || mappingPath.trim().isEmpty()) {
+      return null;
+    }
+
+    String trimmedPath = mappingPath.trim();
+    try (InputStream in = Files.newInputStream(Paths.get(trimmedPath))) {
+      return yaml ? YamlPolicyInitConfigReader.read(in) : JsonPolicyInitConfigReader.read(in);
+    } catch (IOException | RuntimeException e) {
+      logReadFailure(trimmedPath, e);
+      return null;
     }
   }
 

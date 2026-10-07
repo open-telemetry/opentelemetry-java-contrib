@@ -59,8 +59,12 @@ class TelemetryPolicyDeclarativeCustomizerProviderTest {
     assertThat(samplerProperty).isNotNull();
     assertThat(samplerProperty).isInstanceOf(Map.class);
     Map<?, ?> samplerPropertyMap = (Map<?, ?>) samplerProperty;
+    assertThat(samplerPropertyMap.get("sources")).isNotNull();
     assertThat(samplerPropertyMap.get("resource_attributes")).isEqualTo(resourceAttributes());
     assertThat(samplerPropertyMap.get("otel.resource.attributes")).isEqualTo(resourceAttributes());
+    assertThat(customized.getResource().getAttributes())
+        .extracting(AttributeNameValueModel::getName)
+        .contains("service.name");
 
     AutoConfigurationCustomizer autoConfiguration = mock(AutoConfigurationCustomizer.class);
     PolicyInit.init(autoConfiguration);
