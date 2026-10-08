@@ -9,6 +9,7 @@ import static io.opentelemetry.contrib.disk.buffering.internal.storage.util.Cloc
 
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.ReadableFile;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.WritableFile;
+import io.opentelemetry.contrib.disk.buffering.storage.impl.DiscardedFileListener.Reason;
 import io.opentelemetry.contrib.disk.buffering.storage.impl.FileStorageConfiguration;
 import io.opentelemetry.sdk.common.Clock;
 import java.io.Closeable;
@@ -183,6 +184,10 @@ public final class FolderManager implements Closeable {
     }
   }
 
+  FileStorageConfiguration getConfiguration() {
+    return configuration;
+  }
+
   private List<CacheFile> listCacheFiles(Predicate<CacheFile> exclude) {
     File[] existingFiles = folder.listFiles();
     if (existingFiles == null) {
@@ -263,6 +268,7 @@ public final class FolderManager implements Closeable {
         }
         if (existingFile.delete()) {
           filesDeleted++;
+          configuration.getDiscardedFileListener().onDiscarded(existingFile, Reason.EXPIRED);
         }
       }
     }
@@ -279,6 +285,7 @@ public final class FolderManager implements Closeable {
         if (!oldest.delete()) {
           throw new IOException("Could not delete the file: " + oldest);
         }
+        configuration.getDiscardedFileListener().onDiscarded(oldest, Reason.SIZE_LIMIT);
       }
     }
   }

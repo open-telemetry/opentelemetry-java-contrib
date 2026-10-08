@@ -97,15 +97,15 @@ class TraceSamplingRatePolicyTest {
   }
 
   @Test
-  void createSamplerRejectsOutOfRangeOrNaNProbabilities() {
+  void createSamplerRejectsOutOfRangeOrNaNRatios() {
     assertThatThrownBy(() -> TraceSamplingRatePolicy.createSampler(Double.NaN))
         .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("probability must be within [0.0, 1.0]");
+        .hasMessage("ratio must be within [0.0, 1.0]");
     assertThatThrownBy(() -> TraceSamplingRatePolicy.createSampler(-0.01))
         .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("probability must be within [0.0, 1.0]");
+        .hasMessage("ratio must be within [0.0, 1.0]");
     assertThatThrownBy(() -> TraceSamplingRatePolicy.createSampler(1.01))
         .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("probability must be within [0.0, 1.0]");
+        .hasMessage("ratio must be within [0.0, 1.0]");
   }
 }

@@ -14,7 +14,6 @@ import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.extension.incubator.trace.samplers.ComposableSampler;
 import io.opentelemetry.sdk.extension.incubator.trace.samplers.CompositeSampler;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
-import java.util.Collections;
 import java.util.Objects;
 import javax.annotation.Nullable;
 
@@ -58,8 +57,7 @@ public abstract class AbstractTraceSamplingPolicy implements TelemetryPolicy {
       autoConfiguration.addSamplerCustomizer((sampler, config) -> delegatingSampler);
     }
     return new TraceSamplingPolicyImplementer(
-        Objects.requireNonNull(initializedSampler, "initializedSampler cannot be null"),
-        Collections.singletonList(validator));
+        Objects.requireNonNull(initializedSampler, "initializedSampler cannot be null"), validator);
   }
 
   /**
