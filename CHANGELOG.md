@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+### :warning: Breaking changes
+
+- Dynamic control: the `trace-sampling` policy type now takes a percentage (`0.0`–`100.0`) instead
+  of a ratio. Ratio-based configurations must switch to the new `sampling-rate` policy type, keeping
+  the same values (e.g. `policyType: trace-sampling` with `0.5` becomes
+  `policyType: sampling-rate` with `0.5`). Unmigrated ratio values are now read as percentages, so
+  `0.5` would mean 0.5% instead of 50%. Full JSON policies now use `keep.ratio` or `keep.percentage`
+  instead of `keep.probability`.
+  ([#3097](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3097),
+  [#3100](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3100),
+  [#3102](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3102),
+  [#3111](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3111))
+
 ### AWS resources
 
 - Set `aws.ecs.task.id` on the ECS resource, extracted from the task ARN as the semantic
