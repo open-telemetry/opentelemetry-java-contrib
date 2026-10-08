@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+### AWS resources
+
+- Set `aws.ecs.task.id` on the ECS resource, extracted from the task ARN as the semantic
+  conventions require.
+  ([#3098](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3098))
+
+### Azure resources
+
+- Add `cloud.account.id` and `azure.resource_group.name` to the Azure App Service and Azure
+  Functions resource detectors.
+  ([#3074](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3074),
+  [#3092](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3092))
+
 ### Disk buffering
 
 - Add `DiscardedFileListener`, set with `FileStorageConfiguration.Builder.setDiscardedFileListener`,
@@ -9,22 +22,51 @@
   stay within the folder size limit, or corrupted.
   ([#3144](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3144))
 
+### Dynamic control
+
+- Accept full telemetry policy objects, as defined by the current spec, in `jsonkeyvalue` sources.
+  ([#3037](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3037))
+- Add an `http` policy source that polls a URL for policy updates.
+  ([#3040](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3040))
+- Add the `trace-sampling` percentage policy type alongside the `sampling-rate` ratio policy type.
+  Configuring both at once is rejected.
+  ([#3100](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3100),
+  [#3113](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3113))
+- Rename `TraceSamplingRatePolicyImplementer` to `TraceSamplingPolicyImplementer`, and replace
+  `TraceSamplingValidator` with `TraceSamplingRateValidator` and `TraceSamplingPercentageValidator`.
+  ([#3076](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3076),
+  [#3102](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3102),
+  [#3122](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3122))
+- With declarative configuration, OpAMP now takes `service.name` and `deployment.environment.name`
+  from the resolved SDK resource. `OTEL_SERVICE_NAME` and `OTEL_RESOURCE_ATTRIBUTES` no longer
+  override it on that path.
+  ([#3013](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3013))
+
 ### GCP authentication extension
 
 - Add support for the `logs` signal type, enabling authenticated OTLP log record exports.
   ([#3121](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3121))
 
-### AWS resources
+### JMX scraper
 
-- Set `aws.ecs.task.id` on the ECS resource, extracted from the task ARN as the semantic
-  conventions require.
-  ([#3098](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3098))
+- Target systems backed by instrumentation metric definitions now use the plain name, e.g.
+  `cassandra` and `kafka-connect`. The `experimental-` prefix (e.g. `experimental-kafka-connect`)
+  is deprecated and logs a warning. With the default `otel.jmx.target.source=auto`, `cassandra` now
+  uses the instrumentation definitions instead of the legacy ones; set
+  `otel.jmx.target.source=legacy` to keep the previous metrics.
+  ([#3091](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3091),
+  [#3135](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3135))
 
-### JMX Scraper
+### Kafka exporter
 
-- Add `experimental-cassandra` target system, inheriting the aligned Cassandra metric
-  definitions from instrumentation.
-  ([#3091](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3091))
+- Pin `zstd-jni` to 1.5.7-20 to pick up security fixes not yet in the `kafka-clients` dependency.
+  ([#3127](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3127))
+
+### Samplers
+
+- `RuleBasedRoutingSampler` can now match on non-string attributes (e.g. numbers), which are
+  converted to strings before the pattern is applied.
+  ([#3073](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3073))
 
 ## Version 1.60.0 (2026-08-28)
 
