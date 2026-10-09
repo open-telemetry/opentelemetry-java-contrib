@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 1.61.0 (2026-10-09)
+
 ### :warning: Breaking changes
 
 - Dynamic control: the `trace-sampling` policy type now takes a percentage (`0.0`–`100.0`) instead
