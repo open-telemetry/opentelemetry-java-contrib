@@ -41,4 +41,4 @@ and to be set on the span because multiple functions can share a `TracerProvider
 * [Trask Stalnaker](https://github.com/trask), Microsoft
 * [Gregor Zeitlinger](https://github.com/zeitlinger), Grafana
 
-Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).
+See the [component maintenance policy](../MAINTENANCE.md#component-ownership) for owner responsibilities and requirements.

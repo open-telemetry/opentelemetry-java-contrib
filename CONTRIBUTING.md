@@ -15,6 +15,10 @@ discuss your ideas.
 
 Pull requests for bug fixes are always welcome!
 
+## Adding or owning a component
+
+New components require maintainer agreement on scope, a maintenance plan, and at least two active owners. Read the [component maintenance policy](MAINTENANCE.md) before proposing a component or volunteering as an owner. It defines owner responsibilities, removal criteria, and what happens when a component lacks enough owners.
+
 ## Building and Testing
 
 While most modules target Java 8, building this project requires Java 21 or higher.

@@ -70,4 +70,4 @@ implementation for a number of different Samplers.
 * [Otmar Ertl](https://github.com/oertl), Dynatrace
 * [Peter Findeisen](https://github.com/PeterF778), Cisco
 
-Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).
+See the [component maintenance policy](../MAINTENANCE.md#component-ownership) for owner responsibilities and requirements.
