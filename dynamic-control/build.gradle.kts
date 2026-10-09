@@ -26,17 +26,22 @@ dependencies {
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-declarative-config")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-incubator")
+  compileOnly("io.opentelemetry.instrumentation:opentelemetry-declarative-config-bridge")
 
   testCompileOnly("com.google.auto.service:auto-service-annotations")
   testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
   testImplementation("org.junit.jupiter:junit-jupiter-api")
+  testImplementation("org.junit-pioneer:junit-pioneer")
   testCompileOnly("org.junit.jupiter:junit-jupiter-params")
 
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-declarative-config")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-incubator")
+  testImplementation("io.opentelemetry.instrumentation:opentelemetry-declarative-config-bridge")
   testImplementation("org.assertj:assertj-core")
+  testImplementation("com.squareup.okhttp3:mockwebserver3")
+  testImplementation("com.squareup.okhttp3:mockwebserver3-junit5")
   testImplementation("org.mockito:mockito-inline")
   testImplementation("org.mockito:mockito-junit-jupiter")
 }

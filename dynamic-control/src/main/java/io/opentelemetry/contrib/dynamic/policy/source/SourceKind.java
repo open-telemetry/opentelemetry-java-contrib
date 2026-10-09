@@ -6,11 +6,14 @@
 package io.opentelemetry.contrib.dynamic.policy.source;
 
 import com.google.errorprone.annotations.Immutable;
+import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
+import io.opentelemetry.contrib.dynamic.policy.HttpPolicyProvider;
 import io.opentelemetry.contrib.dynamic.policy.OpampPolicyProvider;
 import io.opentelemetry.contrib.dynamic.policy.PolicyProvider;
+import io.opentelemetry.contrib.dynamic.policy.PolicyProviderConfig;
 import io.opentelemetry.contrib.dynamic.policy.PolicyValidator;
 import io.opentelemetry.contrib.dynamic.policy.registry.PolicySourceConfig;
-import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
+import java.net.URI;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -25,23 +28,25 @@ import javax.annotation.Nullable;
  */
 public enum SourceKind {
   /** Policies loaded from a local file (e.g. line-per-policy file). */
-  FILE("file", SourceKind::createNoProvider),
+  FILE("file", 3, SourceKind::createNoProvider),
 
   /** Policies delivered via OpAMP (remote management). */
-  OPAMP("opamp", SourceKind::createOpampProvider),
+  OPAMP("opamp", 1, SourceKind::createOpampProvider),
 
   /** Policies fetched from an HTTP/HTTPS endpoint. */
-  HTTP("http", SourceKind::createNoProvider),
+  HTTP("http", 2, SourceKind::createHttpProvider),
 
   /** User-defined or extension provider. */
-  CUSTOM("custom", SourceKind::createNoProvider);
+  CUSTOM("custom", 1_000, SourceKind::createNoProvider);
 
   private final String configValue;
+  private final int priority;
   private final ProviderCreator providerCreator;
   private static final Logger logger = Logger.getLogger(SourceKind.class.getName());
 
-  SourceKind(String configValue, ProviderCreator providerCreator) {
+  SourceKind(String configValue, int priority, ProviderCreator providerCreator) {
     this.configValue = configValue;
+    this.priority = priority;
     this.providerCreator = providerCreator;
   }
 
@@ -55,6 +60,21 @@ public enum SourceKind {
   }
 
   /**
+   * Returns the priority used to resolve duplicate policy IDs across providers.
+   *
+   * <p>Lower numbers have higher priority, following the policy specification's OpAMP, HTTP, FILE
+   * ordering.
+   */
+  public int priority() {
+    return priority;
+  }
+
+  public boolean hasHigherPriorityThan(SourceKind other) {
+    Objects.requireNonNull(other, "other cannot be null");
+    return priority < other.priority;
+  }
+
+  /**
    * Creates a runtime {@link PolicyProvider} for this source kind.
    *
    * <p>Provider creation is delegated to a per-kind method reference configured on each enum
@@ -62,7 +82,17 @@ public enum SourceKind {
    */
   @Nullable
   public PolicyProvider createProvider(
-      PolicySourceConfig source, ConfigProperties config, List<PolicyValidator> validators) {
+      PolicySourceConfig source,
+      DeclarativeConfigProperties config,
+      List<PolicyValidator> validators) {
+    Objects.requireNonNull(config, "config cannot be null");
+    return createProvider(source, PolicyProviderConfig.create(config), validators);
+  }
+
+  /** Creates a provider with the shared provider configuration context. */
+  @Nullable
+  public PolicyProvider createProvider(
+      PolicySourceConfig source, PolicyProviderConfig config, List<PolicyValidator> validators) {
     Objects.requireNonNull(source, "source cannot be null");
     Objects.requireNonNull(config, "config cannot be null");
     Objects.requireNonNull(validators, "validators cannot be null");
@@ -76,13 +106,32 @@ public enum SourceKind {
 
   @Nullable
   private static PolicyProvider createNoProvider(
-      PolicySourceConfig source, ConfigProperties config, List<PolicyValidator> validators) {
+      PolicySourceConfig source, PolicyProviderConfig config, List<PolicyValidator> validators) {
     return null;
   }
 
   @Nullable
+  private static PolicyProvider createHttpProvider(
+      PolicySourceConfig source, PolicyProviderConfig config, List<PolicyValidator> validators) {
+    String location = source.getLocation();
+    if (location == null || location.trim().isEmpty()) {
+      return null;
+    }
+    try {
+      return new HttpPolicyProvider(
+          URI.create(location.trim()), source.getFormat(), source.getMappings(), validators);
+    } catch (IllegalArgumentException e) {
+      logger.log(
+          Level.FINE,
+          "Skipping HTTP provider creation due to invalid HTTP source configuration: {0}",
+          e.getMessage());
+      return null;
+    }
+  }
+
+  @Nullable
   private static PolicyProvider createOpampProvider(
-      PolicySourceConfig source, ConfigProperties config, List<PolicyValidator> validators) {
+      PolicySourceConfig source, PolicyProviderConfig config, List<PolicyValidator> validators) {
     String location = source.getLocation();
     if (location == null || location.trim().isEmpty()) {
       return null;
@@ -104,7 +153,7 @@ public enum SourceKind {
   private interface ProviderCreator {
     @Nullable
     PolicyProvider create(
-        PolicySourceConfig source, ConfigProperties config, List<PolicyValidator> validators);
+        PolicySourceConfig source, PolicyProviderConfig config, List<PolicyValidator> validators);
   }
 
   /**

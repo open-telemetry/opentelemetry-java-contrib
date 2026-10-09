@@ -5,9 +5,12 @@
 
 package io.opentelemetry.contrib.disk.buffering.internal.storage;
 
+import static org.mockito.Mockito.mock;
+
 import io.opentelemetry.api.common.Value;
 import io.opentelemetry.api.logs.Severity;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.logs.models.LogRecordDataImpl;
+import io.opentelemetry.contrib.disk.buffering.storage.impl.DiscardedFileListener;
 import io.opentelemetry.contrib.disk.buffering.storage.impl.FileStorageConfiguration;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 
@@ -77,6 +80,7 @@ public final class TestData {
         .setMaxFileAgeForReadMillis(MAX_FILE_AGE_FOR_READ_MILLIS)
         .setMaxFileSize(MAX_FILE_SIZE)
         .setMaxFolderSize(MAX_FOLDER_SIZE)
+        .setDiscardedFileListener(mock(DiscardedFileListener.class))
         .build();
   }
 

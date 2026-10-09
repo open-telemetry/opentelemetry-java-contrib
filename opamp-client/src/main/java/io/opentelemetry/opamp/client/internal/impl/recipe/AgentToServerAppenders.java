@@ -9,6 +9,7 @@ import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.AgentDescrip
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.AgentDisconnectAppender;
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.AgentToServerAppender;
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.CapabilitiesAppender;
+import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.CustomCapabilitiesAppender;
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.EffectiveConfigAppender;
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.FlagsAppender;
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.HealthAppender;
@@ -30,6 +31,7 @@ public final class AgentToServerAppenders {
   public final RemoteConfigStatusAppender remoteConfigStatusAppender;
   public final SequenceNumberAppender sequenceNumberAppender;
   public final CapabilitiesAppender capabilitiesAppender;
+  public final CustomCapabilitiesAppender customCapabilitiesAppender;
   public final HealthAppender healthAppender;
   public final InstanceUidAppender instanceUidAppender;
   public final FlagsAppender flagsAppender;
@@ -43,6 +45,7 @@ public final class AgentToServerAppenders {
       RemoteConfigStatusAppender remoteConfigStatusAppender,
       SequenceNumberAppender sequenceNumberAppender,
       CapabilitiesAppender capabilitiesAppender,
+      CustomCapabilitiesAppender customCapabilitiesAppender,
       HealthAppender healthAppender,
       InstanceUidAppender instanceUidAppender,
       FlagsAppender flagsAppender,
@@ -52,6 +55,7 @@ public final class AgentToServerAppenders {
     this.remoteConfigStatusAppender = remoteConfigStatusAppender;
     this.sequenceNumberAppender = sequenceNumberAppender;
     this.capabilitiesAppender = capabilitiesAppender;
+    this.customCapabilitiesAppender = customCapabilitiesAppender;
     this.healthAppender = healthAppender;
     this.instanceUidAppender = instanceUidAppender;
     this.flagsAppender = flagsAppender;
@@ -63,6 +67,7 @@ public final class AgentToServerAppenders {
     appenders.put(Field.REMOTE_CONFIG_STATUS, remoteConfigStatusAppender);
     appenders.put(Field.SEQUENCE_NUM, sequenceNumberAppender);
     appenders.put(Field.CAPABILITIES, capabilitiesAppender);
+    appenders.put(Field.CUSTOM_CAPABILITIES, customCapabilitiesAppender);
     appenders.put(Field.HEALTH, healthAppender);
     appenders.put(Field.INSTANCE_UID, instanceUidAppender);
     appenders.put(Field.FLAGS, flagsAppender);

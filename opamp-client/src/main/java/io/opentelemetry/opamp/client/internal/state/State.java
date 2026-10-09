@@ -77,6 +77,17 @@ public interface State<T> extends Supplier<T> {
     }
   }
 
+  final class CustomCapabilities extends InMemoryState<opamp.proto.CustomCapabilities> {
+    public CustomCapabilities(@Nullable opamp.proto.CustomCapabilities initialValue) {
+      super(initialValue);
+    }
+
+    @Override
+    public Field getFieldType() {
+      return Field.CUSTOM_CAPABILITIES;
+    }
+  }
+
   final class Health extends InMemoryState<ComponentHealth> {
     public Health(@Nullable ComponentHealth initialValue) {
       super(initialValue);

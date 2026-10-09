@@ -24,6 +24,7 @@ class OpampClientStateTest {
   @Mock private State.SequenceNum sequenceNum;
   @Mock private State.AgentDescription agentDescription;
   @Mock private State.Capabilities capabilities;
+  @Mock private State.CustomCapabilities customCapabilities;
   @Mock private State.Health health;
   @Mock private State.InstanceUid instanceUid;
   @Mock private State.Flags flags;

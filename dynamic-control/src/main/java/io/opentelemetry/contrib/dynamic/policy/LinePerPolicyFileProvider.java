@@ -5,14 +5,19 @@
 
 package io.opentelemetry.contrib.dynamic.policy;
 
+import io.opentelemetry.contrib.dynamic.policy.source.JsonSourceWrapper;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceFormat;
+import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceWrapper;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -24,23 +29,30 @@ import java.util.stream.Stream;
  *
  * <ul>
  *   <li><b>{@link SourceFormat#JSONKEYVALUE JSONKEYVALUE}:</b> Lines starting with <code>{</code>
- *       use {@link SourceFormat#JSONKEYVALUE}: JSON text for a single top-level object with exactly
- *       one key (the policy type) and one value (the policy payload).
+ *       use {@link SourceFormat#JSONKEYVALUE}: JSON text for one keyed policy entry or one full
+ *       policy object with an {@code id}.
  *   <li><b>{@link SourceFormat#KEYVALUE KEYVALUE}:</b> Lines containing <code>=</code> are parsed
  *       as {@code policyType=value} and validated against the registered {@link PolicyValidator}s.
  * </ul>
  *
  * <p>Empty lines and lines starting with <code>#</code> are ignored.
  */
+// TODO this needs changing to a full provider implementation or deleting
 final class LinePerPolicyFileProvider implements PolicyProvider {
   private static final Logger logger = Logger.getLogger(LinePerPolicyFileProvider.class.getName());
   private final Path file;
   private final List<PolicyValidator> validators;
+  private final Set<String> policyIds;
 
   public LinePerPolicyFileProvider(Path file, List<PolicyValidator> validators) {
     Objects.requireNonNull(file, "file cannot be null");
     this.file = file;
     this.validators = new ArrayList<>(validators);
+    Set<String> policyIds = new LinkedHashSet<>();
+    for (PolicyValidator validator : validators) {
+      policyIds.add(validator.getPolicyType());
+    }
+    this.policyIds = Collections.unmodifiableSet(policyIds);
   }
 
   @Override
@@ -68,8 +80,11 @@ final class LinePerPolicyFileProvider implements PolicyProvider {
               logger.info("Unsupported policy line format: " + trimmedLine);
               return;
             }
-            List<SourceWrapper> parsedSources = format.parse(trimmedLine);
-            if (parsedSources == null || parsedSources.size() != 1) {
+            List<SourceWrapper> parsedSources = format.parse(trimmedLine, policyIds);
+            if (parsedSources == null
+                || parsedSources.size() != 1
+                || (format == SourceFormat.JSONKEYVALUE
+                    && !JsonSourceWrapper.isSinglePolicyObject(trimmedLine))) {
               logger.info("Invalid " + format.configValue() + " policy line: " + trimmedLine);
               return;
             }
@@ -85,7 +100,7 @@ final class LinePerPolicyFileProvider implements PolicyProvider {
               if (!policyType.equals(validator.getPolicyType())) {
                 continue;
               }
-              policy = validator.validate(parsedSource);
+              policy = validator.validate(parsedSource, SourceKind.FILE);
               break;
             }
             if (policy == null) {

@@ -242,12 +242,21 @@ public final class JmxScraper {
     builder.beanDiscoveryDelay(config.getSamplingInterval());
 
     for (String system : config.getTargetSystems()) {
-      try (InputStream input = config.getTargetSystemYaml(system)) {
-        builder.addRules(input);
-      } catch (IOException e) {
-        // can only be triggered by close(), thus very unlikely to be triggered in practice
-        throw new IllegalStateException("IO error loading rules for system: " + system, e);
-      }
+      config
+          .getTargetSystemRules(system)
+          .forEach(
+              path -> {
+                try (InputStream input =
+                    JmxScraper.class.getClassLoader().getResourceAsStream(path)) {
+                  // input can't be null here because already checked
+                  builder.addRules(input);
+                } catch (IOException e) {
+                  // can only be triggered by close(), thus very unlikely to be triggered in
+                  // practice
+                  throw new IllegalStateException(
+                      "IO error loading rules for system: " + system, e);
+                }
+              });
     }
 
     config.getJmxConfig().stream().map(Paths::get).forEach(builder::addRules);

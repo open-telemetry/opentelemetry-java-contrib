@@ -7,6 +7,242 @@
 - Read `cloud.account.id` from symlink created by the OTel Lambda Extension
   ([#2619](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2619))
 
+## Version 1.61.0 (2026-10-09)
+
+### :warning: Breaking changes
+
+- Dynamic control: the `trace-sampling` policy type now takes a percentage (`0.0`–`100.0`) instead
+  of a ratio. Ratio-based configurations must switch to the new `sampling-rate` policy type, keeping
+  the same values (e.g. `policyType: trace-sampling` with `0.5` becomes
+  `policyType: sampling-rate` with `0.5`). Unmigrated ratio values are now read as percentages, so
+  `0.5` would mean 0.5% instead of 50%. Full JSON policies now use `keep.ratio` or `keep.percentage`
+  instead of `keep.probability`.
+  ([#3097](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3097),
+  [#3100](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3100),
+  [#3102](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3102),
+  [#3111](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3111))
+
+### AWS resources
+
+- Set `aws.ecs.task.id` on the ECS resource, extracted from the task ARN as the semantic
+  conventions require.
+  ([#3098](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3098))
+
+### Azure resources
+
+- Add `cloud.account.id` and `azure.resource_group.name` to the Azure App Service and Azure
+  Functions resource detectors.
+  ([#3074](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3074),
+  [#3092](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3092))
+
+### Disk buffering
+
+- Add `DiscardedFileListener`, set with `FileStorageConfiguration.Builder.setDiscardedFileListener`,
+  to be notified when a stored file is deleted before all of its data was read: expired, removed to
+  stay within the folder size limit, or corrupted.
+  ([#3144](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3144))
+
+### Dynamic control
+
+- Accept full telemetry policy objects, as defined by the current spec, in `jsonkeyvalue` sources.
+  ([#3037](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3037))
+- Add an `http` policy source that polls a URL for policy updates.
+  ([#3040](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3040))
+- Add the `trace-sampling` percentage policy type alongside the `sampling-rate` ratio policy type.
+  Configuring both at once is rejected.
+  ([#3100](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3100),
+  [#3113](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3113))
+- Rename `TraceSamplingRatePolicyImplementer` to `TraceSamplingPolicyImplementer`, and replace
+  `TraceSamplingValidator` with `TraceSamplingRateValidator` and `TraceSamplingPercentageValidator`.
+  ([#3076](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3076),
+  [#3102](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3102),
+  [#3122](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3122))
+- With declarative configuration, OpAMP now takes `service.name` and `deployment.environment.name`
+  from the resolved SDK resource. `OTEL_SERVICE_NAME` and `OTEL_RESOURCE_ATTRIBUTES` no longer
+  override it on that path.
+  ([#3013](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3013))
+
+### GCP authentication extension
+
+- Add support for the `logs` signal type, enabling authenticated OTLP log record exports.
+  ([#3121](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3121))
+
+### JMX scraper
+
+- Target systems backed by instrumentation metric definitions now use the plain name, e.g.
+  `cassandra` and `kafka-connect`. The `experimental-` prefix (e.g. `experimental-kafka-connect`)
+  is deprecated and logs a warning. With the default `otel.jmx.target.source=auto`, `cassandra` now
+  uses the instrumentation definitions instead of the legacy ones; set
+  `otel.jmx.target.source=legacy` to keep the previous metrics.
+  ([#3091](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3091),
+  [#3135](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3135))
+
+### Kafka exporter
+
+- Pin `zstd-jni` to 1.5.7-20 to pick up security fixes not yet in the `kafka-clients` dependency.
+  ([#3127](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3127))
+
+### Samplers
+
+- `RuleBasedRoutingSampler` can now match on non-string attributes (e.g. numbers), which are
+  converted to strings before the pattern is applied.
+  ([#3073](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3073))
+
+## Version 1.60.0 (2026-08-28)
+
+### :warning: Breaking changes
+
+- Remove the deprecated `EventToSpanEventBridge` log processor and its declarative configuration
+  entry.
+  ([#3029](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3029))
+
+### Dynamic control
+
+- Fix policy parsing for JSON and line-based configurations so valid policies are accepted
+  consistently.
+  ([#3010](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3010))
+
+### GCP authentication extension
+
+- Add support for ID token authentication for GCP exports.
+  ([#2999](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2999))
+
+## Version 1.59.0 (2026-07-24)
+
+### :warning: Breaking changes
+
+- Declarative config YAML now only accepts integer millisecond values for duration properties.
+  Users should no longer specify `ms` as a suffix in duration literals (eg. `100ms` should
+  be given as just `100`).
+  ([#2988](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2988))
+
+### Disk buffering
+
+- Replace the read-after-write delay with atomic rename: the writer now appends to
+  `<timestamp>.tmp` and atomically renames to its final numeric name on close, so finalized files
+  become visible to the reader immediately. Orphan `*.tmp` files left behind by an unclean
+  shutdown are recovered on the next storage open. The `minFileAgeForReadMillis` default changes
+  from `33s` to `0` and is no longer required to be greater than `maxFileAgeForWriteMillis`.
+  ([#2897](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2897))
+
+### Dynamic control
+
+- Align to name and ID in spec for policies
+  ([#2926](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2926))
+- Add identity to existing policy classes
+  ([#2942](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2942))
+- Add deleted policy
+  ([#2943](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2943))
+- Apply deleted policy to telemetry policy deletion flow
+  ([#2944](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2944))
+- Make TelemetryPolicy an interface
+  ([#2948](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2948))
+- Refactor sourceKey to policyId to align to spec
+  ([#2949](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2949))
+- Add initializing from declarative config.
+  ([#2967](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2967))
+- Align aggregation to spec
+  ([#2960](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2960))
+- Add priority ordering to sources
+  ([#2970](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2970))
+- Add SourceKind to TelemetryPolicy
+  ([#2972](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2972))
+- Sampling rate is only changed if it has changed value
+  ([#2957](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2957))
+- SourceKind is now propagated across validation and policy creation
+  ([#2973](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2973))
+- Drop comparable policies according to priority for an update
+  ([#2974](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2974))
+- Add change checking for file & http sources
+  ([#2975](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2975))
+- Refactor OpampPolicyProvider for other PolicyProviders
+  ([#2987](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2987))
+
+### GCP resources
+
+- Add a limit on the metadata server response body size read into memory at once by the resource detector
+  ([#2883](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2883))
+
+### IBM MQ metrics
+
+- Queue manager uptime is now reported
+  ([#2835](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2835))
+- Update metric unit from 'microseconds' to 'us'
+  ([#2887](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2887))
+- Remove the in development notice of the IBM MQ metrics component and move it to beta
+  ([#2982](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2982))
+
+### OpAMP client
+
+- Add the ability to receive custom messages
+  ([#2990](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2990))
+
+
+
+## Version 1.58.0 (2026-06-19)
+
+### AWS X-Ray SDK support
+
+- Prevent regex on hot path
+  ([#2879](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2879))
+
+### Azure resources
+
+- Close leaky resources in azure-resources
+  ([#2876](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2876))
+- Handle NumberFormatException when parsing numbers
+  ([#2880](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2880))
+
+### Disk buffering
+
+- Add guard for non-numeric files
+  ([#2877](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2877))
+
+### Dynamic control
+
+- Wire up first policy
+  ([#2833](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2833))
+- Enable autoconfigurable extension
+  ([#2866](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2866))
+- Register implementers
+  ([#2858](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2858))
+- Add shadowJar target for fat jar including dependencies
+  ([#2869](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2869))
+- Update README on instructions for using the project as an extension
+  ([#2885](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2885))
+
+### GCP authentication extension
+
+- Support 'none' option in GOOGLE_OTEL_AUTH_TARGET_SIGNALS
+  ([#2899](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2899))
+
+### GCP resources
+
+- Handle NumberFormatException when parsing numbers
+  ([#2880](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2880))
+
+### IBM MQ metrics
+
+- Move to produce metrics via MetricProducer
+  ([#2836](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2836))
+- Change ibm-mq-metrics to use SnakeYAML Engine v2
+  ([#2872](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2872))
+
+### JMX scraper
+
+- Reconnect when connection is lost
+  ([#2910](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2910))
+
+### Maven extension
+
+- Fix issue with extension service files being overridden
+  ([#2886](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2886))
+
+### OpAMP client
+
+- Add health reporting support
+  ([#2867](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2867))
+
 ## Version 1.57.0 (2026-05-20)
 
 ### Baggage processor

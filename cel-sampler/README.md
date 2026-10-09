@@ -1,6 +1,6 @@
 # CEL-Based Sampler
 
-[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-cel-sampler/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-cel-sampler)
+[![Maven](https://img.shields.io/maven-central/v/io.opentelemetry.contrib/opentelemetry-cel-sampler?label=Maven&color=orange)](https://central.sonatype.com/artifact/io.opentelemetry.contrib/opentelemetry-cel-sampler)
 
 ## Declarative configuration
 
@@ -81,7 +81,7 @@ tracer_provider:
 ## Component owners
 
 * [Dominic Lüchinger](https://github.com/dol), SIX Group
-* [Jack Berg](https://github.com/jack-berg), New Relic
+* [Jack Berg](https://github.com/jack-berg), Grafana Labs
 * [Jason Plumb](https://github.com/breedx-splk), Splunk
 * [Trask Stalnaker](https://github.com/trask), Microsoft
 

@@ -1,6 +1,6 @@
 # OpenTelemetry Inferred Spans Extension
 
-[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-inferred-spans/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-inferred-spans)
+[![Maven](https://img.shields.io/maven-central/v/io.opentelemetry.contrib/opentelemetry-inferred-spans?label=Maven&color=orange)](https://central.sonatype.com/artifact/io.opentelemetry.contrib/opentelemetry-inferred-spans)
 
 OpenTelemetry extension for generating spans via profiling instead of instrumentation.
 This extension enhances traces by running

@@ -13,11 +13,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.ByteArraySerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.ReadableFile;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.files.WritableFile;
+import io.opentelemetry.contrib.disk.buffering.storage.impl.DiscardedFileListener.Reason;
 import io.opentelemetry.sdk.common.Clock;
 import java.io.File;
 import java.io.IOException;
@@ -59,7 +61,7 @@ class FolderManagerTest {
 
     // Creating file
     folderManager.createWritableFile();
-    assertThat(rootDir.list()).containsExactly("1000");
+    assertThat(rootDir.list()).containsExactly("1000.tmp");
 
     // Clear
     folderManager.clear();
@@ -86,6 +88,8 @@ class FolderManagerTest {
     assertThat(existingFile2.exists()).isTrue();
     assertThat(existingFile3.exists()).isTrue();
     assertThat(existingFile1.exists()).isFalse();
+    verify(folderManager.getConfiguration().getDiscardedFileListener())
+        .onDiscarded(existingFile1, Reason.SIZE_LIMIT);
   }
 
   @Test
@@ -104,6 +108,7 @@ class FolderManagerTest {
 
     assertThat(readableFile.getFile()).isEqualTo(writableFile.getFile());
     assertThat(writableFile.isClosed()).isTrue();
+    assertThat(rootDir.list()).containsExactly(String.valueOf(createdFileTime));
   }
 
   @Test
@@ -166,6 +171,8 @@ class FolderManagerTest {
     assertThat(expiredReadableFile.exists()).isFalse();
     assertThat(expiredWritableFile.exists()).isTrue();
     assertThat(file.getFile()).isNotEqualTo(expiredWritableFile);
+    verify(folderManager.getConfiguration().getDiscardedFileListener())
+        .onDiscarded(expiredReadableFile, Reason.EXPIRED);
   }
 
   @Test
@@ -297,6 +304,22 @@ class FolderManagerTest {
     when(clock.now()).thenReturn(creationReferenceTime + MAX_FILE_AGE_FOR_READ_MILLIS);
 
     assertThat(getReadableFile()).isNull();
+  }
+
+  @Test
+  void renameFilesToFinalName_whenTmpFilesFoundOnStart() throws IOException {
+    File orphan = new File(rootDir, "1234.tmp");
+    File expectedFinal = new File(rootDir, "1234");
+    createFiles(orphan);
+    Files.write(orphan.toPath(), new byte[] {1, 2, 3});
+
+    FolderManager fresh = FolderManager.create(rootDir, TestData.getConfiguration(), clock);
+    try {
+      assertThat(rootDir.list()).containsExactly("1234");
+      assertThat(Files.readAllBytes(expectedFinal.toPath())).containsExactly(1, 2, 3);
+    } finally {
+      fresh.close();
+    }
   }
 
   private ReadableFile getReadableFile() throws IOException {

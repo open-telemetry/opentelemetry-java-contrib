@@ -7,19 +7,19 @@ package io.opentelemetry.contrib.dynamic.policy.registry;
 
 import java.util.Objects;
 
-/** One source-local mapping from source key to target policy type. */
+/** One policy mapping from policy ID to target policy type. */
 public final class PolicySourceMappingConfig {
 
-  private final String sourceKey;
+  private final String policyId;
   private final String policyType;
 
-  public PolicySourceMappingConfig(String sourceKey, String policyType) {
-    this.sourceKey = Objects.requireNonNull(sourceKey, "sourceKey cannot be null");
+  public PolicySourceMappingConfig(String policyId, String policyType) {
+    this.policyId = Objects.requireNonNull(policyId, "policyId cannot be null");
     this.policyType = Objects.requireNonNull(policyType, "policyType cannot be null");
   }
 
-  public String getSourceKey() {
-    return sourceKey;
+  public String getPolicyId() {
+    return policyId;
   }
 
   public String getPolicyType() {
@@ -35,12 +35,12 @@ public final class PolicySourceMappingConfig {
       return false;
     }
     PolicySourceMappingConfig that = (PolicySourceMappingConfig) obj;
-    return sourceKey.equals(that.sourceKey) && policyType.equals(that.policyType);
+    return policyId.equals(that.policyId) && policyType.equals(that.policyType);
   }
 
   @Override
   public int hashCode() {
-    int result = sourceKey.hashCode();
+    int result = policyId.hashCode();
     result = 31 * result + policyType.hashCode();
     return result;
   }

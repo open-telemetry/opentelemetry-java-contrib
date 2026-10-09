@@ -1,6 +1,6 @@
 # Samplers
 
-[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-samplers/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-samplers)
+[![Maven](https://img.shields.io/maven-central/v/io.opentelemetry.contrib/opentelemetry-samplers?label=Maven&color=orange)](https://central.sonatype.com/artifact/io.opentelemetry.contrib/opentelemetry-samplers)
 
 ## Declarative configuration
 
@@ -71,7 +71,7 @@ tracer_provider:
 
 ## Component owners
 
-* [Jack Berg](https://github.com/jack-berg), New Relic
+* [Jack Berg](https://github.com/jack-berg), Grafana Labs
 * [Trask Stalnaker](https://github.com/trask), Microsoft
 
 Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).

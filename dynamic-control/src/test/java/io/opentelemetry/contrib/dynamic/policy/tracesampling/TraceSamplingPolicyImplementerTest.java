@@ -1,0 +1,170 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+package io.opentelemetry.contrib.dynamic.policy.tracesampling;
+
+import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.context.Context;
+import io.opentelemetry.contrib.dynamic.policy.DeletedTelemetryPolicy;
+import io.opentelemetry.contrib.dynamic.policy.PolicyValidator;
+import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
+import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicyIdentity;
+import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
+import io.opentelemetry.sdk.trace.samplers.Sampler;
+import io.opentelemetry.sdk.trace.samplers.SamplingDecision;
+import io.opentelemetry.sdk.trace.samplers.SamplingResult;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import org.junit.jupiter.api.Test;
+
+class TraceSamplingPolicyImplementerTest {
+
+  @Test
+  void deletedTraceSamplingPolicyFallsBackToAlwaysOn() {
+    DelegatingSampler delegatingSampler = new DelegatingSampler(Sampler.alwaysOff());
+    TraceSamplingPolicyImplementer implementer =
+        new TraceSamplingPolicyImplementer(delegatingSampler, new TraceSamplingRateValidator());
+
+    implementer.onPoliciesChanged(
+        singletonList(
+            new DeletedTelemetryPolicy(
+                TraceSamplingRatePolicy.DEFAULT_IDENTITY,
+                TraceSamplingRatePolicy.POLICY_TYPE,
+                SourceKind.CUSTOM)));
+
+    assertThat(decisionFor(delegatingSampler)).isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
+  }
+
+  @Test
+  void appliesProbabilityToDelegate() {
+    DelegatingSampler delegatingSampler = new DelegatingSampler(Sampler.alwaysOff());
+    TraceSamplingPolicyImplementer implementer =
+        new TraceSamplingPolicyImplementer(delegatingSampler, new TraceSamplingRateValidator());
+
+    implementer.onPoliciesChanged(
+        singletonList(new TraceSamplingRatePolicy(1.0, SourceKind.CUSTOM)));
+
+    assertThat(decisionFor(delegatingSampler)).isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
+  }
+
+  @Test
+  void skipsRepeatedEquivalentProbability() {
+    CountingDelegatingSampler delegatingSampler =
+        new CountingDelegatingSampler(Sampler.alwaysOff());
+    TraceSamplingPolicyImplementer implementer =
+        new TraceSamplingPolicyImplementer(delegatingSampler, new TraceSamplingRateValidator());
+
+    implementer.onPoliciesChanged(
+        singletonList(new TraceSamplingRatePolicy(1.0, SourceKind.CUSTOM)));
+    implementer.onPoliciesChanged(
+        singletonList(new TraceSamplingRatePolicy(1.0, SourceKind.CUSTOM)));
+
+    assertThat(delegatingSampler.changedProbabilityCount).isEqualTo(1);
+  }
+
+  @Test
+  void ignoresUnrelatedPolicyTypes() {
+    DelegatingSampler delegatingSampler = new DelegatingSampler(Sampler.alwaysOff());
+    TraceSamplingPolicyImplementer implementer =
+        new TraceSamplingPolicyImplementer(delegatingSampler, new TraceSamplingRateValidator());
+
+    implementer.onPoliciesChanged(singletonList(new TestTelemetryPolicy("other-policy")));
+
+    assertThat(decisionFor(delegatingSampler)).isEqualTo(SamplingDecision.DROP);
+  }
+
+  @Test
+  void lastTraceSamplingPolicyWins() {
+    DelegatingSampler delegatingSampler = new DelegatingSampler(Sampler.alwaysOff());
+    TraceSamplingPolicyImplementer implementer =
+        new TraceSamplingPolicyImplementer(delegatingSampler, new TraceSamplingRateValidator());
+
+    List<TelemetryPolicy> policies =
+        Arrays.asList(
+            new TraceSamplingRatePolicy(0.0, SourceKind.CUSTOM),
+            new TraceSamplingRatePolicy(1.0, SourceKind.CUSTOM));
+
+    implementer.onPoliciesChanged(policies);
+
+    assertThat(decisionFor(delegatingSampler)).isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
+  }
+
+  @Test
+  void exposesSingletonImmutableValidatorList() {
+    PolicyValidator validator = new TraceSamplingPercentageValidator();
+    TraceSamplingPolicyImplementer implementer =
+        new TraceSamplingPolicyImplementer(new DelegatingSampler(Sampler.alwaysOff()), validator);
+
+    assertThat(implementer.getValidators()).containsExactly(validator);
+    assertThatThrownBy(() -> implementer.getValidators().add(new TraceSamplingRateValidator()))
+        .isInstanceOf(UnsupportedOperationException.class);
+  }
+
+  private static SamplingDecision decisionFor(DelegatingSampler sampler) {
+    SamplingResult result =
+        sampler.shouldSample(
+            Context.root(),
+            "00000000000000000000000000000001",
+            "test-span",
+            SpanKind.INTERNAL,
+            Attributes.empty(),
+            Collections.emptyList());
+    return result.getDecision();
+  }
+
+  private static final class CountingDelegatingSampler extends DelegatingSampler {
+    private int changedProbabilityCount;
+
+    private CountingDelegatingSampler(Sampler initialDelegate) {
+      super(initialDelegate);
+    }
+
+    @Override
+    public synchronized boolean setSamplingProbability(double probability) {
+      boolean changed = super.setSamplingProbability(probability);
+      if (changed) {
+        changedProbabilityCount++;
+      }
+      return changed;
+    }
+  }
+
+  private static final class TestTelemetryPolicy implements TelemetryPolicy {
+    private final TelemetryPolicyIdentity identity;
+    private final String type;
+    private final SourceKind sourceKind;
+
+    private TestTelemetryPolicy(String type) {
+      this(type, SourceKind.CUSTOM);
+    }
+
+    private TestTelemetryPolicy(String type, SourceKind sourceKind) {
+      this.identity = new TelemetryPolicyIdentity(type, "Test policy");
+      this.type = type;
+      this.sourceKind = sourceKind;
+    }
+
+    @Override
+    public TelemetryPolicyIdentity getIdentity() {
+      return identity;
+    }
+
+    @Override
+    public String getType() {
+      return type;
+    }
+
+    @Override
+    public SourceKind getSourceKind() {
+      return sourceKind;
+    }
+  }
+}

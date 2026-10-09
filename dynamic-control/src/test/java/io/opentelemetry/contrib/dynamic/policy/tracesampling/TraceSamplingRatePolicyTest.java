@@ -11,56 +11,61 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 class TraceSamplingRatePolicyTest {
 
-  @Test
-  void constructorStoresProbabilityAndType() {
-    TraceSamplingRatePolicy policy = new TraceSamplingRatePolicy(0.25);
+  @AfterEach
+  void tearDown() {
+    TraceSamplingRatePolicy.resetForTest();
+  }
 
-    assertThat(policy.getProbability()).isEqualTo(0.25);
+  @Test
+  void constructorStoresRatioAndType() {
+    TraceSamplingRatePolicy policy = new TraceSamplingRatePolicy(0.25, SourceKind.CUSTOM);
+
+    assertThat(policy.getIdentity()).isEqualTo(TraceSamplingRatePolicy.DEFAULT_IDENTITY);
+    assertThat(policy.getRatio()).isEqualTo(0.25);
+    assertThat(policy.getSamplingProbability()).isEqualTo(0.25);
     assertThat(policy.getType()).isEqualTo(TraceSamplingRatePolicy.POLICY_TYPE);
+    assertThat(policy.getSourceKind()).isEqualTo(SourceKind.CUSTOM);
+  }
+
+  @Test
+  void constructorStoresExplicitSourceKind() {
+    TraceSamplingRatePolicy policy = new TraceSamplingRatePolicy(0.25, SourceKind.OPAMP);
+
+    assertThat(policy.getIdentity()).isEqualTo(TraceSamplingRatePolicy.DEFAULT_IDENTITY);
+    assertThat(policy.getRatio()).isEqualTo(0.25);
+    assertThat(policy.getSourceKind()).isEqualTo(SourceKind.OPAMP);
   }
 
   @Test
   void constructorNormalizesNegativeZeroToPositiveZero() {
-    TraceSamplingRatePolicy negativeZero = new TraceSamplingRatePolicy(-0.0);
-    TraceSamplingRatePolicy positiveZero = new TraceSamplingRatePolicy(0.0);
+    TraceSamplingRatePolicy negativeZero = new TraceSamplingRatePolicy(-0.0, SourceKind.CUSTOM);
+    TraceSamplingRatePolicy positiveZero = new TraceSamplingRatePolicy(0.0, SourceKind.CUSTOM);
 
-    assertThat(negativeZero.getProbability()).isEqualTo(0.0);
-    assertThat(Double.doubleToRawLongBits(negativeZero.getProbability()))
+    assertThat(negativeZero.getRatio()).isEqualTo(0.0);
+    assertThat(Double.doubleToRawLongBits(negativeZero.getRatio()))
         .isEqualTo(Double.doubleToRawLongBits(0.0));
-    assertThat(negativeZero).isEqualTo(positiveZero);
-    assertThat(negativeZero.hashCode()).isEqualTo(positiveZero.hashCode());
+    assertThat(positiveZero.getRatio()).isEqualTo(0.0);
   }
 
   @Test
-  void constructorRejectsOutOfRangeOrNaNProbabilities() {
-    assertThatThrownBy(() -> new TraceSamplingRatePolicy(Double.NaN))
+  void constructorRejectsOutOfRangeOrNaNRatios() {
+    assertThatThrownBy(() -> new TraceSamplingRatePolicy(Double.NaN, SourceKind.CUSTOM))
         .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("probability must be within [0.0, 1.0]");
-    assertThatThrownBy(() -> new TraceSamplingRatePolicy(-0.001))
+        .hasMessage("ratio must be within [0.0, 1.0]");
+    assertThatThrownBy(() -> new TraceSamplingRatePolicy(-0.001, SourceKind.CUSTOM))
         .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("probability must be within [0.0, 1.0]");
-    assertThatThrownBy(() -> new TraceSamplingRatePolicy(1.001))
+        .hasMessage("ratio must be within [0.0, 1.0]");
+    assertThatThrownBy(() -> new TraceSamplingRatePolicy(1.001, SourceKind.CUSTOM))
         .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("probability must be within [0.0, 1.0]");
-  }
-
-  @Test
-  void equalsAndHashCodeUseProbability() {
-    TraceSamplingRatePolicy a = new TraceSamplingRatePolicy(0.5);
-    TraceSamplingRatePolicy b = new TraceSamplingRatePolicy(0.5);
-    TraceSamplingRatePolicy c = new TraceSamplingRatePolicy(0.75);
-
-    assertThat(a).isEqualTo(b);
-    assertThat(a.hashCode()).isEqualTo(b.hashCode());
-    assertThat(a).isNotEqualTo(c);
-    assertThat(a).isNotEqualTo(null);
-    assertThat(a).isNotEqualTo("not-a-policy");
+        .hasMessage("ratio must be within [0.0, 1.0]");
   }
 
   @Test
@@ -76,7 +81,7 @@ class TraceSamplingRatePolicyTest {
 
     TraceSamplingRatePolicy.initialize(customizer);
 
-    assertThat(TraceSamplingRatePolicy.getInitializedSampler()).isNotNull();
+    assertThat(AbstractTraceSamplingPolicy.getInitializedSampler()).isNotNull();
     verify(customizer).addSamplerCustomizer(any());
   }
 
@@ -92,15 +97,15 @@ class TraceSamplingRatePolicyTest {
   }
 
   @Test
-  void createSamplerRejectsOutOfRangeOrNaNProbabilities() {
+  void createSamplerRejectsOutOfRangeOrNaNRatios() {
     assertThatThrownBy(() -> TraceSamplingRatePolicy.createSampler(Double.NaN))
         .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("probability must be within [0.0, 1.0]");
+        .hasMessage("ratio must be within [0.0, 1.0]");
     assertThatThrownBy(() -> TraceSamplingRatePolicy.createSampler(-0.01))
         .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("probability must be within [0.0, 1.0]");
+        .hasMessage("ratio must be within [0.0, 1.0]");
     assertThatThrownBy(() -> TraceSamplingRatePolicy.createSampler(1.01))
         .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("probability must be within [0.0, 1.0]");
+        .hasMessage("ratio must be within [0.0, 1.0]");
   }
 }

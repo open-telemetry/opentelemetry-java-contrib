@@ -13,14 +13,14 @@ concurrency:
 
 jobs:
   common:
-    uses: ./.github/workflows/build-common.yml
+    uses: $/.github/workflows/build-common.yml
     with:
       cache-read-only: true
       # retry in merge queue to avoid unnecessary failures
       max-test-retries: ${{ github.event_name == 'merge_group' && 5 || 0 }}
 
   lint:
-    uses: ./.github/workflows/reusable-lint.yml
+    uses: $/.github/workflows/reusable-lint.yml
 
   required-status-check:
     if: always()

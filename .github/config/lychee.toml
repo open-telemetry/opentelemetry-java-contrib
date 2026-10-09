@@ -14,6 +14,10 @@ exclude = [
   "^https://github.com/open-telemetry/opentelemetry-java-contrib/(issues|pull)/\\d+$",
   # developer.ibm.com intermittently returns 500 for MQ downloads
   "^https://developer\\.ibm\\.com/articles/mq-downloads/$",
+  # ibm.com docs / knowledge center sit behind a bot wall that 403s every
+  # non-browser request, including real browser user agents
+  "^https?://www\\.ibm\\.com/(docs|support)/",
   # groovy-lang.org is frequently unreachable / times out
   "^https?://[^/]*groovy-lang\\.org",
+  "^https://cloud-native\\.slack\\.com/", # slack requires auth
 ]

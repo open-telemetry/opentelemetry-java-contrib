@@ -5,82 +5,55 @@
 
 package io.opentelemetry.contrib.dynamic.policy;
 
-import java.util.Objects;
+import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 
 /**
- * Represents a single Telemetry Policy identified by type.
+ * Represents a single telemetry policy with spec-required identity and policy type.
  *
- * <p>A {@code TelemetryPolicy} instance encapsulates a specific rule or configuration intent
- * identified by its {@link #getType() type}.
- *
- * <p>Policies are immutable data carriers.
- *
- * <p>As an example, policy type {@code trace-sampling} indicates that trace sampling behavior
- * should be configured.
- *
- * <p>Direct instantiation of this base class is intentionally supported for type-only policy
- * signals (for example, to indicate policy removal/reset without policy-specific values).
- *
- * <p><b>Subclasses:</b> {@link #equals(Object)} on this class returns {@code false} when either
- * operand is a typed subclass (not {@code TelemetryPolicy} itself), so a type-only instance never
- * equals a value-carrying subclass with the same {@link #getType() type}. Each concrete subclass
- * <b>must</b> override both {@code equals} and {@code hashCode} consistently with its fields, and
- * obey the {@code equals}/{@code hashCode} contract. That is required for consumers such as {@link
- * io.opentelemetry.contrib.dynamic.policy.PolicyStore} that deduplicate and detect changes using
- * {@link Object#equals(Object)}.
+ * <p>Policies are immutable data carriers. Store-level identity, deletion detection, and
+ * deduplication are based on {@link #getType()} and {@code getIdentity().getId()}, not on Java
+ * object equality.
  *
  * @see io.opentelemetry.contrib.dynamic.policy
  */
-public class TelemetryPolicy {
-  private final String type; // e.g. "trace-sampling"
+public interface TelemetryPolicy {
+  /**
+   * Returns the identity for this policy instance.
+   *
+   * <p>The identity distinguishes policy instances within a policy type and is used by {@link
+   * PolicyStore} to detect policy removals.
+   *
+   * @return the non-null policy identity
+   */
+  TelemetryPolicyIdentity getIdentity();
 
   /**
-   * Constructs a new TelemetryPolicy.
+   * Returns the policy type.
    *
-   * <p>This constructor is used by type-specific subclasses and also directly for type-only policy
-   * signals such as policy removal/reset.
+   * <p>The type identifies the policy behavior and the implementer responsible for applying it, for
+   * example {@code trace-sampling}.
    *
-   * @param type the type of the policy (e.g., "trace-sampling"), must not be null.
+   * @return the non-null policy type
    */
-  public TelemetryPolicy(String type) {
-    Objects.requireNonNull(type, "type cannot be null");
-    this.type = type;
-  }
+  String getType();
 
   /**
-   * Returns the type of this policy.
+   * Returns the provider source kind that supplied this policy.
    *
-   * <p>The type identifies the domain and expected behavior of the policy (e.g., "trace-sampling",
-   * "metric-rate").
-   *
-   * @return the policy type.
+   * <p>The source is used to resolve duplicate policy IDs across providers. Lower-priority sources
+   * are dropped when a higher-priority source supplies the same policy identity.
    */
-  public String getType() {
-    return type;
-  }
+  SourceKind getSourceKind();
 
   /**
-   * Type-only policies ({@link TelemetryPolicy} instances) do not equal typed subclasses that share
-   * the same {@link #getType() type} string. Subclasses must override {@code equals} (and {@code
-   * hashCode}) for value-based equality; see the class Javadoc.
+   * Returns whether this policy represents a deleted element.
+   *
+   * <p>Deleted policies are used to signal explicit removal of a previously known policy. Most
+   * policies are not deleted and should leave this method returning false.
+   *
+   * @return true if this policy represents a deleted element, false otherwise.
    */
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (!(obj instanceof TelemetryPolicy)) {
-      return false;
-    }
-    TelemetryPolicy that = (TelemetryPolicy) obj;
-    if (that.getClass() != TelemetryPolicy.class || getClass() != TelemetryPolicy.class) {
-      return false;
-    }
-    return type.equals(that.type);
-  }
-
-  @Override
-  public int hashCode() {
-    return type.hashCode();
+  default boolean isDeleted() {
+    return false;
   }
 }

@@ -7,7 +7,6 @@ package io.opentelemetry.contrib.stacktrace;
 
 import com.google.auto.service.AutoService;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
-import io.opentelemetry.instrumentation.config.bridge.DeclarativeConfigPropertiesBridgeBuilder;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.ComponentProvider;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 
@@ -20,11 +19,7 @@ public class StackTraceComponentProvider implements ComponentProvider {
 
   @Override
   public SpanProcessor create(DeclarativeConfigProperties config) {
-    return StackTraceAutoConfig.create(
-        new DeclarativeConfigPropertiesBridgeBuilder()
-            .addMapping(StackTraceAutoConfig.CONFIG_MIN_DURATION, "min_duration")
-            .addMapping(StackTraceAutoConfig.PREFIX, "")
-            .build(config));
+    return StackTraceAutoConfig.create(config);
   }
 
   @Override

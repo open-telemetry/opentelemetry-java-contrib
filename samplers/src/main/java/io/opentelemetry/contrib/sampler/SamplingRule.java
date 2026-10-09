@@ -12,11 +12,11 @@ import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 
 class SamplingRule {
-  final AttributeKey<String> attributeKey;
+  final AttributeKey<?> attributeKey;
   final Sampler delegate;
   final Pattern pattern;
 
-  SamplingRule(AttributeKey<String> attributeKey, String pattern, Sampler delegate) {
+  SamplingRule(AttributeKey<?> attributeKey, String pattern, Sampler delegate) {
     this.attributeKey = attributeKey;
     this.pattern = Pattern.compile(pattern);
     this.delegate = delegate;

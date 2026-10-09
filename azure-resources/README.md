@@ -1,6 +1,6 @@
 # Azure Resource Detectors for OpenTelemetry
 
-[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-azure-resources/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-azure-resources)
+[![Maven](https://img.shields.io/maven-central/v/io.opentelemetry.contrib/opentelemetry-azure-resources?label=Maven&color=orange)](https://central.sonatype.com/artifact/io.opentelemetry.contrib/opentelemetry-azure-resources)
 
 This module provides Azure resource detectors for OpenTelemetry.
 
@@ -8,11 +8,12 @@ The following OpenTelemetry semantic conventions will be detected:
 
 | Resource attribute          | VM       | Functions       | App Service       | Containers           |
 | --------------------------- | -------- | --------------- | ----------------- | -------------------- |
+| cloud.account.id            |          | auto            | auto              |                      |
 | cloud.platform              | azure.vm | azure.functions | azure.app_service | azure.container_apps |
 | cloud.provider              | azure    | azure           | azure             | azure                |
 | cloud.resource_id           | auto     |                 | auto              |                      |
 | cloud.region                | auto     | auto            | auto              |                      |
-| deployment.environment.name |          |                 | auto              |                      |
+| deployment.environment.name |          | auto            | auto              |                      |
 | host.id                     | auto     |                 | auto              |                      |
 | host.name                   | auto     |                 |                   |                      |
 | host.type                   | auto     |                 |                   |                      |
@@ -20,14 +21,20 @@ The following OpenTelemetry semantic conventions will be detected:
 | os.version                  | auto     |                 |                   |                      |
 | azure.vm.scaleset.name      | auto     |                 |                   |                      |
 | azure.vm.sku                | auto     |                 |                   |                      |
-| service.name                |          |                 | auto              | auto                 |
+| service.name                |          | auto            | auto              | auto                 |
 | service.version             |          |                 |                   | auto                 |
 | service.instance.id         |          |                 | auto              | auto                 |
 | azure.app.service.stamp     |          |                 | auto              |                      |
+| azure.resource_group.name   |          | auto            | auto              |                      |
 | faas.name                   |          | auto            |                   |                      |
 | faas.version                |          | auto            |                   |                      |
 | faas.instance               |          | auto            |                   |                      |
 | faas.max_memory             |          | auto            |                   |                      |
+
+The Azure Functions detector does not emit `cloud.resource_id`. The
+[FaaS resource convention](https://opentelemetry.io/docs/specs/semconv/resource/faas/#faas-resource-attributes)
+requires this attribute to identify the invoked function, not the function app,
+and to be set on the span because multiple functions can share a `TracerProvider`.
 
 ## Component Owners
 

@@ -37,7 +37,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -278,11 +277,10 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
   }
 
   private static String generateClientId() {
-    Random rand = new Random();
     char[] hex = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
     char[] clientIdChars = new char[24];
     for (int i = 0; i < clientIdChars.length; i++) {
-      clientIdChars[i] = hex[rand.nextInt(hex.length)];
+      clientIdChars[i] = hex[ThreadLocalRandom.current().nextInt(hex.length)];
     }
     return new String(clientIdChars);
   }

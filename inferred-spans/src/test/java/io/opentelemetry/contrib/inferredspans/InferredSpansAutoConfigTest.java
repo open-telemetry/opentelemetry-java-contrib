@@ -56,20 +56,20 @@ class InferredSpansAutoConfigTest {
     String libDir = tmpDir.resolve("foo").resolve("bar").toString();
     try (AutoConfigTestProperties props =
         new AutoConfigTestProperties()
-            .put(InferredSpansConfig.ENABLED_OPTION, "true")
-            .put(InferredSpansConfig.LOGGING_OPTION, "false")
-            .put(InferredSpansConfig.DIAGNOSTIC_FILES_OPTION, "true")
-            .put(InferredSpansConfig.SAFEMODE_OPTION, "16")
-            .put(InferredSpansConfig.POSTPROCESSING_OPTION, "false")
-            .put(InferredSpansConfig.SAMPLING_INTERVAL_OPTION, "7ms")
-            .put(InferredSpansConfig.MIN_DURATION_OPTION, "2ms")
-            .put(InferredSpansConfig.INCLUDED_CLASSES_OPTION, "foo*23,bar.baz")
-            .put(InferredSpansConfig.EXCLUDED_CLASSES_OPTION, "blub,test*.test2")
-            .put(InferredSpansConfig.INTERVAL_OPTION, "2s")
-            .put(InferredSpansConfig.DURATION_OPTION, "3s")
-            .put(InferredSpansConfig.LIB_DIRECTORY_OPTION, libDir)
+            .put("otel.inferred.spans.enabled", "true")
+            .put("otel.inferred.spans.logging.enabled", "false")
+            .put("otel.inferred.spans.backup.diagnostic.files", "true")
+            .put("otel.inferred.spans.safe.mode", "16")
+            .put("otel.inferred.spans.post.processing.enabled", "false")
+            .put("otel.inferred.spans.sampling.interval", "7ms")
+            .put("otel.inferred.spans.min.duration", "2ms")
+            .put("otel.inferred.spans.included.classes", "foo*23,bar.baz")
+            .put("otel.inferred.spans.excluded.classes", "blub,test*.test2")
+            .put("otel.inferred.spans.interval", "2s")
+            .put("otel.inferred.spans.duration", "3s")
+            .put("otel.inferred.spans.lib.directory", libDir)
             .put(
-                InferredSpansConfig.PARENT_OVERRIDE_HANDLER_OPTION,
+                "otel.inferred.spans.parent.override.handler",
                 NoOpParentOverrideHandler.class.getName())) {
 
       OpenTelemetry otel = GlobalOpenTelemetry.get();
@@ -112,10 +112,10 @@ class InferredSpansAutoConfigTest {
   void checkProfilerWorking() {
     try (AutoConfigTestProperties props =
         new AutoConfigTestProperties()
-            .put(InferredSpansConfig.ENABLED_OPTION, "true")
-            .put(InferredSpansConfig.DURATION_OPTION, "500ms")
-            .put(InferredSpansConfig.INTERVAL_OPTION, "500ms")
-            .put(InferredSpansConfig.SAMPLING_INTERVAL_OPTION, "5ms")) {
+            .put("otel.inferred.spans.enabled", "true")
+            .put("otel.inferred.spans.duration", "500ms")
+            .put("otel.inferred.spans.interval", "500ms")
+            .put("otel.inferred.spans.sampling.interval", "5ms")) {
       OpenTelemetry otel = GlobalOpenTelemetry.get();
       List<SpanProcessor> processors = OtelReflectionUtils.getSpanProcessors(otel);
       assertThat(processors).filteredOn(proc -> proc instanceof InferredSpansProcessor).hasSize(1);

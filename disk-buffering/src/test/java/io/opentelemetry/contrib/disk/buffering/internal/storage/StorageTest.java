@@ -14,10 +14,12 @@ import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.
 import static io.opentelemetry.contrib.disk.buffering.internal.storage.TestData.getConfiguration;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.mockito.Mockito.verify;
 
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.deserializers.SignalDeserializer;
 import io.opentelemetry.contrib.disk.buffering.internal.serialization.serializers.SignalSerializer;
 import io.opentelemetry.contrib.disk.buffering.internal.storage.responses.ReadableResult;
+import io.opentelemetry.contrib.disk.buffering.storage.impl.DiscardedFileListener.Reason;
 import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 import java.io.File;
@@ -116,7 +118,7 @@ class StorageTest {
     assertThat(write(Collections.singletonList(THIRD_LOG_RECORD))).isTrue();
     assertThat(destinationDir.list())
         .containsExactlyInAnyOrder(
-            String.valueOf(firstFileWriteTime), String.valueOf(secondFileWriteTime));
+            String.valueOf(firstFileWriteTime), secondFileWriteTime + ".tmp");
 
     // Forward past first time read
     currentTimeMillis.set(firstFileWriteTime + MAX_FILE_AGE_FOR_READ_MILLIS + 1);
@@ -132,7 +134,7 @@ class StorageTest {
     // Purge expired files on write
     currentTimeMillis.set(50000);
     assertThat(write(Collections.singletonList(FIRST_LOG_RECORD))).isTrue();
-    assertThat(destinationDir.list()).containsExactly("50000");
+    assertThat(destinationDir.list()).containsExactly("50000.tmp");
   }
 
   @Test
@@ -147,7 +149,7 @@ class StorageTest {
     assertThat(write(Collections.singletonList(THIRD_LOG_RECORD))).isTrue();
     assertThat(destinationDir.list())
         .containsExactlyInAnyOrder(
-            String.valueOf(firstFileWriteTime), String.valueOf(secondFileWriteTime));
+            String.valueOf(firstFileWriteTime), secondFileWriteTime + ".tmp");
 
     // Forward to all files read time
     currentTimeMillis.set(secondFileWriteTime + MIN_FILE_AGE_FOR_READ_MILLIS);
@@ -158,7 +160,7 @@ class StorageTest {
     assertThat(result.getContent()).containsExactly(FIRST_LOG_RECORD, SECOND_LOG_RECORD);
     assertThat(destinationDir.list())
         .containsExactlyInAnyOrder(
-            String.valueOf(firstFileWriteTime), String.valueOf(secondFileWriteTime));
+            String.valueOf(firstFileWriteTime), secondFileWriteTime + ".tmp");
     result.delete();
     result.close();
 
@@ -269,6 +271,12 @@ class StorageTest {
     // Read
     assertThat(storage.readNext(DESERIALIZER)).isNull();
     assertThat(destinationDir.list()).containsExactly("4000"); // it tries 3 times max per call.
+    verify(folderManager.getConfiguration().getDiscardedFileListener())
+        .onDiscarded(new File(destinationDir, "1000"), Reason.CORRUPTED);
+    verify(folderManager.getConfiguration().getDiscardedFileListener())
+        .onDiscarded(new File(destinationDir, "2000"), Reason.CORRUPTED);
+    verify(folderManager.getConfiguration().getDiscardedFileListener())
+        .onDiscarded(new File(destinationDir, "3000"), Reason.CORRUPTED);
   }
 
   private void forwardToReadTime() {

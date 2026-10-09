@@ -42,6 +42,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 
 final class XrayRulesSampler implements Sampler {
@@ -71,6 +72,7 @@ final class XrayRulesSampler implements Sampler {
   private final Cache<String, AwsXrayAdaptiveSamplingConfig.UsageType> traceUsageCache;
 
   @Nullable private AwsXrayAdaptiveSamplingConfig adaptiveSamplingConfig;
+  @Nullable private List<Pattern> errorCodePatterns;
   @Nullable private RateLimiter anomalyCaptureRateLimiter;
 
   XrayRulesSampler(
@@ -125,6 +127,7 @@ final class XrayRulesSampler implements Sampler {
     }
     this.adaptiveSamplingRuleExists = adaptiveSamplingRuleExists;
     this.adaptiveSamplingConfig = adaptiveSamplingConfig;
+    this.errorCodePatterns = compileErrorCodePatterns(adaptiveSamplingConfig);
     this.traceUsageCache = traceUsageCache;
 
     // Initialize anomaly capture rate limiter
@@ -208,6 +211,7 @@ final class XrayRulesSampler implements Sampler {
       throw new IllegalStateException("Programming bug - Adaptive sampling config is already set");
     } else if (config != null && this.adaptiveSamplingConfig == null) {
       this.adaptiveSamplingConfig = config;
+      this.errorCodePatterns = compileErrorCodePatterns(config);
 
       // Initialize anomaly capture rate limiter if error capture limit is configured
       if (config.getAnomalyCaptureLimit() != null) {
@@ -358,7 +362,8 @@ final class XrayRulesSampler implements Sampler {
       if (operation == null) {
         operation = generateIngressOperation(spanData);
       }
-      for (AwsXrayAdaptiveSamplingConfig.AnomalyConditions condition : anomalyConditions) {
+      for (int i = 0; i < anomalyConditions.size(); i++) {
+        AwsXrayAdaptiveSamplingConfig.AnomalyConditions condition = anomalyConditions.get(i);
         // Skip condition if it would only re-apply action already being taken
         if ((shouldBoostSampling
                 && AwsXrayAdaptiveSamplingConfig.UsageType.SAMPLING_BOOST.equals(
@@ -376,15 +381,15 @@ final class XrayRulesSampler implements Sampler {
         // Check if any anomalyConditions detect an anomaly either through error code or latency
         boolean isAnomaly = false;
 
-        String errorCodeRegex = condition.getErrorCodeRegex();
-        if (statusCode != null && errorCodeRegex != null) {
-          isAnomaly = statusCode.toString().matches(errorCodeRegex);
+        Pattern errorCodePattern = (errorCodePatterns != null) ? errorCodePatterns.get(i) : null;
+        if (statusCode != null && errorCodePattern != null) {
+          isAnomaly = errorCodePattern.matcher(statusCode.toString()).matches();
         }
 
         Long highLatencyMs = condition.getHighLatencyMs();
         if (highLatencyMs != null) {
           isAnomaly =
-              (errorCodeRegex == null || isAnomaly)
+              (errorCodePattern == null || isAnomaly)
                   && (span.getLatencyNanos() / 1_000_000.0) >= highLatencyMs;
         }
 
@@ -490,6 +495,17 @@ final class XrayRulesSampler implements Sampler {
     } else {
       this.traceUsageCache.put(traceId, AwsXrayAdaptiveSamplingConfig.UsageType.NEITHER);
     }
+  }
+
+  @Nullable
+  private static List<Pattern> compileErrorCodePatterns(
+      @Nullable AwsXrayAdaptiveSamplingConfig config) {
+    if (config == null || config.getAnomalyConditions() == null) {
+      return null;
+    }
+    return config.getAnomalyConditions().stream()
+        .map(c -> c.getErrorCodeRegex() != null ? Pattern.compile(c.getErrorCodeRegex()) : null)
+        .collect(toList());
   }
 
   private static Map<String, String> createRuleHashMaps(

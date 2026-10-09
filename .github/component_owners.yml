@@ -69,7 +69,6 @@ components:
   processors:
     - LikeTheSalad
     - breedx-splk
-    - jack-berg
   prometheus-client-bridge:
     - jkwatson
   resource-providers:

@@ -9,6 +9,8 @@ import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.asser
 import static io.opentelemetry.semconv.DeploymentAttributes.DEPLOYMENT_ENVIRONMENT_NAME;
 import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_INSTANCE_ID;
 import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_NAME;
+import static io.opentelemetry.semconv.incubating.AzureIncubatingAttributes.AZURE_RESOURCE_GROUP_NAME;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_ACCOUNT_ID;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PLATFORM;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PROVIDER;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_REGION;
@@ -31,7 +33,8 @@ class AzureAppServiceResourceProviderTest {
   private static final String TEST_WEBSITE_INSTANCE_ID = "TEST_WEBSITE_INSTANCE_ID";
   private static final String TEST_WEBSITE_HOME_STAMPNAME = "TEST_WEBSITE_HOME_STAMPNAME";
   private static final String TEST_WEBSITE_RESOURCE_GROUP = "TEST_WEBSITE_RESOURCE_GROUP";
-  private static final String TEST_WEBSITE_OWNER_NAME = "TEST_WEBSITE_OWNER_NAME";
+  private static final String TEST_SUBSCRIPTION_ID = "TEST_SUBSCRIPTION_ID";
+  private static final String TEST_WEBSITE_OWNER_NAME = TEST_SUBSCRIPTION_ID + "+TEST_OWNER";
   private static final ImmutableMap<String, String> DEFAULT_ENV_VARS =
       ImmutableMap.of(
           "WEBSITE_SITE_NAME", TEST_WEBSITE_SITE_NAME,
@@ -49,9 +52,11 @@ class AzureAppServiceResourceProviderTest {
         .containsEntry(SERVICE_NAME, TEST_WEBSITE_SITE_NAME)
         .containsEntry(CLOUD_PROVIDER, "azure")
         .containsEntry(CLOUD_PLATFORM, "azure.app_service")
+        .containsEntry(CLOUD_ACCOUNT_ID, TEST_SUBSCRIPTION_ID)
+        .containsEntry(AZURE_RESOURCE_GROUP_NAME, TEST_WEBSITE_RESOURCE_GROUP)
         .containsEntry(
             CLOUD_RESOURCE_ID,
-            "/subscriptions/TEST_WEBSITE_OWNER_NAME/resourceGroups/TEST_WEBSITE_RESOURCE_GROUP/providers/Microsoft.Web/sites/TEST_WEBSITE_SITE_NAME")
+            "/subscriptions/TEST_SUBSCRIPTION_ID/resourceGroups/TEST_WEBSITE_RESOURCE_GROUP/providers/Microsoft.Web/sites/TEST_WEBSITE_SITE_NAME")
         .containsEntry(CLOUD_REGION, TEST_REGION_NAME)
         .containsEntry(DEPLOYMENT_ENVIRONMENT_NAME, TEST_WEBSITE_SLOT_NAME)
         .containsEntry(HOST_ID, TEST_WEBSITE_HOSTNAME)
@@ -67,17 +72,32 @@ class AzureAppServiceResourceProviderTest {
     map.put("WEBSITE_OWNER_NAME", "foo+bar");
 
     createResource(map)
+        .containsEntry(CLOUD_ACCOUNT_ID, "foo")
         .containsEntry(
             CLOUD_RESOURCE_ID,
             "/subscriptions/foo/resourceGroups/TEST_WEBSITE_RESOURCE_GROUP/providers/Microsoft.Web/sites/TEST_WEBSITE_SITE_NAME");
   }
 
   @Test
-  void noResourceId() {
+  void noResourceGroup() {
     HashMap<String, String> map = new HashMap<>(DEFAULT_ENV_VARS);
     map.remove("WEBSITE_RESOURCE_GROUP");
 
-    createResource(map).doesNotContainKey(CLOUD_RESOURCE_ID);
+    createResource(map)
+        .containsEntry(CLOUD_ACCOUNT_ID, TEST_SUBSCRIPTION_ID)
+        .doesNotContainKey(AZURE_RESOURCE_GROUP_NAME)
+        .doesNotContainKey(CLOUD_RESOURCE_ID);
+  }
+
+  @Test
+  void noOwner() {
+    HashMap<String, String> map = new HashMap<>(DEFAULT_ENV_VARS);
+    map.remove("WEBSITE_OWNER_NAME");
+
+    createResource(map)
+        .containsEntry(AZURE_RESOURCE_GROUP_NAME, TEST_WEBSITE_RESOURCE_GROUP)
+        .doesNotContainKey(CLOUD_ACCOUNT_ID)
+        .doesNotContainKey(CLOUD_RESOURCE_ID);
   }
 
   @Test

@@ -1,0 +1,114 @@
+name: Draft Release Notes
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: draft-release-notes
+
+permissions:
+  contents: read
+
+jobs:
+  draft-notes:
+    if: github.repository == 'open-telemetry/opentelemetry-java-contrib'
+    permissions:
+      # the branch push and `gh pr create` below authenticate with the otelbot
+      # app token, not this one, so no write scope is needed here
+      contents: read
+      pull-requests: read  # for `gh pr list`/`gh pr view` in fetch.py
+      issues: read  # for `gh issue view` in fetch.py
+    runs-on: ubuntu-latest
+    environment: protected
+    steps:
+      - run: |
+          if [[ $GITHUB_REF_NAME != "main" ]]; then
+            echo this workflow should only be run against main
+            exit 1
+          fi
+
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # history and tags are needed to resolve the previous release tag
+          # when computing the commit range
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python 3.14
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.14'
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+
+      - name: Install Copilot CLI
+        run: |
+          npm ci --prefix .github/scripts/copilot-cli
+          echo "$GITHUB_WORKSPACE/.github/scripts/copilot-cli/node_modules/.bin" >> "$GITHUB_PATH"
+
+      - name: Draft release notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
+        run: python3 .github/scripts/draft-release-notes/draft-release-notes.py
+
+      - name: Upload draft diagnostics artifact
+        if: always()
+        id: upload-diagnostics
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: draft-release-notes-diagnostics-${{ github.run_id }}
+          path: build/changelog-bundle/**
+
+      - name: Use CLA approved bot
+        run: .github/scripts/use-cla-approved-bot.sh
+
+      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        id: otelbot-token
+        with:
+          client-id: ${{ vars.OTELBOT_CLIENT_ID }}
+          private-key: ${{ secrets.OTELBOT_PRIVATE_KEY }}
+          owner: open-telemetry
+          repositories: opentelemetry-java-contrib
+          permission-contents: write
+          permission-pull-requests: write
+
+      - name: Create pull request against main
+        env:
+          ARTIFACT_URL: ${{ steps.upload-diagnostics.outputs.artifact-url }}
+          # pull requests from secrets.GITHUB_TOKEN do not run workflows
+          GH_TOKEN: ${{ steps.otelbot-token.outputs.token }}
+        run: |
+          message="Draft release notes"
+          body=$(cat <<EOF
+          Automated draft of the \`## Unreleased\` section of \`CHANGELOG.md\`.
+
+          The entire \`## Unreleased\` block was regenerated from per-PR classifications. Any
+          existing entries are intentionally replaced, so review the diff to recover anything
+          hand-written that should be retained.
+
+          [Download draft diagnostics]($ARTIFACT_URL)
+          EOF
+          )
+          branch="otelbot/draft-release-notes-${GITHUB_RUN_ID}"
+
+          git checkout -b "$branch"
+
+          if git diff --quiet CHANGELOG.md; then
+            echo "No changelog changes to draft."
+            exit 0
+          fi
+
+          git add CHANGELOG.md
+          git commit -m "$message"
+
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/open-telemetry/opentelemetry-java-contrib.git"
+          git push --set-upstream origin "$branch"
+
+          gh pr create --title "$message" \
+                       --body "$body" \
+                       --base main

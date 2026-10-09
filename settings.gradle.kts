@@ -2,9 +2,9 @@ import org.gradle.kotlin.dsl.maven
 
 pluginManagement {
   plugins {
-    id("com.gradleup.shadow") version "9.4.2"
+    id("com.gradleup.shadow") version "9.6.1"
     id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
-    id("com.gradle.develocity") version "4.4.2"
+    id("com.gradle.develocity") version "4.6.0"
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
   }
 }
@@ -27,13 +27,17 @@ dependencyResolutionManagement {
   }
 }
 
-val develocityServer = "https://develocity.opentelemetry.io"
+val develocityServer = "https://community.develocity.cloud"
 val isCI = System.getenv("CI") != null
 val develocityAccessKey = System.getenv("DEVELOCITY_ACCESS_KEY") ?: ""
+val isRemoteBuildCachePushEnabled = isCI && develocityAccessKey.isNotEmpty()
+val shouldDisableLocalBuildCache =
+  isRemoteBuildCachePushEnabled && System.getenv("GITHUB_REF_NAME") == "main"
 
 develocity {
   if (develocityAccessKey.isNotEmpty()) {
     server = develocityServer
+    projectId = "OpenTelemetry"
   }
 
   buildScan {
@@ -58,9 +62,16 @@ develocity {
 }
 
 buildCache {
-  remote(HttpBuildCache::class) {
-    url = uri("$develocityServer/cache/")
-    isPush = isCI && develocityAccessKey.isNotEmpty()
+  // A task loaded from the local build cache is never pushed to the remote build cache, so on main
+  // builds that write the remote cache the local cache is disabled, otherwise everything that
+  // doesn't change is served locally, never re-executed, and never reaches the remote cache.
+  local {
+    isEnabled = !shouldDisableLocalBuildCache
+  }
+
+  remote(develocity.buildCache) {
+    server = develocityServer
+    isPush = isRemoteBuildCachePushEnabled
   }
 }
 

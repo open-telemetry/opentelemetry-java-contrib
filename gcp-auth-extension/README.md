@@ -1,6 +1,6 @@
 # Google Cloud Authentication Extension
 
-[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-gcp-auth-extension/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-gcp-auth-extension)
+[![Maven](https://img.shields.io/maven-central/v/io.opentelemetry.contrib/opentelemetry-gcp-auth-extension?label=Maven&color=orange)](https://central.sonatype.com/artifact/io.opentelemetry.contrib/opentelemetry-gcp-auth-extension)
 
 The Google Cloud Auth Extension allows users to export telemetry from their
 applications to Google Cloud using the built-in OTLP exporters.
@@ -64,13 +64,47 @@ Here is a list of required and optional configuration available for the extensio
 * `GOOGLE_OTEL_AUTH_TARGET_SIGNALS`: Environment variable that specifies a
   comma-separated list of OpenTelemetry signals for which this authentication
   extension should be active.
-  Valid values are `metrics`, `traces`, `all`, and `none`.
+  Valid values are `metrics`, `traces`, `logs`, `all`, and `none`.
   If left unspecified, `all` is assumed, meaning the extension will attempt to
   apply authentication to exports for all signals. If `none` is set, disables
   authentication for all exports. If set alongside other signal types,
   it takes precedence and all other signal types will be ignored.
 
   * Can also be configured using `google.otel.auth.target.signals` system property.
+
+* `GOOGLE_AUTH_TOKEN_TYPE`: Environment variable that specifies the type
+  of token that the extension attaches to the exported telemetry.
+  Valid values are `access_token` and `id_token`:
+
+  * `access_token` (default): OAuth 2.0 access token retrieved from the
+    Application Default Credentials. Use this to export telemetry to Google
+    Cloud APIs, for example `telemetry.googleapis.com`.
+  * `id_token`: Google-signed OpenID Connect ID token minted from the
+    Application Default Credentials for the configured audience. Use this to
+    export telemetry to OTLP endpoints protected by Google IAM-based
+    authentication - for example, an OpenTelemetry Collector running on
+    [Cloud Run](https://cloud.google.com/run/docs/authenticating/service-to-service)
+    or behind [Identity-Aware Proxy](https://cloud.google.com/iap/docs/authentication-howto).
+    The Application Default Credentials must be able to mint ID tokens. This
+    is the case for service account based credentials - for example, the
+    default service account of a GCP compute environment, a service account
+    key, or impersonated credentials. When `id_token` is used, the
+    `GOOGLE_CLOUD_PROJECT` option is not required and the `gcp.project_id`
+    resource attribute is not added.
+  * Can also be configured using `google.auth.token.type` system property.
+
+  The value names are consistent with the `token_type` option of the
+  [Google Client Auth Extension](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension/googleclientauthextension)
+  for the OpenTelemetry Collector.
+
+* `GOOGLE_AUTH_ID_TOKEN_AUDIENCE`: Environment variable that specifies
+  the audience used when minting Google-signed ID tokens. Required when
+  `GOOGLE_AUTH_TOKEN_TYPE` is set to `id_token`, ignored otherwise.
+  For Cloud Run, this is the URL of the receiving service or one of its
+  [custom audiences](https://cloud.google.com/run/docs/configuring/custom-audiences).
+  For Identity-Aware Proxy, this is the OAuth 2.0 client ID.
+
+  * Can also be configured using `google.auth.id.token.audience` system property.
 
 ## Usage
 

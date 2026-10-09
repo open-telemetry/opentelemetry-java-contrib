@@ -1,7 +1,7 @@
 {
   $schema: 'https://docs.renovatebot.com/renovate-schema.json',
   extends: [
-    "github>grafana/flint#v0.22.5",
+    "github>grafana/flint#v0.22.14",
     'config:best-practices',
     'helpers:pinGitHubActionDigestsToSemver',
     'customManagers:githubActionsVersions',
@@ -10,7 +10,6 @@
                    // used to update docker image versions used in Java test files
   ignorePresets: [
     ':ignoreModulesAndTests', // needed to keep maven-extension test pom files up-to-date
-    'workarounds:javaLTSVersions', // Allow all Java major versions, not just LTS
   ],
   prHourlyLimit: 5, // we have a large number of parallel runners
   labels: [
@@ -23,19 +22,39 @@
     {
       // reduces the number of Renovate PRs
       // (patch updates are typically non-breaking)
-      groupName: 'all patch versions',
+      // (OpenTelemetry updates are excluded so that dogfooding updates land individually)
+      groupName: 'all patch and minor versions',
       matchUpdateTypes: [
         'patch',
       ],
       schedule: [
         '* 0-7 * * 2', // weekly, before 8am on Tuesday
       ],
+      matchPackageNames: [
+        '!io.opentelemetry:**',
+        '!io.opentelemetry.*:**',
+        '!open-telemetry/**',
+      ],
     },
     {
-      // avoids these Renovate PRs from trickling in throughout the week
-      // (consolidating the review process)
+      // group minor updates into the same weekly PR
+      // (OpenTelemetry updates are excluded so that dogfooding updates land individually)
+      groupName: 'all patch and minor versions',
       matchUpdateTypes: [
         'minor',
+      ],
+      schedule: [
+        '* 0-7 * * 2', // weekly, before 8am on Tuesday
+      ],
+      matchPackageNames: [
+        '!io.opentelemetry:**',
+        '!io.opentelemetry.*:**',
+        '!open-telemetry/**',
+      ],
+    },
+    {
+      // majors stay individual, but arrive on the weekly schedule
+      matchUpdateTypes: [
         'major',
       ],
       schedule: [
@@ -44,6 +63,7 @@
       matchPackageNames: [
         '!io.opentelemetry:**',
         '!io.opentelemetry.*:**',
+        '!open-telemetry/**',
       ],
     },
     {
@@ -67,6 +87,17 @@
         '* 0-7 * * 2', // weekly, before 8am on Tuesday
       ],
       groupName: 'kotlin plugin updates',
+    },
+    {
+      // The workflow only stores the Java version number, so Renovate has nowhere to write a
+      // Docker digest for this custom-managed dependency.
+      matchDepNames: [
+        'azul/zulu-openjdk',
+      ],
+      matchUpdateTypes: [
+        'pinDigest',
+      ],
+      enabled: false,
     },
 
     // ── Version constraints ────────────────────────────────────────────
@@ -244,6 +275,16 @@
       ],
     },
     {
+      // mockserver 6+ requires Java 11+
+      matchUpdateTypes: [
+        'major',
+      ],
+      enabled: false,
+      matchPackageNames: [
+        'org.mock-server:**'
+      ],
+    },
+    {
       // pinned version for compatibility
       matchFileNames: [
         'micrometer-meter-provider/build.gradle.kts',
@@ -303,6 +344,16 @@
       ],
     },
   ],
+  customDatasources: {
+    'azul-zulu': {
+      // The Docker datasource scans thousands of tags and can hit Docker Hub rate limits.
+      // This filtered datasource returns only major versions, without digests, for scalar Java markers.
+      defaultRegistryUrlTemplate: 'https://hub.docker.com/v2/repositories/library/azul-zulu/tags?page_size=100&name=-jdk-debian',
+      transformTemplates: [
+        '{"releases": results[$match(name, /^\\d+-jdk-debian$/)].{"version": $substringBefore(name, "-jdk-debian")}}',
+      ],
+    },
+  },
   customManagers: [
     {
       // keep SHA-pinned raw.githubusercontent.com URLs in mise.toml up to date
@@ -327,7 +378,7 @@
     },
     {
       customType: 'regex',
-      datasourceTemplate: 'docker',
+      datasourceTemplate: 'custom.azul-zulu',
       managerFilePatterns: [
         '.github/workflows/**',
       ],
@@ -335,7 +386,8 @@
         '(?<currentValue>\\d+) # renovate\\(java-version\\)',
       ],
       // using zulu because new releases get published quickly
-      depNameTemplate: 'azul/zulu-openjdk',
+      depNameTemplate: 'azul-zulu',
+      versioningTemplate: 'regex:^(?<major>\\d+)$',
     },
     {
       customType: 'regex',

@@ -5,17 +5,27 @@
 
 package io.opentelemetry.contrib.dynamic.policy.registry;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
+import io.opentelemetry.common.ComponentLoader;
 import io.opentelemetry.contrib.dynamic.policy.OpampPolicyProvider;
 import io.opentelemetry.contrib.dynamic.policy.PolicyImplementer;
 import io.opentelemetry.contrib.dynamic.policy.PolicyProvider;
+import io.opentelemetry.contrib.dynamic.policy.PolicyProviderConfig;
+import io.opentelemetry.contrib.dynamic.policy.PolicyProviderPoller;
 import io.opentelemetry.contrib.dynamic.policy.PolicyStore;
 import io.opentelemetry.contrib.dynamic.policy.PolicyTypeInitializer;
 import io.opentelemetry.contrib.dynamic.policy.PolicyValidator;
 import io.opentelemetry.contrib.dynamic.policy.TelemetryPolicy;
+import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
+import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingPercentagePolicy;
 import io.opentelemetry.contrib.dynamic.policy.tracesampling.TraceSamplingRatePolicy;
+import io.opentelemetry.instrumentation.config.bridge.DeclarativeConfigBridge;
+import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
+import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
+import io.opentelemetry.sdk.resources.Resource;
 import java.io.Closeable;
 import java.io.IOException;
 import java.lang.reflect.Proxy;
@@ -30,6 +40,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -38,20 +50,21 @@ import java.util.logging.Logger;
  *
  * <p>This class reads the policy-init configuration that specifies how to wire up the policy
  * pipeline (providers reading policies, eg an OpAMP provider, implementers applying policies, eg a
- * TraceSamplingRatePolicyImplementer), resolves any {@code policyType} strings (eg
- * "trace_sampling_rate_policy") to registered policy classes (eg TraceSamplingRatePolicy),
- * initializes the implementer classes, and activates configured providers that read policies from
- * the source and stream policy updates into the shared {@link PolicyStore}.
+ * TraceSamplingPolicyImplementer), resolves any {@code policyType} strings (eg "sampling-rate") to
+ * registered policy classes (eg TraceSamplingRatePolicy), initializes the implementer classes, and
+ * activates configured providers that read policies from the source and stream policy updates into
+ * the shared {@link PolicyStore}.
  *
  * <p>Generically the pipeline is: message -> provider -> policy -> policy handler -> implementer ->
  * agent config is changed
  *
  * <p>A specific example is: eg "change sampling rate" message -> OpampPolicyProvider ->
- * TraceSamplingRatePolicy -> PolicyStore -> TraceSamplingRatePolicyImplementer -> sampling rate
- * changed
+ * TraceSamplingRatePolicy -> PolicyStore -> TraceSamplingPolicyImplementer -> sampling rate changed
  */
 public final class PolicyInit {
   private static final Logger logger = Logger.getLogger(PolicyInit.class.getName());
+  private static final String OPAMP_HEADERS_CONFIG_PROPERTY = "otel.experimental.opamp.headers";
+  private static final String RESOURCE_ATTRIBUTES_CONFIG_PROPERTY = "otel.resource.attributes";
   private static final Map<String, Class<? extends TelemetryPolicy>> REGISTERED_POLICY_TYPES =
       new ConcurrentHashMap<>();
   private static final Map<Class<? extends TelemetryPolicy>, PolicyTypeInitializer>
@@ -64,15 +77,18 @@ public final class PolicyInit {
   private static final Map<PolicyProvider, List<TelemetryPolicy>> sourcePolicies =
       new ConcurrentHashMap<>();
   private static final PolicyStore policyStore = new PolicyStore();
+  private static final AtomicReference<PolicyInitConfig> declarativeInitConfig =
+      new AtomicReference<>();
 
   static {
     // For now, policies will be registered here. TODO: move to a more dynamic way.
     TraceSamplingRatePolicy.registerPolicyType();
+    TraceSamplingPercentagePolicy.registerPolicyType();
   }
 
   /**
    * Registers a policy type string to a concrete policy class and its initializer factory. eg map
-   * 'trace-sampling' to the class 'TraceSamplingRatePolicy', and register the initializer factory
+   * 'sampling-rate' to the class 'TraceSamplingRatePolicy', and register the initializer factory
    * 'TraceSamplingRatePolicy::initialize' for when the policy is present in the init config.
    *
    * <p>Example:
@@ -84,7 +100,7 @@ public final class PolicyInit {
    *     TraceSamplingRatePolicy::initialize);
    * }</pre>
    *
-   * @param policyType configured policy type identifier (for example {@code trace-sampling})
+   * @param policyType configured policy type identifier (for example {@code sampling-rate})
    * @param policyClass runtime class implementing that policy type
    * @param policyTypeInitializer initializer for the policy type that returns the associated
    *     implementer instance
@@ -124,38 +140,101 @@ public final class PolicyInit {
   public static void init(AutoConfigurationCustomizer autoConfiguration) {
     autoConfiguration.addPropertiesCustomizer(
         config -> {
-          PolicyInitConfig initConfig = PolicyInitConfig.readFromConfigProperties(config);
+          PolicyInitConfig initConfig = declarativeInitConfig.getAndSet(null);
+          if (initConfig != null) {
+            logger.log(
+                Level.INFO,
+                "Initializing telemetry policies from top-level declarative config with {0} source(s)",
+                initConfig.getSources().size());
+          } else {
+            initConfig = PolicyInitConfig.readFromConfigProperties(config);
+          }
+
           if (initConfig == null) {
             return Collections.emptyMap();
           }
+          rejectMutuallyExclusiveTraceSamplingTypes(initConfig);
           resolveAndInitializeConfiguredPolicyTypes(initConfig, autoConfiguration);
-          activateSources(initConfig, config);
+          // The legacy duration property has no declarative schema. Apply it at this boundary
+          // rather than adapting declarative provider properties back to ConfigProperties.
+          if (initConfig.getSources().stream()
+              .anyMatch(source -> source.getKind() == SourceKind.HTTP)) {
+            PolicyProviderPoller.configure(config);
+          }
+          activateSources(initConfig, createLegacyProviderConfig(config));
           return Collections.emptyMap();
         });
   }
 
-  /** Initializes dynamic-control policy wiring from declarative config component input. */
-  public static void initFromDeclarativeConfig(
-      DeclarativeConfigProperties declarativeConfig, ConfigProperties config) {
+  /**
+   * Exposes the legacy flat configuration as general declarative properties for source providers.
+   *
+   * <p>This is deliberately a component-properties bridge with an empty prefix, rather than the
+   * instrumentation-config bridge. OpAMP does not have a declarative schema yet, so its endpoint
+   * and service identity continue to come from the general {@code ConfigProperties} namespace.
+   * Map-shaped resource attributes and OpAMP headers are passed separately because they cannot be
+   * exposed by the bridge.
+   */
+  private static PolicyProviderConfig createLegacyProviderConfig(ConfigProperties config) {
+    return PolicyProviderConfig.createWithLegacyProperties(
+        DeclarativeConfigBridge.createComponentProperties(config, ""),
+        config.getMap(RESOURCE_ATTRIBUTES_CONFIG_PROPERTY),
+        config.getMap(OPAMP_HEADERS_CONFIG_PROPERTY));
+  }
+
+  /**
+   * Stores parsed top-level declarative telemetry policy config for auto-configuration bootstrap.
+   */
+  public static void setDeclarativeInitConfig(PolicyInitConfig initConfig) {
+    declarativeInitConfig.set(Objects.requireNonNull(initConfig, "initConfig cannot be null"));
+  }
+
+  /**
+   * Initializes policy implementers and returns the source activation callback for the built SDK.
+   *
+   * <p>The sampler must be available during SDK construction, but OpAMP identity is only available
+   * after resource detection and SDK construction have completed.
+   */
+  @CanIgnoreReturnValue
+  public static Consumer<OpenTelemetrySdk> prepareFromDeclarativeConfig(
+      DeclarativeConfigProperties declarativeConfig) {
     Objects.requireNonNull(declarativeConfig, "declarativeConfig cannot be null");
-    Objects.requireNonNull(config, "config cannot be null");
     PolicyInitConfig initConfig =
         PolicyInitConfig.readFromTelemetryPolicyDeclarativeConfig(declarativeConfig);
     if (initConfig == null) {
       initConfig = PolicyInitConfig.readFromDeclarativeConfigProperties(declarativeConfig);
     }
     if (initConfig == null) {
-      return;
+      return sdk -> {};
     }
+    rejectMutuallyExclusiveTraceSamplingTypes(initConfig);
     resolveAndInitializeConfiguredPolicyTypes(initConfig, createNoopAutoConfigurationCustomizer());
-    try {
-      activateSources(initConfig, config);
-    } catch (RuntimeException e) {
-      logger.log(
-          Level.WARNING,
-          "Failed to activate telemetry policy sources from declarative component config",
-          e);
-    }
+    PolicyInitConfig preparedConfig = initConfig;
+    return sdk -> {
+      try {
+        // Only connection settings remain property-based on the declarative path. Identity comes
+        // from the built SDK, with a logged legacy fallback if reflective access is unavailable.
+        PolicyProviderConfig opampConfig =
+            createLegacyProviderConfig(
+                DefaultConfigProperties.create(
+                    Collections.emptyMap(),
+                    ComponentLoader.forClassLoader(PolicyInit.class.getClassLoader())));
+        if (preparedConfig.getSources().stream()
+            .anyMatch(source -> source.getKind() == SourceKind.OPAMP)) {
+          Resource resource = SdkResourceAccess.getResource(sdk);
+          if (resource != null) {
+            opampConfig = opampConfig.withResource(resource);
+          }
+        }
+        activateSources(
+            preparedConfig, PolicyProviderConfig.create(declarativeConfig), opampConfig);
+      } catch (RuntimeException e) {
+        logger.log(
+            Level.WARNING,
+            "Failed to activate telemetry policy sources after SDK configuration",
+            e);
+      }
+    };
   }
 
   private static AutoConfigurationCustomizer createNoopAutoConfigurationCustomizer() {
@@ -169,7 +248,7 @@ public final class PolicyInit {
   /**
    * Resolves all mapped policy types to classes and invokes each policy-type initializer once.
    *
-   * <p>eg if the init config has {@code policyType: trace-sampling}, this resolves that policy type
+   * <p>eg if the init config has {@code policyType: sampling-rate}, this resolves that policy type
    * to its registered class, TraceSamplingRatePolicy, and runs the registered policy-type
    * initializer for that class, TraceSamplingRatePolicy::initialize.
    *
@@ -191,7 +270,7 @@ public final class PolicyInit {
                   + "' in mapping for source kind '"
                   + source.getKind().configValue()
                   + "' key '"
-                  + mapping.getSourceKey()
+                  + mapping.getPolicyId()
                   + "'");
         }
         initializePolicyClass(policyClass, autoConfiguration, initializedPolicyClasses);
@@ -200,6 +279,34 @@ public final class PolicyInit {
             "Mapped policyType ''{0}'' to class ''{1}''",
             new Object[] {mappedPolicyType, policyClass.getName()});
       }
+    }
+  }
+
+  // This restriction is present because having both samplers active means they compete to set the
+  // sampling rate and they don't merge nicely. For example if one was removed, that would be
+  // considered deletion and sampling rate would be reset to 100% rather than fallback to the other.
+  // To relax the restriction, they would need to be reimplemented as cooperating policies acting
+  // effectively as one. This complicates the implementation and is unlikely to ever be needed in
+  // practice, so I've gone with this simpler approach
+  private static void rejectMutuallyExclusiveTraceSamplingTypes(PolicyInitConfig initConfig) {
+    boolean hasRatio = false;
+    boolean hasPercentage = false;
+    for (PolicySourceConfig source : initConfig.getSources()) {
+      for (PolicySourceMappingConfig mapping : source.getMappings()) {
+        if (TraceSamplingRatePolicy.POLICY_TYPE.equals(mapping.getPolicyType())) {
+          hasRatio = true;
+        } else if (TraceSamplingPercentagePolicy.POLICY_TYPE.equals(mapping.getPolicyType())) {
+          hasPercentage = true;
+        }
+      }
+    }
+    if (hasRatio && hasPercentage) {
+      throw new IllegalArgumentException(
+          "Configure only one trace sampling policy representation: '"
+              + TraceSamplingRatePolicy.POLICY_TYPE
+              + "' or '"
+              + TraceSamplingPercentagePolicy.POLICY_TYPE
+              + "'");
     }
   }
 
@@ -253,7 +360,12 @@ public final class PolicyInit {
    *
    * <p>This is idempotent; repeated calls after first activation are ignored.
    */
-  private static void activateSources(PolicyInitConfig initConfig, ConfigProperties config) {
+  private static void activateSources(PolicyInitConfig initConfig, PolicyProviderConfig config) {
+    activateSources(initConfig, config, config);
+  }
+
+  private static void activateSources(
+      PolicyInitConfig initConfig, PolicyProviderConfig config, PolicyProviderConfig opampConfig) {
     if (!sourcesActivated.compareAndSet(false, true)) {
       return;
     }
@@ -266,7 +378,11 @@ public final class PolicyInit {
             source.getKind().configValue());
         continue;
       }
-      PolicyProvider provider = source.getKind().createProvider(source, config, validators);
+      PolicyProvider provider =
+          source
+              .getKind()
+              .createProvider(
+                  source, source.getKind() == SourceKind.OPAMP ? opampConfig : config, validators);
       if (provider == null) {
         logger.log(
             Level.INFO,
@@ -307,8 +423,8 @@ public final class PolicyInit {
    * {@link PolicyImplementer#getValidators()}.
    *
    * <p>Example: if a source policy maps to {@code TraceSamplingRatePolicy.class}, and its
-   * implementer returns a {@code TraceSamplingValidator}, that validator is included in the source
-   * validator list.
+   * implementer returns a {@code TraceSamplingRateValidator}, that validator is included in the
+   * source validator list.
    */
   private static List<PolicyValidator> createSourceValidators(PolicySourceConfig source) {
     Set<Class<? extends TelemetryPolicy>> mappedClasses =
@@ -353,8 +469,8 @@ public final class PolicyInit {
   /**
    * Collects mapped policy classes for one source mapping list.
    *
-   * <p>Example: if mappings contain policy type {@code trace-sampling} twice, both resolve to
-   * {@code TraceSamplingRatePolicy.class}, but the result contains that class only once.
+   * <p>Example: if mappings contain policy type {@code sampling-rate} twice, both resolve to {@code
+   * TraceSamplingRatePolicy.class}, but the result contains that class only once.
    */
   private static Set<Class<? extends TelemetryPolicy>> collectMappedPolicyClasses(
       List<PolicySourceMappingConfig> mappings) {
@@ -392,6 +508,7 @@ public final class PolicyInit {
     sourcesActivated.set(false);
     initializedImplementers.clear();
     policyStore.clear();
+    declarativeInitConfig.set(null);
   }
 
   /**
@@ -409,6 +526,7 @@ public final class PolicyInit {
   static void resetForTest() {
     shutdown();
     OpampPolicyProvider.resetForTest();
+    PolicyProviderPoller.reset();
   }
 
   private PolicyInit() {}

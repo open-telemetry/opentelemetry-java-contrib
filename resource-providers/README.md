@@ -1,7 +1,7 @@
 
 # Resource Providers
 
-[![Maven](https://badges.mvnrepository.com/badge/io.opentelemetry.contrib/opentelemetry-resource-providers/badge.svg?label=Maven&color=orange)](https://mvnrepository.com/artifact/io.opentelemetry.contrib/opentelemetry-resource-providers)
+[![Maven](https://img.shields.io/maven-central/v/io.opentelemetry.contrib/opentelemetry-resource-providers?label=Maven&color=orange)](https://central.sonatype.com/artifact/io.opentelemetry.contrib/opentelemetry-resource-providers)
 
 This module contains various `ResourceProvider` implementations.
 
@@ -25,6 +25,27 @@ It is capable of detecting common scenarios among the popular application server
 * IBM Websphere
 * IBM Websphere Liberty
 * Wildfly
+
+## Usage with declarative configuration
+
+You can configure the app server resource detector using declarative YAML configuration with the
+OpenTelemetry SDK. For example:
+
+```yaml
+file_format: "1.0"
+resource:
+  detection/development:
+    detectors:
+      # Provides 'service.name' from the application server
+      - app_server:
+      # Provides 'service.name' and 'service.instance.id'
+      - service:
+```
+
+The `app_server` detector needs to be listed before the `service` detector to allow overriding
+the `service.name` attribute with the `OTEL_SERVICE_NAME` environment variable. Also, the resource
+detectors in `detection/development` have lower priority over the explicit `resource.attributes`
+configuration.
 
 ## Component owners
 

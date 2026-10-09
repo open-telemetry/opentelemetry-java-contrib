@@ -65,3 +65,11 @@ object to delegate signals to as well as an optional callback object to notify i
   the time of creating the disk exporter, then it will be ignored, and the next oldest (and
   unexpired) one will be used instead.
 * All the stale and empty files will be removed as a new file is created.
+
+## Writer/reader synchronization
+
+Writer and reader work on disjoint files: the writer appends to `<timestamp>.tmp`, while the
+reader only picks files with a fully numeric name. On rollover the temp file is promoted via
+`File.renameTo` (atomic on POSIX, best-effort on Windows), so the reader cannot observe a
+partial file. Empty files are deleted instead of promoted. On startup, leftover `*.tmp` files
+from a crashed prior run are recovered by renaming them to their final name when free.

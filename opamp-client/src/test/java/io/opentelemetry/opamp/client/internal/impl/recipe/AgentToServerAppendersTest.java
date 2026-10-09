@@ -11,6 +11,7 @@ import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.AgentDescrip
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.AgentDisconnectAppender;
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.AgentToServerAppender;
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.CapabilitiesAppender;
+import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.CustomCapabilitiesAppender;
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.EffectiveConfigAppender;
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.FlagsAppender;
 import io.opentelemetry.opamp.client.internal.impl.recipe.appenders.HealthAppender;
@@ -31,6 +32,7 @@ class AgentToServerAppendersTest {
   @Mock private RemoteConfigStatusAppender remoteConfigStatusAppender;
   @Mock private SequenceNumberAppender sequenceNumberAppender;
   @Mock private CapabilitiesAppender capabilitiesAppender;
+  @Mock private CustomCapabilitiesAppender customCapabilitiesAppender;
   @Mock private HealthAppender healthAppender;
   @Mock private FlagsAppender flagsAppender;
   @Mock private InstanceUidAppender instanceUidAppender;
@@ -44,6 +46,7 @@ class AgentToServerAppendersTest {
     verifyMapping(Field.REMOTE_CONFIG_STATUS, remoteConfigStatusAppender);
     verifyMapping(Field.SEQUENCE_NUM, sequenceNumberAppender);
     verifyMapping(Field.CAPABILITIES, capabilitiesAppender);
+    verifyMapping(Field.CUSTOM_CAPABILITIES, customCapabilitiesAppender);
     verifyMapping(Field.HEALTH, healthAppender);
     verifyMapping(Field.INSTANCE_UID, instanceUidAppender);
     verifyMapping(Field.FLAGS, flagsAppender);
