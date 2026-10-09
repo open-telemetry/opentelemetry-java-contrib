@@ -152,7 +152,7 @@ to `forEach` may be capturing/allocating lambdas).
 
 ### Component README files
 
-* Include a component owners section in each module's README
+* Include a component owners section in each module's README linking to the [component maintenance policy](../MAINTENANCE.md#component-ownership)
 * Document configuration options with examples
 
 ### Deprecation and breaking changes
