@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## Version 1.61.0 (2026-10-09)
 
 ### :warning: Breaking changes
 
