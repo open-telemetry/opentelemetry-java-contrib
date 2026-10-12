@@ -40,6 +40,7 @@ import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -153,7 +154,7 @@ public class GcpAuthAutoConfigurationCustomizerProvider
     }
 
     // Creates the credentials used for authentication based on the configured token type. For the
-    // default token type (access_token) the Application Default Credentials are used as-is. For
+    // default token type (access_token), required scopes are applied to the ADC if missing. For
     // id_token, the Application Default Credentials are wrapped into IdTokenCredentials which mint
     // Google-signed ID tokens for the configured audience.
     private static OAuth2Credentials createCredentials(ConfigProperties configProperties) {
@@ -165,7 +166,7 @@ public class GcpAuthAutoConfigurationCustomizerProvider
       }
 
       if (!isIdTokenType(configProperties)) {
-        return applicationDefaultCredentials;
+        return scopeCredentialsForTargetSignals(applicationDefaultCredentials, configProperties);
       }
 
       String audience =
@@ -184,7 +185,7 @@ public class GcpAuthAutoConfigurationCustomizerProvider
             "{0} is set to {1} but {2} is not configured; falling back to access tokens."
                 + " Configure it by exporting environment variable {3} or system property {4}.",
             params);
-        return applicationDefaultCredentials;
+        return scopeCredentialsForTargetSignals(applicationDefaultCredentials, configProperties);
       }
       if (!(applicationDefaultCredentials instanceof IdTokenProvider)) {
         String[] params = {
@@ -196,7 +197,7 @@ public class GcpAuthAutoConfigurationCustomizerProvider
             Level.WARNING,
             "{0} is set to {1} but the retrieved Application Default Credentials ({2}) cannot mint ID tokens; falling back to access tokens. Use a credential type implementing IdTokenProvider, for example the default service account of a GCP compute environment, a service account key, or impersonated credentials.",
             params);
-        return applicationDefaultCredentials;
+        return scopeCredentialsForTargetSignals(applicationDefaultCredentials, configProperties);
       }
       return IdTokenCredentials.newBuilder()
           .setIdTokenProvider((IdTokenProvider) applicationDefaultCredentials)
@@ -204,6 +205,25 @@ public class GcpAuthAutoConfigurationCustomizerProvider
           .setOptions(singletonList(IdTokenProvider.Option.INCLUDE_EMAIL))
           .build();
     }
+  }
+
+  // Only access-token paths use this helper, including fallbacks from ID token configuration.
+  static GoogleCredentials scopeCredentialsForTargetSignals(
+      GoogleCredentials credentials, ConfigProperties configProperties) {
+    if (!credentials.createScopedRequired()) {
+      return credentials;
+    }
+    List<String> scopes = new ArrayList<>();
+    if (isSignalTargeted(SIGNAL_TYPE_TRACES, configProperties)) {
+      scopes.add("https://www.googleapis.com/auth/trace.append");
+    }
+    if (isSignalTargeted(SIGNAL_TYPE_METRICS, configProperties)) {
+      scopes.add("https://www.googleapis.com/auth/monitoring.write");
+    }
+    if (isSignalTargeted(SIGNAL_TYPE_LOGS, configProperties)) {
+      scopes.add("https://www.googleapis.com/auth/logging.write");
+    }
+    return scopes.isEmpty() ? credentials : credentials.createScoped(scopes);
   }
 
   // Checks whether the extension is configured to attach ID tokens instead of access tokens.
