@@ -149,6 +149,10 @@ dependencies {
   compileOnly("com.google.errorprone:error_prone_annotations")
 }
 
+val testcontainersBom = "org.testcontainers:testcontainers-bom:2.0.2"
+val guavaBom = "com.google.guava:guava-bom:33.5.0-jre"
+val armeriaBom = "com.linecorp.armeria:armeria-bom:1.34.0"
+
 testing {
   suites.withType(JvmTestSuite::class).configureEach {
     useJUnitJupiter("5.14.4")
@@ -156,9 +160,9 @@ testing {
     dependencies {
       implementation(project())
 
-      implementation(enforcedPlatform("org.testcontainers:testcontainers-bom:2.0.2"))
-      implementation(enforcedPlatform("com.google.guava:guava-bom:33.5.0-jre"))
-      implementation(enforcedPlatform("com.linecorp.armeria:armeria-bom:1.34.0"))
+      implementation(enforcedPlatform(testcontainersBom))
+      implementation(enforcedPlatform(guavaBom))
+      implementation(enforcedPlatform(armeriaBom))
 
       compileOnly("com.google.auto.value:auto-value-annotations")
       compileOnly("com.google.errorprone:error_prone_annotations")
