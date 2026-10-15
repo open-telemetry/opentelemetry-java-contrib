@@ -149,9 +149,9 @@ dependencies {
   compileOnly("com.google.errorprone:error_prone_annotations")
 }
 
-val testcontainersBom = "org.testcontainers:testcontainers-bom:2.0.2"
-val guavaBom = "com.google.guava:guava-bom:33.5.0-jre"
-val armeriaBom = "com.linecorp.armeria:armeria-bom:1.34.0"
+val testcontainersBom = "org.testcontainers:testcontainers-bom:2.0.5"
+val guavaBom = "com.google.guava:guava-bom:33.7.2-jre"
+val armeriaBom = "com.linecorp.armeria:armeria-bom:1.42.0"
 
 testing {
   suites.withType(JvmTestSuite::class).configureEach {
