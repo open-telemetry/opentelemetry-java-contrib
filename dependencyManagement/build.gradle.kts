@@ -54,7 +54,7 @@ dependencies {
     api("org.bouncycastle:bcprov-jdk18on:1.86")
     api("org.junit-pioneer:junit-pioneer:1.9.1")
     api("org.skyscreamer:jsonassert:1.5.3")
-    api("org.apache.kafka:kafka-clients:4.3.1")
+    api("org.apache.kafka:kafka-clients:4.4.0")
     // transitive deps of kafka-clients, pinned for CVE fixes (see kafka-exporter/build.gradle.kts)
     // remove once kafka-clients depends on fixed versions
     api("at.yawk.lz4:lz4-java:1.12.0")
