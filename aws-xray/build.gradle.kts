@@ -37,7 +37,7 @@ dependencies {
 
 testing {
   suites {
-    val awsTest by registering(JvmTestSuite::class) {
+    register<JvmTestSuite>("awsTest") {
       dependencies {
         implementation("io.opentelemetry:opentelemetry-exporter-otlp")
         implementation("io.opentelemetry:opentelemetry-sdk-testing")

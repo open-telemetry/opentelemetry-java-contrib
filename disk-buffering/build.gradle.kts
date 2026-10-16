@@ -12,7 +12,7 @@ plugins {
 description = "Exporter implementations that store signals on disk"
 otelJava.moduleName.set("io.opentelemetry.contrib.exporters.disk")
 
-val protos by configurations.creating
+val protos = configurations.create("protos")
 
 dependencies {
   api("io.opentelemetry:opentelemetry-sdk")
@@ -33,7 +33,7 @@ jmh {
   timeUnit.set("ms")
 }
 
-val setupProtos by tasks.registering(Sync::class) {
+val setupProtos = tasks.register<Sync>("setupProtos") {
   inputs.files(protos)
   from(zipTree(protos.singleFile))
   into(layout.buildDirectory.dir("protos"))

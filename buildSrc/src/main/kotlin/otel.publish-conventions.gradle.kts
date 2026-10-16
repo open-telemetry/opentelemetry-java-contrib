@@ -3,7 +3,7 @@ plugins {
   signing
 }
 
-val tagVersion: String by rootProject.extra
+val tagVersion = rootProject.extra["tagVersion"] as String
 
 publishing {
   publications {
@@ -22,7 +22,7 @@ publishing {
       }
 
       afterEvaluate {
-        val mavenGroupId: String? by project
+        val mavenGroupId = project.extra.properties["mavenGroupId"] as String?
         if (mavenGroupId != null) {
           groupId = mavenGroupId
         }

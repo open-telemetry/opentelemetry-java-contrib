@@ -16,7 +16,7 @@ tasks {
   }
 
   test {
-    val testJavaVersion: String? by project
+    val testJavaVersion = project.findProperty("testJavaVersion") as String?
     if (testJavaVersion == "8") {
       enabled = false
     }

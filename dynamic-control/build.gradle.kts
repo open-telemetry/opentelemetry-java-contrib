@@ -50,6 +50,14 @@ tasks {
   shadowJar {
     archiveClassifier.set("all")
     mergeServiceFiles()
+    // mergeServiceFiles requires that duplicate strategy is set to include
+    filesMatching("META-INF/services/**") {
+      duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    }
+    // avoid warning about duplicate kotlin module files being silently dropped
+    filesMatching("META-INF/*.kotlin_module") {
+      duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    }
     manifest {
       attributes["Implementation-Version"] = project.version
     }

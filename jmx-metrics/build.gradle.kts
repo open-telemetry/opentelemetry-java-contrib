@@ -41,7 +41,7 @@ dependencies {
 
 testing {
   suites {
-    val integrationTest by registering(JvmTestSuite::class) {
+    register<JvmTestSuite>("integrationTest") {
       dependencies {
         implementation("com.linecorp.armeria:armeria-grpc")
         implementation("com.linecorp.armeria:armeria-junit5")

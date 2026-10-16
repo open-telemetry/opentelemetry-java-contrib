@@ -7,7 +7,7 @@ plugins {
 description = "OpenTelemetry extension that provides GCP authentication support for OTLP exporters"
 otelJava.moduleName.set("io.opentelemetry.contrib.gcp.auth")
 
-val agent: Configuration by configurations.creating {
+val agent = configurations.create("agent") {
   isCanBeResolved = true
   isCanBeConsumed = false
 }
@@ -56,7 +56,7 @@ dependencies {
 
 testing {
   suites {
-    val test by getting(JvmTestSuite::class) {
+    getByName<JvmTestSuite>("test") {
       targets.all {
         testTask.configure {
           // Unset relevant environment variables to provide a clean state for the tests
@@ -68,7 +68,7 @@ testing {
       }
     }
 
-    val integrationTestUserCreds by registering(JvmTestSuite::class) {
+    register<JvmTestSuite>("integrationTestUserCreds") {
       dependencies {
         implementation(project())
       }

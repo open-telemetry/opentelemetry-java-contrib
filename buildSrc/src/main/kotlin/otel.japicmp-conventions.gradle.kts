@@ -75,11 +75,11 @@ fun findArtifact(version: String): File {
 if (project.findProperty("otel.stable") == "true" && !project.name.startsWith("bom")) {
   afterEvaluate {
     tasks {
-      val jApiCmp by registering(JapicmpTask::class) {
+      val jApiCmp = register<JapicmpTask>("jApiCmp") {
         dependsOn("jar")
 
         // the japicmp "new" version is either the user-specified one, or the locally built jar.
-        val apiNewVersion: String? by project
+        val apiNewVersion = project.findProperty("apiNewVersion") as String?
         val newArtifact = apiNewVersion?.let { findArtifact(it) }
           ?: file(getByName<Jar>("jar").archiveFile)
         newClasspath.from(files(newArtifact))
@@ -88,7 +88,7 @@ if (project.findProperty("otel.stable") == "true" && !project.name.startsWith("b
         onlyModified.set(true)
 
         // the japicmp "old" version is either the user-specified one, or the pinned baseline.
-        val apiBaseVersion: String? by project
+        val apiBaseVersion = project.findProperty("apiBaseVersion") as String?
         val baselineVersion = apiBaseVersion ?: apidiffBaselineVersion
         oldClasspath.from(
           try {
