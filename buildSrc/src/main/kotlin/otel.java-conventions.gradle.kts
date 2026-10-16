@@ -150,7 +150,6 @@ dependencies {
 }
 
 val testcontainersBom = "org.testcontainers:testcontainers-bom:2.0.5"
-val guavaBom = "com.google.guava:guava-bom:33.7.2-jre"
 val armeriaBom = "com.linecorp.armeria:armeria-bom:1.42.0"
 
 testing {
@@ -161,7 +160,6 @@ testing {
       implementation(project())
 
       implementation(enforcedPlatform(testcontainersBom))
-      implementation(enforcedPlatform(guavaBom))
       implementation(enforcedPlatform(armeriaBom))
 
       compileOnly("com.google.auto.value:auto-value-annotations")

@@ -10,11 +10,9 @@ dependencies {
   api("io.opentelemetry:opentelemetry-sdk")
 
   implementation("dev.cel:cel:0.14.0")
-
-  constraints {
-    implementation("com.google.guava:guava:33.7.2-jre") {
-      because("Earlier versions are affected by CVE-2026-102554")
-    }
+  // can be removed when cel updates the guava version
+  implementation("com.google.guava:guava") {
+    because("Versions before 33.7.2 are affected by CVE-2026-102554")
   }
 
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
