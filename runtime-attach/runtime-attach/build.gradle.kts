@@ -6,7 +6,7 @@ plugins {
 description = "To runtime attach the OpenTelemetry Java Instrumentation agent"
 otelJava.moduleName.set("io.opentelemetry.contrib.attach")
 
-val agent: Configuration by configurations.creating {
+val agent = configurations.create("agent") {
   isCanBeResolved = true
   isCanBeConsumed = false
 }
@@ -26,7 +26,7 @@ dependencies {
 
 testing {
   suites {
-    val test by getting(JvmTestSuite::class) {
+    getByName<JvmTestSuite>("test") {
       targets.all {
         testTask.configure {
           setForkEvery(1) // One JVM by test class to avoid a test class launching a runtime attachment influences the behavior of another test class
@@ -38,7 +38,7 @@ testing {
       }
     }
 
-    val testAgentDisabledByEnvironmentVariable by registering(JvmTestSuite::class) {
+    register<JvmTestSuite>("testAgentDisabledByEnvironmentVariable") {
       targets.all {
         testTask.configure {
           setForkEvery(1)
@@ -51,7 +51,7 @@ testing {
       }
     }
 
-    val testAgentDisabledBySystemProperty by registering(JvmTestSuite::class) {
+    register<JvmTestSuite>("testAgentDisabledBySystemProperty") {
       targets.all {
         testTask.configure {
           setForkEvery(1)

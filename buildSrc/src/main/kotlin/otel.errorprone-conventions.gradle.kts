@@ -13,7 +13,7 @@ dependencies {
   errorprone(project(":custom-checks"))
 }
 
-val disableErrorProne = properties["disableErrorProne"]?.toString()?.toBoolean() ?: false
+val disableErrorProne = project.findProperty("disableErrorProne")?.toString()?.toBoolean() ?: false
 
 tasks {
   withType<JavaCompile>().configureEach {

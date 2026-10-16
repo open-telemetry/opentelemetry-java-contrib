@@ -32,7 +32,7 @@ dependencies {
 
 testing {
   suites {
-    val integrationTest by registering(JvmTestSuite::class) {
+    register<JvmTestSuite>("integrationTest") {
       dependencies {
         implementation("org.testcontainers:testcontainers-junit-jupiter")
         implementation("org.slf4j:slf4j-simple")

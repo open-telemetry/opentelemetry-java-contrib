@@ -14,7 +14,7 @@ otelWeaver {
   javaOutputPackage.set("io/opentelemetry/ibm/mq/metrics")
 }
 
-val ibmClientJar: Configuration by configurations.creating {
+val ibmClientJar = configurations.create("ibmClientJar") {
   isCanBeResolved = true
   isCanBeConsumed = false
 }
@@ -46,7 +46,7 @@ dependencies {
 
 testing {
   suites {
-    val integrationTest by registering(JvmTestSuite::class) {
+    register<JvmTestSuite>("integrationTest") {
       dependencies {
         implementation("org.assertj:assertj-core")
         implementation("io.opentelemetry:opentelemetry-sdk-testing")
@@ -58,7 +58,7 @@ testing {
         all {
           testTask.configure {
             // Jakarta JMS requires Java 11+
-            val testJavaVersion: String? by project
+            val testJavaVersion = project.findProperty("testJavaVersion") as String?
             if (testJavaVersion == "8") {
               enabled = false
             }
@@ -70,6 +70,10 @@ testing {
 }
 
 tasks.shadowJar {
+  // avoid warning about duplicate kotlin module files being silently dropped
+  filesMatching("META-INF/*.kotlin_module") {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+  }
   dependencies {
     exclude(dependency("com.ibm.mq:com.ibm.mq.allclient"))
   }

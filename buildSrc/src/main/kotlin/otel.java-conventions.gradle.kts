@@ -130,7 +130,7 @@ plugins.withId("otel.publish-conventions") {
   }
 }
 
-val dependencyManagement by configurations.creating {
+val dependencyManagement = configurations.create("dependencyManagement") {
   isCanBeConsumed = false
   isCanBeResolved = false
 }
