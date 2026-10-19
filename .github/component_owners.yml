@@ -76,6 +76,7 @@ components:
     - laurit
   runtime-attach:
     - jeanbisutti
+    - sylvainjuge
   samplers:
     - trask
     - jack-berg
