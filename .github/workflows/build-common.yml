@@ -120,7 +120,7 @@ jobs:
           - 25
           # The marked row tracks the newest feature release. When it becomes LTS, retain it and
           # manually add the next feature release with the marker.
-          - 26 # renovate(java-version)
+          - 27 # renovate(java-version)
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
