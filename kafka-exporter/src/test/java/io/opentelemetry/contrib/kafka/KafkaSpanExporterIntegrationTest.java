@@ -68,6 +68,8 @@ class KafkaSpanExporterIntegrationTest {
         ImmutableMap.of(
             ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
             kafka.getBootstrapServers(),
+            ProducerConfig.COMPRESSION_TYPE_CONFIG,
+            "snappy",
             ProducerConfig.CLIENT_ID_CONFIG,
             UUID.randomUUID().toString());
 
