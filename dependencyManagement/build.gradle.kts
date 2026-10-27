@@ -17,7 +17,7 @@ dependencies {
   api(platform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${otelInstrumentationVersion}"))
   api(platform("com.fasterxml.jackson:jackson-bom:2.22.3"))
   api(platform("com.google.protobuf:protobuf-bom:4.36.2"))
-  api(platform("com.squareup.okhttp3:okhttp-bom:5.5.0"))
+  api(platform("com.squareup.okhttp3:okhttp-bom:5.5.1"))
   api(platform("com.google.guava:guava-bom:33.7.2-jre"))
 
   constraints {
@@ -47,7 +47,7 @@ dependencies {
 
     api("com.google.code.findbugs:annotations:3.0.1u2")
     api("com.google.code.findbugs:jsr305:3.0.2")
-    api("com.uber.nullaway:nullaway:0.14.2")
+    api("com.uber.nullaway:nullaway:0.14.3")
     api("org.assertj:assertj-core:3.27.7")
     api("org.awaitility:awaitility:4.3.0")
     api("org.bouncycastle:bcpkix-jdk15on:1.70")
@@ -58,11 +58,11 @@ dependencies {
     api("org.apache.kafka:kafka-clients:4.4.0")
     // transitive deps of kafka-clients, pinned for CVE fixes (see kafka-exporter/build.gradle.kts)
     // remove once kafka-clients depends on fixed versions
-    api("at.yawk.lz4:lz4-java:1.12.0")
-    api("com.github.luben:zstd-jni:1.5.7-23")
+    api("at.yawk.lz4:lz4-java:1.12.1")
+    api("com.github.luben:zstd-jni:1.5.7-24")
     api("org.testcontainers:testcontainers-kafka:2.0.5")
     api("org.jctools:jctools-core:4.0.7")
-    api("tools.profiler:async-profiler:4.5")
+    api("tools.profiler:async-profiler:4.6")
     api("com.blogspot.mydailyjava:weak-lock-free:0.18")
     api("com.github.f4b6a3:uuid-creator:6.1.1")
   }
