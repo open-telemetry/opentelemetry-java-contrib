@@ -30,6 +30,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 
+/**
+ * Span processor that uses a sampling profiler to create inferred spans for method calls within
+ * traces.
+ */
 public class InferredSpansProcessor implements SpanProcessor {
 
   private static final Logger logger = Logger.getLogger(InferredSpansProcessor.class.getName());

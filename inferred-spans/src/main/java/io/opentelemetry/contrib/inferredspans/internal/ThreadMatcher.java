@@ -5,6 +5,12 @@
 
 package io.opentelemetry.contrib.inferredspans.internal;
 
+/**
+ * Iterates over all threads, invoking a consumer for each thread that matches a predicate.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public class ThreadMatcher {
 
   private final ThreadGroup systemThreadGroup;

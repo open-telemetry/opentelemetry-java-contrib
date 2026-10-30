@@ -18,6 +18,12 @@ import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.data.StatusData;
 import java.util.List;
 
+/**
+ * {@link SpanData} implementation for deserialized spans.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 @AutoValue
 public abstract class SpanDataImpl implements SpanData {
 
@@ -40,6 +46,12 @@ public abstract class SpanDataImpl implements SpanData {
   @Override
   public abstract InstrumentationScopeInfo getInstrumentationScopeInfo();
 
+  /**
+   * Builder for {@link SpanDataImpl}.
+   *
+   * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+   * at any time.
+   */
   @AutoValue.Builder
   public abstract static class Builder {
     public abstract Builder setName(String value);

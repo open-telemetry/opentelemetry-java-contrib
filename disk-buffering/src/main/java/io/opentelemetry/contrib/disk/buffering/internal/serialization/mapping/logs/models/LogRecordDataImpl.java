@@ -16,6 +16,12 @@ import io.opentelemetry.sdk.logs.data.LogRecordData;
 import io.opentelemetry.sdk.resources.Resource;
 import javax.annotation.Nullable;
 
+/**
+ * {@link LogRecordData} implementation for deserialized log records.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 @AutoValue
 public abstract class LogRecordDataImpl implements LogRecordData {
 
@@ -40,6 +46,12 @@ public abstract class LogRecordDataImpl implements LogRecordData {
   @Nullable
   public abstract String getEventName();
 
+  /**
+   * Builder for {@link LogRecordDataImpl}.
+   *
+   * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+   * at any time.
+   */
   @AutoValue.Builder
   public abstract static class Builder {
     public abstract Builder setResource(Resource value);

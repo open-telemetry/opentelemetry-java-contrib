@@ -16,6 +16,12 @@ import okhttp3.Response;
 import okhttp3.WebSocketListener;
 import okio.ByteString;
 
+/**
+ * {@link WebSocket} implementation based on OkHttp.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public class OkHttpWebSocket implements WebSocket {
   private final String url;
   private final OkHttpClient client;

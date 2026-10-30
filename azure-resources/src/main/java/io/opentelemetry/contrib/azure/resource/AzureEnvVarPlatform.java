@@ -9,6 +9,7 @@ import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.AttributesBuilder;
 import java.util.Map;
 
+/** Azure platforms that can be detected from environment variables. */
 public enum AzureEnvVarPlatform {
   APP_SERVICE,
   FUNCTIONS,

@@ -8,6 +8,12 @@ package io.opentelemetry.opamp.client.internal.request.delay;
 import java.time.Duration;
 import javax.annotation.concurrent.GuardedBy;
 
+/**
+ * {@link PeriodicDelay} that doubles the delay each time it is requested, until reset.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public final class ExponentialBackoffPeriodicDelay implements PeriodicDelay {
   private final Duration initialDelay;
   private final Object delayNanosLock = new Object();

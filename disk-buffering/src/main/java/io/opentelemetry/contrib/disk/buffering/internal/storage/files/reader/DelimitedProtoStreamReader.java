@@ -10,6 +10,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import javax.annotation.Nullable;
 
+/**
+ * {@link StreamReader} that reads length-delimited protobuf items.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public final class DelimitedProtoStreamReader implements StreamReader {
   private final InputStream inputStream;
 
@@ -54,6 +60,12 @@ public final class DelimitedProtoStreamReader implements StreamReader {
     inputStream.close();
   }
 
+  /**
+   * Factory for {@link DelimitedProtoStreamReader}.
+   *
+   * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+   * at any time.
+   */
   public static class Factory implements StreamReader.Factory {
 
     private static final Factory INSTANCE = new DelimitedProtoStreamReader.Factory();

@@ -8,6 +8,7 @@ package io.opentelemetry.ibm.mq.config;
 import java.util.HashSet;
 import java.util.Set;
 
+/** Include and exclude filters for IBM MQ resource names. */
 public final class ResourceFilters {
 
   private Set<String> include = new HashSet<>();

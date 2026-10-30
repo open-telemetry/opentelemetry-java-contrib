@@ -13,6 +13,10 @@ import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
 import java.util.logging.Logger;
 
+/**
+ * Autoconfiguration customizer that adds the inferred spans processor when {@code
+ * otel.inferred.spans.enabled} is true.
+ */
 @AutoService(AutoConfigurationCustomizerProvider.class)
 public class InferredSpansAutoConfig implements AutoConfigurationCustomizerProvider {
 

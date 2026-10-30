@@ -40,6 +40,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/** Connects to the configured IBM MQ queue managers and runs the metric collectors against each. */
 public final class WmqMonitor {
 
   private static final Logger logger = LoggerFactory.getLogger(WmqMonitor.class);

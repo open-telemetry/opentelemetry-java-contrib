@@ -30,6 +30,12 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
 
+/**
+ * Maps between {@link SpanData} and proto {@link Span} values.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public final class SpanDataMapper {
 
   private static final SpanDataMapper INSTANCE = new SpanDataMapper();

@@ -24,7 +24,7 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// Reads queue manager events and counts them as metrics
+/** Reads queue manager events and counts them as metrics. */
 public final class QueueManagerEventCollector implements Consumer<MetricsCollectorContext> {
 
   private static final Logger logger = LoggerFactory.getLogger(QueueManagerEventCollector.class);

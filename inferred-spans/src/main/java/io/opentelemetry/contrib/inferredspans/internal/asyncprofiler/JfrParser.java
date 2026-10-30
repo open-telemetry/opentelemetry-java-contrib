@@ -464,6 +464,7 @@ public class JfrParser implements Recyclable {
     symbolIdToString.clear();
   }
 
+  /** Callback for stack trace events parsed by {@link JfrParser}. */
   public interface StackTraceConsumer {
 
     /**

@@ -18,6 +18,7 @@ import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/** Command-line entry point that collects IBM MQ metrics using the given configuration file. */
 @SuppressWarnings("SystemOut")
 public final class Main {
 

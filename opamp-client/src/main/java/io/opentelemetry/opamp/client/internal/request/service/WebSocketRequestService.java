@@ -30,6 +30,12 @@ import opamp.proto.ServerErrorResponse;
 import opamp.proto.ServerErrorResponseType;
 import opamp.proto.ServerToAgent;
 
+/**
+ * {@link RequestService} that sends requests to the server over a WebSocket.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public final class WebSocketRequestService implements RequestService, WebSocket.Listener {
   private static final PeriodicDelay DEFAULT_DELAY_BETWEEN_RETRIES =
       RetryPeriodicDelay.create(Duration.ofSeconds(30));

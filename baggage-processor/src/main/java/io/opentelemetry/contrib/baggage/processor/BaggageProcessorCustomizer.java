@@ -13,6 +13,7 @@ import io.opentelemetry.sdk.logs.SdkLoggerProviderBuilder;
 import io.opentelemetry.sdk.trace.SdkTracerProviderBuilder;
 import java.util.List;
 
+/** Autoconfiguration customizer that adds the baggage span and log record processors. */
 @AutoService(AutoConfigurationCustomizerProvider.class)
 public final class BaggageProcessorCustomizer implements AutoConfigurationCustomizerProvider {
   @Override

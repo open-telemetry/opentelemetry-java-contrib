@@ -61,6 +61,7 @@ public final class MetricToDiskExporter implements MetricExporter {
     return aggregationTemporalitySelector.getAggregationTemporality(instrumentType);
   }
 
+  /** Builder for {@link MetricToDiskExporter}. */
   public static final class Builder {
     private final SignalStorage.Metric storage;
     private AggregationTemporalitySelector aggregationTemporalitySelector =

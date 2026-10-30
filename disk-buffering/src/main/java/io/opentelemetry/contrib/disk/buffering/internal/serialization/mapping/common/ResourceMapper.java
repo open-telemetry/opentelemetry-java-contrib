@@ -9,6 +9,12 @@ import io.opentelemetry.proto.resource.v1.Resource;
 import io.opentelemetry.sdk.resources.ResourceBuilder;
 import javax.annotation.Nullable;
 
+/**
+ * Maps between SDK resources and proto {@link Resource} values.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public final class ResourceMapper {
 
   private static final ResourceMapper INSTANCE = new ResourceMapper();

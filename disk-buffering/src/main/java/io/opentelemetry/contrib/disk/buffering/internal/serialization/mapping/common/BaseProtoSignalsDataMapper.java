@@ -18,6 +18,12 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
 
+/**
+ * Base class for mapping between SDK signal items and proto export requests.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public abstract class BaseProtoSignalsDataMapper<
     SIGNAL_ITEM, PROTO_SIGNAL_ITEM, PROTO_DATA, PROTO_RESOURCE_ITEM, PROTO_SCOPE_ITEM> {
 

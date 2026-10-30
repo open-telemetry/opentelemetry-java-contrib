@@ -10,6 +10,7 @@ import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.ComponentProvider;
 import io.opentelemetry.sdk.resources.Resource;
 
+/** Declarative configuration SPI implementation for {@link AppServerServiceNameProvider}. */
 @AutoService(ComponentProvider.class)
 public final class AppServerResourceDetector implements ComponentProvider {
 

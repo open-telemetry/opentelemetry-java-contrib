@@ -13,6 +13,12 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
+/**
+ * Parses the value of an HTTP {@code Retry-After} header into a {@link Duration}.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public final class RetryAfterParser {
   private final SystemTime systemTime;
   private static final Pattern SECONDS_PATTERN = Pattern.compile("\\d+");

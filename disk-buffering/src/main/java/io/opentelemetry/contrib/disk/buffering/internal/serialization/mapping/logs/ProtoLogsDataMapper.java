@@ -17,6 +17,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Maps between {@link LogRecordData} items and {@link ExportLogsServiceRequest} protos.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public final class ProtoLogsDataMapper
     extends BaseProtoSignalsDataMapper<
         LogRecordData, LogRecord, ExportLogsServiceRequest, ResourceLogs, ScopeLogs> {

@@ -17,6 +17,12 @@ import io.opentelemetry.contrib.metrics.micrometer.internal.state.InstrumentStat
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterSharedState;
 import java.util.function.Consumer;
 
+/**
+ * Long up-down counter instrument delegating to Micrometer.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public final class MicrometerLongUpDownCounter extends AbstractUpDownCounter
     implements LongUpDownCounter, ObservableLongMeasurement {
   private MicrometerLongUpDownCounter(InstrumentState instrumentState) {

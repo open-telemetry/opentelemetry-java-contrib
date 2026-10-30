@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import javax.annotation.Nonnull;
 
+/** File-based storage for metrics. */
 public final class FileMetricStorage implements SignalStorage.Metric {
   private final FileSignalStorage<MetricData> fileSignalStorage;
 

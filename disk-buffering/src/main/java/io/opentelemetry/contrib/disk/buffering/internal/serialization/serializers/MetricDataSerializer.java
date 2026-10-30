@@ -13,6 +13,12 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collection;
 
+/**
+ * Serializes {@link MetricData} items into protobuf-encoded metrics.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public final class MetricDataSerializer implements SignalSerializer<MetricData> {
 
   private final LowAllocationMetricsRequestMarshaler marshaler =

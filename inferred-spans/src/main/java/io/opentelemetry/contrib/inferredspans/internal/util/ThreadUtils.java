@@ -10,6 +10,12 @@ import java.lang.invoke.MethodHandles;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+/**
+ * Utility methods for checking whether a thread is virtual.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public class ThreadUtils {
 
   private static final MethodHandle VIRTUAL_CHECKER = generateVirtualChecker();

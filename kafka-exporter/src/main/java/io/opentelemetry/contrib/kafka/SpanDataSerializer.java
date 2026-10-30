@@ -20,6 +20,7 @@ import java.util.Objects;
 import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.serialization.Serializer;
 
+/** Kafka {@link Serializer} that encodes spans as an {@link ExportTraceServiceRequest}. */
 public final class SpanDataSerializer implements Serializer<Collection<SpanData>> {
   @Override
   public byte[] serialize(String topic, Collection<SpanData> data) {

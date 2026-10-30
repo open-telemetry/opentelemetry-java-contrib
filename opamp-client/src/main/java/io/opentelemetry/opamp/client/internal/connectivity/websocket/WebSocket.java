@@ -7,6 +7,12 @@ package io.opentelemetry.opamp.client.internal.connectivity.websocket;
 
 import javax.annotation.Nullable;
 
+/**
+ * WebSocket connection abstraction.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public interface WebSocket {
   /**
    * Starts the websocket connection if it's not yet started or if it has been closed.
@@ -37,6 +43,7 @@ public interface WebSocket {
    */
   boolean send(byte[] request);
 
+  /** Receives events from a {@link WebSocket} connection. */
   interface Listener {
 
     /**

@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.stream.Stream;
 
+/** Loads the built-in and SPI-provided {@link MojoGoalExecutionHandler}s. */
 public class MojoGoalExecutionHandlerConfiguration {
 
   public static Map<MavenGoal, MojoGoalExecutionHandler> loadMojoGoalExecutionHandler(

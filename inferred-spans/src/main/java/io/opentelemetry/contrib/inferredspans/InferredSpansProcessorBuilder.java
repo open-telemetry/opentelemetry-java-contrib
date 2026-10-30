@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import javax.annotation.Nullable;
 
+/** Builder for {@link InferredSpansProcessor}. */
 @SuppressWarnings("CanIgnoreReturnValueSuggester")
 public class InferredSpansProcessorBuilder {
   private boolean enabled = true;

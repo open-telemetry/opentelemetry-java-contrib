@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
+/** Provides a {@link Resource} with Cloud Foundry attributes from {@code VCAP_APPLICATION}. */
 public final class CloudFoundryResource {
 
   private static final String ENV_VCAP_APPLICATION = "VCAP_APPLICATION";

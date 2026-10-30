@@ -21,6 +21,12 @@ import java.util.ArrayList;
 import java.util.List;
 import okio.ByteString;
 
+/**
+ * Maps between SDK {@link Attributes} and proto key-value lists.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public final class AttributesMapper {
 
   private static final AttributesMapper INSTANCE = new AttributesMapper();

@@ -29,6 +29,12 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Manages the readable and writable cache files within a storage folder.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public final class FolderManager implements Closeable {
   private final File folder;
   private final Clock clock;

@@ -51,6 +51,7 @@ public final class LogRecordToDiskExporter implements LogRecordExporter {
     return CompletableResultCode.ofSuccess();
   }
 
+  /** Builder for {@link LogRecordToDiskExporter}. */
   public static final class Builder {
     private final SignalStorage.LogRecord storage;
     private ExporterCallback<LogRecordData> callback = DEFAULT_CALLBACK;

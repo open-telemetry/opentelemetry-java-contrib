@@ -16,6 +16,7 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/** Collects IBM MQ queue metrics. */
 public final class QueueMetricsCollector implements Consumer<MetricsCollectorContext> {
 
   private static final Logger logger = LoggerFactory.getLogger(QueueMetricsCollector.class);

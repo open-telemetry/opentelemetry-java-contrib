@@ -32,6 +32,12 @@ import opamp.proto.ServerErrorResponse;
 import opamp.proto.ServerErrorResponseType;
 import opamp.proto.ServerToAgent;
 
+/**
+ * {@link RequestService} that sends requests to the server over HTTP.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public final class HttpRequestService implements RequestService {
   private final HttpSender requestSender;
   // must be a single threaded executor, the code in this class relies on requests being processed
