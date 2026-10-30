@@ -86,6 +86,8 @@ public class OkHttpWebSocket implements WebSocket {
     @Override
     public void onClosing(@Nonnull okhttp3.WebSocket webSocket, int code, @Nonnull String reason) {
       status.set(Status.CLOSING);
+      // Complete the close handshake so OkHttp can release the connection and call onClosed.
+      webSocket.close(1000, null);
       delegate.onClosing();
     }
 
