@@ -79,8 +79,11 @@ public final class JmxScraper {
       // we rely on the config customizer to be executed first to get effective config.
       BiFunction<Resource, ConfigProperties, Resource> resourceCustomizer =
           (resource, configProperties) -> {
+            if (isServiceInstanceIdConfigured(configProperties)) {
+              return resource;
+            }
             UUID instanceId = getRemoteServiceInstanceId(configCustomizer.getConnectorBuilder());
-            if (resource.getAttribute(SERVICE_INSTANCE_ID) != null || instanceId == null) {
+            if (instanceId == null) {
               return resource;
             }
             logger.log(INFO, "remote service instance ID: " + instanceId);
@@ -166,6 +169,13 @@ public final class JmxScraper {
     } catch (IOException e) {
       return null;
     }
+  }
+
+  // The SDK sets a random service.instance.id by default, so the resource attribute can't be used
+  // to detect whether the user explicitly provided one.
+  // package private for testing
+  static boolean isServiceInstanceIdConfigured(ConfigProperties config) {
+    return config.getMap("otel.resource.attributes").containsKey(SERVICE_INSTANCE_ID.getKey());
   }
 
   // package private for testing
