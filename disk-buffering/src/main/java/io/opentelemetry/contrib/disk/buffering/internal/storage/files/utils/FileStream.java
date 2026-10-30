@@ -12,6 +12,12 @@ import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * {@link InputStream} backed by a {@link RandomAccessFile}.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public class FileStream extends InputStream {
   private final RandomAccessFile file;
   private final FileChannel channel;

@@ -13,6 +13,12 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collection;
 
+/**
+ * Serializes {@link LogRecordData} items into protobuf-encoded logs.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public final class LogRecordDataSerializer implements SignalSerializer<LogRecordData> {
 
   private final LowAllocationLogsRequestMarshaler marshaler =

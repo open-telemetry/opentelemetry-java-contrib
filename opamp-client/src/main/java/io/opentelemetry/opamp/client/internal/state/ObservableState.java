@@ -37,6 +37,7 @@ public abstract class ObservableState<T> implements State<T> {
     }
   }
 
+  /** Listener notified when an {@link ObservableState} has new data. */
   public interface Listener {
     /**
      * Notifies that there's new data available for this state, so that the client includes it in

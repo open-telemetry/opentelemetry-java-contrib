@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/** Resource provider for Azure Functions. */
 public final class AzureFunctionsResourceProvider extends CloudResourceProvider {
 
   private static final Logger logger =

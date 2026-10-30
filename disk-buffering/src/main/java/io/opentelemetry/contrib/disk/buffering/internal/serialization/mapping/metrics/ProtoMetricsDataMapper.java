@@ -17,6 +17,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Maps between {@link MetricData} items and {@link ExportMetricsServiceRequest} protos.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public final class ProtoMetricsDataMapper
     extends BaseProtoSignalsDataMapper<
         MetricData, Metric, ExportMetricsServiceRequest, ResourceMetrics, ScopeMetrics> {

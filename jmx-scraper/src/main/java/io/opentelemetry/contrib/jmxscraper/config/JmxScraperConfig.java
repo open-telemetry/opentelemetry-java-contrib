@@ -72,6 +72,7 @@ public final class JmxScraperConfig {
   @Nullable private String remoteProfile;
   private boolean registrySsl;
 
+  /** Source of metrics definitions to use for the configured target systems. */
   public enum TargetSystemSource {
     AUTO,
     INSTRUMENTATION,

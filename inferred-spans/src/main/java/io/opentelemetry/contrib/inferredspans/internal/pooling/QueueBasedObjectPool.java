@@ -8,6 +8,12 @@ package io.opentelemetry.contrib.inferredspans.internal.pooling;
 import java.util.Queue;
 import javax.annotation.Nullable;
 
+/**
+ * {@link ObjectPool} backed by a {@link Queue}.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public class QueueBasedObjectPool<T> extends AbstractObjectPool<T> {
 
   private final Queue<T> queue;

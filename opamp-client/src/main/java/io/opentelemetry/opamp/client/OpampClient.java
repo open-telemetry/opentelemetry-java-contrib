@@ -13,6 +13,7 @@ import opamp.proto.ComponentHealth;
 import opamp.proto.RemoteConfigStatus;
 import opamp.proto.ServerErrorResponse;
 
+/** Client for the OpAMP protocol. */
 public interface OpampClient extends Closeable {
 
   static OpampClientBuilder builder() {
@@ -43,6 +44,7 @@ public interface OpampClient extends Closeable {
    */
   void setHealth(ComponentHealth health);
 
+  /** Callbacks invoked by the {@link OpampClient} on connection and server message events. */
   interface Callbacks {
     /**
      * Called when the connection is successfully established to the Server. For WebSocket clients

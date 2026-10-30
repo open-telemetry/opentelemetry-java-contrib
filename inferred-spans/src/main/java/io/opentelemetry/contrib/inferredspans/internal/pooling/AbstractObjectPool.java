@@ -8,6 +8,12 @@ package io.opentelemetry.contrib.inferredspans.internal.pooling;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nullable;
 
+/**
+ * Base {@link ObjectPool} that allocates a new instance when no pooled instance is available.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public abstract class AbstractObjectPool<T> implements ObjectPool<T> {
 
   protected final Allocator<? extends T> allocator;

@@ -14,6 +14,7 @@ import io.opentelemetry.sdk.trace.samplers.Sampler;
 import java.util.ArrayList;
 import java.util.List;
 
+/** Builder for {@link RuleBasedRoutingSampler}. */
 public final class RuleBasedRoutingSamplerBuilder {
   private final List<SamplingRule> rules = new ArrayList<>();
   private final SpanKind kind;

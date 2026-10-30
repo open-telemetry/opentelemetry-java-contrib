@@ -11,6 +11,7 @@ import io.opentelemetry.sdk.autoconfigure.spi.internal.ComponentProvider;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 import java.util.logging.Logger;
 
+/** Declarative configuration {@link ComponentProvider} for the inferred spans processor. */
 @AutoService(ComponentProvider.class)
 public class InferredSpansSpanProcessorProvider implements ComponentProvider {
 

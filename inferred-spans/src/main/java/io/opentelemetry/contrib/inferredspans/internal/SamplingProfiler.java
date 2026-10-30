@@ -860,6 +860,7 @@ public class SamplingProfiler implements Runnable {
     return clock;
   }
 
+  /** A stack trace sample recorded for a thread at a point in time. */
   public static class StackTraceEvent implements Comparable<StackTraceEvent> {
     private final long nanoTime;
     private final long stackTraceId;

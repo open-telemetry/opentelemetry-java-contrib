@@ -11,6 +11,7 @@ import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.ConditionalResourceProvider;
 import io.opentelemetry.sdk.resources.Resource;
 
+/** Base class for resource providers that apply only when no cloud provider is already set. */
 public abstract class CloudResourceProvider implements ConditionalResourceProvider {
 
   @Override

@@ -7,6 +7,12 @@ package io.opentelemetry.contrib.inferredspans.internal.semconv;
 
 import io.opentelemetry.api.common.AttributeKey;
 
+/**
+ * Attribute keys used on inferred spans.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public class Attributes {
 
   private Attributes() {}

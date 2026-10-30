@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.sampler.consistent56;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 
+/** Utility methods for consistent sampling thresholds and random values. */
 public final class ConsistentSamplingUtil {
 
   private static final int RANDOM_VALUE_BITS = 56;

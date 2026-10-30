@@ -8,6 +8,7 @@ package io.opentelemetry.contrib.dynamic.policy;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.util.Objects;
 
+/** Identity of a telemetry policy, consisting of an id and a name. */
 public final class TelemetryPolicyIdentity {
   private final String id;
   private final String name;

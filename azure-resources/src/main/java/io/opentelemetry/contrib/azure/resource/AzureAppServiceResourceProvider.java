@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nullable;
 
+/** Resource provider for Azure App Service. */
 public final class AzureAppServiceResourceProvider extends CloudResourceProvider {
 
   static final AttributeKey<String> AZURE_APP_SERVICE_STAMP_RESOURCE_ATTRIBUTE =

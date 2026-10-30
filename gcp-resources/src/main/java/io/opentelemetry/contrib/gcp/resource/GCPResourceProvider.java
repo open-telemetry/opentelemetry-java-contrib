@@ -60,6 +60,7 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/** Resource provider for the detected Google Cloud Platform environment. */
 @SuppressWarnings("MemberName")
 public class GCPResourceProvider implements ConditionalResourceProvider {
 

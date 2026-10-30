@@ -29,6 +29,7 @@ public interface State<T> extends Supplier<T> {
     return Objects.requireNonNull(get());
   }
 
+  /** In-memory state for the instance UID field. */
   final class InstanceUid extends InMemoryState<byte[]> {
     public InstanceUid(byte[] initialValue) {
       super(initialValue);
@@ -40,6 +41,7 @@ public interface State<T> extends Supplier<T> {
     }
   }
 
+  /** In-memory state for the sequence number field. */
   final class SequenceNum extends InMemoryState<Long> {
     public SequenceNum(Long initialValue) {
       super(initialValue);
@@ -55,6 +57,7 @@ public interface State<T> extends Supplier<T> {
     }
   }
 
+  /** In-memory state for the agent description field. */
   final class AgentDescription extends InMemoryState<opamp.proto.AgentDescription> {
     public AgentDescription(opamp.proto.AgentDescription initialValue) {
       super(initialValue);
@@ -66,6 +69,7 @@ public interface State<T> extends Supplier<T> {
     }
   }
 
+  /** In-memory state for the capabilities field. */
   final class Capabilities extends InMemoryState<Long> {
     public Capabilities(Long initialValue) {
       super(initialValue);
@@ -77,6 +81,7 @@ public interface State<T> extends Supplier<T> {
     }
   }
 
+  /** In-memory state for the custom capabilities field. */
   final class CustomCapabilities extends InMemoryState<opamp.proto.CustomCapabilities> {
     public CustomCapabilities(@Nullable opamp.proto.CustomCapabilities initialValue) {
       super(initialValue);
@@ -88,6 +93,7 @@ public interface State<T> extends Supplier<T> {
     }
   }
 
+  /** In-memory state for the health field. */
   final class Health extends InMemoryState<ComponentHealth> {
     public Health(@Nullable ComponentHealth initialValue) {
       super(initialValue);
@@ -99,6 +105,7 @@ public interface State<T> extends Supplier<T> {
     }
   }
 
+  /** In-memory state for the remote config status field. */
   final class RemoteConfigStatus extends InMemoryState<opamp.proto.RemoteConfigStatus> {
 
     public RemoteConfigStatus(opamp.proto.RemoteConfigStatus initialValue) {
@@ -111,6 +118,7 @@ public interface State<T> extends Supplier<T> {
     }
   }
 
+  /** In-memory state for the flags field. */
   final class Flags extends InMemoryState<Long> {
 
     public Flags(Long initialValue) {
@@ -123,6 +131,7 @@ public interface State<T> extends Supplier<T> {
     }
   }
 
+  /** Observable state for the effective config field. */
   abstract class EffectiveConfig extends ObservableState<opamp.proto.EffectiveConfig> {
     @Override
     public final Field getFieldType() {

@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/** Collects IBM MQ topic status metrics. */
 public final class TopicMetricsCollector implements Consumer<MetricsCollectorContext> {
   private static final Logger logger = LoggerFactory.getLogger(TopicMetricsCollector.class);
   private final InquireTStatusCmdCollector inquireTStatusCmdCollector;

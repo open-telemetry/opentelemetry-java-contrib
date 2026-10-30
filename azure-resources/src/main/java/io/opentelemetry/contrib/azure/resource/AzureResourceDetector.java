@@ -11,6 +11,7 @@ import io.opentelemetry.sdk.autoconfigure.spi.internal.ComponentProvider;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.resources.ResourceBuilder;
 
+/** Declarative configuration SPI implementation for Azure resource detection. */
 public final class AzureResourceDetector implements ComponentProvider {
 
   @Override

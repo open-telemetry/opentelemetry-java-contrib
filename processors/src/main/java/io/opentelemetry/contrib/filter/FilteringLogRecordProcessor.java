@@ -11,6 +11,7 @@ import io.opentelemetry.sdk.logs.ReadWriteLogRecord;
 import io.opentelemetry.sdk.logs.data.LogRecordData;
 import java.util.function.Predicate;
 
+/** {@link LogRecordProcessor} that forwards only log records matching a predicate to a delegate. */
 public final class FilteringLogRecordProcessor implements LogRecordProcessor {
 
   private final LogRecordProcessor delegate;

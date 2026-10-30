@@ -27,6 +27,7 @@ public abstract class MessageData {
     return new AutoValue_MessageData.Builder();
   }
 
+  /** Builder for {@link MessageData}. */
   @AutoValue.Builder
   public abstract static class Builder {
     public abstract Builder setRemoteConfig(AgentRemoteConfig remoteConfig);

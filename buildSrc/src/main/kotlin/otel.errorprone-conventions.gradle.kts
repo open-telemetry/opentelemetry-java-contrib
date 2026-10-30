@@ -55,6 +55,9 @@ tasks {
         // We don't depend on Guava so use normal splitting
         disable("StringSplitter")
 
+        // Suggests Guava's Preconditions, but we don't use Guava
+        disable("PreferPreconditions")
+
         // Prevents lazy initialization
         disable("InitializeInline")
 
@@ -80,6 +83,9 @@ tasks {
         disable("AddNullMarkedToPackageInfo")
 
         disable("ReferenceEquality")
+
+        // Markdown Javadoc requires Java 23+
+        disable("TraditionalJavadocToMarkdown")
 
         if (name.contains("Jmh") || name.contains("Test")) {
           // Allow underscore in test-type method names

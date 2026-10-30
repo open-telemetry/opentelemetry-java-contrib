@@ -10,6 +10,13 @@ import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.trace.ReadWriteSpan;
 
+/**
+ * Clock that translates {@link #nanoTime()} values to epoch timestamps anchored to span start
+ * times.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public class SpanAnchoredClock {
   private final WeakConcurrentMap<Span, Long> nanoTimeOffsetMap =
       new WeakConcurrentMap.WithInlinedExpunction<>();

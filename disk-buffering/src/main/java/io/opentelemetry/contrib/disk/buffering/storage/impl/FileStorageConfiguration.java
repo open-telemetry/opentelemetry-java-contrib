@@ -71,6 +71,7 @@ public abstract class FileStorageConfiguration {
         .setDiscardedFileListener((file, reason) -> {});
   }
 
+  /** Builder for {@link FileStorageConfiguration}. */
   @AutoValue.Builder
   public abstract static class Builder {
     public abstract Builder setMaxFileAgeForWriteMillis(long value);

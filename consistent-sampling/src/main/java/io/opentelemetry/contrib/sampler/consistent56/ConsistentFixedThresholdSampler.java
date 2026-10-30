@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.sampler.consistent56;
 
 import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.calculateThreshold;
 
+/** A consistent sampler that uses a fixed threshold. */
 public class ConsistentFixedThresholdSampler extends ConsistentThresholdSampler {
 
   private final long threshold;

@@ -11,6 +11,12 @@ import io.opentelemetry.sdk.trace.data.SpanData;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Deserializes protobuf-encoded spans into {@link SpanData} items.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public final class SpanDataDeserializer implements SignalDeserializer<SpanData> {
   private static final SpanDataDeserializer INSTANCE = new SpanDataDeserializer();
 

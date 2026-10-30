@@ -10,6 +10,12 @@ import io.opentelemetry.context.propagation.TextMapPropagator;
 import io.opentelemetry.contrib.awsxray.propagator.AwsXrayPropagator;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.ComponentProvider;
 
+/**
+ * Declarative configuration SPI implementation for {@link AwsXrayPropagator}.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public class AwsXrayComponentProvider implements ComponentProvider {
   @Override
   public Class<TextMapPropagator> getType() {

@@ -25,6 +25,12 @@ import io.opentelemetry.sdk.logs.data.LogRecordData;
 import io.opentelemetry.sdk.resources.Resource;
 import java.util.stream.Collectors;
 
+/**
+ * Maps between {@link LogRecordData} and proto {@link LogRecord} values.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public final class LogRecordDataMapper {
 
   private static final LogRecordDataMapper INSTANCE = new LogRecordDataMapper();

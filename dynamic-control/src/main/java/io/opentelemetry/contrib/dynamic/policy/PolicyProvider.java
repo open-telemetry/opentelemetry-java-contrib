@@ -9,6 +9,7 @@ import java.io.Closeable;
 import java.util.List;
 import java.util.function.Consumer;
 
+/** Source of telemetry policies. */
 public interface PolicyProvider {
   /**
    * Retrieves the current list of telemetry policies provided by this source.

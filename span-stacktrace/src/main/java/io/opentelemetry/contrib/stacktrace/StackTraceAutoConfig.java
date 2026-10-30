@@ -24,6 +24,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 
+/** Autoconfiguration customizer that adds the {@link StackTraceSpanProcessor}. */
 @AutoService(AutoConfigurationCustomizerProvider.class)
 public class StackTraceAutoConfig implements AutoConfigurationCustomizerProvider {
 

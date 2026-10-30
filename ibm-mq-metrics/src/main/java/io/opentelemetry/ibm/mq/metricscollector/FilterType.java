@@ -5,6 +5,7 @@
 
 package io.opentelemetry.ibm.mq.metricscollector;
 
+/** Types of name matching used by exclude filters. */
 public enum FilterType {
   STARTSWITH,
   EQUALS,

@@ -46,6 +46,7 @@ import javax.management.ObjectName;
 import javax.management.remote.JMXConnectionNotification;
 import javax.management.remote.JMXConnector;
 
+/** Main entry point that connects to a remote JMX endpoint and collects JMX metrics. */
 public final class JmxScraper {
   private static final Logger logger = Logger.getLogger(JmxScraper.class.getName());
 

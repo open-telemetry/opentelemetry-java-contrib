@@ -5,6 +5,12 @@
 
 package io.opentelemetry.opamp.client.internal.connectivity.http;
 
+/**
+ * Exception that carries an HTTP error code and message.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public class HttpErrorException extends Exception {
   private final int errorCode;
 

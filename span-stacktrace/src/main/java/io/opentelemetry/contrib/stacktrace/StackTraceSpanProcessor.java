@@ -14,6 +14,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.function.Predicate;
 
+/** Span processor that captures the stack trace of spans exceeding a minimum duration. */
 public class StackTraceSpanProcessor implements ExtendedSpanProcessor {
 
   private final long minSpanDurationNanos;
