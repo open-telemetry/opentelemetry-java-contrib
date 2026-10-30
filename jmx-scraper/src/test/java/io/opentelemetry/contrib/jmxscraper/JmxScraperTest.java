@@ -42,6 +42,22 @@ class JmxScraperTest {
     testInvalidArguments("-config", "missing.properties");
   }
 
+  @Test
+  void serviceInstanceIdConfigured() {
+    Properties properties = new Properties();
+    assertThat(JmxScraper.isServiceInstanceIdConfigured(TestUtil.configProperties(properties)))
+        .isFalse();
+
+    properties.setProperty("otel.resource.attributes", "service.name=my-service");
+    assertThat(JmxScraper.isServiceInstanceIdConfigured(TestUtil.configProperties(properties)))
+        .isFalse();
+
+    properties.setProperty(
+        "otel.resource.attributes", "service.name=my-service,service.instance.id=my-instance");
+    assertThat(JmxScraper.isServiceInstanceIdConfigured(TestUtil.configProperties(properties)))
+        .isTrue();
+  }
+
   private static void testInvalidArguments(String... args) {
     assertThatThrownBy(() -> JmxScraper.argsToConfig(asList(args)))
         .isInstanceOf(InvalidArgumentException.class);
