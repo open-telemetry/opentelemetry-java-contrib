@@ -5,7 +5,6 @@ plugins {
   id("otel.publish-conventions")
   id("otel.animalsniffer-conventions")
   id("com.gradleup.shadow")
-  id("me.champeau.jmh") version "0.7.3"
   id("com.squareup.wire") version "7.1.0"
 }
 
@@ -23,14 +22,6 @@ dependencies {
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
 
   protos("io.opentelemetry.proto:opentelemetry-proto:1.11.1-alpha@jar")
-}
-
-jmh {
-  warmupIterations.set(0)
-  fork.set(2)
-  iterations.set(5)
-  timeOnIteration.set("5s")
-  timeUnit.set("ms")
 }
 
 val setupProtos = tasks.register<Sync>("setupProtos") {
