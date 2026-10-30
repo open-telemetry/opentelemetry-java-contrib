@@ -47,7 +47,6 @@ class AwsXrayPropagatorTest {
           return carrier.get(key);
         }
       };
-  protected static final AwsXrayPropagator X_RAY = AwsXrayPropagator.getInstance();
   protected final TextMapPropagator subject = propagator();
 
   TextMapPropagator propagator() {
