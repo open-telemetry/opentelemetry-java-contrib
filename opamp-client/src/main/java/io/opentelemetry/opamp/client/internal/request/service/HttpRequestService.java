@@ -113,6 +113,13 @@ public final class HttpRequestService implements RequestService {
   public void stop() {
     if (isRunning.compareAndSet(true, false)) {
       hasStopped.set(true);
+
+      ScheduledFuture<?> scheduledFuture = scheduledTask.getAndSet(null);
+      if (scheduledFuture != null) {
+        scheduledFuture.cancel(false);
+      }
+
+      executorService.execute(this::doSendRequest);
       executorService.shutdown();
     }
   }
@@ -125,8 +132,7 @@ public final class HttpRequestService implements RequestService {
 
     executorService.execute(
         () -> {
-          // cancel the already scheduled task, a new one is created after current request is
-          // processed
+          // Cancel the already scheduled task.
           ScheduledFuture<?> scheduledFuture = scheduledTask.get();
           if (scheduledFuture != null) {
             scheduledFuture.cancel(false);
@@ -136,6 +142,10 @@ public final class HttpRequestService implements RequestService {
   }
 
   private void sendAndScheduleNext() {
+    if (!isRunning.get()) {
+      return;
+    }
+
     doSendRequest();
     scheduleNextExecution();
   }

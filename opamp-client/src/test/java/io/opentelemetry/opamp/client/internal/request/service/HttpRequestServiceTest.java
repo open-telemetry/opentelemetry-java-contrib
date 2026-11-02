@@ -6,10 +6,13 @@
 package io.opentelemetry.opamp.client.internal.request.service;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -35,6 +38,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Queue;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.atomic.AtomicInteger;
 import opamp.proto.AgentToServer;
 import opamp.proto.RetryInfo;
 import opamp.proto.ServerErrorResponse;
@@ -81,6 +88,15 @@ class HttpRequestServiceTest {
 
   @AfterEach
   void tearDown() {
+    HttpSender.Response response = mock();
+    lenient().when(response.statusCode()).thenReturn(200);
+    lenient()
+        .when(response.bodyInputStream())
+        .thenReturn(
+            new ByteArrayInputStream(
+                new ServerToAgent.Builder().build().encodeByteString().toByteArray()));
+
+    requestSender.enqueueResponse(response);
     httpRequestService.stop();
     verify(scheduler.getMockService()).shutdown();
   }
@@ -102,6 +118,84 @@ class HttpRequestServiceTest {
     httpRequestService.sendRequest();
 
     assertThat(scheduler.getScheduledTasks()).hasSize(1);
+  }
+
+  @Test
+  void verifyStop_sendsFinalRequestAndCancelsScheduledPoll() {
+    TestScheduler.Task scheduledPoll = assertAndGetSingleCurrentTask();
+    assertThat(scheduledPoll.getDelay()).isEqualTo(REGULAR_DELAY);
+
+    requestSender.enqueueResponse(createSuccessfulResponse(new ServerToAgent.Builder().build()));
+
+    httpRequestService.stop();
+
+    verifySingleRequestSent();
+    assertThat(scheduler.getScheduledTasks()).isEmpty();
+  }
+
+  @Test
+  void verifyStop_pendingPollDoesNotSendRequest() {
+    TestScheduler.Task scheduledPoll = assertAndGetSingleCurrentTask();
+
+    requestSender.enqueueResponse(createSuccessfulResponse(new ServerToAgent.Builder().build()));
+
+    httpRequestService.stop();
+
+    verifySingleRequestSent();
+
+    // Simulate a poll that was already due when stop() was called.
+    scheduledPoll.run();
+
+    requestSender.getRequests(0);
+  }
+
+  @Test
+  void verifyStop_sendsFinalRequestAfterInFlightRequest() throws Exception {
+    ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+    CountDownLatch firstRequestStarted = new CountDownLatch(1);
+    CountDownLatch releaseFirstRequest = new CountDownLatch(1);
+    AtomicInteger requestCount = new AtomicInteger();
+
+    HttpSender sender = mock(HttpSender.class);
+
+    when(sender.send(any(), anyInt()))
+        .thenAnswer(
+            invocation -> {
+              int count = requestCount.incrementAndGet();
+
+              if (count == 1) {
+                firstRequestStarted.countDown();
+                if (!releaseFirstRequest.await(5, SECONDS)) {
+                  throw new IOException("First request timed out");
+                }
+              }
+
+              return createSuccessfulResponse(new ServerToAgent.Builder().build());
+            });
+
+    HttpRequestService service =
+        new HttpRequestService(
+            sender,
+            executor,
+            periodicRequestDelay,
+            periodicRetryDelay,
+            RetryAfterParser.getInstance());
+
+    try {
+      service.start(callback, this::createRequest);
+      service.sendRequest();
+
+      assertThat(firstRequestStarted.await(5, SECONDS)).isTrue();
+
+      service.stop();
+      releaseFirstRequest.countDown();
+
+      assertThat(executor.awaitTermination(5, SECONDS)).isTrue();
+      assertThat(requestCount.get()).isEqualTo(2);
+    } finally {
+      releaseFirstRequest.countDown();
+      executor.shutdownNow();
+    }
   }
 
   @Test
