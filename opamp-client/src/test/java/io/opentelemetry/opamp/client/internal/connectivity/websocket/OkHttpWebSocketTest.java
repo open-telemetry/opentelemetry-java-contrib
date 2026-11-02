@@ -10,7 +10,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -21,6 +20,8 @@ import okio.ByteString;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -103,16 +104,26 @@ class OkHttpWebSocketTest {
     assertThat(requestCaptor.getValue().url().host()).isEqualTo("some.server");
   }
 
-  @Test
-  void validateOnClosing() {
+  @ParameterizedTest
+  @ValueSource(ints = {1000, 1001, 1005, 4000})
+  void validateOnClosing(int code) {
     openAndCaptureArguments();
 
     callOnOpen();
-    callOnClosing();
+    listenerCaptor.getValue().onClosing(okHttpWebSocket, code, "server closing");
+    verify(okHttpWebSocket).close(1000, null);
+    verify(listener).onClosing();
 
     // Validate calling after onClosing
     webSocket.close(1, null);
-    verifyNoInteractions(okHttpWebSocket);
+    assertThat(webSocket.send(new byte[1])).isFalse();
+    verifyNoMoreInteractions(okHttpWebSocket);
+    webSocket.open(listener);
+    verifyNoMoreInteractions(client);
+
+    callOnClosed();
+    clearInvocations(client);
+    openAndCaptureArguments();
   }
 
   @Test
@@ -132,11 +143,6 @@ class OkHttpWebSocketTest {
   private void callOnClosed() {
     listenerCaptor.getValue().onClosed(mock(), 0, "");
     verify(listener).onClosed();
-  }
-
-  private void callOnClosing() {
-    listenerCaptor.getValue().onClosing(mock(), 0, "");
-    verify(listener).onClosing();
   }
 
   private void callOnFailure() {
