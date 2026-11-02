@@ -25,7 +25,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.annotation.concurrent.GuardedBy;
 import opamp.proto.ServerErrorResponse;
 import opamp.proto.ServerErrorResponseType;
 import opamp.proto.ServerToAgent;
@@ -49,10 +48,7 @@ public final class WebSocketRequestService implements RequestService, WebSocket.
   /** Defined <a href="https://datatracker.ietf.org/doc/html/rfc6455#section-7.4.1">here</a>. */
   private static final int WEBSOCKET_NORMAL_CLOSURE_CODE = 1000;
 
-  @GuardedBy("hasPendingRequestLock")
-  private boolean hasPendingRequest = false;
-
-  private final Object hasPendingRequestLock = new Object();
+  private final Object sendLock = new Object();
   @Nullable private Callback callback;
   @Nullable private Supplier<Request> requestSupplier;
 
@@ -120,22 +116,20 @@ public final class WebSocketRequestService implements RequestService, WebSocket.
 
   private void doSendRequest() {
     try {
-      synchronized (hasPendingRequestLock) {
-        if (!trySendRequest()) {
-          hasPendingRequest = true;
-        }
+      synchronized (sendLock) {
+        trySendRequest();
       }
     } catch (IOException e) {
       getCallback().onRequestFailed(e);
     }
   }
 
-  private boolean trySendRequest() throws IOException {
+  private void trySendRequest() throws IOException {
     try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
       ProtoAdapter.UINT64.encode(outputStream, 0L);
       byte[] payload = getRequest().getAgentToServer().encode();
       outputStream.write(payload);
-      return webSocket.send(outputStream.toByteArray());
+      webSocket.send(outputStream.toByteArray());
     }
   }
 
@@ -161,13 +155,18 @@ public final class WebSocketRequestService implements RequestService, WebSocket.
 
   @Override
   public void onOpen() {
+    if (hasStopped.get()) {
+      return;
+    }
     connectionStatus.success();
-    getCallback().onConnectionSuccess();
-    synchronized (hasPendingRequestLock) {
-      if (hasPendingRequest) {
-        hasPendingRequest = false;
-        sendRequest();
+    synchronized (sendLock) {
+      if (!hasStopped.get()) {
+        // Every new connection needs a status report, even without pending state changes.
+        doSendRequest();
       }
+    }
+    if (!hasStopped.get()) {
+      getCallback().onConnectionSuccess();
     }
   }
 
