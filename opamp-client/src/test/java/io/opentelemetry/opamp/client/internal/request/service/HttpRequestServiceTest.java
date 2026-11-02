@@ -134,6 +134,22 @@ class HttpRequestServiceTest {
   }
 
   @Test
+  void verifyStop_pendingPollDoesNotSendRequest() {
+    TestScheduler.Task scheduledPoll = assertAndGetSingleCurrentTask();
+
+    requestSender.enqueueResponse(createSuccessfulResponse(new ServerToAgent.Builder().build()));
+
+    httpRequestService.stop();
+
+    verifySingleRequestSent();
+
+    // Simulate a poll that was already due when stop() was called.
+    scheduledPoll.run();
+
+    requestSender.getRequests(0);
+  }
+
+  @Test
   void verifyStop_sendsFinalRequestAfterInFlightRequest() throws Exception {
     ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     CountDownLatch firstRequestStarted = new CountDownLatch(1);

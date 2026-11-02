@@ -20,7 +20,6 @@ import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Executors;
-import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -131,22 +130,15 @@ public final class HttpRequestService implements RequestService {
       throw new IllegalStateException("HttpRequestService is not running");
     }
 
-    try {
-      executorService.execute(
-          () -> {
-            ScheduledFuture<?> scheduledFuture = scheduledTask.get();
-            if (scheduledFuture != null) {
-              scheduledFuture.cancel(false);
-            }
-            sendAndScheduleNext();
-          });
-    } catch (RejectedExecutionException e) {
-      if (isRunning.get()) {
-        throw e;
-      }
-      // Shutdown raced with request submission; the final request
-      // has already been queued by stop().
-    }
+    executorService.execute(
+        () -> {
+          // Cancel the already scheduled task.
+          ScheduledFuture<?> scheduledFuture = scheduledTask.get();
+          if (scheduledFuture != null) {
+            scheduledFuture.cancel(false);
+          }
+          sendAndScheduleNext();
+        });
   }
 
   private void sendAndScheduleNext() {
@@ -159,28 +151,11 @@ public final class HttpRequestService implements RequestService {
   }
 
   private void scheduleNextExecution() {
-    if (!isRunning.get()) {
-      return;
-    }
-
-    try {
-      ScheduledFuture<?> future =
-          executorService.schedule(
-              this::sendAndScheduleNext,
-              connectionStatus.getNextDelay().toNanos(),
-              TimeUnit.NANOSECONDS);
-
-      scheduledTask.set(future);
-
-      if (!isRunning.get()) {
-        future.cancel(false);
-        scheduledTask.compareAndSet(future, null);
-      }
-    } catch (RejectedExecutionException e) {
-      if (isRunning.get()) {
-        throw e;
-      }
-    }
+    scheduledTask.set(
+        executorService.schedule(
+            this::sendAndScheduleNext,
+            connectionStatus.getNextDelay().toNanos(),
+            TimeUnit.NANOSECONDS));
   }
 
   private void doSendRequest() {
