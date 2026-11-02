@@ -15,6 +15,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import io.opentelemetry.opamp.client.OpampClient;
+import io.opentelemetry.opamp.client.OpampClientBuilder;
 import io.opentelemetry.opamp.client.internal.connectivity.http.OkHttpSender;
 import io.opentelemetry.opamp.client.internal.request.Request;
 import io.opentelemetry.opamp.client.internal.request.service.HttpRequestService;
@@ -64,6 +65,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -234,6 +237,42 @@ class OpampClientImplTest {
 
     assertThat(getAgentToServerMessage(takeRequest()).custom_capabilities.capabilities)
         .containsExactlyInAnyOrder("com.example.pause", "com.example.discovery");
+  }
+
+  @ParameterizedTest
+  @CsvSource({"false, false", "true, false", "false, true", "true, true"})
+  void builderReportsStatusOnEveryMessage(
+      boolean enableRemoteConfig, boolean enableOtherCapabilities) {
+    OpampClientBuilder builder = OpampClient.builder().setRequestService(requestService);
+    long expectedCapabilities = AgentCapabilities.AgentCapabilities_ReportsStatus.getValue();
+    if (enableRemoteConfig) {
+      builder.enableRemoteConfig();
+      expectedCapabilities |=
+          AgentCapabilities.AgentCapabilities_AcceptsRemoteConfig.getValue()
+              | AgentCapabilities.AgentCapabilities_ReportsRemoteConfig.getValue();
+    }
+    if (enableOtherCapabilities) {
+      builder.enableEffectiveConfigReporting().enableHealthReporting(initialHealth);
+      expectedCapabilities |=
+          AgentCapabilities.AgentCapabilities_ReportsEffectiveConfig.getValue()
+              | AgentCapabilities.AgentCapabilities_ReportsHealth.getValue();
+    }
+
+    ServerToAgent response = new ServerToAgent.Builder().build();
+    enqueueServerToAgentResponse(response);
+    callbacks = spy(new TestCallbacks());
+    client = (OpampClientImpl) builder.build(callbacks);
+    assertThat(getAgentToServerMessage(takeRequest()).capabilities).isEqualTo(expectedCapabilities);
+
+    enqueueServerToAgentResponse(response);
+    requestService.sendRequest();
+    assertThat(getAgentToServerMessage(takeRequest()).capabilities).isEqualTo(expectedCapabilities);
+
+    enqueueServerToAgentResponse(response);
+    client.close();
+    AgentToServer disconnect = getAgentToServerMessage(takeRequest());
+    assertThat(disconnect.agent_disconnect).isNotNull();
+    assertThat(disconnect.capabilities).isEqualTo(expectedCapabilities);
   }
 
   @Test
