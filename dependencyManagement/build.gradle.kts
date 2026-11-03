@@ -18,7 +18,7 @@ dependencies {
   api(platform("com.fasterxml.jackson:jackson-bom:2.22.4"))
   api(platform("com.google.protobuf:protobuf-bom:4.36.2"))
   api(platform("com.squareup.okhttp3:okhttp-bom:5.5.1"))
-  api(platform("com.google.guava:guava-bom:33.7.2-jre"))
+  api(platform("com.google.guava:guava-bom:33.8.0-jre"))
 
   constraints {
     api("io.opentelemetry.semconv:opentelemetry-semconv:${semconvVersion}")
@@ -59,7 +59,7 @@ dependencies {
     // transitive deps of kafka-clients, pinned for CVE fixes (see kafka-exporter/build.gradle.kts)
     // remove once kafka-clients depends on fixed versions
     api("at.yawk.lz4:lz4-java:1.12.1")
-    api("com.github.luben:zstd-jni:1.5.7-24")
+    api("com.github.luben:zstd-jni:1.5.7-25")
     api("org.xerial.snappy:snappy-java:1.1.10.12")
     api("org.testcontainers:testcontainers-kafka:2.0.5")
     api("org.jctools:jctools-core:4.0.7")
