@@ -107,7 +107,14 @@ public final class ReadableFile implements FileOperations {
     }
   }
 
+  /**
+   * Removes the last item returned by {@link #readNext()}. Does nothing if the file is closed, as
+   * it can be closed and discarded while its last item is being processed.
+   */
   public synchronized void removeTopItem() throws IOException {
+    if (isClosed.get()) {
+      return;
+    }
     fileStream.truncateTop();
     if (fileStream.size() == 0) {
       clear();

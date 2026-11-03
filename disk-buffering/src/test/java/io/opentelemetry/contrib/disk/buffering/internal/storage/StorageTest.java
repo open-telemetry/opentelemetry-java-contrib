@@ -199,6 +199,33 @@ class StorageTest {
   }
 
   @Test
+  void whenWritePurgesFileBeingRead_deleteIsIgnored_andNextReadRecovers() throws IOException {
+    long firstFileWriteTime = 1000;
+    currentTimeMillis.set(firstFileWriteTime);
+    assertThat(write(Collections.singletonList(FIRST_LOG_RECORD))).isTrue();
+
+    currentTimeMillis.set(firstFileWriteTime + MIN_FILE_AGE_FOR_READ_MILLIS);
+    ReadableResult<LogRecordData> result = storage.readNext(DESERIALIZER);
+    assertThat(result).isNotNull();
+    assertThat(result.getContent()).containsExactly(FIRST_LOG_RECORD);
+
+    // A write while the result is still open purges the expired file that is being read.
+    long secondFileWriteTime = firstFileWriteTime + MAX_FILE_AGE_FOR_READ_MILLIS + 1;
+    currentTimeMillis.set(secondFileWriteTime);
+    assertThat(write(Collections.singletonList(SECOND_LOG_RECORD))).isTrue();
+    assertThat(destinationDir.list()).containsExactly(secondFileWriteTime + ".tmp");
+
+    result.delete();
+    result.close();
+
+    currentTimeMillis.set(secondFileWriteTime + MIN_FILE_AGE_FOR_READ_MILLIS);
+    ReadableResult<LogRecordData> result2 = storage.readNext(DESERIALIZER);
+    assertThat(result2).isNotNull();
+    assertThat(result2.getContent()).containsExactly(SECOND_LOG_RECORD);
+    result2.close();
+  }
+
+  @Test
   void whenReadingMultipleFilesWithoutDeleting_advancesCorrectly() throws IOException {
     long firstFileWriteTime = 1000;
     long secondFileWriteTime = firstFileWriteTime + MAX_FILE_AGE_FOR_WRITE_MILLIS + 1;
