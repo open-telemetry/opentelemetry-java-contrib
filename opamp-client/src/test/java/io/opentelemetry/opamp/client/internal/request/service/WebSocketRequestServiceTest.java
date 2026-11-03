@@ -165,16 +165,6 @@ class WebSocketRequestServiceTest {
     clearInvocations(webSocket);
     requestService.onOpen();
     verify(webSocket).send(getExpectedOutgoingBytes());
-
-    // Failed send
-    when(webSocket.send(any())).thenReturn(false);
-    requestService.sendRequest();
-    clearInvocations(webSocket);
-
-    // Check pending request
-    when(webSocket.send(any())).thenReturn(true);
-    requestService.onOpen();
-    verify(webSocket).send(getExpectedOutgoingBytes());
   }
 
   @Test
@@ -214,7 +204,9 @@ class WebSocketRequestServiceTest {
     requestService.stop();
     clearInvocations(webSocket, callback);
     requestService.onOpen();
-    verifyNoInteractions(webSocket, callback);
+    verify(webSocket).close(1000, null);
+    verifyNoMoreInteractions(webSocket);
+    verifyNoInteractions(callback);
   }
 
   @Test

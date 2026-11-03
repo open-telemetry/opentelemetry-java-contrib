@@ -156,6 +156,7 @@ public final class WebSocketRequestService implements RequestService, WebSocket.
   @Override
   public void onOpen() {
     if (hasStopped.get()) {
+      webSocket.close(WEBSOCKET_NORMAL_CLOSURE_CODE, null);
       return;
     }
     connectionStatus.success();
