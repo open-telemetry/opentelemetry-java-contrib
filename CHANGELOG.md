@@ -26,6 +26,9 @@
 
 - Reconnect after the server closes the WebSocket.
   ([#3192](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3192))
+- Send a status report whenever a new WebSocket connection is established, even when there are no
+  pending state changes.
+  ([#3195](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3195))
 - Include `ReportsStatus` in the default capabilities.
   ([#3189](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3189))
 - Send the agent disconnect message when the HTTP client shuts down.
