@@ -1,5 +1,5 @@
-val stableVersion = "1.62.0-SNAPSHOT"
-val alphaVersion = "1.62.0-alpha-SNAPSHOT"
+val stableVersion = "1.62.0"
+val alphaVersion = "1.62.0-alpha"
 val apidiffBaselineVersion = "1.61.0"
 extra["tagVersion"] = "v$stableVersion"
 
