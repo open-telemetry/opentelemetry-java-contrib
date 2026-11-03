@@ -4,8 +4,35 @@
 
 ### AWS Lambda resource detector
 
-- Read `cloud.account.id` from symlink created by the OTel Lambda Extension
+- Read `cloud.account.id` from symlink created by the OTel Lambda Extension.
   ([#2619](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2619))
+
+### Common Expression Language sampler
+
+- Require a patched Guava version to avoid a known vulnerability.
+  ([#3166](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3166))
+
+### Disk buffering
+
+- Ignore removal of a buffered item after its file has been closed.
+  ([#3172](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3172))
+
+### Kafka exporter
+
+- Override the vulnerable Snappy dependency pulled in by `kafka-clients`.
+  ([#3180](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3180))
+
+### OpAMP client
+
+- Reconnect after the server closes the WebSocket.
+  ([#3192](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3192))
+- Send a status report whenever a new WebSocket connection is established, even when there are no
+  pending state changes.
+  ([#3195](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3195))
+- Include `ReportsStatus` in the default capabilities.
+  ([#3189](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3189))
+- Send the agent disconnect message when the HTTP client shuts down.
+  ([#3194](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3194))
 
 ## Version 1.61.0 (2026-10-09)
 
