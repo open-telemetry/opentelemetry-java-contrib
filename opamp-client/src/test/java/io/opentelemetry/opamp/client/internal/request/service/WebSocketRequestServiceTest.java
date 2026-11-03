@@ -161,20 +161,52 @@ class WebSocketRequestServiceTest {
     requestService.sendRequest();
     verify(webSocket).send(getExpectedOutgoingBytes());
 
-    // Check there are no pending requests
+    // A new connection requires a status report even when nothing is pending.
     clearInvocations(webSocket);
     requestService.onOpen();
-    verifyNoInteractions(webSocket);
+    verify(webSocket).send(getExpectedOutgoingBytes());
+  }
 
-    // Failed send
-    when(webSocket.send(any())).thenReturn(false);
-    requestService.sendRequest();
-    clearInvocations(webSocket);
+  @Test
+  void verifyFirstReportPrecedesConnectionCallback() {
+    startService();
+    when(webSocket.send(any())).thenReturn(true);
 
-    // Check pending request
+    requestService.onOpen();
+
+    InOrder order = inOrder(webSocket, callback);
+    order.verify(webSocket).send(getExpectedOutgoingBytes());
+    order.verify(callback).onConnectionSuccess();
+  }
+
+  @Test
+  void verifyReconnectSendsStatusWithoutPendingChange() {
+    startService();
     when(webSocket.send(any())).thenReturn(true);
     requestService.onOpen();
     verify(webSocket).send(getExpectedOutgoingBytes());
+
+    // Reconnect with unchanged state and no pending application updates.
+    clearInvocations(webSocket);
+    requestService.onClosed();
+    assertThat(scheduler.getScheduledTasks()).hasSize(1);
+    scheduler.getScheduledTasks().get(0).run();
+    verify(webSocket).open(requestService);
+
+    clearInvocations(webSocket);
+    requestService.onOpen();
+    verify(webSocket).send(getExpectedOutgoingBytes());
+  }
+
+  @Test
+  void verifyLateOnOpenAfterStopDoesNotSend() {
+    startService();
+    requestService.stop();
+    clearInvocations(webSocket, callback);
+    requestService.onOpen();
+    verify(webSocket).close(1000, null);
+    verifyNoMoreInteractions(webSocket);
+    verifyNoInteractions(callback);
   }
 
   @Test
