@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## Version 1.62.0 (2026-11-03)
+
 ### AWS Lambda resource detector
 
 - Read `cloud.account.id` from symlink created by the OTel Lambda Extension.
