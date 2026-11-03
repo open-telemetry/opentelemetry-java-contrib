@@ -74,14 +74,13 @@ public final class KafkaSpanExporter implements SpanExporter {
                       }
                     }),
             executorService)
-        .whenComplete(
-            (ignore, exception) -> {
-              if (exception != null) {
-                logger.error(
-                    "Executor task failed while sending to Kafka topic {}", topicName, exception);
-                result.fail();
-              }
-            });
+        .whenComplete((ignore, exception) -> {
+          if (exception != null) {
+            logger.error(
+                "Executor task failed while sending to Kafka topic {}", topicName, exception);
+            result.fail();
+          }
+        });
     return result;
   }
 
@@ -89,19 +88,17 @@ public final class KafkaSpanExporter implements SpanExporter {
   public CompletableResultCode flush() {
     CompletableResultCode result = new CompletableResultCode();
     CompletableFuture.runAsync(producer::flush, executorService)
-        .handle(
-            (unused, exception) -> {
-              if (exception == null) {
-                result.succeed();
-              } else {
-                logger.error(
-                    String.format(
-                        "Error while performing the flush operation on topic %s", topicName),
-                    exception);
-                result.fail();
-              }
-              return true;
-            });
+        .handle((unused, exception) -> {
+          if (exception == null) {
+            result.succeed();
+          } else {
+            logger.error(
+                String.format("Error while performing the flush operation on topic %s", topicName),
+                exception);
+            result.fail();
+          }
+          return true;
+        });
     return result;
   }
 

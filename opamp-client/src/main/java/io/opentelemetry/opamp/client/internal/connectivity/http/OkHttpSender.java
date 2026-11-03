@@ -57,14 +57,13 @@ public final class OkHttpSender implements HttpSender {
     AtomicReference<IOException> errorRef = new AtomicReference<>();
     // By suppressing instrumentations, we prevent automatic instrumentations for the okhttp request
     // that polls the opamp server.
-    InstrumentationUtil.suppressInstrumentation(
-        () -> {
-          try {
-            responseRef.set(doSendRequest(builder.build()));
-          } catch (IOException e) {
-            errorRef.set(e);
-          }
-        });
+    InstrumentationUtil.suppressInstrumentation(() -> {
+      try {
+        responseRef.set(doSendRequest(builder.build()));
+      } catch (IOException e) {
+        errorRef.set(e);
+      }
+    });
     if (errorRef.get() != null) {
       throw errorRef.get();
     }

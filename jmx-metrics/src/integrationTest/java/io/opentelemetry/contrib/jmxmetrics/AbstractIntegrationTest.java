@@ -135,26 +135,24 @@ public abstract class AbstractIntegrationTest {
   }
 
   protected final void waitAndAssertMetrics(Iterable<Consumer<Metric>> assertions) {
-    waitAndAssertMetrics(
-        () -> {
-          List<Metric> metrics =
-              otlpServer.getMetrics().stream()
-                  .map(ExportMetricsServiceRequest::getResourceMetricsList)
-                  .flatMap(rm -> rm.stream().map(ResourceMetrics::getScopeMetricsList))
-                  .flatMap(Collection::stream)
-                  .filter(
-                      sm ->
-                          sm.getScope().getName().equals("io.opentelemetry.contrib.jmxmetrics")
-                              && sm.getScope().getVersion().equals(expectedMeterVersion()))
-                  .flatMap(sm -> sm.getMetricsList().stream())
-                  .collect(Collectors.toList());
+    waitAndAssertMetrics(() -> {
+      List<Metric> metrics =
+          otlpServer.getMetrics().stream()
+              .map(ExportMetricsServiceRequest::getResourceMetricsList)
+              .flatMap(rm -> rm.stream().map(ResourceMetrics::getScopeMetricsList))
+              .flatMap(Collection::stream)
+              .filter(sm ->
+                  sm.getScope().getName().equals("io.opentelemetry.contrib.jmxmetrics")
+                      && sm.getScope().getVersion().equals(expectedMeterVersion()))
+              .flatMap(sm -> sm.getMetricsList().stream())
+              .collect(Collectors.toList());
 
-          assertThat(metrics).isNotEmpty();
+      assertThat(metrics).isNotEmpty();
 
-          for (Consumer<Metric> assertion : assertions) {
-            assertThat(metrics).anySatisfy(assertion);
-          }
-        });
+      for (Consumer<Metric> assertion : assertions) {
+        assertThat(metrics).anySatisfy(assertion);
+      }
+    });
   }
 
   private static void waitAndAssertMetrics(Runnable assertion) {
@@ -259,10 +257,9 @@ public abstract class AbstractIntegrationTest {
   private static void assertTypedPoints(List<NumberDataPoint> points, List<String> types) {
     Consumer<MapAssert<String, String>>[] assertions =
         types.stream()
-            .map(
-                type ->
-                    (Consumer<MapAssert<String, String>>)
-                        attrs -> attrs.containsOnly(entry("name", type)))
+            .map(type ->
+                (Consumer<MapAssert<String, String>>)
+                    attrs -> attrs.containsOnly(entry("name", type)))
             .toArray(Consumer[]::new);
 
     assertAttributedPoints(points, assertions);
@@ -277,12 +274,11 @@ public abstract class AbstractIntegrationTest {
             .map(assertion -> (Consumer<Map<String, String>>) m -> assertion.accept(assertThat(m)))
             .toArray(Consumer[]::new);
     assertThat(points)
-        .extracting(
-            numberDataPoint ->
-                numberDataPoint.getAttributesList().stream()
-                    .collect(
-                        Collectors.toMap(
-                            KeyValue::getKey, keyValue -> keyValue.getValue().getStringValue())))
+        .extracting(numberDataPoint ->
+            numberDataPoint.getAttributesList().stream()
+                .collect(
+                    Collectors.toMap(
+                        KeyValue::getKey, keyValue -> keyValue.getValue().getStringValue())))
         .satisfiesExactlyInAnyOrder(assertions);
   }
 

@@ -106,7 +106,7 @@ class StackTraceSpanProcessorTest {
         minDurationString,
         spanDurationNanos,
         Function.identity(),
-        (stackTrace) ->
+        stackTrace ->
             assertThat(stackTrace)
                 .describedAs("span stack trace should contain caller class name")
                 .contains(StackTraceSpanProcessorTest.class.getCanonicalName()),
@@ -123,7 +123,7 @@ class StackTraceSpanProcessorTest {
         minDurationString,
         spanDurationNanos,
         Function.identity(),
-        (stackTrace) -> assertThat(stackTrace).describedAs("no stack trace expected").isNull(),
+        stackTrace -> assertThat(stackTrace).describedAs("no stack trace expected").isNull(),
         scopeName);
   }
 
@@ -139,23 +139,21 @@ class StackTraceSpanProcessorTest {
     InMemorySpanExporter spansExporter = InMemorySpanExporter.create();
 
     AutoConfiguredOpenTelemetrySdkBuilder sdkBuilder = AutoConfiguredOpenTelemetrySdk.builder();
-    sdkBuilder.addPropertiesSupplier(
-        () -> {
-          Map<String, String> configMap = new HashMap<>();
+    sdkBuilder.addPropertiesSupplier(() -> {
+      Map<String, String> configMap = new HashMap<>();
 
-          configMap.put("otel.metrics.exporter", "none");
-          configMap.put("otel.traces.exporter", "logging");
-          configMap.put("otel.logs.exporter", "none");
+      configMap.put("otel.metrics.exporter", "none");
+      configMap.put("otel.traces.exporter", "logging");
+      configMap.put("otel.logs.exporter", "none");
 
-          if (minDurationString != null) {
-            configMap.put("otel.java.experimental.span-stacktrace.min.duration", minDurationString);
-          }
-          if (predicateClass != null) {
-            configMap.put(
-                "otel.java.experimental.span-stacktrace.filter", predicateClass.getName());
-          }
-          return configMap;
-        });
+      if (minDurationString != null) {
+        configMap.put("otel.java.experimental.span-stacktrace.min.duration", minDurationString);
+      }
+      if (predicateClass != null) {
+        configMap.put("otel.java.experimental.span-stacktrace.filter", predicateClass.getName());
+      }
+      return configMap;
+    });
     // duplicate export to our in-memory span exporter
     sdkBuilder.addSpanExporterCustomizer(
         (exporter, config) -> SpanExporter.composite(exporter, spansExporter));

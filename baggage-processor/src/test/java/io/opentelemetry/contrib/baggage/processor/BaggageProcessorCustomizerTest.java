@@ -83,15 +83,14 @@ class BaggageProcessorCustomizerTest {
 
     await()
         .atMost(Duration.ofSeconds(10))
-        .untilAsserted(
-            () -> {
-              assertThat(spanExporter.getFinishedSpanItems())
-                  .hasSize(1)
-                  .allSatisfy(spanDataRequirements);
-              assertThat(logExporter.getFinishedLogRecordItems())
-                  .hasSize(1)
-                  .allSatisfy(logRecordRequirements);
-            });
+        .untilAsserted(() -> {
+          assertThat(spanExporter.getFinishedSpanItems())
+              .hasSize(1)
+              .allSatisfy(spanDataRequirements);
+          assertThat(logExporter.getFinishedLogRecordItems())
+              .hasSize(1)
+              .allSatisfy(logRecordRequirements);
+        });
   }
 
   private static OpenTelemetrySdk getOpenTelemetrySdk(
@@ -102,21 +101,20 @@ class BaggageProcessorCustomizerTest {
 
     AutoConfiguredOpenTelemetrySdkBuilder sdkBuilder =
         AutoConfiguredOpenTelemetrySdk.builder()
-            .addPropertiesSupplier(
-                () ->
-                    ImmutableMap.of(
-                        // We set the export interval of the spans to 10 ms. The default value is 5
-                        // seconds.
-                        "otel.bsp.schedule.delay", // span exporter
-                        "10",
-                        "otel.blrp.schedule.delay", // log exporter
-                        "10",
-                        "otel.traces.exporter",
-                        MEMORY_EXPORTER,
-                        "otel.metrics.exporter",
-                        "none",
-                        "otel.logs.exporter",
-                        MEMORY_EXPORTER))
+            .addPropertiesSupplier(() ->
+                ImmutableMap.of(
+                    // We set the export interval of the spans to 10 ms. The default value is 5
+                    // seconds.
+                    "otel.bsp.schedule.delay", // span exporter
+                    "10",
+                    "otel.blrp.schedule.delay", // log exporter
+                    "10",
+                    "otel.traces.exporter",
+                    MEMORY_EXPORTER,
+                    "otel.metrics.exporter",
+                    "none",
+                    "otel.logs.exporter",
+                    MEMORY_EXPORTER))
             .addPropertiesSupplier(() -> properties)
             .setComponentLoader(
                 new ComponentLoader() {

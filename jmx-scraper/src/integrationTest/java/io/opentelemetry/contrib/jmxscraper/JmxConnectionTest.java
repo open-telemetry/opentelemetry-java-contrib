@@ -235,18 +235,17 @@ class JmxConnectionTest {
     // the stack trace is last in the output, so it's simpler to check all lines of log output
 
     assertThat(logLines)
-        .anySatisfy(
-            line -> {
-              if (expectedOk) {
-                assertThat(line)
-                    .describedAs("should log connection success")
-                    .contains("JMX connection test OK");
-              } else {
-                assertThat(line)
-                    .describedAs("should log connection failure")
-                    .contains("JMX connection test ERROR");
-              }
-            });
+        .anySatisfy(line -> {
+          if (expectedOk) {
+            assertThat(line)
+                .describedAs("should log connection success")
+                .contains("JMX connection test OK");
+          } else {
+            assertThat(line)
+                .describedAs("should log connection failure")
+                .contains("JMX connection test ERROR");
+          }
+        });
   }
 
   private static void waitTerminated(GenericContainer<?> container) {

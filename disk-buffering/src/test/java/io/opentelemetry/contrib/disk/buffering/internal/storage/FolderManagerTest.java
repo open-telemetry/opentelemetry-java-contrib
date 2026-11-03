@@ -247,11 +247,10 @@ class FolderManagerTest {
     createFiles(writableFile, firstReadableFile, secondReadableFile, thirdReadableFile);
 
     ReadableFile file =
-        getReadableFile(
-            it -> {
-              // Exclude the oldest file so that the next oldest is selected.
-              return it.getCreatedTimeMillis() <= firstReadableFileTimestamp;
-            });
+        getReadableFile(it -> {
+          // Exclude the oldest file so that the next oldest is selected.
+          return it.getCreatedTimeMillis() <= firstReadableFileTimestamp;
+        });
 
     assertThat(file.getFile()).isEqualTo(secondReadableFile);
   }

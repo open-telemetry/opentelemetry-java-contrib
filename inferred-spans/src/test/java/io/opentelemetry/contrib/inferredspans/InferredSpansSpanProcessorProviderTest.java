@@ -99,33 +99,30 @@ class InferredSpansSpanProcessorProviderTest {
           .extracting("activeSpanProcessor")
           .extracting("profiler")
           .extracting("config")
-          .satisfies(
-              config -> {
-                assertThat(config).extracting("profilerLoggingEnabled").isEqualTo(false);
-                assertThat(config).extracting("backupDiagnosticFiles").isEqualTo(true);
-                assertThat(config).extracting("asyncProfilerSafeMode").isEqualTo(7);
-                assertThat(config).extracting("postProcessingEnabled").isEqualTo(false);
-                assertThat(config).extracting("samplingInterval").isEqualTo(Duration.ofMillis(7));
-                assertThat(config)
-                    .extracting("inferredSpansMinDuration")
-                    .isEqualTo(Duration.ofMillis(9));
-                assertThat(config)
-                    .extracting("includedClasses")
-                    .satisfies(v -> assertThat((List<?>) v).hasSize(2));
-                assertThat(config)
-                    .extracting("excludedClasses")
-                    .satisfies(v -> assertThat((List<?>) v).hasSize(2));
-                assertThat(config).extracting("profilerInterval").isEqualTo(Duration.ofSeconds(11));
-                assertThat(config)
-                    .extracting("profilingDuration")
-                    .isEqualTo(Duration.ofSeconds(13));
-                assertThat(config)
-                    .extracting("profilerLibDirectory")
-                    .isEqualTo("/tmp/inferred-spans-test");
-                assertThat(config)
-                    .extracting("parentOverrideHandler")
-                    .isInstanceOf(TestParentOverrideHandler.class);
-              });
+          .satisfies(config -> {
+            assertThat(config).extracting("profilerLoggingEnabled").isEqualTo(false);
+            assertThat(config).extracting("backupDiagnosticFiles").isEqualTo(true);
+            assertThat(config).extracting("asyncProfilerSafeMode").isEqualTo(7);
+            assertThat(config).extracting("postProcessingEnabled").isEqualTo(false);
+            assertThat(config).extracting("samplingInterval").isEqualTo(Duration.ofMillis(7));
+            assertThat(config)
+                .extracting("inferredSpansMinDuration")
+                .isEqualTo(Duration.ofMillis(9));
+            assertThat(config)
+                .extracting("includedClasses")
+                .satisfies(v -> assertThat((List<?>) v).hasSize(2));
+            assertThat(config)
+                .extracting("excludedClasses")
+                .satisfies(v -> assertThat((List<?>) v).hasSize(2));
+            assertThat(config).extracting("profilerInterval").isEqualTo(Duration.ofSeconds(11));
+            assertThat(config).extracting("profilingDuration").isEqualTo(Duration.ofSeconds(13));
+            assertThat(config)
+                .extracting("profilerLibDirectory")
+                .isEqualTo("/tmp/inferred-spans-test");
+            assertThat(config)
+                .extracting("parentOverrideHandler")
+                .isInstanceOf(TestParentOverrideHandler.class);
+          });
     }
   }
 
@@ -147,10 +144,9 @@ class InferredSpansSpanProcessorProviderTest {
           .extracting("delegate")
           .extracting("sharedState")
           .extracting("activeSpanProcessor")
-          .satisfies(
-              p ->
-                  assertThat(p.getClass().getName())
-                      .isEqualTo("io.opentelemetry.sdk.trace.NoopSpanProcessor"));
+          .satisfies(p ->
+              assertThat(p.getClass().getName())
+                  .isEqualTo("io.opentelemetry.sdk.trace.NoopSpanProcessor"));
     }
   }
 

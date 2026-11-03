@@ -148,11 +148,10 @@ public class GCPResourceProvider implements ConditionalResourceProvider {
     Optional.ofNullable(attributesMap.get(GCE_INSTANCE_ID))
         .ifPresent(instanceId -> attrBuilder.put(HOST_ID, instanceId));
     Optional.ofNullable(attributesMap.get(GCE_INSTANCE_NAME))
-        .ifPresent(
-            instanceName -> {
-              attrBuilder.put(HOST_NAME, instanceName);
-              attrBuilder.put(GCP_GCE_INSTANCE_NAME, instanceName);
-            });
+        .ifPresent(instanceName -> {
+          attrBuilder.put(HOST_NAME, instanceName);
+          attrBuilder.put(GCP_GCE_INSTANCE_NAME, instanceName);
+        });
     Optional.ofNullable(attributesMap.get(GCE_INSTANCE_HOSTNAME))
         .ifPresent(
             instanceHostname -> attrBuilder.put(GCP_GCE_INSTANCE_HOSTNAME, instanceHostname));
@@ -176,26 +175,24 @@ public class GCPResourceProvider implements ConditionalResourceProvider {
     Optional.ofNullable(attributesMap.get(GKE_HOST_ID))
         .ifPresent(hostId -> attrBuilder.put(HOST_ID, hostId));
     Optional.ofNullable(attributesMap.get(GKE_CLUSTER_LOCATION_TYPE))
-        .ifPresent(
-            locationType -> {
-              if (attributesMap.get(GKE_CLUSTER_LOCATION) != null) {
-                switch (locationType) {
-                  case GKE_LOCATION_TYPE_REGION:
-                    attrBuilder.put(CLOUD_REGION, attributesMap.get(GKE_CLUSTER_LOCATION));
-                    break;
-                  case GKE_LOCATION_TYPE_ZONE:
-                    attrBuilder.put(
-                        CLOUD_AVAILABILITY_ZONE, attributesMap.get(GKE_CLUSTER_LOCATION));
-                    break;
-                  default:
-                    // TODO: Figure out how to handle unexpected conditions like this
-                    LOGGER.severe(
-                        String.format(
-                            "Unrecognized format for cluster location: %s",
-                            attributesMap.get(GKE_CLUSTER_LOCATION)));
-                }
-              }
-            });
+        .ifPresent(locationType -> {
+          if (attributesMap.get(GKE_CLUSTER_LOCATION) != null) {
+            switch (locationType) {
+              case GKE_LOCATION_TYPE_REGION:
+                attrBuilder.put(CLOUD_REGION, attributesMap.get(GKE_CLUSTER_LOCATION));
+                break;
+              case GKE_LOCATION_TYPE_ZONE:
+                attrBuilder.put(CLOUD_AVAILABILITY_ZONE, attributesMap.get(GKE_CLUSTER_LOCATION));
+                break;
+              default:
+                // TODO: Figure out how to handle unexpected conditions like this
+                LOGGER.severe(
+                    String.format(
+                        "Unrecognized format for cluster location: %s",
+                        attributesMap.get(GKE_CLUSTER_LOCATION)));
+            }
+          }
+        });
   }
 
   /**
@@ -241,25 +238,22 @@ public class GCPResourceProvider implements ConditionalResourceProvider {
     Optional.ofNullable(attributesMap.get(SERVERLESS_COMPUTE_CLOUD_REGION))
         .ifPresent(cloudRegion -> attrBuilder.put(CLOUD_REGION, cloudRegion));
     Optional.ofNullable(attributesMap.get(GCR_JOB_EXECUTION_KEY))
-        .ifPresent(
-            jobExecutionKey ->
-                attrBuilder.put(IncubatingAttributes.GCP_CLOUD_RUN_JOB_EXECUTION, jobExecutionKey));
+        .ifPresent(jobExecutionKey ->
+            attrBuilder.put(IncubatingAttributes.GCP_CLOUD_RUN_JOB_EXECUTION, jobExecutionKey));
     Optional.ofNullable(attributesMap.get(GCR_JOB_TASK_INDEX))
-        .ifPresent(
-            jobTaskIndex -> {
-              try {
-                attrBuilder.put(
-                    IncubatingAttributes.GCP_CLOUD_RUN_JOB_TASK_INDEX,
-                    Integer.parseInt(jobTaskIndex));
-              } catch (NumberFormatException e) {
-                LOGGER.log(
-                    Level.WARNING,
-                    "Can't parse GCP Cloud Run job task index (CLOUD_RUN_TASK_INDEX): '"
-                        + jobTaskIndex
-                        + "'",
-                    e);
-              }
-            });
+        .ifPresent(jobTaskIndex -> {
+          try {
+            attrBuilder.put(
+                IncubatingAttributes.GCP_CLOUD_RUN_JOB_TASK_INDEX, Integer.parseInt(jobTaskIndex));
+          } catch (NumberFormatException e) {
+            LOGGER.log(
+                Level.WARNING,
+                "Can't parse GCP Cloud Run job task index (CLOUD_RUN_TASK_INDEX): '"
+                    + jobTaskIndex
+                    + "'",
+                e);
+          }
+        });
   }
 
   /**
@@ -281,9 +275,8 @@ public class GCPResourceProvider implements ConditionalResourceProvider {
     Optional.ofNullable(attributesMap.get(GAE_CLOUD_REGION))
         .ifPresent(cloudRegion -> attrBuilder.put(CLOUD_REGION, cloudRegion));
     Optional.ofNullable(attributesMap.get(GAE_AVAILABILITY_ZONE))
-        .ifPresent(
-            cloudAvailabilityZone ->
-                attrBuilder.put(CLOUD_AVAILABILITY_ZONE, cloudAvailabilityZone));
+        .ifPresent(cloudAvailabilityZone ->
+            attrBuilder.put(CLOUD_AVAILABILITY_ZONE, cloudAvailabilityZone));
   }
 
   /**

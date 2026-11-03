@@ -132,35 +132,32 @@ class AwsXrayRemoteSamplerTest {
 
     // cat-service allowed, others dropped
     await()
-        .untilAsserted(
-            () -> {
-              assertThat(doSample(sampler, "cat-service"))
-                  .isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
-              assertThat(doSample(sampler, "dog-service")).isEqualTo(SamplingDecision.DROP);
-            });
+        .untilAsserted(() -> {
+          assertThat(doSample(sampler, "cat-service"))
+              .isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
+          assertThat(doSample(sampler, "dog-service")).isEqualTo(SamplingDecision.DROP);
+        });
 
     rulesResponse.set(RULE_RESPONSE_2);
 
     // cat-service dropped, others allowed
     await()
-        .untilAsserted(
-            () -> {
-              assertThat(doSample(sampler, "cat-service")).isEqualTo(SamplingDecision.DROP);
-              assertThat(doSample(sampler, "dog-service"))
-                  .isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
-            });
+        .untilAsserted(() -> {
+          assertThat(doSample(sampler, "cat-service")).isEqualTo(SamplingDecision.DROP);
+          assertThat(doSample(sampler, "dog-service"))
+              .isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
+        });
 
     targetsResponse.set(TARGETS_RESPONSE);
 
     // cat-service target sets fixed rate to 1.0 for this test.
     await()
-        .untilAsserted(
-            () -> {
-              assertThat(doSample(sampler, "cat-service"))
-                  .isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
-              assertThat(doSample(sampler, "dog-service"))
-                  .isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
-            });
+        .untilAsserted(() -> {
+          assertThat(doSample(sampler, "cat-service"))
+              .isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
+          assertThat(doSample(sampler, "dog-service"))
+              .isEqualTo(SamplingDecision.RECORD_AND_SAMPLE);
+        });
   }
 
   @Test
@@ -209,11 +206,10 @@ class AwsXrayRemoteSamplerTest {
             .setPollingInterval(Duration.ofMinutes(5))
             .build()) {
       await()
-          .untilAsserted(
-              () -> {
-                assertThat(samplerWithLongerPollingInterval.getNextSamplerUpdateScheduledDuration())
-                    .isCloseTo(Duration.ofMinutes(5), Duration.ofSeconds(10));
-              });
+          .untilAsserted(() -> {
+            assertThat(samplerWithLongerPollingInterval.getNextSamplerUpdateScheduledDuration())
+                .isCloseTo(Duration.ofMinutes(5), Duration.ofSeconds(10));
+          });
     }
   }
 

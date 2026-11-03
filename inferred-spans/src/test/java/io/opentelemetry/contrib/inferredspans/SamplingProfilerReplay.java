@@ -35,12 +35,11 @@ public class SamplingProfilerReplay {
     jfrFile.deleteOnExit();
 
     try (ProfilerTestSetup setup =
-        ProfilerTestSetup.create(
-            config ->
-                config
-                    .startScheduledProfiling(false)
-                    .activationEventsFile(activationEventsFile)
-                    .jfrFile(jfrFile))) {
+        ProfilerTestSetup.create(config ->
+            config
+                .startScheduledProfiling(false)
+                .activationEventsFile(activationEventsFile)
+                .jfrFile(jfrFile))) {
       Path baseDir = Paths.get(System.getProperty("java.io.tmpdir"), "profiler");
       List<Path> activationFiles =
           Files.list(baseDir)

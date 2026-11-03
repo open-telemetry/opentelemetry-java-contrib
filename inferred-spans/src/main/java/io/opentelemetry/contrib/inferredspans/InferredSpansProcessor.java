@@ -120,16 +120,15 @@ public class InferredSpansProcessor implements SpanProcessor {
           return thread;
         };
     Executors.newSingleThreadExecutor(threadFactory)
-        .submit(
-            () -> {
-              try {
-                profiler.stop();
-                result.succeed();
-              } catch (Throwable e) {
-                logger.log(Level.SEVERE, "Failed to stop Inferred Spans Processor", e);
-                result.fail();
-              }
-            });
+        .submit(() -> {
+          try {
+            profiler.stop();
+            result.succeed();
+          } catch (Throwable e) {
+            logger.log(Level.SEVERE, "Failed to stop Inferred Spans Processor", e);
+            result.fail();
+          }
+        });
     return result;
   }
 

@@ -174,11 +174,10 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
     when(mockOtlpHttpSpanExporter.shutdown()).thenReturn(CompletableResultCode.ofSuccess());
     List<SpanData> exportedSpans = new ArrayList<>();
     when(mockOtlpHttpSpanExporter.export(any()))
-        .thenAnswer(
-            invocationOnMock -> {
-              exportedSpans.addAll(invocationOnMock.getArgument(0));
-              return CompletableResultCode.ofSuccess();
-            });
+        .thenAnswer(invocationOnMock -> {
+          exportedSpans.addAll(invocationOnMock.getArgument(0));
+          return CompletableResultCode.ofSuccess();
+        });
     Mockito.when(mockOtlpHttpSpanExporter.toBuilder()).thenReturn(spyOtlpHttpSpanExporterBuilder);
 
     // begin assertions
@@ -205,16 +204,14 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
 
       assertThat(exportedSpans)
           .hasSizeGreaterThan(0)
-          .allSatisfy(
-              spanData -> {
-                assertThat(spanData.getResource().getAttributes().asMap())
-                    .containsEntry(
-                        AttributeKey.stringKey(GCP_USER_PROJECT_ID_KEY),
-                        DUMMY_GCP_RESOURCE_PROJECT_ID)
-                    .containsEntry(AttributeKey.stringKey("foo"), "bar");
-                assertThat(spanData.getAttributes().asMap())
-                    .containsKey(AttributeKey.longKey("work_loop"));
-              });
+          .allSatisfy(spanData -> {
+            assertThat(spanData.getResource().getAttributes().asMap())
+                .containsEntry(
+                    AttributeKey.stringKey(GCP_USER_PROJECT_ID_KEY), DUMMY_GCP_RESOURCE_PROJECT_ID)
+                .containsEntry(AttributeKey.stringKey("foo"), "bar");
+            assertThat(spanData.getAttributes().asMap())
+                .containsKey(AttributeKey.longKey("work_loop"));
+          });
     }
   }
 
@@ -258,16 +255,14 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
 
       assertThat(exportedSpans)
           .hasSizeGreaterThan(0)
-          .allSatisfy(
-              spanData -> {
-                assertThat(spanData.getResource().getAttributes().asMap())
-                    .containsEntry(
-                        AttributeKey.stringKey(GCP_USER_PROJECT_ID_KEY),
-                        DUMMY_GCP_RESOURCE_PROJECT_ID)
-                    .containsEntry(AttributeKey.stringKey("foo"), "bar");
-                assertThat(spanData.getAttributes().asMap())
-                    .containsKey(AttributeKey.longKey("work_loop"));
-              });
+          .allSatisfy(spanData -> {
+            assertThat(spanData.getResource().getAttributes().asMap())
+                .containsEntry(
+                    AttributeKey.stringKey(GCP_USER_PROJECT_ID_KEY), DUMMY_GCP_RESOURCE_PROJECT_ID)
+                .containsEntry(AttributeKey.stringKey("foo"), "bar");
+            assertThat(spanData.getAttributes().asMap())
+                .containsKey(AttributeKey.longKey("work_loop"));
+          });
     }
   }
 
@@ -315,21 +310,18 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
 
       assertThat(exportedMetrics)
           .hasSizeGreaterThan(0)
-          .allSatisfy(
-              metricData -> {
-                assertThat(metricData.getResource().getAttributes().asMap())
-                    .containsEntry(
-                        AttributeKey.stringKey(GCP_USER_PROJECT_ID_KEY),
-                        DUMMY_GCP_RESOURCE_PROJECT_ID)
-                    .containsEntry(AttributeKey.stringKey("foo"), "bar");
-                assertThat(metricData.getLongSumData().getPoints())
-                    .hasSizeGreaterThan(0)
-                    .allSatisfy(
-                        longPointData -> {
-                          assertThat(longPointData.getAttributes().asMap())
-                              .containsKey(AttributeKey.longKey("work_loop"));
-                        });
-              });
+          .allSatisfy(metricData -> {
+            assertThat(metricData.getResource().getAttributes().asMap())
+                .containsEntry(
+                    AttributeKey.stringKey(GCP_USER_PROJECT_ID_KEY), DUMMY_GCP_RESOURCE_PROJECT_ID)
+                .containsEntry(AttributeKey.stringKey("foo"), "bar");
+            assertThat(metricData.getLongSumData().getPoints())
+                .hasSizeGreaterThan(0)
+                .allSatisfy(longPointData -> {
+                  assertThat(longPointData.getAttributes().asMap())
+                      .containsKey(AttributeKey.longKey("work_loop"));
+                });
+          });
     }
   }
 
@@ -376,21 +368,18 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
 
       assertThat(exportedMetrics)
           .hasSizeGreaterThan(0)
-          .allSatisfy(
-              metricData -> {
-                assertThat(metricData.getResource().getAttributes().asMap())
-                    .containsEntry(
-                        AttributeKey.stringKey(GCP_USER_PROJECT_ID_KEY),
-                        DUMMY_GCP_RESOURCE_PROJECT_ID)
-                    .containsEntry(AttributeKey.stringKey("foo"), "bar");
-                assertThat(metricData.getLongSumData().getPoints())
-                    .hasSizeGreaterThan(0)
-                    .allSatisfy(
-                        longPointData -> {
-                          assertThat(longPointData.getAttributes().asMap())
-                              .containsKey(AttributeKey.longKey("work_loop"));
-                        });
-              });
+          .allSatisfy(metricData -> {
+            assertThat(metricData.getResource().getAttributes().asMap())
+                .containsEntry(
+                    AttributeKey.stringKey(GCP_USER_PROJECT_ID_KEY), DUMMY_GCP_RESOURCE_PROJECT_ID)
+                .containsEntry(AttributeKey.stringKey("foo"), "bar");
+            assertThat(metricData.getLongSumData().getPoints())
+                .hasSizeGreaterThan(0)
+                .allSatisfy(longPointData -> {
+                  assertThat(longPointData.getAttributes().asMap())
+                      .containsKey(AttributeKey.longKey("work_loop"));
+                });
+          });
     }
   }
 
@@ -439,16 +428,14 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
 
       assertThat(exportedLogRecords)
           .hasSizeGreaterThan(0)
-          .allSatisfy(
-              logRecordData -> {
-                assertThat(logRecordData.getResource().getAttributes().asMap())
-                    .containsEntry(
-                        AttributeKey.stringKey(GCP_USER_PROJECT_ID_KEY),
-                        DUMMY_GCP_RESOURCE_PROJECT_ID)
-                    .containsEntry(AttributeKey.stringKey("foo"), "bar");
-                assertThat(logRecordData.getAttributes().asMap())
-                    .containsKey(AttributeKey.longKey("work_loop"));
-              });
+          .allSatisfy(logRecordData -> {
+            assertThat(logRecordData.getResource().getAttributes().asMap())
+                .containsEntry(
+                    AttributeKey.stringKey(GCP_USER_PROJECT_ID_KEY), DUMMY_GCP_RESOURCE_PROJECT_ID)
+                .containsEntry(AttributeKey.stringKey("foo"), "bar");
+            assertThat(logRecordData.getAttributes().asMap())
+                .containsKey(AttributeKey.longKey("work_loop"));
+          });
     }
   }
 
@@ -496,16 +483,14 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
 
       assertThat(exportedLogRecords)
           .hasSizeGreaterThan(0)
-          .allSatisfy(
-              logRecordData -> {
-                assertThat(logRecordData.getResource().getAttributes().asMap())
-                    .containsEntry(
-                        AttributeKey.stringKey(GCP_USER_PROJECT_ID_KEY),
-                        DUMMY_GCP_RESOURCE_PROJECT_ID)
-                    .containsEntry(AttributeKey.stringKey("foo"), "bar");
-                assertThat(logRecordData.getAttributes().asMap())
-                    .containsKey(AttributeKey.longKey("work_loop"));
-              });
+          .allSatisfy(logRecordData -> {
+            assertThat(logRecordData.getResource().getAttributes().asMap())
+                .containsEntry(
+                    AttributeKey.stringKey(GCP_USER_PROJECT_ID_KEY), DUMMY_GCP_RESOURCE_PROJECT_ID)
+                .containsEntry(AttributeKey.stringKey("foo"), "bar");
+            assertThat(logRecordData.getAttributes().asMap())
+                .containsKey(AttributeKey.longKey("work_loop"));
+          });
     }
   }
 
@@ -1259,11 +1244,10 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
     Mockito.lenient().when(mockGrpcExporter.toBuilder()).thenReturn(spyGrpcExporterBuilder);
     Mockito.lenient()
         .when(mockGrpcExporter.export(Mockito.anyCollection()))
-        .thenAnswer(
-            invocationOnMock -> {
-              exportedSpanContainer.addAll(invocationOnMock.getArgument(0));
-              return CompletableResultCode.ofSuccess();
-            });
+        .thenAnswer(invocationOnMock -> {
+          exportedSpanContainer.addAll(invocationOnMock.getArgument(0));
+          return CompletableResultCode.ofSuccess();
+        });
   }
 
   // Configure necessary behavior on the http mock metric exporters to work.
@@ -1277,11 +1261,10 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
     Mockito.when(mockOtlpHttpMetricExporter.toBuilder())
         .thenReturn(spyOtlpHttpMetricExporterBuilder);
     Mockito.when(mockOtlpHttpMetricExporter.export(Mockito.anyCollection()))
-        .thenAnswer(
-            invocationOnMock -> {
-              exportedMetricContainer.addAll(invocationOnMock.getArgument(0));
-              return CompletableResultCode.ofSuccess();
-            });
+        .thenAnswer(invocationOnMock -> {
+          exportedMetricContainer.addAll(invocationOnMock.getArgument(0));
+          return CompletableResultCode.ofSuccess();
+        });
     // mock the get default aggregation and aggregation temporality - they're required for valid
     // metric collection.
     Mockito.when(mockOtlpHttpMetricExporter.getDefaultAggregation(Mockito.any()))
@@ -1319,11 +1302,10 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
         .thenReturn(spyOtlpGrpcMetricExporterBuilder);
     Mockito.lenient()
         .when(mockOtlpGrpcMetricExporter.export(Mockito.anyCollection()))
-        .thenAnswer(
-            invocationOnMock -> {
-              exportedMetricContainer.addAll(invocationOnMock.getArgument(0));
-              return CompletableResultCode.ofSuccess();
-            });
+        .thenAnswer(invocationOnMock -> {
+          exportedMetricContainer.addAll(invocationOnMock.getArgument(0));
+          return CompletableResultCode.ofSuccess();
+        });
     // mock the get default aggregation and aggregation temporality - they're required for valid
     // metric collection.
     Mockito.lenient()
@@ -1363,11 +1345,10 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
     Mockito.when(mockOtlpHttpLogRecordExporter.toBuilder())
         .thenReturn(spyOtlpHttpLogRecordExporterBuilder);
     Mockito.when(mockOtlpHttpLogRecordExporter.export(Mockito.anyCollection()))
-        .thenAnswer(
-            invocationOnMock -> {
-              exportedLogRecordContainer.addAll(invocationOnMock.getArgument(0));
-              return CompletableResultCode.ofSuccess();
-            });
+        .thenAnswer(invocationOnMock -> {
+          exportedLogRecordContainer.addAll(invocationOnMock.getArgument(0));
+          return CompletableResultCode.ofSuccess();
+        });
   }
 
   // Configure necessary behavior on the gRPC mock log record exporters to work.
@@ -1391,11 +1372,10 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
         .thenReturn(spyOtlpGrpcLogRecordExporterBuilder);
     Mockito.lenient()
         .when(mockOtlpGrpcLogRecordExporter.export(Mockito.anyCollection()))
-        .thenAnswer(
-            invocationOnMock -> {
-              exportedLogRecordContainer.addAll(invocationOnMock.getArgument(0));
-              return CompletableResultCode.ofSuccess();
-            });
+        .thenAnswer(invocationOnMock -> {
+          exportedLogRecordContainer.addAll(invocationOnMock.getArgument(0));
+          return CompletableResultCode.ofSuccess();
+        });
   }
 
   @AutoValue
@@ -1533,11 +1513,10 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
     when(mockOtlpHttpSpanExporter.shutdown()).thenReturn(CompletableResultCode.ofSuccess());
     List<SpanData> exportedSpans = new ArrayList<>();
     when(mockOtlpHttpSpanExporter.export(any()))
-        .thenAnswer(
-            invocationOnMock -> {
-              exportedSpans.addAll(invocationOnMock.getArgument(0));
-              return CompletableResultCode.ofSuccess();
-            });
+        .thenAnswer(invocationOnMock -> {
+          exportedSpans.addAll(invocationOnMock.getArgument(0));
+          return CompletableResultCode.ofSuccess();
+        });
     Mockito.when(mockOtlpHttpSpanExporter.toBuilder()).thenReturn(spyOtlpHttpSpanExporterBuilder);
 
     try (MockedStatic<GoogleCredentials> googleCredentialsMockedStatic =
@@ -1566,10 +1545,9 @@ class GcpAuthAutoConfigurationCustomizerProviderTest {
       // GOOGLE_CLOUD_PROJECT option is not required.
       assertThat(exportedSpans)
           .hasSizeGreaterThan(0)
-          .allSatisfy(
-              spanData ->
-                  assertThat(spanData.getResource().getAttributes().asMap())
-                      .doesNotContainKey(AttributeKey.stringKey(GCP_USER_PROJECT_ID_KEY)));
+          .allSatisfy(spanData ->
+              assertThat(spanData.getResource().getAttributes().asMap())
+                  .doesNotContainKey(AttributeKey.stringKey(GCP_USER_PROJECT_ID_KEY)));
     }
   }
 

@@ -59,12 +59,11 @@ public final class BaggageLogRecordProcessor implements LogRecordProcessor {
   @Override
   public void onEmit(Context context, ReadWriteLogRecord logRecord) {
     Baggage.fromContext(context)
-        .forEach(
-            (s, baggageEntry) -> {
-              if (baggageKeyPredicate.test(s)) {
-                logRecord.setAttribute(AttributeKey.stringKey(s), baggageEntry.getValue());
-              }
-            });
+        .forEach((s, baggageEntry) -> {
+          if (baggageKeyPredicate.test(s)) {
+            logRecord.setAttribute(AttributeKey.stringKey(s), baggageEntry.getValue());
+          }
+        });
   }
 
   @Override

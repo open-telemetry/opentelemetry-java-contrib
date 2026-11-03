@@ -74,12 +74,11 @@ class MetricAssertions {
             .toArray(Consumer[]::new);
 
     assertThat(points)
-        .extracting(
-            numberDataPoint ->
-                numberDataPoint.getAttributesList().stream()
-                    .collect(
-                        Collectors.toMap(
-                            KeyValue::getKey, keyValue -> keyValue.getValue().getStringValue())))
+        .extracting(numberDataPoint ->
+            numberDataPoint.getAttributesList().stream()
+                .collect(
+                    Collectors.toMap(
+                        KeyValue::getKey, keyValue -> keyValue.getValue().getStringValue())))
         .satisfiesExactlyInAnyOrder(assertions);
   }
 }

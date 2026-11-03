@@ -33,15 +33,14 @@ public final class SpanDataSerializer implements Serializer<Collection<SpanData>
   ExportTraceServiceRequest convertSpansToRequest(Collection<SpanData> spans) {
     List<ResourceSpans> resourceSpansList =
         Arrays.stream(ResourceSpansMarshaler.create(spans))
-            .map(
-                resourceSpansMarshaler -> {
-                  try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-                    resourceSpansMarshaler.writeBinaryTo(baos);
-                    return ResourceSpans.parseFrom(baos.toByteArray());
-                  } catch (IOException e) {
-                    throw new SerializationException(e);
-                  }
-                })
+            .map(resourceSpansMarshaler -> {
+              try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+                resourceSpansMarshaler.writeBinaryTo(baos);
+                return ResourceSpans.parseFrom(baos.toByteArray());
+              } catch (IOException e) {
+                throw new SerializationException(e);
+              }
+            })
             .collect(toList());
 
     return ExportTraceServiceRequest.newBuilder().addAllResourceSpans(resourceSpansList).build();

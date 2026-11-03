@@ -37,7 +37,7 @@ final class ConsistentRuleBasedSampler extends ConsistentSampler {
 
     this.description =
         Stream.of(samplers)
-            .map((s) -> s.getSampler().getDescription())
+            .map(s -> s.getSampler().getDescription())
             .collect(Collectors.joining(",", "ConsistentRuleBasedSampler{", "}"));
   }
 

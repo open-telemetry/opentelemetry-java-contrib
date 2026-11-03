@@ -26,22 +26,21 @@ class TomcatIntegrationTest extends AbstractIntegrationTest {
   GenericContainer<?> tomcat =
       new GenericContainer<>(
               new ImageFromDockerfile()
-                  .withDockerfileFromBuilder(
-                      builder ->
-                          builder
-                              .from("tomcat:9.0")
-                              .run("rm", "-fr", "/usr/local/tomcat/webapps/ROOT")
-                              .add(
-                                  "https://tomcat.apache.org/tomcat-9.0-doc/appdev/sample/sample.war",
-                                  "/usr/local/tomcat/webapps/ROOT.war")
-                              .env(
-                                  "CATALINA_OPTS",
-                                  "-Dcom.sun.management.jmxremote.local.only=false "
-                                      + "-Dcom.sun.management.jmxremote.authenticate=false "
-                                      + "-Dcom.sun.management.jmxremote.ssl=false "
-                                      + "-Dcom.sun.management.jmxremote.port=9010 "
-                                      + "-Dcom.sun.management.jmxremote.rmi.port=9010")
-                              .build()))
+                  .withDockerfileFromBuilder(builder ->
+                      builder
+                          .from("tomcat:9.0")
+                          .run("rm", "-fr", "/usr/local/tomcat/webapps/ROOT")
+                          .add(
+                              "https://tomcat.apache.org/tomcat-9.0-doc/appdev/sample/sample.war",
+                              "/usr/local/tomcat/webapps/ROOT.war")
+                          .env(
+                              "CATALINA_OPTS",
+                              "-Dcom.sun.management.jmxremote.local.only=false "
+                                  + "-Dcom.sun.management.jmxremote.authenticate=false "
+                                  + "-Dcom.sun.management.jmxremote.ssl=false "
+                                  + "-Dcom.sun.management.jmxremote.port=9010 "
+                                  + "-Dcom.sun.management.jmxremote.rmi.port=9010")
+                          .build()))
           .withNetwork(Network.SHARED)
           .withEnv("LOCAL_JMX", "no")
           .withNetworkAliases("tomcat")

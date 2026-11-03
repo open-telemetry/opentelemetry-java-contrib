@@ -557,25 +557,23 @@ class CallTreeTest {
 
     assertThat(spans.get("b").getLinks())
         .hasSize(1)
-        .anySatisfy(
-            link -> {
-              assertThat(link.getAttributes()).containsEntry(LINK_IS_CHILD, true);
-              SpanData expectedSpan = spans.get("2");
-              assertThat(link.getSpanContext().getTraceId()).isEqualTo(expectedSpan.getTraceId());
-              assertThat(link.getSpanContext().getSpanId()).isEqualTo(expectedSpan.getSpanId());
-            });
+        .anySatisfy(link -> {
+          assertThat(link.getAttributes()).containsEntry(LINK_IS_CHILD, true);
+          SpanData expectedSpan = spans.get("2");
+          assertThat(link.getSpanContext().getTraceId()).isEqualTo(expectedSpan.getTraceId());
+          assertThat(link.getSpanContext().getSpanId()).isEqualTo(expectedSpan.getSpanId());
+        });
 
     assertThat(spans.get("c").getLinks()).isEmpty();
 
     assertThat(spans.get("a").getLinks())
         .hasSize(1)
-        .anySatisfy(
-            link -> {
-              assertThat(link.getAttributes()).containsEntry(LINK_IS_CHILD, true);
-              SpanData expectedSpan = spans.get("3");
-              assertThat(link.getSpanContext().getTraceId()).isEqualTo(expectedSpan.getTraceId());
-              assertThat(link.getSpanContext().getSpanId()).isEqualTo(expectedSpan.getSpanId());
-            });
+        .anySatisfy(link -> {
+          assertThat(link.getAttributes()).containsEntry(LINK_IS_CHILD, true);
+          SpanData expectedSpan = spans.get("3");
+          assertThat(link.getSpanContext().getTraceId()).isEqualTo(expectedSpan.getTraceId());
+          assertThat(link.getSpanContext().getSpanId()).isEqualTo(expectedSpan.getSpanId());
+        });
   }
 
   /*
@@ -735,12 +733,11 @@ class CallTreeTest {
   void testCallTreeActivationAsChildOfFastSpan() throws Exception {
     profilerSetup.close();
     profilerSetup =
-        ProfilerTestSetup.create(
-            config ->
-                config
-                    .inferredSpansMinDuration(Duration.ofMillis(50))
-                    .clock(nanoClock)
-                    .startScheduledProfiling(false));
+        ProfilerTestSetup.create(config ->
+            config
+                .inferredSpansMinDuration(Duration.ofMillis(50))
+                .clock(nanoClock)
+                .startScheduledProfiling(false));
     profilerSetup.profiler.setProfilingSessionOngoing(true);
     assertCallTree(
         new String[] {"   c  c   ", "   b  b   ", " aaa  aaa ", "1   22   1"},
@@ -781,12 +778,11 @@ class CallTreeTest {
   void testCallTreeMultipleActivationsAsLeafWithExcludedParent() throws Exception {
     profilerSetup.close();
     profilerSetup =
-        ProfilerTestSetup.create(
-            config ->
-                config
-                    .clock(nanoClock)
-                    .startScheduledProfiling(false)
-                    .inferredSpansMinDuration(Duration.ofMillis(50)));
+        ProfilerTestSetup.create(config ->
+            config
+                .clock(nanoClock)
+                .startScheduledProfiling(false)
+                .inferredSpansMinDuration(Duration.ofMillis(50)));
     profilerSetup.profiler.setProfilingSessionOngoing(true);
     // min duration 4
     assertCallTree(
@@ -930,13 +926,8 @@ class CallTreeTest {
         } else {
           String expected =
               stackTrace.stream()
-                  .map(
-                      funcName ->
-                          "at "
-                              + CallTreeTest.class.getName()
-                              + "."
-                              + funcName
-                              + "(CallTreeTest.java)")
+                  .map(funcName ->
+                      "at " + CallTreeTest.class.getName() + "." + funcName + "(CallTreeTest.java)")
                   .collect(Collectors.joining("\n"));
           assertThat(actualStacktrace).isEqualTo(expected);
         }

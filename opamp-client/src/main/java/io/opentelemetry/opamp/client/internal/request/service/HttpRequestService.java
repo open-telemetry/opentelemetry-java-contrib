@@ -130,15 +130,14 @@ public final class HttpRequestService implements RequestService {
       throw new IllegalStateException("HttpRequestService is not running");
     }
 
-    executorService.execute(
-        () -> {
-          // Cancel the already scheduled task.
-          ScheduledFuture<?> scheduledFuture = scheduledTask.get();
-          if (scheduledFuture != null) {
-            scheduledFuture.cancel(false);
-          }
-          sendAndScheduleNext();
-        });
+    executorService.execute(() -> {
+      // Cancel the already scheduled task.
+      ScheduledFuture<?> scheduledFuture = scheduledTask.get();
+      if (scheduledFuture != null) {
+        scheduledFuture.cancel(false);
+      }
+      sendAndScheduleNext();
+    });
   }
 
   private void sendAndScheduleNext() {

@@ -144,9 +144,8 @@ class OtelHelperJmxTest {
 
     assertThat(mbeans)
         .singleElement()
-        .satisfies(
-            bean ->
-                assertThat(bean.getProperty("SomeAttribute")).isEqualTo("This is the attribute"));
+        .satisfies(bean ->
+            assertThat(bean.getProperty("SomeAttribute")).isEqualTo("This is the attribute"));
   }
 
   public interface ThingMBean {

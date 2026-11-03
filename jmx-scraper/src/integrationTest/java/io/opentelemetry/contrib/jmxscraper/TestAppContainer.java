@@ -175,14 +175,13 @@ public class TestAppContainer extends GenericContainer<TestAppContainer> {
 
     String confArgs =
         properties.entrySet().stream()
-            .map(
-                e -> {
-                  String s = "-D" + e.getKey();
-                  if (!e.getValue().isEmpty()) {
-                    s += "=" + e.getValue();
-                  }
-                  return s;
-                })
+            .map(e -> {
+              String s = "-D" + e.getKey();
+              if (!e.getValue().isEmpty()) {
+                s += "=" + e.getValue();
+              }
+              return s;
+            })
             .collect(Collectors.joining(" "));
 
     this.withEnv("JAVA_TOOL_OPTIONS", confArgs);

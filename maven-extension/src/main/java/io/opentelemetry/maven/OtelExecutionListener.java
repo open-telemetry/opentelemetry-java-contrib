@@ -228,14 +228,13 @@ public final class OtelExecutionListener extends AbstractExecutionListener {
     Scope scope = span.makeCurrent();
     spanRegistry.putSpan(span, mojoExecution, executionEvent.getProject());
     Optional.ofNullable(MOJO_EXECUTION_SCOPE.get())
-        .ifPresent(
-            previousScope ->
-                logger.warn(
-                    "OpenTelemetry: Scope "
-                        + System.identityHashCode(previousScope)
-                        + "already attached to thread '"
-                        + Thread.currentThread().getName()
-                        + "'"));
+        .ifPresent(previousScope ->
+            logger.warn(
+                "OpenTelemetry: Scope "
+                    + System.identityHashCode(previousScope)
+                    + "already attached to thread '"
+                    + Thread.currentThread().getName()
+                    + "'"));
     MOJO_EXECUTION_SCOPE.set(scope);
     if (logger.isDebugEnabled()) {
       logger.debug(

@@ -24,15 +24,14 @@ class TomcatIntegrationTest extends TargetSystemIntegrationTest {
   protected GenericContainer<?> createTargetContainer(int jmxPort) {
     return new GenericContainer<>(
             new ImageFromDockerfile()
-                .withDockerfileFromBuilder(
-                    builder ->
-                        builder
-                            .from("tomcat:9.0")
-                            .run("rm", "-fr", "/usr/local/tomcat/webapps/ROOT")
-                            .add(
-                                "https://tomcat.apache.org/tomcat-9.0-doc/appdev/sample/sample.war",
-                                "/usr/local/tomcat/webapps/ROOT.war")
-                            .build()))
+                .withDockerfileFromBuilder(builder ->
+                    builder
+                        .from("tomcat:9.0")
+                        .run("rm", "-fr", "/usr/local/tomcat/webapps/ROOT")
+                        .add(
+                            "https://tomcat.apache.org/tomcat-9.0-doc/appdev/sample/sample.war",
+                            "/usr/local/tomcat/webapps/ROOT.war")
+                        .build()))
         .withEnv("CATALINA_OPTS", genericJmxJvmArguments(jmxPort))
         .withStartupTimeout(Duration.ofMinutes(2))
         .withExposedPorts(TOMCAT_PORT, jmxPort)

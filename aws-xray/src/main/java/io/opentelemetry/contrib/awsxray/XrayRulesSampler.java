@@ -90,10 +90,8 @@ final class XrayRulesSampler implements Sampler {
         rules.stream()
             // Lower priority value takes precedence so normal ascending sort.
             .sorted(Comparator.comparingInt(GetSamplingRulesResponse.SamplingRule::getPriority))
-            .map(
-                rule ->
-                    new SamplingRuleApplier(
-                        clientId, rule, resource.getAttribute(SERVICE_NAME), clock))
+            .map(rule ->
+                new SamplingRuleApplier(clientId, rule, resource.getAttribute(SERVICE_NAME), clock))
             .toArray(SamplingRuleApplier[]::new),
         createRuleHashMaps(rules),
         rules.stream().anyMatch(r -> r.getSamplingRateBoost() != null),
@@ -321,21 +319,20 @@ final class XrayRulesSampler implements Sampler {
         currentNanoTime + AwsXrayRemoteSampler.DEFAULT_TARGET_INTERVAL_NANOS;
     SamplingRuleApplier[] newAppliers =
         Arrays.stream(ruleAppliers)
-            .map(
-                rule -> {
-                  SamplingTargetDocument target = ruleTargets.get(rule.getRuleName());
-                  if (target != null) {
-                    return rule.withTarget(target, now, currentNanoTime);
-                  }
-                  if (requestedTargetRuleNames.contains(rule.getRuleName())) {
-                    // In practice X-Ray should return a target for any rule we requested but
-                    // do a defensive check here in case. If we requested a target but got nothing
-                    // back assume the default interval.
-                    return rule.withNextSnapshotTimeNanos(defaultNextSnapshotTimeNanos);
-                  }
-                  // Target not requested, will be updated in a future target fetch.
-                  return rule;
-                })
+            .map(rule -> {
+              SamplingTargetDocument target = ruleTargets.get(rule.getRuleName());
+              if (target != null) {
+                return rule.withTarget(target, now, currentNanoTime);
+              }
+              if (requestedTargetRuleNames.contains(rule.getRuleName())) {
+                // In practice X-Ray should return a target for any rule we requested but
+                // do a defensive check here in case. If we requested a target but got nothing
+                // back assume the default interval.
+                return rule.withNextSnapshotTimeNanos(defaultNextSnapshotTimeNanos);
+              }
+              // Target not requested, will be updated in a future target fetch.
+              return rule;
+            })
             .toArray(SamplingRuleApplier[]::new);
     return new XrayRulesSampler(
         clientId,

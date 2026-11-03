@@ -227,20 +227,15 @@ public final class JmxScraperConfig {
     // those should be removed once the 'legacy' target system source is removed.
     targetSystem =
         targetSystem.stream()
-            .map(
-                s -> {
-                  if (s.startsWith("experimental-")) {
-                    String normalized = s.substring("experimental-".length());
-                    logger.warning(
-                        "target system identifier '"
-                            + s
-                            + "' is deprecated, use '"
-                            + normalized
-                            + "'");
-                    return normalized;
-                  }
-                  return s;
-                })
+            .map(s -> {
+              if (s.startsWith("experimental-")) {
+                String normalized = s.substring("experimental-".length());
+                logger.warning(
+                    "target system identifier '" + s + "' is deprecated, use '" + normalized + "'");
+                return normalized;
+              }
+              return s;
+            })
             .collect(toList());
 
     scraperConfig.jmxConfig = unmodifiableList(jmxConfig);

@@ -138,32 +138,31 @@ public final class PolicyInit {
    * @param autoConfiguration OpenTelemetry auto-configuration customizer
    */
   public static void init(AutoConfigurationCustomizer autoConfiguration) {
-    autoConfiguration.addPropertiesCustomizer(
-        config -> {
-          PolicyInitConfig initConfig = declarativeInitConfig.getAndSet(null);
-          if (initConfig != null) {
-            logger.log(
-                Level.INFO,
-                "Initializing telemetry policies from top-level declarative config with {0} source(s)",
-                initConfig.getSources().size());
-          } else {
-            initConfig = PolicyInitConfig.readFromConfigProperties(config);
-          }
+    autoConfiguration.addPropertiesCustomizer(config -> {
+      PolicyInitConfig initConfig = declarativeInitConfig.getAndSet(null);
+      if (initConfig != null) {
+        logger.log(
+            Level.INFO,
+            "Initializing telemetry policies from top-level declarative config with {0} source(s)",
+            initConfig.getSources().size());
+      } else {
+        initConfig = PolicyInitConfig.readFromConfigProperties(config);
+      }
 
-          if (initConfig == null) {
-            return Collections.emptyMap();
-          }
-          rejectMutuallyExclusiveTraceSamplingTypes(initConfig);
-          resolveAndInitializeConfiguredPolicyTypes(initConfig, autoConfiguration);
-          // The legacy duration property has no declarative schema. Apply it at this boundary
-          // rather than adapting declarative provider properties back to ConfigProperties.
-          if (initConfig.getSources().stream()
-              .anyMatch(source -> source.getKind() == SourceKind.HTTP)) {
-            PolicyProviderPoller.configure(config);
-          }
-          activateSources(initConfig, createLegacyProviderConfig(config));
-          return Collections.emptyMap();
-        });
+      if (initConfig == null) {
+        return Collections.emptyMap();
+      }
+      rejectMutuallyExclusiveTraceSamplingTypes(initConfig);
+      resolveAndInitializeConfiguredPolicyTypes(initConfig, autoConfiguration);
+      // The legacy duration property has no declarative schema. Apply it at this boundary
+      // rather than adapting declarative provider properties back to ConfigProperties.
+      if (initConfig.getSources().stream()
+          .anyMatch(source -> source.getKind() == SourceKind.HTTP)) {
+        PolicyProviderPoller.configure(config);
+      }
+      activateSources(initConfig, createLegacyProviderConfig(config));
+      return Collections.emptyMap();
+    });
   }
 
   /**
@@ -400,14 +399,13 @@ public final class PolicyInit {
             e);
       }
       Closeable watch =
-          provider.startWatching(
-              policies -> {
-                updatePoliciesForSource(provider, policies);
-                logger.log(
-                    Level.INFO,
-                    "provider source ''{0}'' produced {1} policies",
-                    new Object[] {source.getLocation(), policies.size()});
-              });
+          provider.startWatching(policies -> {
+            updatePoliciesForSource(provider, policies);
+            logger.log(
+                Level.INFO,
+                "provider source ''{0}'' produced {1} policies",
+                new Object[] {source.getLocation(), policies.size()});
+          });
       activeSourceWatches.add(watch);
       logger.log(
           Level.INFO,

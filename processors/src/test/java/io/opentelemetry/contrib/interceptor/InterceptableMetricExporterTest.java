@@ -43,12 +43,11 @@ class InterceptableMetricExporterTest {
 
   @Test
   void verifyMetricModification() {
-    interceptor.add(
-        item -> {
-          ModifiableMetricData modified = new ModifiableMetricData(item);
-          modified.name = "ModifiedName";
-          return modified;
-        });
+    interceptor.add(item -> {
+      ModifiableMetricData modified = new ModifiableMetricData(item);
+      modified.name = "ModifiedName";
+      return modified;
+    });
 
     meter.counterBuilder("OneCounter").build().add(1);
     meterProvider.forceFlush();
@@ -60,13 +59,12 @@ class InterceptableMetricExporterTest {
 
   @Test
   void verifyMetricFiltering() {
-    interceptor.add(
-        item -> {
-          if (item.getName().contains("Deleted")) {
-            return null;
-          }
-          return item;
-        });
+    interceptor.add(item -> {
+      if (item.getName().contains("Deleted")) {
+        return null;
+      }
+      return item;
+    });
 
     meter.counterBuilder("OneCounter").build().add(1);
     meter.counterBuilder("DeletedCounter").build().add(1);
