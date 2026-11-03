@@ -195,10 +195,9 @@ class PolicyProviderPollerTest {
 
   @Test
   void registerUrlRejectsNonHttpUrls() {
-    assertThatThrownBy(
-            () ->
-                PolicyProviderPoller.registerUrl(
-                    URI.create("file:///tmp/policies.txt"), (url, body) -> {}))
+    assertThatThrownBy(() ->
+            PolicyProviderPoller.registerUrl(
+                URI.create("file:///tmp/policies.txt"), (url, body) -> {}))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("URL must use http or https scheme");
   }

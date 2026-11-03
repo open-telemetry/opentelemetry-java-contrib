@@ -20,11 +20,10 @@ public class DisabledOnOpenJ9Condition implements ExecutionCondition {
   public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext context) {
     AnnotatedElement element = context.getElement().orElse(null);
     return findAnnotation(element, DisabledOnOpenJ9.class)
-        .map(
-            annotation ->
-                isOnOpenJ9()
-                    ? disabled(element + " is @DisabledOnOpenJ9", annotation.value())
-                    : enabled("Not running on OpenJ9 JVM"))
+        .map(annotation ->
+            isOnOpenJ9()
+                ? disabled(element + " is @DisabledOnOpenJ9", annotation.value())
+                : enabled("Not running on OpenJ9 JVM"))
         .orElse(enabled("@DisabledOnOpenJ9 is not present"));
   }
 

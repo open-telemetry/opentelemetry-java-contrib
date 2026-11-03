@@ -19,16 +19,14 @@ public final class BaggageProcessorCustomizer implements AutoConfigurationCustom
   @Override
   public void customize(AutoConfigurationCustomizer autoConfigurationCustomizer) {
     autoConfigurationCustomizer
-        .addTracerProviderCustomizer(
-            (sdkTracerProviderBuilder, config) -> {
-              addSpanProcessor(sdkTracerProviderBuilder, config);
-              return sdkTracerProviderBuilder;
-            })
-        .addLoggerProviderCustomizer(
-            (sdkLoggerProviderBuilder, config) -> {
-              addLogRecordProcessor(sdkLoggerProviderBuilder, config);
-              return sdkLoggerProviderBuilder;
-            });
+        .addTracerProviderCustomizer((sdkTracerProviderBuilder, config) -> {
+          addSpanProcessor(sdkTracerProviderBuilder, config);
+          return sdkTracerProviderBuilder;
+        })
+        .addLoggerProviderCustomizer((sdkLoggerProviderBuilder, config) -> {
+          addLogRecordProcessor(sdkLoggerProviderBuilder, config);
+          return sdkLoggerProviderBuilder;
+        });
   }
 
   private static void addSpanProcessor(

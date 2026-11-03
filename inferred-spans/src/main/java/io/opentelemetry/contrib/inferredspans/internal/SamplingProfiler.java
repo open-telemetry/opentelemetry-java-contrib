@@ -180,13 +180,12 @@ public class SamplingProfiler implements Runnable {
     this.tracerProvider = tracerProvider;
     this.tempDir = tempDir;
     this.scheduler =
-        Executors.newSingleThreadScheduledExecutor(
-            r -> {
-              Thread thread = new Thread(r);
-              thread.setDaemon(true);
-              thread.setName("otel-inferred-spans");
-              return thread;
-            });
+        Executors.newSingleThreadScheduledExecutor(r -> {
+          Thread thread = new Thread(r);
+          thread.setDaemon(true);
+          thread.setName("otel-inferred-spans");
+          return thread;
+        });
     this.clock = nanoClock;
     activationEventTranslator =
         (event, sequence, active, previouslyActive) ->

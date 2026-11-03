@@ -34,14 +34,13 @@ public class StackTraceAutoConfig implements AutoConfigurationCustomizerProvider
 
   @Override
   public void customize(AutoConfigurationCustomizer config) {
-    config.addTracerProviderCustomizer(
-        (providerBuilder, properties) -> {
-          DeclarativeConfigProperties declarativeConfig = createDeclarativeConfig(properties);
-          if (getMinDuration(declarativeConfig) >= 0) {
-            providerBuilder.addSpanProcessor(create(declarativeConfig));
-          }
-          return providerBuilder;
-        });
+    config.addTracerProviderCustomizer((providerBuilder, properties) -> {
+      DeclarativeConfigProperties declarativeConfig = createDeclarativeConfig(properties);
+      if (getMinDuration(declarativeConfig) >= 0) {
+        providerBuilder.addSpanProcessor(create(declarativeConfig));
+      }
+      return providerBuilder;
+    });
   }
 
   static StackTraceSpanProcessor create(DeclarativeConfigProperties properties) {

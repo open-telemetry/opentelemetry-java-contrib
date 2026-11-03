@@ -67,9 +67,8 @@ public final class Main {
       ConfigWrapper config, ScheduledExecutorService service, MetricProducer producer) {
 
     AutoConfiguredOpenTelemetrySdk.builder()
-        .addMeterProviderCustomizer(
-            (builder, configProps) ->
-                builder.setResource(Resource.empty()).registerMetricProducer(producer))
+        .addMeterProviderCustomizer((builder, configProps) ->
+            builder.setResource(Resource.empty()).registerMetricProducer(producer))
         .build();
 
     WmqMonitor monitor = new WmqMonitor(config, service, producer);

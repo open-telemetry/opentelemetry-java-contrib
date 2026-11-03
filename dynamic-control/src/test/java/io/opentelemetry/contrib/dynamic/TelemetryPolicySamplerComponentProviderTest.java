@@ -87,11 +87,10 @@ class TelemetryPolicySamplerComponentProviderTest {
       AgentToServer message = AgentToServer.ADAPTER.decode(request.getBody());
       assertThat(message.agent_description).isNotNull();
       assertThat(message.agent_description.identifying_attributes)
-          .anySatisfy(
-              attribute -> {
-                assertThat(attribute.key).isEqualTo("service.name");
-                assertThat(attribute.value.string_value).isEqualTo("detected-service");
-              });
+          .anySatisfy(attribute -> {
+            assertThat(attribute.key).isEqualTo("service.name");
+            assertThat(attribute.value.string_value).isEqualTo("detected-service");
+          });
     }
   }
 

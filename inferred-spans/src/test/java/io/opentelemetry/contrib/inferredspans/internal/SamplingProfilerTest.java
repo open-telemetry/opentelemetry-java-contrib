@@ -148,13 +148,12 @@ class SamplingProfilerTest {
             "start,jfr,clock=m,event=wall,nobatch,cstack=n,interval=5ms,filter,file=null,safemode=0,loglevel=none");
 
     setup.close();
-    setupProfiler(
-        config ->
-            config
-                .startScheduledProfiling(false)
-                .profilerLoggingEnabled(false)
-                .samplingInterval(Duration.ofMillis(10))
-                .asyncProfilerSafeMode(14));
+    setupProfiler(config ->
+        config
+            .startScheduledProfiling(false)
+            .profilerLoggingEnabled(false)
+            .samplingInterval(Duration.ofMillis(10))
+            .asyncProfilerSafeMode(14));
     assertThat(setup.profiler.createStartCommand())
         .isEqualTo(
             "start,jfr,clock=m,event=wall,nobatch,cstack=n,interval=10ms,filter,file=null,safemode=14,loglevel=none");
@@ -196,12 +195,11 @@ class SamplingProfilerTest {
     await()
         .pollDelay(Duration.ofMillis(10))
         .timeout(Duration.ofSeconds(10))
-        .untilAsserted(
-            () -> {
-              assertThat(setup.getSpans()).hasSizeGreaterThanOrEqualTo(6);
-              assertThat(setup.getSpans())
-                  .anySatisfy(span -> assertThat(span.getName()).isEqualTo("transaction"));
-            });
+        .untilAsserted(() -> {
+          assertThat(setup.getSpans()).hasSizeGreaterThanOrEqualTo(6);
+          assertThat(setup.getSpans())
+              .anySatisfy(span -> assertThat(span.getName()).isEqualTo("transaction"));
+        });
 
     assertThat(profilingActiveOnThread).isTrue();
 
@@ -231,15 +229,14 @@ class SamplingProfilerTest {
 
     assertThat(inferredSpanA.get().getLinks())
         .hasSize(1)
-        .anySatisfy(
-            link -> {
-              assertThat(link.getAttributes()).containsEntry(LINK_IS_CHILD, true);
-              SpanData expectedSpan = explicitSpanB.get();
-              Assertions.assertThat(link.getSpanContext().getTraceId())
-                  .isEqualTo(expectedSpan.getTraceId());
-              Assertions.assertThat(link.getSpanContext().getSpanId())
-                  .isEqualTo(expectedSpan.getSpanId());
-            });
+        .anySatisfy(link -> {
+          assertThat(link.getAttributes()).containsEntry(LINK_IS_CHILD, true);
+          SpanData expectedSpan = explicitSpanB.get();
+          Assertions.assertThat(link.getSpanContext().getTraceId())
+              .isEqualTo(expectedSpan.getTraceId());
+          Assertions.assertThat(link.getSpanContext().getSpanId())
+              .isEqualTo(expectedSpan.getSpanId());
+        });
 
     Optional<SpanData> inferredSpanC =
         setup.getSpans().stream()
@@ -333,15 +330,14 @@ class SamplingProfilerTest {
 
   private void setupProfiler(Consumer<InferredSpansProcessorBuilder> configCustomizer) {
     setup =
-        ProfilerTestSetup.create(
-            config -> {
-              config
-                  .profilingDuration(Duration.ofMillis(2500))
-                  .profilerInterval(Duration.ofMillis(2500))
-                  .samplingInterval(Duration.ofMillis(5))
-                  .tempDir(tempDir.toFile());
-              configCustomizer.accept(config);
-            });
+        ProfilerTestSetup.create(config -> {
+          config
+              .profilingDuration(Duration.ofMillis(2500))
+              .profilerInterval(Duration.ofMillis(2500))
+              .samplingInterval(Duration.ofMillis(5))
+              .tempDir(tempDir.toFile());
+          configCustomizer.accept(config);
+        });
   }
 
   private static void awaitProfilerStarted(SamplingProfiler profiler) {

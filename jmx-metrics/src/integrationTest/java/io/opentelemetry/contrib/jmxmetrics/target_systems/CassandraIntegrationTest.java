@@ -137,15 +137,11 @@ class CassandraIntegrationTest extends AbstractIntegrationTest {
     List<String> statuses = Arrays.asList("Timeout", "Failure", "Unavailable");
 
     return operations.stream()
-        .flatMap(
-            op ->
-                statuses.stream()
-                    .map(
-                        st ->
-                            (Consumer<MapAssert<String, String>>)
-                                attrs ->
-                                    attrs.containsOnly(
-                                        entry("operation", op), entry("status", st))))
+        .flatMap(op ->
+            statuses.stream()
+                .map(st ->
+                    (Consumer<MapAssert<String, String>>)
+                        attrs -> attrs.containsOnly(entry("operation", op), entry("status", st))))
         .toArray(Consumer[]::new);
   }
 }

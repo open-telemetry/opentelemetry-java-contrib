@@ -64,51 +64,50 @@ final class LinePerPolicyFileProvider implements PolicyProvider {
     }
 
     try (Stream<String> lines = Files.lines(file)) {
-      lines.forEach(
-          line -> {
-            String trimmedLine = line.trim();
-            if (trimmedLine.isEmpty() || trimmedLine.startsWith("#")) {
-              return;
-            }
+      lines.forEach(line -> {
+        String trimmedLine = line.trim();
+        if (trimmedLine.isEmpty() || trimmedLine.startsWith("#")) {
+          return;
+        }
 
-            SourceFormat format;
-            if (trimmedLine.startsWith("{")) {
-              format = SourceFormat.JSONKEYVALUE;
-            } else if (trimmedLine.indexOf('=') >= 0) {
-              format = SourceFormat.KEYVALUE;
-            } else {
-              logger.info("Unsupported policy line format: " + trimmedLine);
-              return;
-            }
-            List<SourceWrapper> parsedSources = format.parse(trimmedLine, policyIds);
-            if (parsedSources == null
-                || parsedSources.size() != 1
-                || (format == SourceFormat.JSONKEYVALUE
-                    && !JsonSourceWrapper.isSinglePolicyObject(trimmedLine))) {
-              logger.info("Invalid " + format.configValue() + " policy line: " + trimmedLine);
-              return;
-            }
+        SourceFormat format;
+        if (trimmedLine.startsWith("{")) {
+          format = SourceFormat.JSONKEYVALUE;
+        } else if (trimmedLine.indexOf('=') >= 0) {
+          format = SourceFormat.KEYVALUE;
+        } else {
+          logger.info("Unsupported policy line format: " + trimmedLine);
+          return;
+        }
+        List<SourceWrapper> parsedSources = format.parse(trimmedLine, policyIds);
+        if (parsedSources == null
+            || parsedSources.size() != 1
+            || (format == SourceFormat.JSONKEYVALUE
+                && !JsonSourceWrapper.isSinglePolicyObject(trimmedLine))) {
+          logger.info("Invalid " + format.configValue() + " policy line: " + trimmedLine);
+          return;
+        }
 
-            SourceWrapper parsedSource = parsedSources.get(0);
-            String policyType = parsedSource.getPolicyType();
-            if (policyType == null || policyType.isEmpty()) {
-              logger.info("Policy type not found in line: " + trimmedLine);
-              return;
-            }
-            TelemetryPolicy policy = null;
-            for (PolicyValidator validator : validators) {
-              if (!policyType.equals(validator.getPolicyType())) {
-                continue;
-              }
-              policy = validator.validate(parsedSource, SourceKind.FILE);
-              break;
-            }
-            if (policy == null) {
-              logger.info("Validator not found or rejected for line: " + trimmedLine);
-              return;
-            }
-            policies.add(policy);
-          });
+        SourceWrapper parsedSource = parsedSources.get(0);
+        String policyType = parsedSource.getPolicyType();
+        if (policyType == null || policyType.isEmpty()) {
+          logger.info("Policy type not found in line: " + trimmedLine);
+          return;
+        }
+        TelemetryPolicy policy = null;
+        for (PolicyValidator validator : validators) {
+          if (!policyType.equals(validator.getPolicyType())) {
+            continue;
+          }
+          policy = validator.validate(parsedSource, SourceKind.FILE);
+          break;
+        }
+        if (policy == null) {
+          logger.info("Validator not found or rejected for line: " + trimmedLine);
+          return;
+        }
+        policies.add(policy);
+      });
     }
     return policies;
   }

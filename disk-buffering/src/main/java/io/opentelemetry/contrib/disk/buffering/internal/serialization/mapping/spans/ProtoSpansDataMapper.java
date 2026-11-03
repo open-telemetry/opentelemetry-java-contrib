@@ -53,17 +53,16 @@ public final class ProtoSpansDataMapper
   protected ExportTraceServiceRequest createProtoData(
       Map<Resource, Map<InstrumentationScopeInfo, List<Span>>> itemsByResource) {
     List<ResourceSpans> items = new ArrayList<>();
-    itemsByResource.forEach(
-        (resource, instrumentationScopeInfoScopedSpansMap) -> {
-          ResourceSpans.Builder resourceSpansBuilder = createProtoResourceBuilder(resource);
-          for (Map.Entry<InstrumentationScopeInfo, List<Span>> spansByScope :
-              instrumentationScopeInfoScopedSpansMap.entrySet()) {
-            ScopeSpans.Builder scopeBuilder = createProtoScopeBuilder(spansByScope.getKey());
-            scopeBuilder.spans.addAll(spansByScope.getValue());
-            resourceSpansBuilder.scope_spans.add(scopeBuilder.build());
-          }
-          items.add(resourceSpansBuilder.build());
-        });
+    itemsByResource.forEach((resource, instrumentationScopeInfoScopedSpansMap) -> {
+      ResourceSpans.Builder resourceSpansBuilder = createProtoResourceBuilder(resource);
+      for (Map.Entry<InstrumentationScopeInfo, List<Span>> spansByScope :
+          instrumentationScopeInfoScopedSpansMap.entrySet()) {
+        ScopeSpans.Builder scopeBuilder = createProtoScopeBuilder(spansByScope.getKey());
+        scopeBuilder.spans.addAll(spansByScope.getValue());
+        resourceSpansBuilder.scope_spans.add(scopeBuilder.build());
+      }
+      items.add(resourceSpansBuilder.build());
+    });
     return new ExportTraceServiceRequest.Builder().resource_spans(items).build();
   }
 

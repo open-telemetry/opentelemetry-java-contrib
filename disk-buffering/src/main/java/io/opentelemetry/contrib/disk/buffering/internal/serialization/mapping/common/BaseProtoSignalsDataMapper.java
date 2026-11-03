@@ -30,27 +30,25 @@ public abstract class BaseProtoSignalsDataMapper<
   public PROTO_DATA toProto(Collection<SIGNAL_ITEM> sourceItems) {
     Map<Resource, Map<InstrumentationScopeInfo, List<PROTO_SIGNAL_ITEM>>> itemsByResourceAndScope =
         new HashMap<>();
-    sourceItems.forEach(
-        sourceData -> {
-          Resource resource = getResourceFromSignal(sourceData);
-          InstrumentationScopeInfo instrumentationScopeInfo =
-              getInstrumentationScopeInfo(sourceData);
+    sourceItems.forEach(sourceData -> {
+      Resource resource = getResourceFromSignal(sourceData);
+      InstrumentationScopeInfo instrumentationScopeInfo = getInstrumentationScopeInfo(sourceData);
 
-          Map<InstrumentationScopeInfo, List<PROTO_SIGNAL_ITEM>> itemsByResource =
-              itemsByResourceAndScope.get(resource);
-          if (itemsByResource == null) {
-            itemsByResource = new HashMap<>();
-            itemsByResourceAndScope.put(resource, itemsByResource);
-          }
+      Map<InstrumentationScopeInfo, List<PROTO_SIGNAL_ITEM>> itemsByResource =
+          itemsByResourceAndScope.get(resource);
+      if (itemsByResource == null) {
+        itemsByResource = new HashMap<>();
+        itemsByResourceAndScope.put(resource, itemsByResource);
+      }
 
-          List<PROTO_SIGNAL_ITEM> scopeSignals = itemsByResource.get(instrumentationScopeInfo);
-          if (scopeSignals == null) {
-            scopeSignals = new ArrayList<>();
-            itemsByResource.put(instrumentationScopeInfo, scopeSignals);
-          }
+      List<PROTO_SIGNAL_ITEM> scopeSignals = itemsByResource.get(instrumentationScopeInfo);
+      if (scopeSignals == null) {
+        scopeSignals = new ArrayList<>();
+        itemsByResource.put(instrumentationScopeInfo, scopeSignals);
+      }
 
-          scopeSignals.add(signalItemToProto(sourceData));
-        });
+      scopeSignals.add(signalItemToProto(sourceData));
+    });
 
     return createProtoData(itemsByResourceAndScope);
   }

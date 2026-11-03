@@ -24,18 +24,17 @@ public class InferredSpansAutoConfig implements AutoConfigurationCustomizerProvi
 
   @Override
   public void customize(AutoConfigurationCustomizer config) {
-    config.addTracerProviderCustomizer(
-        (providerBuilder, properties) -> {
-          DeclarativeConfigProperties declarativeProperties =
-              InferredSpansConfig.createDeclarativeConfig(properties);
-          if (declarativeProperties.getBoolean(ENABLED_OPTION, false)) {
-            providerBuilder.addSpanProcessor(
-                InferredSpansConfig.createSpanProcessor(declarativeProperties));
-          } else {
-            log.finest(
-                "Not enabling inferred spans processor because otel.inferred.spans.enabled is unset or false");
-          }
-          return providerBuilder;
-        });
+    config.addTracerProviderCustomizer((providerBuilder, properties) -> {
+      DeclarativeConfigProperties declarativeProperties =
+          InferredSpansConfig.createDeclarativeConfig(properties);
+      if (declarativeProperties.getBoolean(ENABLED_OPTION, false)) {
+        providerBuilder.addSpanProcessor(
+            InferredSpansConfig.createSpanProcessor(declarativeProperties));
+      } else {
+        log.finest(
+            "Not enabling inferred spans processor because otel.inferred.spans.enabled is unset or false");
+      }
+      return providerBuilder;
+    });
   }
 }

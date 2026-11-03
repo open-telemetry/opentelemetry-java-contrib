@@ -255,19 +255,16 @@ public final class JmxScraper {
     for (String system : config.getTargetSystems()) {
       config
           .getTargetSystemRules(system)
-          .forEach(
-              path -> {
-                try (InputStream input =
-                    JmxScraper.class.getClassLoader().getResourceAsStream(path)) {
-                  // input can't be null here because already checked
-                  builder.addRules(input);
-                } catch (IOException e) {
-                  // can only be triggered by close(), thus very unlikely to be triggered in
-                  // practice
-                  throw new IllegalStateException(
-                      "IO error loading rules for system: " + system, e);
-                }
-              });
+          .forEach(path -> {
+            try (InputStream input = JmxScraper.class.getClassLoader().getResourceAsStream(path)) {
+              // input can't be null here because already checked
+              builder.addRules(input);
+            } catch (IOException e) {
+              // can only be triggered by close(), thus very unlikely to be triggered in
+              // practice
+              throw new IllegalStateException("IO error loading rules for system: " + system, e);
+            }
+          });
     }
 
     config.getJmxConfig().stream().map(Paths::get).forEach(builder::addRules);
@@ -277,29 +274,27 @@ public final class JmxScraper {
   private void start() throws IOException {
     Runtime.getRuntime()
         .addShutdownHook(
-            new Thread(
-                () -> {
-                  logger.info("JMX scraping stopped");
-                  stopLatch.countDown();
-                }));
+            new Thread(() -> {
+              logger.info("JMX scraping stopped");
+              stopLatch.countDown();
+            }));
 
     try (ConnectionHandler connectionHandler = new ConnectionHandler(client)) {
       ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-      jmxTelemetry.start(
-          () -> {
-            // JMXConnectorProvider for custom protocol e.g. wildfly remote+http is loaded from
-            // context class loader (alternatively could pass the class loader in environment map
-            // with key JMXConnectorFactory.PROTOCOL_PROVIDER_CLASS_LOADER to
-            // JMXConnectorFactory.connect).
-            ClassLoader original = Thread.currentThread().getContextClassLoader();
-            Thread.currentThread().setContextClassLoader(contextClassLoader);
-            try {
-              MBeanServerConnection connection = connectionHandler.getMBeanServerConnection();
-              return connection == null ? emptyList() : singletonList(connection);
-            } finally {
-              Thread.currentThread().setContextClassLoader(original);
-            }
-          });
+      jmxTelemetry.start(() -> {
+        // JMXConnectorProvider for custom protocol e.g. wildfly remote+http is loaded from
+        // context class loader (alternatively could pass the class loader in environment map
+        // with key JMXConnectorFactory.PROTOCOL_PROVIDER_CLASS_LOADER to
+        // JMXConnectorFactory.connect).
+        ClassLoader original = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(contextClassLoader);
+        try {
+          MBeanServerConnection connection = connectionHandler.getMBeanServerConnection();
+          return connection == null ? emptyList() : singletonList(connection);
+        } finally {
+          Thread.currentThread().setContextClassLoader(original);
+        }
+      });
 
       logger.info("JMX scraping started");
 

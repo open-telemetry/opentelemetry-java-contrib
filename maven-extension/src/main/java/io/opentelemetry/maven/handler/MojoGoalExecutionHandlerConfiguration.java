@@ -39,24 +39,22 @@ public class MojoGoalExecutionHandlerConfiguration {
     Map<MavenGoal, MojoGoalExecutionHandler> mojoGoalExecutionHandlers = new HashMap<>();
 
     Stream.concat(builtInHandlers.stream(), spiHandlers.stream())
-        .forEach(
-            handler ->
-                handler
-                    .getSupportedGoals()
-                    .forEach(
-                        goal -> {
-                          MojoGoalExecutionHandler previousHandler =
-                              mojoGoalExecutionHandlers.put(goal, handler);
-                          if (previousHandler != null) {
-                            throw new IllegalStateException(
-                                "More than one handler found for maven goal "
-                                    + goal
-                                    + ": "
-                                    + previousHandler
-                                    + ", "
-                                    + handler);
-                          }
-                        }));
+        .forEach(handler ->
+            handler
+                .getSupportedGoals()
+                .forEach(goal -> {
+                  MojoGoalExecutionHandler previousHandler =
+                      mojoGoalExecutionHandlers.put(goal, handler);
+                  if (previousHandler != null) {
+                    throw new IllegalStateException(
+                        "More than one handler found for maven goal "
+                            + goal
+                            + ": "
+                            + previousHandler
+                            + ", "
+                            + handler);
+                  }
+                }));
     return mojoGoalExecutionHandlers;
   }
 

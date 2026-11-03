@@ -130,11 +130,10 @@ class HttpPolicyProviderTest {
     AtomicInteger updateCount = new AtomicInteger();
     AtomicReference<List<TelemetryPolicy>> latestPolicies = new AtomicReference<>();
     Closeable watch =
-        provider.startWatching(
-            policies -> {
-              updateCount.incrementAndGet();
-              latestPolicies.set(policies);
-            });
+        provider.startWatching(policies -> {
+          updateCount.incrementAndGet();
+          latestPolicies.set(policies);
+        });
 
     PolicyProviderPoller.poll();
     responseBody.set("sampling-rate=0.75");

@@ -72,13 +72,12 @@ public final class CelBasedSampler implements Sampler {
     this.expressions =
         Collections.unmodifiableList(
             new ArrayList<>(requireNonNull(expressions, "expressions must not be null")));
-    this.expressions.forEach(
-        expr -> {
-          if (!expr.getAbstractSyntaxTree().isChecked()) {
-            throw new IllegalArgumentException(
-                "Expression and its AST is not checked: " + expr.getExpression());
-          }
-        });
+    this.expressions.forEach(expr -> {
+      if (!expr.getAbstractSyntaxTree().isChecked()) {
+        throw new IllegalArgumentException(
+            "Expression and its AST is not checked: " + expr.getExpression());
+      }
+    });
     this.fallback = requireNonNull(fallback, "fallback must not be null");
     this.celRuntime = CelRuntimeFactory.plannerRuntimeBuilder().build();
   }

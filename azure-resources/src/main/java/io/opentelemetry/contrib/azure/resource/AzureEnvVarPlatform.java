@@ -35,12 +35,11 @@ public enum AzureEnvVarPlatform {
       Map<AttributeKey<String>, String> mapping,
       Map<String, String> env,
       AttributesBuilder builder) {
-    mapping.forEach(
-        (key, value) -> {
-          String envValue = env.get(value);
-          if (envValue != null) {
-            builder.put(key, envValue);
-          }
-        });
+    mapping.forEach((key, value) -> {
+      String envValue = env.get(value);
+      if (envValue != null) {
+        builder.put(key, envValue);
+      }
+    });
   }
 }

@@ -442,15 +442,13 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
     assertThat(metric.hasGauge()).isTrue();
 
     assertThat(metric.getGauge().getDataPointsList())
-        .satisfiesExactly(
-            point ->
-                assertThat(point.getAttributesList())
-                    .singleElement()
-                    .satisfies(
-                        attribute -> {
-                          assertThat(attribute.getKey()).isEqualTo("client-id");
-                          assertThat(attribute.getValue().getStringValue()).isNotEmpty();
-                        }));
+        .satisfiesExactly(point ->
+            assertThat(point.getAttributesList())
+                .singleElement()
+                .satisfies(attribute -> {
+                  assertThat(attribute.getKey()).isEqualTo("client-id");
+                  assertThat(attribute.getValue().getStringValue()).isNotEmpty();
+                }));
   }
 
   @SuppressWarnings("unchecked")
@@ -464,22 +462,21 @@ abstract class KafkaIntegrationTest extends AbstractIntegrationTest {
     assertThat(metric.getGauge().getDataPointsList())
         .satisfiesExactlyInAnyOrder(
             topics.stream()
-                .map(
-                    topic ->
-                        (Consumer<NumberDataPoint>)
-                            point ->
-                                assertThat(point.getAttributesList())
-                                    .satisfiesExactlyInAnyOrder(
-                                        attribute -> {
-                                          assertThat(attribute.getKey()).isEqualTo("client-id");
-                                          assertThat(attribute.getValue().getStringValue())
-                                              .isNotEmpty();
-                                        },
-                                        attribute -> {
-                                          assertThat(attribute.getKey()).isEqualTo("topic");
-                                          assertThat(attribute.getValue().getStringValue())
-                                              .isEqualTo(topic);
-                                        }))
+                .map(topic ->
+                    (Consumer<NumberDataPoint>)
+                        point ->
+                            assertThat(point.getAttributesList())
+                                .satisfiesExactlyInAnyOrder(
+                                    attribute -> {
+                                      assertThat(attribute.getKey()).isEqualTo("client-id");
+                                      assertThat(attribute.getValue().getStringValue())
+                                          .isNotEmpty();
+                                    },
+                                    attribute -> {
+                                      assertThat(attribute.getKey()).isEqualTo("topic");
+                                      assertThat(attribute.getValue().getStringValue())
+                                          .isEqualTo(topic);
+                                    }))
                 .toArray(Consumer[]::new));
   }
 }

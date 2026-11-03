@@ -45,14 +45,13 @@ class FilteringLogRecordProcessorTest {
   void setUp() {
     sdkBuilder = AutoConfiguredOpenTelemetrySdk.builder();
     sdkBuilder
-        .addPropertiesSupplier(
-            () -> {
-              Map<String, String> configMap = new HashMap<>();
-              configMap.put("otel.metrics.exporter", "none");
-              configMap.put("otel.traces.exporter", "logging");
-              configMap.put("otel.logs.exporter", "logging");
-              return configMap;
-            })
+        .addPropertiesSupplier(() -> {
+          Map<String, String> configMap = new HashMap<>();
+          configMap.put("otel.metrics.exporter", "none");
+          configMap.put("otel.traces.exporter", "logging");
+          configMap.put("otel.logs.exporter", "logging");
+          return configMap;
+        })
         .addSpanExporterCustomizer((exporter, c) -> spansExporter)
         .addLogRecordExporterCustomizer(
             (logRecordExporter, configProperties) -> memoryLogRecordExporter)

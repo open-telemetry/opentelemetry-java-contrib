@@ -53,17 +53,16 @@ public final class ProtoMetricsDataMapper
   protected ExportMetricsServiceRequest createProtoData(
       Map<Resource, Map<InstrumentationScopeInfo, List<Metric>>> itemsByResource) {
     List<ResourceMetrics> items = new ArrayList<>();
-    itemsByResource.forEach(
-        (resource, instrumentationScopeInfoScopedMetricsMap) -> {
-          ResourceMetrics.Builder resourceMetricsBuilder = createProtoResourceBuilder(resource);
-          for (Map.Entry<InstrumentationScopeInfo, List<Metric>> metricsByScope :
-              instrumentationScopeInfoScopedMetricsMap.entrySet()) {
-            ScopeMetrics.Builder scopeBuilder = createProtoScopeBuilder(metricsByScope.getKey());
-            scopeBuilder.metrics.addAll(metricsByScope.getValue());
-            resourceMetricsBuilder.scope_metrics.add(scopeBuilder.build());
-          }
-          items.add(resourceMetricsBuilder.build());
-        });
+    itemsByResource.forEach((resource, instrumentationScopeInfoScopedMetricsMap) -> {
+      ResourceMetrics.Builder resourceMetricsBuilder = createProtoResourceBuilder(resource);
+      for (Map.Entry<InstrumentationScopeInfo, List<Metric>> metricsByScope :
+          instrumentationScopeInfoScopedMetricsMap.entrySet()) {
+        ScopeMetrics.Builder scopeBuilder = createProtoScopeBuilder(metricsByScope.getKey());
+        scopeBuilder.metrics.addAll(metricsByScope.getValue());
+        resourceMetricsBuilder.scope_metrics.add(scopeBuilder.build());
+      }
+      items.add(resourceMetricsBuilder.build());
+    });
     return new ExportMetricsServiceRequest.Builder().resource_metrics(items).build();
   }
 

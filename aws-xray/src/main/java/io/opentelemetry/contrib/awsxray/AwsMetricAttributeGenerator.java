@@ -215,8 +215,8 @@ final class AwsMetricAttributeGenerator implements MetricAttributeGenerator {
    *
    * <ul>
    *   <li>Attributes are meaningfully indicative of remote service/operation names.
-   *   <li>Attributes are defined in the specification to be low cardinality, usually with a low-
-   *       cardinality list of values.
+   *   <li>Attributes are defined in the specification to be low cardinality, usually with a
+   *       low-cardinality list of values.
    *   <li>Attributes are confirmed to have low-cardinality values, based on code analysis.
    * </ul>
    *

@@ -731,12 +731,11 @@ class SamplingRuleApplierTest {
     AtomicInteger numRequests = new AtomicInteger();
     // Wait for reservoir to fill.
     await()
-        .untilAsserted(
-            () -> {
-              numRequests.incrementAndGet();
-              assertThat(doSample(applier))
-                  .isEqualTo(SamplingResult.create(SamplingDecision.RECORD_AND_SAMPLE));
-            });
+        .untilAsserted(() -> {
+          numRequests.incrementAndGet();
+          assertThat(doSample(applier))
+              .isEqualTo(SamplingResult.create(SamplingDecision.RECORD_AND_SAMPLE));
+        });
 
     now = new Date();
     statistics = applier.snapshot(now).getStatisticsDocument();
@@ -1107,12 +1106,11 @@ class SamplingRuleApplierTest {
   private static Attributes removeAttribute(Attributes attributes, AttributeKey<?> removedKey) {
     AttributesBuilder builder = Attributes.builder();
     // TODO(anuraaga): Replace with AttributeBuilder.remove
-    attributes.forEach(
-        (key, value) -> {
-          if (!key.equals(removedKey)) {
-            builder.put((AttributeKey) key, value);
-          }
-        });
+    attributes.forEach((key, value) -> {
+      if (!key.equals(removedKey)) {
+        builder.put((AttributeKey) key, value);
+      }
+    });
     return builder.build();
   }
 }

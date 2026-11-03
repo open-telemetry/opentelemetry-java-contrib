@@ -25,11 +25,10 @@ public final class ResourceHolder implements AutoConfigurationCustomizerProvider
 
   @Override
   public void customize(AutoConfigurationCustomizer autoConfiguration) {
-    autoConfiguration.addResourceCustomizer(
-        (resource, config) -> {
-          ResourceHolder.resource = resource;
-          return resource;
-        });
+    autoConfiguration.addResourceCustomizer((resource, config) -> {
+      ResourceHolder.resource = resource;
+      return resource;
+    });
   }
 
   /**

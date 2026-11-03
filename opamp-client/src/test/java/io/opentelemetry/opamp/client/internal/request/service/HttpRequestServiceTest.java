@@ -159,19 +159,18 @@ class HttpRequestServiceTest {
     HttpSender sender = mock(HttpSender.class);
 
     when(sender.send(any(), anyInt()))
-        .thenAnswer(
-            invocation -> {
-              int count = requestCount.incrementAndGet();
+        .thenAnswer(invocation -> {
+          int count = requestCount.incrementAndGet();
 
-              if (count == 1) {
-                firstRequestStarted.countDown();
-                if (!releaseFirstRequest.await(5, SECONDS)) {
-                  throw new IOException("First request timed out");
-                }
-              }
+          if (count == 1) {
+            firstRequestStarted.countDown();
+            if (!releaseFirstRequest.await(5, SECONDS)) {
+              throw new IOException("First request timed out");
+            }
+          }
 
-              return createSuccessfulResponse(new ServerToAgent.Builder().build());
-            });
+          return createSuccessfulResponse(new ServerToAgent.Builder().build());
+        });
 
     HttpRequestService service =
         new HttpRequestService(
