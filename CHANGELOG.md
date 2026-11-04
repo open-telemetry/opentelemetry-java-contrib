@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-## Version 1.62.0 (2026-11-03)
+## Version 1.62.0 (2026-11-04)
 
 ### AWS Lambda resource detector
 
