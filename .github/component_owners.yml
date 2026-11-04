@@ -52,9 +52,6 @@ components:
     - dsgrieve
   jfr-events:
     - sfriberg
-  jmx-metrics:
-    - breedx-splk
-    - sylvainjuge
   jmx-scraper:
     - breedx-splk
     - robsunday
