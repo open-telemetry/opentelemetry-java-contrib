@@ -20,6 +20,7 @@ import com.ibm.mq.headers.pcf.PCFMessage;
 import com.ibm.mq.headers.pcf.PCFMessageAgent;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.ibm.mq.WmqMonitor;
 import io.opentelemetry.ibm.mq.config.QueueManager;
 import io.opentelemetry.ibm.mq.metrics.MetricProducer;
 import io.opentelemetry.ibm.mq.opentelemetry.ConfigWrapper;
@@ -65,10 +66,11 @@ class WMQMonitorIntegrationTest {
           4, /* one gets burned with our @BeforeAll message uzi, 4 is faster than 2 */
           r -> {
             Thread thread = new Thread(r);
-            thread.setUncaughtExceptionHandler((t, e) -> {
-              logger.error("Uncaught exception", e);
-              fail(e.getMessage());
-            });
+            thread.setUncaughtExceptionHandler(
+                (t, e) -> {
+                  logger.error("Uncaught exception", e);
+                  fail(e.getMessage());
+                });
             thread.setDaemon(true);
             thread.setName("WMQMonitorIntegrationTest");
             return thread;
@@ -255,10 +257,9 @@ class WMQMonitorIntegrationTest {
         ConfigWrapper.parse(WMQMonitorIntegrationTest.getConfigFile("conf/test-config.yml"));
     ScheduledExecutorService service =
         Executors.newScheduledThreadPool(config.getNumberOfThreads());
-    MetricProducer producer =
-        new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
-
-    Main.run(config, service, producer);
+    WmqMonitor monitor = new WmqMonitor(config, service);
+    MetricProducer producer = monitor.getQueueManagers().values().iterator().next();
+    Main.run(config, service, monitor);
     CountDownLatch latch = new CountDownLatch(1);
     Future<?> ignored = service.submit(latch::countDown);
     Thread.sleep(5000); // TODO: This is fragile and time consuming and should be made better

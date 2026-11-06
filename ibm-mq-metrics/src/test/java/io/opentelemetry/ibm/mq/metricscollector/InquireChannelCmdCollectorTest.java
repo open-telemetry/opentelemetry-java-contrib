@@ -58,6 +58,7 @@ class InquireChannelCmdCollectorTest {
         .thenReturn(createPCFResponseForInquireChannelCmd());
     classUnderTest = new InquireChannelCmdCollector();
     classUnderTest.accept(context);
+    MetricProducer producer = context.getMetricProducer();
     List<String> metricsList =
         new ArrayList<>(
             Arrays.asList(

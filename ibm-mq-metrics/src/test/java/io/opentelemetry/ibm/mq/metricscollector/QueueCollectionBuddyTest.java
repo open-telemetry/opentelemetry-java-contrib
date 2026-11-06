@@ -86,7 +86,7 @@ class QueueCollectionBuddyTest {
                         "ibm.mq.onqtime.long_period", -1L,
                         "ibm.mq.queue.depth", 1L))));
 
-    for (MetricData metric : producer.produce(Resource.empty())) {
+    for (MetricData metric : collectorContext.getMetricProducer().produce(Resource.empty())) {
       for (LongPointData d : metric.getLongGaugeData().getPoints()) {
         String queueName = d.getAttributes().get(MESSAGING_DESTINATION_NAME);
         Long expectedValue = expectedValues.get(queueName).remove(metric.getName());
@@ -125,7 +125,7 @@ class QueueCollectionBuddyTest {
                         "ibm.mq.open.input.count", 3L,
                         "ibm.mq.open.output.count", 3L))));
 
-    for (MetricData metric : producer.produce(Resource.empty())) {
+    for (MetricData metric : collectorContext.getMetricProducer().produce(Resource.empty())) {
       for (LongPointData d : metric.getLongGaugeData().getPoints()) {
         String queueName = d.getAttributes().get(MESSAGING_DESTINATION_NAME);
         Long expectedValue = expectedValues.get(queueName).remove(metric.getName());
@@ -150,7 +150,7 @@ class QueueCollectionBuddyTest {
     classUnderTest.processPcfRequestAndPublishQMetrics(
         collectorContext, request, "*", ResetQStatsCmdCollector.ATTRIBUTES);
 
-    for (MetricData metric : producer.produce(Resource.empty())) {
+    for (MetricData metric : collectorContext.getMetricProducer().produce(Resource.empty())) {
       Iterator<LongPointData> iterator = metric.getLongGaugeData().getPoints().iterator();
       if (metric.getName().equals("ibm.mq.high.queue.depth")) {
         assertThat(iterator.next().getValue()).isEqualTo(10);

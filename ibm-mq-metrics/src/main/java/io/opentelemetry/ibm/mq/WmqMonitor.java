@@ -29,7 +29,10 @@ import io.opentelemetry.ibm.mq.metricscollector.ReadConfigurationEventQueueColle
 import io.opentelemetry.ibm.mq.metricscollector.TopicMetricsCollector;
 import io.opentelemetry.ibm.mq.opentelemetry.ConfigWrapper;
 import io.opentelemetry.ibm.mq.util.WmqUtil;
+import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
+import io.opentelemetry.sdk.resources.Resource;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -45,23 +48,23 @@ public final class WmqMonitor {
 
   private static final Logger logger = LoggerFactory.getLogger(WmqMonitor.class);
 
-  private final List<QueueManager> queueManagers;
+  private final Map<QueueManager, MetricProducer> queueManagers;
   private final List<Consumer<MetricsCollectorContext>> jobs = new ArrayList<>();
   private final ExecutorService threadPool;
   private final MetricsConfig metricsConfig;
-  private final MetricProducer producer;
 
-  public WmqMonitor(ConfigWrapper config, ExecutorService threadPool, MetricProducer producer) {
+  public WmqMonitor(ConfigWrapper config, ExecutorService threadPool) {
     List<Map<String, ?>> queueManagers = getQueueManagers(config);
     ObjectMapper mapper = new ObjectMapper();
 
-    this.producer = producer;
-    this.queueManagers = new ArrayList<>();
+    this.queueManagers = new HashMap<>();
 
     for (Map<String, ?> queueManager : queueManagers) {
       try {
         QueueManager qManager = mapper.convertValue(queueManager, QueueManager.class);
-        this.queueManagers.add(qManager);
+        this.queueManagers.put(
+            qManager,
+            new MetricProducer(Resource.empty(), InstrumentationScopeInfo.create("websphere/mq")));
       } catch (Throwable t) {
         logger.error("Error preparing queue manager {}", queueManager, t);
       }
@@ -82,13 +85,11 @@ public final class WmqMonitor {
     jobs.add(new QueueManagerEventCollector());
   }
 
-  public void run() {
-    for (QueueManager qm : this.queueManagers) {
-      run(qm);
-    }
+  public Map<QueueManager, MetricProducer> getQueueManagers() {
+    return this.queueManagers;
   }
 
-  public void run(QueueManager queueManager) {
+  public void run(QueueManager queueManager, MetricProducer producer) {
     String queueManagerName = queueManager.getName();
     logger.debug("WMQMonitor thread for queueManager {} started.", queueManagerName);
     long startTime = System.currentTimeMillis();
@@ -99,7 +100,7 @@ public final class WmqMonitor {
       ibmQueueManager = WmqUtil.connectToQueueManager(queueManager);
       heartBeatMetricValue = 1;
       agent = WmqUtil.initPcfMessageAgent(queueManager, ibmQueueManager);
-      extractAndReportMetrics(ibmQueueManager, queueManager, agent);
+      extractAndReportMetrics(ibmQueueManager, queueManager, agent, producer);
     } catch (RuntimeException e) {
       logger.error(
           "Error connecting to QueueManager {} by thread {}: {}",
@@ -138,31 +139,39 @@ public final class WmqMonitor {
   }
 
   private void extractAndReportMetrics(
-      MQQueueManager mqQueueManager, QueueManager queueManager, PCFMessageAgent agent) {
+      MQQueueManager mqQueueManager,
+      QueueManager queueManager,
+      PCFMessageAgent agent,
+      MetricProducer producer) {
     logger.debug("Queueing {} jobs", jobs.size());
     MetricsCollectorContext context =
         new MetricsCollectorContext(
-            queueManager, agent, mqQueueManager, this.metricsConfig, this.producer);
+            queueManager, agent, mqQueueManager, this.metricsConfig, producer);
     List<Callable<Void>> tasks = new ArrayList<>();
     for (Consumer<MetricsCollectorContext> collector : jobs) {
-      tasks.add(() -> {
-        try {
-          long startTime = System.currentTimeMillis();
-          collector.accept(context);
-          long diffTime = System.currentTimeMillis() - startTime;
-          if (diffTime > 60000L) {
-            logger.warn(
-                "{} Task took {} ms to complete", collector.getClass().getSimpleName(), diffTime);
-          } else {
-            logger.debug(
-                "{} Task took {} ms to complete", collector.getClass().getSimpleName(), diffTime);
-          }
-        } catch (RuntimeException e) {
-          logger.error(
-              "Error while running task name = {}", collector.getClass().getSimpleName(), e);
-        }
-        return null;
-      });
+      tasks.add(
+          () -> {
+            try {
+              long startTime = System.currentTimeMillis();
+              collector.accept(context);
+              long diffTime = System.currentTimeMillis() - startTime;
+              if (diffTime > 60000L) {
+                logger.warn(
+                    "{} Task took {} ms to complete",
+                    collector.getClass().getSimpleName(),
+                    diffTime);
+              } else {
+                logger.debug(
+                    "{} Task took {} ms to complete",
+                    collector.getClass().getSimpleName(),
+                    diffTime);
+              }
+            } catch (RuntimeException e) {
+              logger.error(
+                  "Error while running task name = {}", collector.getClass().getSimpleName(), e);
+            }
+            return null;
+          });
     }
 
     try {

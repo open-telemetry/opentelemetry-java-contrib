@@ -57,7 +57,7 @@ class TopicMetricsCollectorTest {
 
     classUnderTest.accept(context);
 
-    List<MetricData> result = producer.produce(Resource.empty());
+    List<MetricData> result = context.getMetricProducer().produce(Resource.empty());
     assertThat(result.size()).isEqualTo(4);
     assertThat(result.get(0).getName()).isEqualTo("ibm.mq.publish.count");
     assertThat(result.get(0).getLongGaugeData().getPoints().iterator().next().getValue())

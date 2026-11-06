@@ -44,10 +44,11 @@ public final class QueueMetricsCollector implements Consumer<MetricsCollectorCon
     // schedule all other jobs in parallel.
     List<Callable<Void>> taskJobs = new ArrayList<>();
     for (Consumer<MetricsCollectorContext> p : publishers) {
-      taskJobs.add(() -> {
-        p.accept(context);
-        return null;
-      });
+      taskJobs.add(
+          () -> {
+            p.accept(context);
+            return null;
+          });
     }
 
     try {
