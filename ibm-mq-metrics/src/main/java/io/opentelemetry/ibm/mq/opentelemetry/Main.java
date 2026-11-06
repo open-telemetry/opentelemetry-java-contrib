@@ -67,14 +67,13 @@ public final class Main {
       ConfigWrapper config, ScheduledExecutorService service, WmqMonitor monitor) {
 
     AutoConfiguredOpenTelemetrySdk.builder()
-        .addMeterProviderCustomizer(
-            (builder, configProps) -> {
-              builder.setResource(Resource.empty());
-              for (MetricProducer mp : monitor.getQueueManagers().values()) {
-                builder.registerMetricProducer(mp);
-              }
-              return builder;
-            })
+        .addMeterProviderCustomizer((builder, configProps) -> {
+          builder.setResource(Resource.empty());
+          for (MetricProducer mp : monitor.getQueueManagers().values()) {
+            builder.registerMetricProducer(mp);
+          }
+          return builder;
+        })
         .build();
 
     long skew = 0;

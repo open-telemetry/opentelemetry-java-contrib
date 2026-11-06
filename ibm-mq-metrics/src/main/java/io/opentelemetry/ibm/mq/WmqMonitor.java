@@ -149,29 +149,24 @@ public final class WmqMonitor {
             queueManager, agent, mqQueueManager, this.metricsConfig, producer);
     List<Callable<Void>> tasks = new ArrayList<>();
     for (Consumer<MetricsCollectorContext> collector : jobs) {
-      tasks.add(
-          () -> {
-            try {
-              long startTime = System.currentTimeMillis();
-              collector.accept(context);
-              long diffTime = System.currentTimeMillis() - startTime;
-              if (diffTime > 60000L) {
-                logger.warn(
-                    "{} Task took {} ms to complete",
-                    collector.getClass().getSimpleName(),
-                    diffTime);
-              } else {
-                logger.debug(
-                    "{} Task took {} ms to complete",
-                    collector.getClass().getSimpleName(),
-                    diffTime);
-              }
-            } catch (RuntimeException e) {
-              logger.error(
-                  "Error while running task name = {}", collector.getClass().getSimpleName(), e);
-            }
-            return null;
-          });
+      tasks.add(() -> {
+        try {
+          long startTime = System.currentTimeMillis();
+          collector.accept(context);
+          long diffTime = System.currentTimeMillis() - startTime;
+          if (diffTime > 60000L) {
+            logger.warn(
+                "{} Task took {} ms to complete", collector.getClass().getSimpleName(), diffTime);
+          } else {
+            logger.debug(
+                "{} Task took {} ms to complete", collector.getClass().getSimpleName(), diffTime);
+          }
+        } catch (RuntimeException e) {
+          logger.error(
+              "Error while running task name = {}", collector.getClass().getSimpleName(), e);
+        }
+        return null;
+      });
     }
 
     try {
