@@ -80,7 +80,7 @@ public final class Main {
     long periodNanos = TimeUnit.SECONDS.toNanos(config.getTaskDelaySeconds());
     long step = periodNanos / monitor.getQueueManagers().size();
     for (Map.Entry<QueueManager, MetricProducer> entry : monitor.getQueueManagers().entrySet()) {
-      ScheduledFuture unused =
+      ScheduledFuture<?> unused =
           service.scheduleAtFixedRate(
               () -> monitor.run(entry.getKey(), entry.getValue()),
               TimeUnit.SECONDS.toNanos(config.getTaskInitialDelaySeconds()) + skew,
