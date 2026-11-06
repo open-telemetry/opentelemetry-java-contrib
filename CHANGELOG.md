@@ -5,8 +5,8 @@
 ### JMX metrics
 
 - Remove the deprecated `jmx-metrics` (JMX Gatherer) module. Use the
-  [JMX Scraper](./jmx-scraper/README.md) instead, see the
-  [migration guide](./jmx-scraper/README.md#migration-from-jmx-gatherer).
+  [JMX Scraper](https://github.com/open-telemetry/opentelemetry-java-contrib/blob/main/jmx-scraper/README.md) instead, see the
+  [migration guide](https://github.com/open-telemetry/opentelemetry-java-contrib/blob/main/jmx-scraper/README.md#migration-from-jmx-gatherer).
 
 ## Version 1.62.0 (2026-11-04)
 
