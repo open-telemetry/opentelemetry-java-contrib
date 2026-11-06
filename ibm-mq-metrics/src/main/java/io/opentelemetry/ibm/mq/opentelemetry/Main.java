@@ -73,7 +73,7 @@ public final class Main {
         .addMeterProviderCustomizer(
             (builder, configProps) -> {
               builder.setResource(Resource.empty());
-              for (MetricProducer mp : monitor.getQueueManagers().values()) {
+              for (MetricProducer mp : monitor.getMetricProducersByQueueManagers().values()) {
                 builder.registerMetricProducer(mp);
               }
               return builder;
@@ -82,8 +82,8 @@ public final class Main {
 
     long skew = 0;
     long periodNanos = TimeUnit.SECONDS.toNanos(config.getTaskDelaySeconds());
-    long step = periodNanos / monitor.getQueueManagers().size();
-    for (Map.Entry<QueueManager, MetricProducer> entry : monitor.getQueueManagers().entrySet()) {
+    long step = periodNanos / monitor.getMetricProducersByQueueManagers().size();
+    for (Map.Entry<QueueManager, MetricProducer> entry : monitor.getMetricProducersByQueueManagers().entrySet()) {
       ScheduledFuture<?> unused =
           service.scheduleAtFixedRate(
               () -> monitor.run(entry.getKey(), entry.getValue()),

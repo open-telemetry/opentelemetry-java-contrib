@@ -257,7 +257,7 @@ class WMQMonitorIntegrationTest {
     ScheduledExecutorService service =
         Executors.newScheduledThreadPool(config.getNumberOfThreads());
     WmqMonitor monitor = new WmqMonitor(config, service);
-    MetricProducer producer = monitor.getQueueManagers().values().iterator().next();
+    MetricProducer producer = monitor.getMetricProducersByQueueManagers().values().iterator().next();
     Main.run(config, service, monitor);
     CountDownLatch latch = new CountDownLatch(1);
     Future<?> ignored = service.submit(latch::countDown);
