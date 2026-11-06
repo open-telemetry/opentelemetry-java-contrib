@@ -26,7 +26,9 @@ import javax.annotation.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class AwsXrayPropagatorTest {
 
@@ -455,17 +457,29 @@ class AwsXrayPropagatorTest {
                 TraceState.getDefault()));
   }
 
-  @Test
-  void extract_EpochPart_TwoChars() {
+  @ParameterizedTest
+  @CsvSource({
+    "1, 00000001",
+    "1a, 0000001a",
+    "1a2, 000001a2",
+    "1a2b, 00001a2b",
+    "1a2b3, 0001a2b3",
+    "1a2b3c, 001a2b3c",
+    "1a2b3c4, 01a2b3c4",
+    "1a2b3c4d, 1a2b3c4d"
+  })
+  void extract_EpochPart(String epochPart, String paddedEpochPart) {
     Map<String, String> carrier = new LinkedHashMap<>();
     carrier.put(
         TRACE_HEADER_KEY,
-        "Root=1-1a-d188f8fa79d48a391a778fa6;Parent=53995c3f42cd8ad8;Sampled=1;Foo=Bar");
+        "Root=1-"
+            + epochPart
+            + "-d188f8fa79d48a391a778fa6;Parent=53995c3f42cd8ad8;Sampled=1;Foo=Bar");
 
     assertThat(getSpanContext(subject.extract(Context.current(), carrier, GETTER)))
         .isEqualTo(
             SpanContext.createFromRemoteParent(
-                "0000001ad188f8fa79d48a391a778fa6",
+                paddedEpochPart + "d188f8fa79d48a391a778fa6",
                 SPAN_ID,
                 TraceFlags.getSampled(),
                 TraceState.getDefault()));
@@ -496,6 +510,23 @@ class AwsXrayPropagatorTest {
 
     assertThat(getSpanContext(subject.extract(Context.current(), invalidHeaders, GETTER)))
         .isSameAs(SpanContext.getInvalid());
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "1-g-d188f8fa79d48a391a778fa6",
+        "1-1a-d188f8fa79d48a391a778fag",
+        "1-0-000000000000000000000000",
+        "1-00000000-000000000000000000000000",
+        "1-1a-d188f8fa79d48a391a778fa",
+        ""
+      })
+  void extract_InvalidTraceId_Padding(String traceId) {
+    Map<String, String> invalidHeaders = new LinkedHashMap<>();
+    invalidHeaders.put(TRACE_HEADER_KEY, "Root=" + traceId + ";Parent=53995c3f42cd8ad8;Sampled=0");
+
+    verifyInvalidBehavior(invalidHeaders);
   }
 
   @Test
