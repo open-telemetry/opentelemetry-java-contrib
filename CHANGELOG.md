@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### JMX metrics
+
+- Remove the deprecated `jmx-metrics` (JMX Gatherer) module. Use the
+  [JMX Scraper](./jmx-scraper/README.md) instead, see the
+  [migration guide](./jmx-scraper/README.md#migration-from-jmx-gatherer).
+
 ## Version 1.62.0 (2026-11-04)
 
 ### AWS Lambda resource detector
