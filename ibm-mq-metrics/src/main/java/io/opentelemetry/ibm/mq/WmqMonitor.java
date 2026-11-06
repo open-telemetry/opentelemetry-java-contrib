@@ -54,7 +54,7 @@ public final class WmqMonitor {
   private final MetricsConfig metricsConfig;
 
   public WmqMonitor(ConfigWrapper config, ExecutorService threadPool) {
-    List<Map<String, ?>> queueManagers = getQueueManagers(config);
+    List<Map<String, ?>> queueManagers = getMetricProducersByQueueManagers(config);
     ObjectMapper mapper = new ObjectMapper();
 
     this.queueManagers = new HashMap<>();
@@ -83,10 +83,6 @@ public final class WmqMonitor {
     jobs.add(new ReadConfigurationEventQueueCollector());
     jobs.add(new PerformanceEventQueueCollector());
     jobs.add(new QueueManagerEventCollector());
-  }
-
-  public Map<QueueManager, MetricProducer> getQueueManagers() {
-    return this.queueManagers;
   }
 
   public void run(QueueManager queueManager, MetricProducer producer) {
@@ -128,8 +124,12 @@ public final class WmqMonitor {
     }
   }
 
+  public Map<QueueManager, MetricProducer> getMetricProducersByQueueManagers() {
+    return this.queueManagers;
+  }
+
   @NotNull
-  private static List<Map<String, ?>> getQueueManagers(ConfigWrapper config) {
+  private static List<Map<String, ?>> getMetricProducersByQueueManagers(ConfigWrapper config) {
     List<Map<String, ?>> queueManagers = config.getQueueManagers();
     if (queueManagers.isEmpty()) {
       throw new IllegalStateException(
