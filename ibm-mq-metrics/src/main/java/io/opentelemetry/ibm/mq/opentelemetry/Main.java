@@ -6,10 +6,11 @@
 package io.opentelemetry.ibm.mq.opentelemetry;
 
 import io.opentelemetry.ibm.mq.WmqMonitor;
+import io.opentelemetry.ibm.mq.config.QueueManager;
 import io.opentelemetry.ibm.mq.metrics.MetricProducer;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
-import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.resources.Resource;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -57,26 +58,36 @@ public final class Main {
 
     Config.configureSecurity(config);
     Config.setUpSslConnection(config.getSslConnection());
-    MetricProducer producer =
-        new MetricProducer(Resource.empty(), InstrumentationScopeInfo.create("websphere/mq"));
-    run(config, service, producer);
+    WmqMonitor monitor = new WmqMonitor(config, service);
+    run(config, service, monitor);
   }
 
   @VisibleForTesting
   public static void run(
-      ConfigWrapper config, ScheduledExecutorService service, MetricProducer producer) {
+      ConfigWrapper config, ScheduledExecutorService service, WmqMonitor monitor) {
 
     AutoConfiguredOpenTelemetrySdk.builder()
-        .addMeterProviderCustomizer((builder, configProps) ->
-            builder.setResource(Resource.empty()).registerMetricProducer(producer))
+        .addMeterProviderCustomizer(
+            (builder, configProps) -> {
+              builder.setResource(Resource.empty());
+              for (MetricProducer mp : monitor.getQueueManagers().values()) {
+                builder.registerMetricProducer(mp);
+              }
+              return builder;
+            })
         .build();
 
-    WmqMonitor monitor = new WmqMonitor(config, service, producer);
-    ScheduledFuture<?> unused =
-        service.scheduleAtFixedRate(
-            monitor::run,
-            config.getTaskInitialDelaySeconds(),
-            config.getTaskDelaySeconds(),
-            TimeUnit.SECONDS);
+    long skew = 0;
+    long periodNanos = TimeUnit.SECONDS.toNanos(config.getTaskDelaySeconds());
+    long step = periodNanos / monitor.getQueueManagers().size();
+    for (Map.Entry<QueueManager, MetricProducer> entry : monitor.getQueueManagers().entrySet()) {
+      ScheduledFuture unused =
+          service.scheduleAtFixedRate(
+              () -> monitor.run(entry.getKey(), entry.getValue()),
+              TimeUnit.SECONDS.toNanos(config.getTaskInitialDelaySeconds()) + skew,
+              periodNanos,
+              TimeUnit.NANOSECONDS);
+      skew += step;
+    }
   }
 }

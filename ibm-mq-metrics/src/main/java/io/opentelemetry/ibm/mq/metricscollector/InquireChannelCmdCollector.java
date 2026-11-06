@@ -26,11 +26,8 @@ import org.slf4j.LoggerFactory;
 public final class InquireChannelCmdCollector implements Consumer<MetricsCollectorContext> {
 
   public static final Logger logger = LoggerFactory.getLogger(InquireChannelCmdCollector.class);
-  private final MetricProducer producer;
 
-  public InquireChannelCmdCollector(MetricProducer producer) {
-    this.producer = producer;
-  }
+  public InquireChannelCmdCollector() {}
 
   @Override
   public void accept(MetricsCollectorContext context) {
@@ -95,9 +92,10 @@ public final class InquireChannelCmdCollector implements Consumer<MetricsCollect
     logger.debug("Time taken to publish metrics for all channels is {} milliseconds", exitTime);
   }
 
-  private void updateMetrics(
+  private static void updateMetrics(
       PCFMessage message, String channelName, String channelType, MetricsCollectorContext context)
       throws PCFException {
+    MetricProducer producer = context.getMetricProducer();
     Attributes attributes =
         Attributes.builder()
             .put(IBM_MQ_CHANNEL_NAME, channelName)
@@ -106,12 +104,12 @@ public final class InquireChannelCmdCollector implements Consumer<MetricsCollect
             .build();
     if (context.getMetricsConfig().isIbmMqMaxInstancesEnabled()
         && message.getParameter(CMQCFC.MQIACH_MAX_INSTANCES) != null) {
-      this.producer.recordIbmMqMaxInstances(
+      producer.recordIbmMqMaxInstances(
           message.getIntParameterValue(CMQCFC.MQIACH_MAX_INSTANCES), attributes);
     }
     if (context.getMetricsConfig().isIbmMqInstancesPerClientEnabled()
         && message.getParameter(CMQCFC.MQIACH_MAX_INSTS_PER_CLIENT) != null) {
-      this.producer.recordIbmMqInstancesPerClient(
+      producer.recordIbmMqInstancesPerClient(
           message.getIntParameterValue(CMQCFC.MQIACH_MAX_INSTS_PER_CLIENT), attributes);
     }
     if (context.getMetricsConfig().isIbmMqMessageRetryCountEnabled()) {
@@ -119,21 +117,21 @@ public final class InquireChannelCmdCollector implements Consumer<MetricsCollect
       if (message.getParameter(CMQCFC.MQIACH_MR_COUNT) != null) {
         count = message.getIntParameterValue(CMQCFC.MQIACH_MR_COUNT);
       }
-      this.producer.recordIbmMqMessageRetryCount(count, attributes);
+      producer.recordIbmMqMessageRetryCount(count, attributes);
     }
     if (context.getMetricsConfig().isIbmMqInstancesPerClientEnabled()) {
       int received = 0;
       if (message.getParameter(CMQCFC.MQIACH_MSGS_RECEIVED) != null) {
         received = message.getIntParameterValue(CMQCFC.MQIACH_MSGS_RECEIVED);
       }
-      this.producer.recordIbmMqMessageReceivedCount(received, attributes);
+      producer.recordIbmMqMessageReceivedCount(received, attributes);
     }
     if (context.getMetricsConfig().isIbmMqMessageSentCountEnabled()) {
       int sent = 0;
       if (message.getParameter(CMQCFC.MQIACH_MSGS_SENT) != null) {
         sent = message.getIntParameterValue(CMQCFC.MQIACH_MSGS_SENT);
       }
-      this.producer.recordIbmMqMessageSentCount(sent, attributes);
+      producer.recordIbmMqMessageSentCount(sent, attributes);
     }
   }
 }

@@ -28,13 +28,10 @@ public final class PerformanceEventQueueCollector implements Consumer<MetricsCol
 
   private static final Logger logger =
       LoggerFactory.getLogger(PerformanceEventQueueCollector.class);
-  private final MetricProducer producer;
 
-  public PerformanceEventQueueCollector(MetricProducer producer) {
-    this.producer = producer;
-  }
+  public PerformanceEventQueueCollector() {}
 
-  private void readEvents(MetricsCollectorContext context, String performanceEventsQueueName)
+  private static void readEvents(MetricsCollectorContext context, String performanceEventsQueueName)
       throws Exception {
 
     MQQueue queue = null;
@@ -73,8 +70,9 @@ public final class PerformanceEventQueueCollector implements Consumer<MetricsCol
     logger.debug("Read {} events from performance queue {}", counter, performanceEventsQueueName);
   }
 
-  private void incrementCounterByEventType(MetricsCollectorContext context, PCFMessage receivedMsg)
-      throws PCFException {
+  private static void incrementCounterByEventType(
+      MetricsCollectorContext context, PCFMessage receivedMsg) throws PCFException {
+    MetricProducer producer = context.getMetricProducer();
     String queueName = receivedMsg.getStringParameterValue(CMQC.MQCA_BASE_OBJECT_NAME).trim();
     Attributes attributes =
         Attributes.of(
@@ -85,17 +83,17 @@ public final class PerformanceEventQueueCollector implements Consumer<MetricsCol
     switch (receivedMsg.getReason()) {
       case CMQC.MQRC_Q_FULL:
         if (context.getMetricsConfig().isIbmMqQueueDepthFullEventEnabled()) {
-          this.producer.addIbmMqQueueDepthFullEvent(1, attributes);
+          producer.addIbmMqQueueDepthFullEvent(1, attributes);
         }
         break;
       case CMQC.MQRC_Q_DEPTH_HIGH:
         if (context.getMetricsConfig().isIbmMqQueueDepthHighEventEnabled()) {
-          this.producer.addIbmMqQueueDepthHighEvent(1, attributes);
+          producer.addIbmMqQueueDepthHighEvent(1, attributes);
         }
         break;
       case CMQC.MQRC_Q_DEPTH_LOW:
         if (context.getMetricsConfig().isIbmMqQueueDepthLowEventEnabled()) {
-          this.producer.addIbmMqQueueDepthLowEvent(1, attributes);
+          producer.addIbmMqQueueDepthLowEvent(1, attributes);
         }
         break;
       default:
