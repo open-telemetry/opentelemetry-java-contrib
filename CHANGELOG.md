@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### 🛠️ Bug fixes
+
+- Fix `NoSuchMethodError` when extracting AWS X-Ray context with OpenTelemetry SDK 1.68.0.
+  ([#3208](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3208))
+
 ## Version 1.62.0 (2026-11-03)
 
 ### AWS Lambda resource detector
