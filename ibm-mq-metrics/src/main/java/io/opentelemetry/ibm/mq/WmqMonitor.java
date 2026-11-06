@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import org.jetbrains.annotations.NotNull;
@@ -52,10 +53,12 @@ public final class WmqMonitor {
   private final List<Consumer<MetricsCollectorContext>> jobs = new ArrayList<>();
   private final ExecutorService threadPool;
   private final MetricsConfig metricsConfig;
+  @Nullable private final Integer collectionTimeout;
 
   public WmqMonitor(ConfigWrapper config, ExecutorService threadPool) {
     List<Map<String, ?>> queueManagers = getMetricProducersByQueueManagers(config);
     ObjectMapper mapper = new ObjectMapper();
+    this.collectionTimeout = config.getCollectionTimeoutSeconds();
 
     this.queueManagers = new HashMap<>();
 
@@ -77,7 +80,7 @@ public final class WmqMonitor {
     jobs.add(new InquireQueueManagerCmdCollector());
     jobs.add(new ChannelMetricsCollector());
     jobs.add(new InquireChannelCmdCollector());
-    jobs.add(new QueueMetricsCollector(threadPool, config));
+    jobs.add(new QueueMetricsCollector());
     jobs.add(new ListenerMetricsCollector());
     jobs.add(new TopicMetricsCollector());
     jobs.add(new ReadConfigurationEventQueueCollector());
@@ -170,7 +173,11 @@ public final class WmqMonitor {
     }
 
     try {
-      this.threadPool.invokeAll(tasks);
+      if (this.collectionTimeout != null) {
+        this.threadPool.invokeAll(tasks, this.collectionTimeout, TimeUnit.SECONDS);
+      } else {
+        this.threadPool.invokeAll(tasks);
+      }
     } catch (InterruptedException e) {
       logger.error("Error while the thread {} is waiting ", Thread.currentThread().getName(), e);
     }

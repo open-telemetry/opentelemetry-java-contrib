@@ -5,12 +5,8 @@
 
 package io.opentelemetry.ibm.mq.metricscollector;
 
-import io.opentelemetry.ibm.mq.opentelemetry.ConfigWrapper;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,12 +18,8 @@ public final class QueueMetricsCollector implements Consumer<MetricsCollectorCon
 
   private final List<Consumer<MetricsCollectorContext>> publishers = new ArrayList<>();
   private final InquireQCmdCollector inquireQueueCmd;
-  private final ExecutorService threadPool;
-  private final ConfigWrapper config;
 
-  public QueueMetricsCollector(ExecutorService threadPool, ConfigWrapper config) {
-    this.threadPool = threadPool;
-    this.config = config;
+  public QueueMetricsCollector() {
     QueueCollectionBuddy queueBuddy = new QueueCollectionBuddy();
     this.inquireQueueCmd = new InquireQCmdCollector(queueBuddy);
     publishers.add(new InquireQStatusCmdCollector(queueBuddy));
@@ -41,20 +33,8 @@ public final class QueueMetricsCollector implements Consumer<MetricsCollectorCon
     // first collect all queue types.
     inquireQueueCmd.accept(context);
 
-    // schedule all other jobs in parallel.
-    List<Callable<Void>> taskJobs = new ArrayList<>();
     for (Consumer<MetricsCollectorContext> p : publishers) {
-      taskJobs.add(() -> {
-        p.accept(context);
-        return null;
-      });
-    }
-
-    try {
-      int timeout = this.config.getInt("queueMetricsCollectionTimeoutInSeconds", 20);
-      threadPool.invokeAll(taskJobs, timeout, TimeUnit.SECONDS);
-    } catch (InterruptedException e) {
-      logger.error("The thread was interrupted ", e);
+      p.accept(context);
     }
   }
 }
