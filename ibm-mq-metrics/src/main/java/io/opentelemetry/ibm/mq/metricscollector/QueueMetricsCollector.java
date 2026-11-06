@@ -28,7 +28,7 @@ public final class QueueMetricsCollector implements Consumer<MetricsCollectorCon
   public QueueMetricsCollector(ExecutorService threadPool, ConfigWrapper config) {
     this.threadPool = threadPool;
     this.config = config;
-    QueueCollectionBuddy queueBuddy = new QueueCollectionBuddy(new QueueCollectorSharedState());
+    QueueCollectionBuddy queueBuddy = new QueueCollectionBuddy();
     this.inquireQueueCmd = new InquireQCmdCollector(queueBuddy);
     publishers.add(new InquireQStatusCmdCollector(queueBuddy));
     publishers.add(new ResetQStatsCmdCollector(queueBuddy));
@@ -44,11 +44,10 @@ public final class QueueMetricsCollector implements Consumer<MetricsCollectorCon
     // schedule all other jobs in parallel.
     List<Callable<Void>> taskJobs = new ArrayList<>();
     for (Consumer<MetricsCollectorContext> p : publishers) {
-      taskJobs.add(
-          () -> {
-            p.accept(context);
-            return null;
-          });
+      taskJobs.add(() -> {
+        p.accept(context);
+        return null;
+      });
     }
 
     try {

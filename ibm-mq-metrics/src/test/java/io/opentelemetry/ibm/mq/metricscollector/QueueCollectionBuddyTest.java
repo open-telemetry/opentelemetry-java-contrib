@@ -60,7 +60,8 @@ class QueueCollectionBuddyTest {
     sharedState.putQueueType("DEV.QUEUE.1", "local-transmission");
     PCFMessage request = createPCFRequestForInquireQStatusCmd();
     when(pcfMessageAgent.send(request)).thenReturn(createPCFResponseForInquireQStatusCmd());
-    classUnderTest = new QueueCollectionBuddy(sharedState);
+    classUnderTest = new QueueCollectionBuddy();
+    classUnderTest.sharedStates.put(collectorContext.getQueueManagerName(), sharedState);
     classUnderTest.processPcfRequestAndPublishQMetrics(
         collectorContext, request, "*", InquireQStatusCmdCollector.ATTRIBUTES);
 
@@ -103,7 +104,10 @@ class QueueCollectionBuddyTest {
   void testProcessPcfRequestAndPublishQMetricsForInquireQCmd() throws Exception {
     PCFMessage request = createPCFRequestForInquireQCmd();
     when(pcfMessageAgent.send(request)).thenReturn(createPCFResponseForInquireQCmd());
-    classUnderTest = new QueueCollectionBuddy(new QueueCollectorSharedState());
+    classUnderTest = new QueueCollectionBuddy();
+    classUnderTest.sharedStates.put(
+        collectorContext.getQueueManagerName(), new QueueCollectorSharedState());
+
     classUnderTest.processPcfRequestAndPublishQMetrics(
         collectorContext, request, "*", InquireQCmdCollector.ATTRIBUTES);
 
@@ -146,7 +150,8 @@ class QueueCollectionBuddyTest {
     sharedState.putQueueType("DEV.QUEUE.1", "local-transmission");
     PCFMessage request = createPCFRequestForResetQStatsCmd();
     when(pcfMessageAgent.send(request)).thenReturn(createPCFResponseForResetQStatsCmd());
-    classUnderTest = new QueueCollectionBuddy(sharedState);
+    classUnderTest = new QueueCollectionBuddy();
+    classUnderTest.sharedStates.put(collectorContext.getQueueManagerName(), sharedState);
     classUnderTest.processPcfRequestAndPublishQMetrics(
         collectorContext, request, "*", ResetQStatsCmdCollector.ATTRIBUTES);
 

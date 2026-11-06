@@ -67,11 +67,9 @@ public final class Main {
       ConfigWrapper config, ScheduledExecutorService service, WmqMonitor monitor) {
 
     AutoConfiguredOpenTelemetrySdk.builder()
-<<<<<<< HEAD
         .addPropertiesSupplier(config::getOtlpConfiguration)
         .addMeterProviderCustomizer((builder, configProps) ->
-            builder.setResource(Resource.empty()).registerMetricProducer(producer))
-=======
+            builder.setResource(Resource.empty()))
         .addMeterProviderCustomizer(
             (builder, configProps) -> {
               builder.setResource(Resource.empty());
@@ -80,7 +78,6 @@ public final class Main {
               }
               return builder;
             })
->>>>>>> 896441df ([ibm-mq-metrics] Separate metric export and distribute them accross the collection interval to reduce spike in exports with large number of resources under monitoring)
         .build();
 
     long skew = 0;
