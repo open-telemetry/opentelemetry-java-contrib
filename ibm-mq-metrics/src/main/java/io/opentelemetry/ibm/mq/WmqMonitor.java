@@ -35,9 +35,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import org.jetbrains.annotations.NotNull;
@@ -51,14 +50,11 @@ public final class WmqMonitor {
 
   private final Map<QueueManager, MetricProducer> queueManagers;
   private final List<Consumer<MetricsCollectorContext>> jobs = new ArrayList<>();
-  private final ExecutorService threadPool;
   private final MetricsConfig metricsConfig;
-  @Nullable private final Integer collectionTimeout;
 
-  public WmqMonitor(ConfigWrapper config, ExecutorService threadPool) {
+  public WmqMonitor(ConfigWrapper config) {
     List<Map<String, ?>> queueManagers = getMetricProducersByQueueManagers(config);
     ObjectMapper mapper = new ObjectMapper();
-    this.collectionTimeout = config.getCollectionTimeoutSeconds();
 
     this.queueManagers = new HashMap<>();
 
@@ -74,7 +70,6 @@ public final class WmqMonitor {
     }
 
     this.metricsConfig = new MetricsConfig(config);
-    this.threadPool = threadPool;
 
     jobs.add(new QueueManagerMetricsCollector());
     jobs.add(new InquireQueueManagerCmdCollector());
@@ -88,7 +83,7 @@ public final class WmqMonitor {
     jobs.add(new QueueManagerEventCollector());
   }
 
-  public void run(QueueManager queueManager, MetricProducer producer) {
+  public void run(QueueManager queueManager, MetricProducer producer, ExecutorService threadPool) {
     String queueManagerName = queueManager.getName();
     logger.debug("WMQMonitor thread for queueManager {} started.", queueManagerName);
     long startTime = System.currentTimeMillis();
@@ -99,7 +94,7 @@ public final class WmqMonitor {
       ibmQueueManager = WmqUtil.connectToQueueManager(queueManager);
       heartBeatMetricValue = 1;
       agent = WmqUtil.initPcfMessageAgent(queueManager, ibmQueueManager);
-      extractAndReportMetrics(ibmQueueManager, queueManager, agent, producer);
+      extractAndReportMetrics(ibmQueueManager, queueManager, agent, producer, threadPool);
     } catch (RuntimeException e) {
       logger.error(
           "Error connecting to QueueManager {} by thread {}: {}",
@@ -145,41 +140,36 @@ public final class WmqMonitor {
       MQQueueManager mqQueueManager,
       QueueManager queueManager,
       PCFMessageAgent agent,
-      MetricProducer producer) {
+      MetricProducer producer,
+      ExecutorService threadPool) {
     logger.debug("Queueing {} jobs", jobs.size());
     MetricsCollectorContext context =
         new MetricsCollectorContext(
             queueManager, agent, mqQueueManager, this.metricsConfig, producer);
-    List<Callable<Void>> tasks = new ArrayList<>();
     for (Consumer<MetricsCollectorContext> collector : jobs) {
-      tasks.add(() -> {
-        try {
-          long startTime = System.currentTimeMillis();
-          collector.accept(context);
-          long diffTime = System.currentTimeMillis() - startTime;
-          if (diffTime > 60000L) {
-            logger.warn(
-                "{} Task took {} ms to complete", collector.getClass().getSimpleName(), diffTime);
-          } else {
-            logger.debug(
-                "{} Task took {} ms to complete", collector.getClass().getSimpleName(), diffTime);
-          }
-        } catch (RuntimeException e) {
-          logger.error(
-              "Error while running task name = {}", collector.getClass().getSimpleName(), e);
-        }
-        return null;
-      });
-    }
-
-    try {
-      if (this.collectionTimeout != null) {
-        this.threadPool.invokeAll(tasks, this.collectionTimeout, TimeUnit.SECONDS);
-      } else {
-        this.threadPool.invokeAll(tasks);
-      }
-    } catch (InterruptedException e) {
-      logger.error("Error while the thread {} is waiting ", Thread.currentThread().getName(), e);
+      Future<Void> unused =
+          threadPool.submit(() -> {
+            try {
+              long startTime = System.currentTimeMillis();
+              collector.accept(context);
+              long diffTime = System.currentTimeMillis() - startTime;
+              if (diffTime > 60000L) {
+                logger.warn(
+                    "{} Task took {} ms to complete",
+                    collector.getClass().getSimpleName(),
+                    diffTime);
+              } else {
+                logger.debug(
+                    "{} Task took {} ms to complete",
+                    collector.getClass().getSimpleName(),
+                    diffTime);
+              }
+            } catch (RuntimeException e) {
+              logger.error(
+                  "Error while running task name = {}", collector.getClass().getSimpleName(), e);
+            }
+            return null;
+          });
     }
   }
 
