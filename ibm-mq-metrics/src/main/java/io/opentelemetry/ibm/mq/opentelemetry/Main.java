@@ -55,6 +55,7 @@ public final class Main {
   public static void run(ConfigWrapper config, WmqMonitor monitor) {
 
     AutoConfiguredOpenTelemetrySdk.builder()
+        .addPropertiesSupplier(config::getOtlpConfiguration)
         .addMeterProviderCustomizer((builder, configProps) -> {
           builder.setResource(Resource.empty());
           for (MetricProducer mp : monitor.getMetricProducersByQueueManagers().values()) {
