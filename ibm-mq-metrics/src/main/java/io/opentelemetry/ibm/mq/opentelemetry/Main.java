@@ -99,7 +99,10 @@ public final class Main {
     for (Map.Entry<QueueManager, MetricProducer> entry :
         monitor.getMetricProducersByQueueManagers().entrySet()) {
 
-      logger.debug("Initializing thread pool with {} threads", threadsPerQueueManager);
+      logger.debug(
+          "Initializing thread pool with {} threads for {}",
+          threadsPerQueueManager,
+          entry.getKey().getName());
       ExecutorService service =
           Executors.newFixedThreadPool(
               threadsPerQueueManager,
@@ -111,19 +114,7 @@ public final class Main {
               });
       ScheduledFuture<?> unused =
           queueManagersThreadPool.scheduleAtFixedRate(
-              () -> {
-                monitor.run(entry.getKey(), entry.getValue(), service);
-                if (collectionTimeout != null) {
-                  try {
-                    service.awaitTermination(collectionTimeout, TimeUnit.SECONDS);
-                  } catch (InterruptedException e) {
-                    logger.error(
-                        "Error while the thread {} is waiting ",
-                        Thread.currentThread().getName(),
-                        e);
-                  }
-                }
-              },
+              () -> monitor.run(entry.getKey(), entry.getValue(), service, collectionTimeout),
               TimeUnit.SECONDS.toNanos(config.getTaskInitialDelaySeconds()) + skew,
               periodNanos,
               TimeUnit.NANOSECONDS);

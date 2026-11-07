@@ -35,8 +35,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import org.jetbrains.annotations.NotNull;
@@ -83,7 +84,11 @@ public final class WmqMonitor {
     jobs.add(new QueueManagerEventCollector());
   }
 
-  public void run(QueueManager queueManager, MetricProducer producer, ExecutorService threadPool) {
+  public void run(
+      QueueManager queueManager,
+      MetricProducer producer,
+      ExecutorService threadPool,
+      @Nullable Integer timeoutSeconds) {
     String queueManagerName = queueManager.getName();
     logger.debug("WMQMonitor thread for queueManager {} started.", queueManagerName);
     long startTime = System.currentTimeMillis();
@@ -94,7 +99,8 @@ public final class WmqMonitor {
       ibmQueueManager = WmqUtil.connectToQueueManager(queueManager);
       heartBeatMetricValue = 1;
       agent = WmqUtil.initPcfMessageAgent(queueManager, ibmQueueManager);
-      extractAndReportMetrics(ibmQueueManager, queueManager, agent, producer, threadPool);
+      extractAndReportMetrics(
+          ibmQueueManager, queueManager, agent, producer, threadPool, timeoutSeconds);
     } catch (RuntimeException e) {
       logger.error(
           "Error connecting to QueueManager {} by thread {}: {}",
@@ -141,35 +147,44 @@ public final class WmqMonitor {
       QueueManager queueManager,
       PCFMessageAgent agent,
       MetricProducer producer,
-      ExecutorService threadPool) {
+      ExecutorService threadPool,
+      @Nullable Integer timeoutSeconds) {
     logger.debug("Queueing {} jobs", jobs.size());
     MetricsCollectorContext context =
         new MetricsCollectorContext(
             queueManager, agent, mqQueueManager, this.metricsConfig, producer);
+    List<Callable<Void>> tasks = new ArrayList<>();
     for (Consumer<MetricsCollectorContext> collector : jobs) {
-      Future<Void> unused =
-          threadPool.submit(() -> {
-            try {
-              long startTime = System.currentTimeMillis();
-              collector.accept(context);
-              long diffTime = System.currentTimeMillis() - startTime;
-              if (diffTime > 60000L) {
-                logger.warn(
-                    "{} Task took {} ms to complete",
-                    collector.getClass().getSimpleName(),
-                    diffTime);
-              } else {
-                logger.debug(
-                    "{} Task took {} ms to complete",
-                    collector.getClass().getSimpleName(),
-                    diffTime);
-              }
-            } catch (RuntimeException e) {
-              logger.error(
-                  "Error while running task name = {}", collector.getClass().getSimpleName(), e);
-            }
-            return null;
-          });
+      tasks.add(() -> {
+        try {
+          long startTime = System.currentTimeMillis();
+          collector.accept(context);
+          long diffTime = System.currentTimeMillis() - startTime;
+          if (diffTime > 60000L) {
+            logger.warn(
+                "{} Task took {} ms to complete", collector.getClass().getSimpleName(), diffTime);
+          } else {
+            logger.debug(
+                "{} Task took {} ms to complete", collector.getClass().getSimpleName(), diffTime);
+          }
+        } catch (RuntimeException e) {
+          logger.error(
+              "Error while running task name = {}", collector.getClass().getSimpleName(), e);
+        }
+        return null;
+      });
+    }
+    // Block until every collector is done (or the timeout elapses, in which case unfinished
+    // collectors are cancelled) so the connections are not closed underneath running jobs.
+    try {
+      if (timeoutSeconds != null) {
+        threadPool.invokeAll(tasks, timeoutSeconds, TimeUnit.SECONDS);
+      } else {
+        threadPool.invokeAll(tasks);
+      }
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      logger.error("Interrupted while collecting metrics for {}", queueManager.getName(), e);
     }
   }
 
