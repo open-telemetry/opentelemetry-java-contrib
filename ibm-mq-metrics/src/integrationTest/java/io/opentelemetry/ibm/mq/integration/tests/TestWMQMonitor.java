@@ -52,7 +52,7 @@ class TestWMQMonitor {
     // we override this helper to pass in our opentelemetry helper instead.
     for (Map<String, ?> queueManager : queueManagers) {
       QueueManager qManager = mapper.convertValue(queueManager, QueueManager.class);
-      wmqTask.run(qManager, producer, threadPool);
+      wmqTask.run(qManager, producer, threadPool, null);
     }
   }
 }
