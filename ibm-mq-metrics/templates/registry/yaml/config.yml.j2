@@ -1,14 +1,13 @@
 # This section defines the schedule at which the program will scrape metrics.
 taskSchedule:
+  # Number of threads dedicated to metric collection. The application can parallelize up to 12 jobs per queue manager when collecting metrics.
   numberOfThreads: 20
   initialDelaySeconds: 0
   taskDelaySeconds: 60
 
-#This is the timeout on queue metrics and channel metrics threads.Default value is 20 seconds.
+#This is the timeout to collect metrics for a queue manager. There is no default value.
 #No need to change the default unless you know what you are doing.
-#queueMetricsCollectionTimeoutInSeconds: 40
-#channelMetricsCollectionTimeoutInSeconds: 40
-#topicMetricsCollectionTimeoutInSeconds: 40
+#collectionTimeoutSeconds: 30
 
 queueManagers:
   - name: "QM1"
@@ -123,3 +122,6 @@ sslConnection:
 # Configure the OTLP exporter using system properties keys following the specification https://opentelemetry.io/docs/languages/java/configuration/
 otlpExporter:
   otel.exporter.otlp.endpoint: http://localhost:4318
+  otel.exporter.otlp.protocol: http/protobuf
+  # Set an export interval lower than the collection interval `taskDelaySeconds` to avoid sending all metrics in one batch.
+  otel.metric.export.interval: 30000

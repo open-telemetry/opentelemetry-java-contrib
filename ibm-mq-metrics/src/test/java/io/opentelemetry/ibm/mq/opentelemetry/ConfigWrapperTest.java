@@ -15,6 +15,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -62,5 +64,17 @@ class ConfigWrapperTest {
     Files.write(tempFile, "!!java.lang.Runtime {}".getBytes(StandardCharsets.UTF_8));
     assertThatThrownBy(() -> ConfigWrapper.parse(tempFile.toString()))
         .isInstanceOf(YamlEngineException.class);
+  }
+
+  @Test
+  void testOtlpConfiguration() throws Exception {
+    ConfigWrapper config = ConfigWrapper.parse(file);
+    Map<String, String> props = new HashMap<>();
+    props.put("otel.exporter.otlp.endpoint", "https://localhost:4318");
+    props.put("otel.exporter.otlp.protocol", "http/protobuf");
+    props.put("otel.metric.export.interval", "5s");
+    props.put("otel.logs.exporter", "none");
+    props.put("otel.traces.exporter", "none");
+    assertThat(config.getOtlpConfiguration()).isEqualTo(props);
   }
 }

@@ -20,6 +20,7 @@ import com.ibm.mq.headers.pcf.PCFMessage;
 import com.ibm.mq.headers.pcf.PCFMessageAgent;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.ibm.mq.WmqMonitor;
 import io.opentelemetry.ibm.mq.config.QueueManager;
 import io.opentelemetry.ibm.mq.metrics.MetricProducer;
 import io.opentelemetry.ibm.mq.opentelemetry.ConfigWrapper;
@@ -41,7 +42,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
@@ -253,12 +253,10 @@ class WMQMonitorIntegrationTest {
   void test_otlphttp() throws Exception {
     ConfigWrapper config =
         ConfigWrapper.parse(WMQMonitorIntegrationTest.getConfigFile("conf/test-config.yml"));
-    ScheduledExecutorService service =
-        Executors.newScheduledThreadPool(config.getNumberOfThreads());
+    WmqMonitor monitor = new WmqMonitor(config);
     MetricProducer producer =
-        new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
-
-    Main.run(config, service, producer);
+        monitor.getMetricProducersByQueueManagers().values().iterator().next();
+    Main.run(config, monitor);
     CountDownLatch latch = new CountDownLatch(1);
     Future<?> ignored = service.submit(latch::countDown);
     Thread.sleep(5000); // TODO: This is fragile and time consuming and should be made better

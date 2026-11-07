@@ -29,11 +29,15 @@ import io.opentelemetry.ibm.mq.metricscollector.ReadConfigurationEventQueueColle
 import io.opentelemetry.ibm.mq.metricscollector.TopicMetricsCollector;
 import io.opentelemetry.ibm.mq.opentelemetry.ConfigWrapper;
 import io.opentelemetry.ibm.mq.util.WmqUtil;
+import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
+import io.opentelemetry.sdk.resources.Resource;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import org.jetbrains.annotations.NotNull;
@@ -45,50 +49,46 @@ public final class WmqMonitor {
 
   private static final Logger logger = LoggerFactory.getLogger(WmqMonitor.class);
 
-  private final List<QueueManager> queueManagers;
+  private final Map<QueueManager, MetricProducer> queueManagers;
   private final List<Consumer<MetricsCollectorContext>> jobs = new ArrayList<>();
-  private final ExecutorService threadPool;
   private final MetricsConfig metricsConfig;
-  private final MetricProducer producer;
 
-  public WmqMonitor(ConfigWrapper config, ExecutorService threadPool, MetricProducer producer) {
-    List<Map<String, ?>> queueManagers = getQueueManagers(config);
+  public WmqMonitor(ConfigWrapper config) {
+    List<Map<String, ?>> queueManagers = getMetricProducersByQueueManagers(config);
     ObjectMapper mapper = new ObjectMapper();
 
-    this.producer = producer;
-    this.queueManagers = new ArrayList<>();
+    this.queueManagers = new HashMap<>();
 
     for (Map<String, ?> queueManager : queueManagers) {
       try {
         QueueManager qManager = mapper.convertValue(queueManager, QueueManager.class);
-        this.queueManagers.add(qManager);
+        this.queueManagers.put(
+            qManager,
+            new MetricProducer(Resource.empty(), InstrumentationScopeInfo.create("websphere/mq")));
       } catch (Throwable t) {
         logger.error("Error preparing queue manager {}", queueManager, t);
       }
     }
 
     this.metricsConfig = new MetricsConfig(config);
-    this.threadPool = threadPool;
 
-    jobs.add(new QueueManagerMetricsCollector(producer));
-    jobs.add(new InquireQueueManagerCmdCollector(producer));
-    jobs.add(new ChannelMetricsCollector(producer));
-    jobs.add(new InquireChannelCmdCollector(producer));
-    jobs.add(new QueueMetricsCollector(producer, threadPool, config));
-    jobs.add(new ListenerMetricsCollector(producer));
-    jobs.add(new TopicMetricsCollector(producer));
-    jobs.add(new ReadConfigurationEventQueueCollector(producer));
-    jobs.add(new PerformanceEventQueueCollector(producer));
-    jobs.add(new QueueManagerEventCollector(producer));
+    jobs.add(new QueueManagerMetricsCollector());
+    jobs.add(new InquireQueueManagerCmdCollector());
+    jobs.add(new ChannelMetricsCollector());
+    jobs.add(new InquireChannelCmdCollector());
+    jobs.add(new QueueMetricsCollector());
+    jobs.add(new ListenerMetricsCollector());
+    jobs.add(new TopicMetricsCollector());
+    jobs.add(new ReadConfigurationEventQueueCollector());
+    jobs.add(new PerformanceEventQueueCollector());
+    jobs.add(new QueueManagerEventCollector());
   }
 
-  public void run() {
-    for (QueueManager qm : this.queueManagers) {
-      run(qm);
-    }
-  }
-
-  public void run(QueueManager queueManager) {
+  public void run(
+      QueueManager queueManager,
+      MetricProducer producer,
+      ExecutorService threadPool,
+      @Nullable Integer timeoutSeconds) {
     String queueManagerName = queueManager.getName();
     logger.debug("WMQMonitor thread for queueManager {} started.", queueManagerName);
     long startTime = System.currentTimeMillis();
@@ -99,7 +99,8 @@ public final class WmqMonitor {
       ibmQueueManager = WmqUtil.connectToQueueManager(queueManager);
       heartBeatMetricValue = 1;
       agent = WmqUtil.initPcfMessageAgent(queueManager, ibmQueueManager);
-      extractAndReportMetrics(ibmQueueManager, queueManager, agent);
+      extractAndReportMetrics(
+          ibmQueueManager, queueManager, agent, producer, threadPool, timeoutSeconds);
     } catch (RuntimeException e) {
       logger.error(
           "Error connecting to QueueManager {} by thread {}: {}",
@@ -127,8 +128,12 @@ public final class WmqMonitor {
     }
   }
 
+  public Map<QueueManager, MetricProducer> getMetricProducersByQueueManagers() {
+    return this.queueManagers;
+  }
+
   @NotNull
-  private static List<Map<String, ?>> getQueueManagers(ConfigWrapper config) {
+  private static List<Map<String, ?>> getMetricProducersByQueueManagers(ConfigWrapper config) {
     List<Map<String, ?>> queueManagers = config.getQueueManagers();
     if (queueManagers.isEmpty()) {
       throw new IllegalStateException(
@@ -138,10 +143,16 @@ public final class WmqMonitor {
   }
 
   private void extractAndReportMetrics(
-      MQQueueManager mqQueueManager, QueueManager queueManager, PCFMessageAgent agent) {
+      MQQueueManager mqQueueManager,
+      QueueManager queueManager,
+      PCFMessageAgent agent,
+      MetricProducer producer,
+      ExecutorService threadPool,
+      @Nullable Integer timeoutSeconds) {
     logger.debug("Queueing {} jobs", jobs.size());
     MetricsCollectorContext context =
-        new MetricsCollectorContext(queueManager, agent, mqQueueManager, this.metricsConfig);
+        new MetricsCollectorContext(
+            queueManager, agent, mqQueueManager, this.metricsConfig, producer);
     List<Callable<Void>> tasks = new ArrayList<>();
     for (Consumer<MetricsCollectorContext> collector : jobs) {
       tasks.add(() -> {
@@ -163,11 +174,17 @@ public final class WmqMonitor {
         return null;
       });
     }
-
+    // Block until every collector is done (or the timeout elapses, in which case unfinished
+    // collectors are cancelled) so the connections are not closed underneath running jobs.
     try {
-      this.threadPool.invokeAll(tasks);
+      if (timeoutSeconds != null) {
+        threadPool.invokeAll(tasks, timeoutSeconds, TimeUnit.SECONDS);
+      } else {
+        threadPool.invokeAll(tasks);
+      }
     } catch (InterruptedException e) {
-      logger.error("Error while the thread {} is waiting ", Thread.currentThread().getName(), e);
+      Thread.currentThread().interrupt();
+      logger.error("Interrupted while collecting metrics for {}", queueManager.getName(), e);
     }
   }
 
