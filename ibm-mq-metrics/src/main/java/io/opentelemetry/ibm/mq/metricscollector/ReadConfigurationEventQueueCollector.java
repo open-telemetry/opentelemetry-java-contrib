@@ -61,7 +61,7 @@ public final class ReadConfigurationEventQueueCollector
       queue = context.getMqQueueManager().accessQueue(configurationQueueName, queueAccessOptions);
       int maxSequenceNumber = 0;
       // keep going until receiving the exception MQConstants.MQRC_NO_MSG_AVAILABLE
-      while (true) {
+      while (!Thread.currentThread().isInterrupted()) {
         try {
           MQGetMessageOptions getOptions = new MQGetMessageOptions();
           getOptions.options = MQConstants.MQGMO_NO_WAIT | MQConstants.MQGMO_FAIL_IF_QUIESCING;
