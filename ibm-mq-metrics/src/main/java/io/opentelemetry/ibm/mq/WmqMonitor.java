@@ -35,11 +35,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import org.jetbrains.annotations.NotNull;
@@ -158,32 +156,34 @@ public final class WmqMonitor {
         new MetricsCollectorContext(
             queueManager, agent, mqQueueManager, this.metricsConfig, producer);
     CountDownLatch finished = new CountDownLatch(jobs.size());
-    List<AtomicBoolean> started = new ArrayList<>();
-    List<Callable<Void>> tasks = new ArrayList<>();
+    List<CollectorTask> tasks = new ArrayList<>();
     for (Consumer<MetricsCollectorContext> collector : jobs) {
-      AtomicBoolean taskStarted = new AtomicBoolean();
-      started.add(taskStarted);
-      tasks.add(() -> {
-        taskStarted.set(true);
-        try {
-          long startTime = System.currentTimeMillis();
-          collector.accept(context);
-          long diffTime = System.currentTimeMillis() - startTime;
-          if (diffTime > 60000L) {
-            logger.warn(
-                "{} Task took {} ms to complete", collector.getClass().getSimpleName(), diffTime);
-          } else {
-            logger.debug(
-                "{} Task took {} ms to complete", collector.getClass().getSimpleName(), diffTime);
-          }
-        } catch (RuntimeException e) {
-          logger.error(
-              "Error while running task name = {}", collector.getClass().getSimpleName(), e);
-        } finally {
-          finished.countDown();
-        }
-        return null;
-      });
+      tasks.add(
+          new CollectorTask(
+              () -> {
+                try {
+                  long startTime = System.currentTimeMillis();
+                  collector.accept(context);
+                  long diffTime = System.currentTimeMillis() - startTime;
+                  if (diffTime > 60000L) {
+                    logger.warn(
+                        "{} Task took {} ms to complete",
+                        collector.getClass().getSimpleName(),
+                        diffTime);
+                  } else {
+                    logger.debug(
+                        "{} Task took {} ms to complete",
+                        collector.getClass().getSimpleName(),
+                        diffTime);
+                  }
+                } catch (RuntimeException e) {
+                  logger.error(
+                      "Error while running task name = {}",
+                      collector.getClass().getSimpleName(),
+                      e);
+                }
+              },
+              finished));
     }
     try {
       if (timeoutSeconds != null) {
@@ -195,21 +195,15 @@ public final class WmqMonitor {
       Thread.currentThread().interrupt();
       logger.error("Interrupted while collecting metrics for {}", queueManager.getName(), e);
     }
-    awaitRunningCollectors(queueManager, tasks, started, finished);
+    awaitRunningCollectors(queueManager, tasks, finished);
   }
 
   // invokeAll only cancels (interrupts) unfinished futures; it does not wait for the collectors to
   // react. Wait for the ones that actually started before the caller closes the connections.
   private static void awaitRunningCollectors(
-      QueueManager queueManager,
-      List<Callable<Void>> tasks,
-      List<AtomicBoolean> started,
-      CountDownLatch finished) {
-    // Tasks cancelled before they started will never run, so they will never count down.
-    for (AtomicBoolean taskStarted : started) {
-      if (!taskStarted.get()) {
-        finished.countDown();
-      }
+      QueueManager queueManager, List<CollectorTask> tasks, CountDownLatch finished) {
+    for (CollectorTask task : tasks) {
+      task.cancelIfNotStarted();
     }
     boolean interrupted = Thread.interrupted();
     try {
