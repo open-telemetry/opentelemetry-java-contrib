@@ -40,7 +40,7 @@ public final class QueueManagerEventCollector implements Consumer<MetricsCollect
       queue =
           context.getMqQueueManager().accessQueue(queueManagerEventsQueueName, queueAccessOptions);
       // keep going until receiving the exception MQConstants.MQRC_NO_MSG_AVAILABLE
-      while (true) {
+      while (!Thread.currentThread().isInterrupted()) {
         try {
           MQGetMessageOptions getOptions = new MQGetMessageOptions();
           getOptions.options = MQConstants.MQGMO_NO_WAIT | MQConstants.MQGMO_FAIL_IF_QUIESCING;

@@ -36,8 +36,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import org.jetbrains.annotations.NotNull;
@@ -48,6 +50,8 @@ import org.slf4j.LoggerFactory;
 public final class WmqMonitor {
 
   private static final Logger logger = LoggerFactory.getLogger(WmqMonitor.class);
+
+  private static final long CANCELLATION_GRACE_SECONDS = 30;
 
   private final Map<QueueManager, MetricProducer> queueManagers;
   private final List<Consumer<MetricsCollectorContext>> jobs = new ArrayList<>();
@@ -153,9 +157,14 @@ public final class WmqMonitor {
     MetricsCollectorContext context =
         new MetricsCollectorContext(
             queueManager, agent, mqQueueManager, this.metricsConfig, producer);
+    CountDownLatch finished = new CountDownLatch(jobs.size());
+    List<AtomicBoolean> started = new ArrayList<>();
     List<Callable<Void>> tasks = new ArrayList<>();
     for (Consumer<MetricsCollectorContext> collector : jobs) {
+      AtomicBoolean taskStarted = new AtomicBoolean();
+      started.add(taskStarted);
       tasks.add(() -> {
+        taskStarted.set(true);
         try {
           long startTime = System.currentTimeMillis();
           collector.accept(context);
@@ -170,12 +179,12 @@ public final class WmqMonitor {
         } catch (RuntimeException e) {
           logger.error(
               "Error while running task name = {}", collector.getClass().getSimpleName(), e);
+        } finally {
+          finished.countDown();
         }
         return null;
       });
     }
-    // Block until every collector is done (or the timeout elapses, in which case unfinished
-    // collectors are cancelled) so the connections are not closed underneath running jobs.
     try {
       if (timeoutSeconds != null) {
         threadPool.invokeAll(tasks, timeoutSeconds, TimeUnit.SECONDS);
@@ -185,6 +194,39 @@ public final class WmqMonitor {
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
       logger.error("Interrupted while collecting metrics for {}", queueManager.getName(), e);
+    }
+    awaitRunningCollectors(queueManager, tasks, started, finished);
+  }
+
+  // invokeAll only cancels (interrupts) unfinished futures; it does not wait for the collectors to
+  // react. Wait for the ones that actually started before the caller closes the connections.
+  private static void awaitRunningCollectors(
+      QueueManager queueManager,
+      List<Callable<Void>> tasks,
+      List<AtomicBoolean> started,
+      CountDownLatch finished) {
+    // Tasks cancelled before they started will never run, so they will never count down.
+    for (AtomicBoolean taskStarted : started) {
+      if (!taskStarted.get()) {
+        finished.countDown();
+      }
+    }
+    boolean interrupted = Thread.interrupted();
+    try {
+      if (!finished.await(CANCELLATION_GRACE_SECONDS, TimeUnit.SECONDS)) {
+        logger.warn(
+            "{} of {} collectors for queue manager {} did not stop within {}s of cancellation",
+            finished.getCount(),
+            tasks.size(),
+            queueManager.getName(),
+            CANCELLATION_GRACE_SECONDS);
+      }
+    } catch (InterruptedException e) {
+      interrupted = true;
+    } finally {
+      if (interrupted) {
+        Thread.currentThread().interrupt();
+      }
     }
   }
 
