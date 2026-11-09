@@ -8,6 +8,13 @@
   [JMX Scraper](https://github.com/open-telemetry/opentelemetry-java-contrib/blob/main/jmx-scraper/README.md) instead, see the
   [migration guide](https://github.com/open-telemetry/opentelemetry-java-contrib/blob/main/jmx-scraper/README.md#migration-from-jmx-gatherer).
 
+## Version 1.62.1 (2026-11-06)
+
+### 🛠️ Bug fixes
+
+- Fix `NoSuchMethodError` when extracting AWS X-Ray context with OpenTelemetry SDK 1.68.0.
+  ([#3208](https://github.com/open-telemetry/opentelemetry-java-contrib/pull/3208))
+
 ## Version 1.62.0 (2026-11-04)
 
 ### AWS Lambda resource detector
