@@ -17,8 +17,10 @@ import static org.mockito.Mockito.verify;
 import io.opentelemetry.opamp.client.OpampClient;
 import io.opentelemetry.opamp.client.OpampClientBuilder;
 import io.opentelemetry.opamp.client.internal.connectivity.http.OkHttpSender;
+import io.opentelemetry.opamp.client.internal.connectivity.websocket.WebSocket;
 import io.opentelemetry.opamp.client.internal.request.Request;
 import io.opentelemetry.opamp.client.internal.request.service.HttpRequestService;
+import io.opentelemetry.opamp.client.internal.request.service.WebSocketRequestService;
 import io.opentelemetry.opamp.client.internal.response.MessageData;
 import io.opentelemetry.opamp.client.internal.state.State;
 import io.opentelemetry.opamp.client.request.service.RequestService;
@@ -67,6 +69,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -191,6 +194,67 @@ class OpampClientImplTest {
     assertThat(fullRequestedMessage.health).isEqualTo(state.health.get());
     assertThat(fullRequestedMessage.effective_config).isEqualTo(state.effectiveConfig.get());
     assertThat(fullRequestedMessage.remote_config_status).isEqualTo(state.remoteConfigStatus.get());
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void verifyFirstWebSocketMessageContainsFullStatus(boolean handshakeCompletesDuringStart) {
+    TestWebSocket webSocket = new TestWebSocket(handshakeCompletesDuringStart);
+    requestService = WebSocketRequestService.create(webSocket);
+    state = createState();
+    AgentDescription agentDescription =
+        getAgentDescriptionWithOneIdentifyingValue("service.name", "my-service");
+    state.agentDescription.set(agentDescription);
+    callbacks = spy(new TestCallbacks());
+
+    client = OpampClientImpl.create(requestService, state, callbacks);
+    webSocket.completeHandshake();
+
+    assertThat(webSocket.sentMessages).isNotEmpty();
+    AgentToServer firstMessage = webSocket.sentMessages.get(0);
+    assertThat(firstMessage.sequence_num).isEqualTo(1);
+    assertThat(firstMessage.agent_description).isEqualTo(agentDescription);
+    assertThat(firstMessage.health).isEqualTo(initialHealth);
+    assertThat(firstMessage.effective_config).isEqualTo(state.effectiveConfig.get());
+  }
+
+  @Test
+  void verifyWebSocketChangesWhileDisconnectedAreSentOnReconnect() {
+    TestWebSocket webSocket = new TestWebSocket(/* completeHandshakeOnOpen= */ true);
+    requestService = WebSocketRequestService.create(webSocket);
+    state = createState();
+    callbacks = spy(new TestCallbacks());
+    client = OpampClientImpl.create(requestService, state, callbacks);
+    long lastSequenceNum = webSocket.lastMessage().sequence_num;
+
+    webSocket.startClosing();
+    AgentDescription agentDescription =
+        getAgentDescriptionWithOneIdentifyingValue("service.name", "other-service");
+    client.setAgentDescription(agentDescription);
+    webSocket.completeHandshake();
+
+    AgentToServer reconnectMessage = webSocket.lastMessage();
+    assertThat(reconnectMessage.agent_description).isEqualTo(agentDescription);
+    assertThat(reconnectMessage.sequence_num).isEqualTo(lastSequenceNum + 1);
+  }
+
+  @Test
+  void verifyRefusedWebSocketSendKeepsFieldsForNextMessage() {
+    TestWebSocket webSocket = new TestWebSocket(/* completeHandshakeOnOpen= */ true);
+    requestService = WebSocketRequestService.create(webSocket);
+    state = createState();
+    callbacks = spy(new TestCallbacks());
+    client = OpampClientImpl.create(requestService, state, callbacks);
+
+    // The socket stops accepting messages before the service is told that it is closing.
+    webSocket.isOpen = false;
+    AgentDescription agentDescription =
+        getAgentDescriptionWithOneIdentifyingValue("service.name", "other-service");
+    client.setAgentDescription(agentDescription);
+    webSocket.startClosing();
+    webSocket.completeHandshake();
+
+    assertThat(webSocket.lastMessage().agent_description).isEqualTo(agentDescription);
   }
 
   @Test
@@ -638,6 +702,62 @@ class OpampClientImplTest {
       // This is to verify agent disconnect field presence for the websocket use case.
       delegate.sendRequest();
       delegate.stop();
+    }
+  }
+
+  /** Refuses to send until the handshake completes, like {@code OkHttpWebSocket}. */
+  private static class TestWebSocket implements WebSocket {
+    private final boolean completeHandshakeOnOpen;
+    private final List<AgentToServer> sentMessages = new ArrayList<>();
+    @Nullable private Listener listener;
+    private boolean isOpen;
+
+    private TestWebSocket(boolean completeHandshakeOnOpen) {
+      this.completeHandshakeOnOpen = completeHandshakeOnOpen;
+    }
+
+    @Override
+    public void open(Listener listener) {
+      this.listener = listener;
+      if (completeHandshakeOnOpen) {
+        completeHandshake();
+      }
+    }
+
+    void completeHandshake() {
+      if (!isOpen) {
+        isOpen = true;
+        Objects.requireNonNull(listener).onOpen();
+      }
+    }
+
+    void startClosing() {
+      isOpen = false;
+      Objects.requireNonNull(listener).onClosing();
+    }
+
+    AgentToServer lastMessage() {
+      assertThat(sentMessages).isNotEmpty();
+      return sentMessages.get(sentMessages.size() - 1);
+    }
+
+    @Override
+    public void close(int code, @Nullable String reason) {
+      isOpen = false;
+    }
+
+    @Override
+    public boolean send(byte[] request) {
+      if (!isOpen) {
+        return false;
+      }
+      try {
+        // Skip the one-byte header that precedes each OpAMP WebSocket message.
+        sentMessages.add(AgentToServer.ADAPTER.decode(ByteString.of(request).substring(1)));
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+      return true;
     }
   }
 
