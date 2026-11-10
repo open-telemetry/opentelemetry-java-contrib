@@ -43,24 +43,18 @@ The available configuration parameters are the following:
 * Delete items on iteration. Controls whether items are automatically removed from disk as the
   iterator advances. Defaults to `true`. See [Deleting data](#deleting-data) for more details.
 
-The following examples use explicit deletion so that failed exports can be retried.
-
 ```java
 // Root dir
 File rootDir = new File("/some/root");
 
-FileStorageConfiguration config = FileStorageConfiguration.builder()
-    .setDeleteItemsOnIteration(false)
-    .build();
-
 // Setting up span storage
-SignalStorage.Span spanStorage = FileSpanStorage.create(new File(rootDir, "spans"), config);
+SignalStorage.Span spanStorage = FileSpanStorage.create(new File(rootDir, "spans"));
 
 // Setting up metric storage
-SignalStorage.Metric metricStorage = FileMetricStorage.create(new File(rootDir, "metrics"), config);
+SignalStorage.Metric metricStorage = FileMetricStorage.create(new File(rootDir, "metrics"));
 
 // Setting up log storage
-SignalStorage.LogRecord logStorage = FileLogRecordStorage.create(new File(rootDir, "logs"), config);
+SignalStorage.LogRecord logStorage = FileLogRecordStorage.create(new File(rootDir, "logs"));
 ```
 
 ### Storing data
@@ -116,11 +110,61 @@ Now when creating signals using your `OpenTelemetry` instance, those will get st
 
 ### Reading data
 
-To export buffered spans, keep a reader instance between calls. It retains a failed or timed-out
-batch and retries it before advancing the iterator. With `deleteItemsOnIteration` set to `false`
-as above, the batch also remains on disk until it is explicitly removed after a successful export.
+In order to read data, we can iterate through our signal storage objects and then forward them to
+a network exporter. By default, items are automatically deleted from disk as the iterator advances,
+so a simple iteration is all that's needed:
 
-Call the reader sequentially. The caller controls retry delays and limits.
+```java
+/**
+ * Example of reading and exporting spans from disk.
+ *
+ * @return true, if the exporting was successful, false, if an export failed or timed out
+ */
+public boolean exportSpansFromDisk(SpanExporter networkExporter, long timeout) {
+    for (Collection<SpanData> spanData : spanStorage) {
+        CompletableResultCode resultCode = networkExporter.export(spanData);
+        resultCode.join(timeout, TimeUnit.MILLISECONDS);
+
+        if (!resultCode.isSuccess()) {
+            logger.trace("Error while exporting", resultCode.getFailureThrowable());
+            // Stop before advancing the iterator and deleting the failed batch.
+            return false;
+        }
+    }
+    logger.trace("Finished exporting");
+    return true;
+}
+```
+
+Returning `false` stops this iteration, but does not rewind the storage iterator. To retry after
+returning, retain the failed batch and retry it before querying the iterator again. See
+[Automatic vs explicit deletion](#automatic-vs-explicit-deletion) for an example that retains a
+pending batch across calls.
+
+### Deleting data
+
+By default, items are automatically deleted from disk as the iterator advances. You can also
+clear all data at once by calling `SignalStorage.clear()`.
+
+#### Automatic vs explicit deletion
+
+The default behavior (`deleteItemsOnIteration = true`) automatically removes items from disk during
+iteration. This means you don't need to call `Iterator.remove()` since the data is cleaned up as the
+iterator advances.
+
+If you need more control (e.g., only deleting items after a successful network export), set
+`deleteItemsOnIteration` to `false` in the configuration:
+
+```java
+FileStorageConfiguration config = FileStorageConfiguration.builder()
+    .setDeleteItemsOnIteration(false)
+    .build();
+SignalStorage.Span spanStorage = FileSpanStorage.create(new File(rootDir, "spans"), config);
+```
+
+Disabling automatic deletion does not rewind the iterator after a failed export. To retry across
+calls, retain both the iterator and the pending batch. The following reader retries that batch
+before querying the iterator again, and removes it only after a successful export:
 
 ```java
 public final class SpanStorageReader {
@@ -154,24 +198,14 @@ public final class SpanStorageReader {
 }
 ```
 
-Reuse the same reader after a failed attempt so that it retries the pending batch first. A timed-out
+Create one reader for the configured storage and reuse it after a failed attempt so that it retries
+the pending batch first. Call it sequentially; the caller controls retry delays and limits. A timed-out
 export might still complete, so retrying can deliver duplicates.
 
-### Deleting data
-
-#### Automatic vs explicit deletion
-
-By default, `deleteItemsOnIteration = true` automatically removes the previous batch from disk
-when the iterator advances. Automatic deletion is independent of the network export result;
-stopping an iteration after a failure does not protect that batch when iteration resumes.
-
-The examples above use `deleteItemsOnIteration = false` and call `Iterator.remove()` only after
-a successful network export. You can also clear all data at once by calling `SignalStorage.clear()`.
-
-Even with explicit deletion, disk usage is bounded by the configured max folder size and max file
-age, so stale files are automatically purged when there is not enough space before new data is written.
-Set a `DiscardedFileListener` with `setDiscardedFileListener` to be notified when a file is deleted
-before all of its data was read.
+Note that even with explicit deletion, disk usage is still bounded by the configured max folder size and max file
+age, so stale files are automatically purged when there's not enough space available before new data is written.
+Set a `DiscardedFileListener` with `setDiscardedFileListener` to be notified when a file is deleted before all of
+its data was read.
 
 ### More details on the writing and reading processes
 
