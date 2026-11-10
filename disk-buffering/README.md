@@ -43,18 +43,24 @@ The available configuration parameters are the following:
 * Delete items on iteration. Controls whether items are automatically removed from disk as the
   iterator advances. Defaults to `true`. See [Deleting data](#deleting-data) for more details.
 
+The following examples use explicit deletion so that failed exports can be retried.
+
 ```java
 // Root dir
 File rootDir = new File("/some/root");
 
+FileStorageConfiguration config = FileStorageConfiguration.builder()
+    .setDeleteItemsOnIteration(false)
+    .build();
+
 // Setting up span storage
-SignalStorage.Span spanStorage = FileSpanStorage.create(new File(rootDir, "spans"));
+SignalStorage.Span spanStorage = FileSpanStorage.create(new File(rootDir, "spans"), config);
 
 // Setting up metric storage
-SignalStorage.Metric metricStorage = FileMetricStorage.create(new File(rootDir, "metrics"));
+SignalStorage.Metric metricStorage = FileMetricStorage.create(new File(rootDir, "metrics"), config);
 
 // Setting up log storage
-SignalStorage.LogRecord logStorage = FileLogRecordStorage.create(new File(rootDir, "logs"));
+SignalStorage.LogRecord logStorage = FileLogRecordStorage.create(new File(rootDir, "logs"), config);
 ```
 
 ### Storing data
@@ -110,76 +116,62 @@ Now when creating signals using your `OpenTelemetry` instance, those will get st
 
 ### Reading data
 
-In order to read data, we can iterate through our signal storage objects and then forward them to
-a network exporter. By default, items are automatically deleted from disk as the iterator advances,
-so a simple iteration is all that's needed:
+To export buffered spans, keep a reader instance between calls. It retains a failed or timed-out
+batch and retries it before advancing the iterator. With `deleteItemsOnIteration` set to `false`
+as above, the batch also remains on disk until it is explicitly removed after a successful export.
+
+Call the reader sequentially. The caller controls retry delays and limits.
 
 ```java
-/**
- * Example of reading and exporting spans from disk.
- *
- * @return true, if the exporting was successful, false, if it needs to be retried
- */
-public boolean exportSpansFromDisk(SpanExporter networkExporter, long timeout) {
-    for (Collection<SpanData> spanData : spanStorage) {
-        CompletableResultCode resultCode = networkExporter.export(spanData);
-        resultCode.join(timeout, TimeUnit.MILLISECONDS);
+public final class SpanStorageReader {
+  private final Iterator<Collection<SpanData>> spanBatches;
+  private Collection<SpanData> pendingBatch;
 
-        if (!resultCode.isSuccess()) {
-            logger.trace("Error while exporting", resultCode.getFailureThrowable());
-            // The iteration should be aborted here to avoid consuming batches, which were not exported successfully
-            return false;
-        }
+  public SpanStorageReader(SignalStorage.Span spanStorage) {
+    this.spanBatches = spanStorage.iterator();
+  }
+
+  /**
+   * @return true if all available batches were exported, false if the current batch needs a retry
+   */
+  public boolean exportSpansFromDisk(SpanExporter networkExporter, long timeout) {
+    while (pendingBatch != null || spanBatches.hasNext()) {
+      if (pendingBatch == null) {
+        pendingBatch = spanBatches.next();
+      }
+
+      CompletableResultCode resultCode = networkExporter.export(pendingBatch);
+      resultCode.join(timeout, TimeUnit.MILLISECONDS);
+      if (!resultCode.isSuccess()) {
+        return false;
+      }
+
+      spanBatches.remove();
+      pendingBatch = null;
     }
-    logger.trace("Finished exporting");
     return true;
+  }
 }
 ```
+
+Reuse the same reader after a failed attempt so that it retries the pending batch first. A timed-out
+export might still complete, so retrying can deliver duplicates.
 
 ### Deleting data
 
-By default, items are automatically deleted from disk as the iterator advances. You can also
-clear all data at once by calling `SignalStorage.clear()`.
-
 #### Automatic vs explicit deletion
 
-The default behavior (`deleteItemsOnIteration = true`) automatically removes items from disk during
-iteration. This means you don't need to call `Iterator.remove()` since the data is cleaned up as the
-iterator advances.
+By default, `deleteItemsOnIteration = true` automatically removes the previous batch from disk
+when the iterator advances. Automatic deletion is independent of the network export result;
+stopping an iteration after a failure does not protect that batch when iteration resumes.
 
-If you need more control (e.g., only deleting items after a successful network export), set
-`deleteItemsOnIteration` to `false` in the configuration:
+The examples above use `deleteItemsOnIteration = false` and call `Iterator.remove()` only after
+a successful network export. You can also clear all data at once by calling `SignalStorage.clear()`.
 
-```java
-FileStorageConfiguration config = FileStorageConfiguration.builder()
-    .setDeleteItemsOnIteration(false)
-    .build();
-SignalStorage.Span spanStorage = FileSpanStorage.create(new File(rootDir, "spans"), config);
-```
-
-With this setting, items remain on disk until explicitly removed via `Iterator.remove()`:
-
-```java
-public boolean exportSpansFromDisk(SpanExporter networkExporter, long timeout) {
-  Iterator<Collection<SpanData>> spansIterator = spanStorage.iterator();
-  while (spansIterator.hasNext()) {
-    CompletableResultCode resultCode = networkExporter.export(spansIterator.next());
-    resultCode.join(timeout, TimeUnit.MILLISECONDS);
-
-    if (resultCode.isSuccess()) {
-      spansIterator.remove();
-    } else {
-      return false;
-    }
-  }
-  return true;
-}
-```
-
-Note that even with explicit deletion, disk usage is still bounded by the configured max folder size and max file
-age, so stale files are automatically purged when there's not enough space available before new data is written.
-Set a `DiscardedFileListener` with `setDiscardedFileListener` to be notified when a file is deleted before all of
-its data was read.
+Even with explicit deletion, disk usage is bounded by the configured max folder size and max file
+age, so stale files are automatically purged when there is not enough space before new data is written.
+Set a `DiscardedFileListener` with `setDiscardedFileListener` to be notified when a file is deleted
+before all of its data was read.
 
 ### More details on the writing and reading processes
 
