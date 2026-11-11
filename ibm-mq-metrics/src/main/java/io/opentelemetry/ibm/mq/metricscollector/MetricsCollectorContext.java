@@ -13,8 +13,10 @@ import com.ibm.mq.headers.pcf.PCFMessage;
 import com.ibm.mq.headers.pcf.PCFMessageAgent;
 import io.opentelemetry.ibm.mq.config.ExcludeFilters;
 import io.opentelemetry.ibm.mq.config.QueueManager;
+import io.opentelemetry.ibm.mq.metrics.MetricProducer;
 import io.opentelemetry.ibm.mq.metrics.MetricsConfig;
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -33,16 +35,19 @@ public final class MetricsCollectorContext {
   private final PCFMessageAgent agent;
   private final MQQueueManager mqQueueManager;
   private final MetricsConfig metricsConfig;
+  private final MetricProducer metricProducer;
 
   public MetricsCollectorContext(
       QueueManager queueManager,
       PCFMessageAgent agent,
       MQQueueManager mqQueueManager,
-      MetricsConfig metricsConfig) {
+      MetricsConfig metricsConfig,
+      MetricProducer metricProducer) {
     this.queueManager = queueManager;
     this.agent = agent;
     this.mqQueueManager = mqQueueManager;
     this.metricsConfig = metricsConfig;
+    this.metricProducer = metricProducer;
   }
 
   Set<String> getChannelIncludeFilterNames() {
@@ -79,6 +84,9 @@ public final class MetricsCollectorContext {
 
   @NotNull
   List<PCFMessage> send(PCFMessage request) throws IOException, MQDataException {
+    if (Thread.currentThread().isInterrupted()) {
+      throw new InterruptedIOException("Collection cancelled");
+    }
     PCFMessage[] result = agent.send(request);
     return result == null ? emptyList() : Arrays.asList(result);
   }
@@ -97,5 +105,9 @@ public final class MetricsCollectorContext {
 
   public MetricsConfig getMetricsConfig() {
     return metricsConfig;
+  }
+
+  public MetricProducer getMetricProducer() {
+    return metricProducer;
   }
 }

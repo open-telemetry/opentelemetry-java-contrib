@@ -45,21 +45,24 @@ class QueueManagerMetricsCollectorTest {
     ObjectMapper mapper = new ObjectMapper();
     queueManager = mapper.convertValue(config.getQueueManagers().get(0), QueueManager.class);
     context =
-        new MetricsCollectorContext(queueManager, pcfMessageAgent, null, new MetricsConfig(config));
+        new MetricsCollectorContext(
+            queueManager,
+            pcfMessageAgent,
+            null,
+            new MetricsConfig(config),
+            new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty()));
   }
 
   @Test
   void testProcessPCFRequestAndPublishQMetricsForInquireQStatusCmd() throws Exception {
     when(pcfMessageAgent.send(any(PCFMessage.class)))
         .thenReturn(createPCFResponseForInquireQMgrStatusCmd());
-    MetricProducer producer =
-        new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
-    classUnderTest = new QueueManagerMetricsCollector(producer);
+    classUnderTest = new QueueManagerMetricsCollector();
     classUnderTest.accept(context);
     List<String> metricsList = new ArrayList<>(singletonList("ibm.mq.manager.status"));
     metricsList.add("ibm.mq.queue_manager.uptime");
 
-    for (MetricData metric : producer.produce(Resource.empty())) {
+    for (MetricData metric : context.getMetricProducer().produce(Resource.empty())) {
       if (metricsList.remove(metric.getName())) {
         if ("ibm.mq.manager.status".equals(metric.getName())) {
           assertThat(metric.getLongGaugeData().getPoints().iterator().next().getValue())

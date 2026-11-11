@@ -33,11 +33,9 @@ public final class ReadConfigurationEventQueueCollector
   private static final Logger logger =
       LoggerFactory.getLogger(ReadConfigurationEventQueueCollector.class);
   private final long bootTime;
-  private final MetricProducer producer;
 
-  public ReadConfigurationEventQueueCollector(MetricProducer producer) {
+  public ReadConfigurationEventQueueCollector() {
     this.bootTime = System.currentTimeMillis();
-    this.producer = producer;
   }
 
   @Nullable
@@ -63,7 +61,7 @@ public final class ReadConfigurationEventQueueCollector
       queue = context.getMqQueueManager().accessQueue(configurationQueueName, queueAccessOptions);
       int maxSequenceNumber = 0;
       // keep going until receiving the exception MQConstants.MQRC_NO_MSG_AVAILABLE
-      while (true) {
+      while (!Thread.currentThread().isInterrupted()) {
         try {
           MQGetMessageOptions getOptions = new MQGetMessageOptions();
           getOptions.options = MQConstants.MQGMO_NO_WAIT | MQConstants.MQGMO_FAIL_IF_QUIESCING;
@@ -99,6 +97,7 @@ public final class ReadConfigurationEventQueueCollector
 
   @Override
   public void accept(MetricsCollectorContext context) {
+    MetricProducer producer = context.getMetricProducer();
     long entryTime = System.currentTimeMillis();
     String configurationQueueName = context.getQueueManager().getConfigurationQueueName();
     logger.info(
@@ -126,7 +125,7 @@ public final class ReadConfigurationEventQueueCollector
       if (candidate != null) {
         if (context.getMetricsConfig().isIbmMqManagerMaxHandlesEnabled()) {
           int maxHandles = candidate.getIntParameterValue(CMQC.MQIA_MAX_HANDLES);
-          this.producer.recordIbmMqManagerMaxHandles(
+          producer.recordIbmMqManagerMaxHandles(
               maxHandles, Attributes.of(IBM_MQ_QUEUE_MANAGER, context.getQueueManager().getName()));
         }
       }

@@ -47,12 +47,12 @@ class TestWMQMonitor {
     assertThat(queueManagers).isNotNull();
     ObjectMapper mapper = new ObjectMapper();
 
-    WmqMonitor wmqTask = new WmqMonitor(config, threadPool, producer);
+    WmqMonitor wmqTask = new WmqMonitor(config);
 
     // we override this helper to pass in our opentelemetry helper instead.
     for (Map<String, ?> queueManager : queueManagers) {
       QueueManager qManager = mapper.convertValue(queueManager, QueueManager.class);
-      wmqTask.run(qManager);
+      wmqTask.run(qManager, producer, threadPool, null);
     }
   }
 }

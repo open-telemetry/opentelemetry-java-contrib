@@ -14,9 +14,11 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,6 +79,12 @@ public final class ConfigWrapper {
     return defaultedInt(getTaskSchedule(), "initialDelaySeconds", DEFAULT_INITIAL_DELAY);
   }
 
+  @Nullable
+  public Integer getCollectionTimeoutSeconds() {
+    Object value = config.get("collectionTimeoutSeconds");
+    return (Integer) value;
+  }
+
   @NotNull
   List<String> getQueueManagerNames() {
     return getQueueManagers().stream()
@@ -104,14 +112,6 @@ public final class ConfigWrapper {
     return result;
   }
 
-  public int getInt(String key, int defaultValue) {
-    Object result = config.get(key);
-    if (result == null) {
-      return defaultValue;
-    }
-    return (Integer) result;
-  }
-
   @NotNull
   @SuppressWarnings("unchecked") // reading map from yaml
   public Map<String, ?> getMetrics() {
@@ -133,5 +133,17 @@ public final class ConfigWrapper {
       return (Map<String, ?>) config.get("taskSchedule");
     }
     return Collections.emptyMap();
+  }
+
+  public Map<String, String> getOtlpConfiguration() {
+    Map<String, String> properties = new HashMap<>();
+    if (config.get("otlpExporter") instanceof Map) {
+      Map<?, ?> otlpExporterConfig = (Map<?, ?>) config.get("otlpExporter");
+
+      for (Map.Entry<?, ?> entry : otlpExporterConfig.entrySet()) {
+        properties.put(String.valueOf(entry.getKey()), String.valueOf(entry.getValue()));
+      }
+    }
+    return properties;
   }
 }
