@@ -7,12 +7,14 @@ package io.opentelemetry.opamp.client.internal.request.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Named.named;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -27,14 +29,20 @@ import io.opentelemetry.opamp.client.request.service.RequestService;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.Duration;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 import opamp.proto.AgentToServer;
 import opamp.proto.RetryInfo;
 import opamp.proto.ServerErrorResponse;
 import opamp.proto.ServerErrorResponseType;
 import opamp.proto.ServerToAgent;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
@@ -45,6 +53,7 @@ class WebSocketRequestServiceTest {
   @Mock private WebSocket webSocket;
   @Mock private RequestService.Callback callback;
   @Mock private PeriodicDelayWithSuggestion retryDelay;
+  private final AtomicInteger requestsBuilt = new AtomicInteger();
   private Request request;
   private TestScheduler scheduler;
   private WebSocketRequestService requestService;
@@ -63,6 +72,7 @@ class WebSocketRequestServiceTest {
     verify(webSocket).open(requestService);
 
     // When opening successfully, notify callback
+    when(webSocket.send(any())).thenReturn(true);
     requestService.onOpen();
     verify(callback).onConnectionSuccess();
     verifyNoMoreInteractions(callback);
@@ -131,6 +141,7 @@ class WebSocketRequestServiceTest {
     verify(webSocket).open(requestService);
 
     // Succeed
+    when(webSocket.send(any())).thenReturn(true);
     requestService.onOpen();
     verify(callback).onConnectionSuccess();
     verifyNoMoreInteractions(callback);
@@ -155,6 +166,8 @@ class WebSocketRequestServiceTest {
     }
 
     startService();
+    requestService.onOpen();
+    clearInvocations(webSocket);
 
     // Successful send
     when(webSocket.send(any())).thenReturn(true);
@@ -165,6 +178,69 @@ class WebSocketRequestServiceTest {
     clearInvocations(webSocket);
     requestService.onOpen();
     verify(webSocket).send(getExpectedOutgoingBytes());
+  }
+
+  @Test
+  void verifyRequestIsNotBuiltBeforeConnectionOpens() {
+    startService();
+
+    // Building a request consumes its pending fields, so it must wait for the connection.
+    requestService.sendRequest();
+    assertThat(requestsBuilt).hasValue(0);
+    verify(webSocket, never()).send(any());
+
+    when(webSocket.send(any())).thenReturn(true);
+    requestService.onOpen();
+    assertThat(requestsBuilt).hasValue(1);
+    verify(webSocket).send(getExpectedOutgoingBytes());
+  }
+
+  @ParameterizedTest
+  @MethodSource("disconnections")
+  void verifyRequestIsNotBuiltWhileDisconnected(Consumer<WebSocketRequestService> disconnection) {
+    startService();
+    when(webSocket.send(any())).thenReturn(true);
+    requestService.onOpen();
+    assertThat(requestsBuilt).hasValue(1);
+
+    disconnection.accept(requestService);
+    requestService.sendRequest();
+    assertThat(requestsBuilt).hasValue(1);
+
+    requestService.onOpen();
+    assertThat(requestsBuilt).hasValue(2);
+    verify(webSocket, times(2)).send(any());
+  }
+
+  private static Stream<Named<Consumer<WebSocketRequestService>>> disconnections() {
+    ServerToAgent serverUnavailable =
+        new ServerToAgent.Builder()
+            .error_response(
+                new ServerErrorResponse.Builder()
+                    .type(ServerErrorResponseType.ServerErrorResponseType_Unavailable)
+                    .build())
+            .build();
+    return Stream.of(
+        named("closing", WebSocketRequestService::onClosing),
+        named("closed", WebSocketRequestService::onClosed),
+        named("failure", service -> service.onFailure(new IOException())),
+        named(
+            "server unavailable",
+            service -> service.onMessage(createServerToAgentPayload(serverUnavailable))));
+  }
+
+  @Test
+  void verifyRefusedSendIsReportedAsFailedRequest() {
+    startService();
+    when(webSocket.send(any())).thenReturn(true);
+    requestService.onOpen();
+    clearInvocations(callback);
+
+    // The socket can refuse a message before the service learns that the connection is gone.
+    when(webSocket.send(any())).thenReturn(false);
+    requestService.sendRequest();
+    verify(callback).onRequestFailed(any(IOException.class));
+    verifyNoMoreInteractions(callback);
   }
 
   @Test
@@ -202,6 +278,9 @@ class WebSocketRequestServiceTest {
   void verifyLateOnOpenAfterStopDoesNotSend() {
     startService();
     requestService.stop();
+    assertThat(requestsBuilt).hasValue(0);
+    verify(webSocket, never()).send(any());
+    verify(webSocket).close(1000, null);
     clearInvocations(webSocket, callback);
     requestService.onOpen();
     verify(webSocket).close(1000, null);
@@ -284,6 +363,8 @@ class WebSocketRequestServiceTest {
   @Test
   void verifyStop() {
     startService();
+    requestService.onOpen();
+    clearInvocations(webSocket);
 
     requestService.stop();
 
@@ -362,6 +443,7 @@ class WebSocketRequestServiceTest {
   }
 
   private Request createRequest() {
+    requestsBuilt.incrementAndGet();
     AgentToServer agentToServer = new AgentToServer.Builder().sequence_num(10).build();
     request = Request.create(agentToServer);
     return request;

@@ -150,7 +150,7 @@ dependencies {
 }
 
 val testcontainersBom = "org.testcontainers:testcontainers-bom:2.0.5"
-val armeriaBom = "com.linecorp.armeria:armeria-bom:1.42.0"
+val armeriaBom = "com.linecorp.armeria:armeria-bom:1.43.0"
 
 testing {
   suites.withType(JvmTestSuite::class).configureEach {
