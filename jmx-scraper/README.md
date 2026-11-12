@@ -160,7 +160,7 @@ java -cp scraper.jar:jboss-client.jar io.opentelemetry.contrib.jmxscraper.JmxScr
 
 ## Migration from JMX Gatherer
 
-The JMX Scraper aims to replace the [JMX Gatherer](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/v1.62.0/jmx-metrics) tool and
+The JMX Scraper replaces the [JMX Gatherer](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/v1.62.0/jmx-metrics) tool and
 thus share most features and configuration with it.
 
 Features not supported:
