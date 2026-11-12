@@ -6,8 +6,6 @@ This utility provides a way to query JMX metrics and export them to an OTLP endp
 The JMX MBeans and their metric mappings are defined in YAML and reuse implementation from
 [jmx-metrics instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/jmx-metrics).
 
-This is an alternative to the [JMX Gatherer](../jmx-metrics/README.md) utility.
-
 ## Release
 
 This project is released as part of the [OpenTelemetry Java Contrib](https://github.com/open-telemetry/opentelemetry-java-contrib) project.
@@ -94,7 +92,7 @@ The source of metrics definitions is controlled by `otel.jmx.target.source`:
 * `auto` (default): metrics definitions from `instrumentation` with fallback on
   `legacy` when not available.
 * `legacy`: metrics definitions embedded in `jmx-scraper`, almost equivalent to
-  [JMX Gatherer](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/jmx-metrics).
+  [JMX Gatherer](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/v1.62.0/jmx-metrics).
 * `instrumentation`: metrics definitions embedded in the
   [instrumentation/jmx-metrics](https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/jmx-metrics/library)
   library.
@@ -162,7 +160,7 @@ java -cp scraper.jar:jboss-client.jar io.opentelemetry.contrib.jmxscraper.JmxScr
 
 ## Migration from JMX Gatherer
 
-The JMX Scraper aims to replace the [JMX Gatherer](../jmx-metrics) tool and
+The JMX Scraper replaces the [JMX Gatherer](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/v1.62.0/jmx-metrics) tool and
 thus share most features and configuration with it.
 
 Features not supported:
