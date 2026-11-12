@@ -217,4 +217,4 @@ application {
 * [Josh Suereth](https://github.com/jsuereth), Google
 * [Pranav Sharma](https://github.com/psx95), Google
 
-Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).
+See the [component maintenance policy](../MAINTENANCE.md#component-ownership) for owner responsibilities and requirements.

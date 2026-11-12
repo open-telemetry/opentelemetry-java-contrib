@@ -1,5 +1,7 @@
 # this file is used by .github/workflows/assign-reviewers.yml and .github/workflows/assign-issue-owners.yml
 #
+# See ../MAINTENANCE.md for component owner responsibilities and maintenance requirements.
+#
 # NOTE component owners must be members of the GitHub OpenTelemetry organization
 # so that they can be added to @open-telemetry/java-contrib-triagers
 # which in turn is required for them to be auto-assigned as reviewers and issue assignees by the automation

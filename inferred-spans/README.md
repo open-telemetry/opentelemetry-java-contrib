@@ -239,4 +239,4 @@ In this screenshot, we can see several problems at once
 * [Jonas Kunz](https://github.com/jonaskunz), Elastic
 * [Sylvain Juge](https://github.com/sylvainjuge), Elastic
 
-Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).
+See the [component maintenance policy](../MAINTENANCE.md#component-ownership) for owner responsibilities and requirements.

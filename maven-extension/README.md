@@ -268,4 +268,4 @@ public class TestMojo extends AbstractMojo {
 * [Cyrille Le Clerc](https://github.com/cyrille-leclerc), Grafana Labs
 * [Ken Finnigan](https://github.com/kenfinnigan), Workday
 
-Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).
+See the [component maintenance policy](../MAINTENANCE.md#component-ownership) for owner responsibilities and requirements.
