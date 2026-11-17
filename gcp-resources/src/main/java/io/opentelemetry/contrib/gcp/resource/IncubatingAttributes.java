@@ -22,6 +22,8 @@ class IncubatingAttributes {
   public static final AttributeKey<String> CLOUD_PROVIDER =
       AttributeKey.stringKey("cloud.provider");
   public static final AttributeKey<String> CLOUD_REGION = AttributeKey.stringKey("cloud.region");
+  public static final AttributeKey<String> CLOUD_RESOURCE_ID =
+      AttributeKey.stringKey("cloud.resource_id");
 
   public static final class CloudPlatformIncubatingValues {
 

@@ -37,6 +37,7 @@ import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOU
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PLATFORM;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_PROVIDER;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_REGION;
+import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CLOUD_RESOURCE_ID;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudPlatformIncubatingValues.GCP_APP_ENGINE;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudPlatformIncubatingValues.GCP_CLOUD_FUNCTIONS;
 import static io.opentelemetry.semconv.incubating.CloudIncubatingAttributes.CloudPlatformIncubatingValues.GCP_CLOUD_RUN;
@@ -66,7 +67,11 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ServiceLoader;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class GCPResourceProviderTest {
   private static final String DUMMY_PROJECT_ID = "google-pid";
@@ -206,7 +211,8 @@ class GCPResourceProviderTest {
         .containsEntry(GCP_GCE_INSTANCE_HOSTNAME, detectedAttributes.get(GCE_INSTANCE_HOSTNAME))
         .containsEntry(HOST_TYPE, detectedAttributes.get(GCE_MACHINE_TYPE))
         .containsEntry(CLOUD_AVAILABILITY_ZONE, detectedAttributes.get(GCE_AVAILABILITY_ZONE))
-        .containsEntry(CLOUD_REGION, detectedAttributes.get(GCE_CLOUD_REGION));
+        .containsEntry(CLOUD_REGION, detectedAttributes.get(GCE_CLOUD_REGION))
+        .doesNotContainKey(CLOUD_RESOURCE_ID);
   }
 
   @Test
@@ -223,7 +229,8 @@ class GCPResourceProviderTest {
         .hasSize(6)
         .containsEntry(CLOUD_ACCOUNT_ID, DUMMY_PROJECT_ID)
         .containsEntry(CLOUD_REGION, mockPlatform.getAttributes().get(GKE_CLUSTER_LOCATION))
-        .doesNotContainKey(CLOUD_AVAILABILITY_ZONE);
+        .doesNotContainKey(CLOUD_AVAILABILITY_ZONE)
+        .doesNotContainKey(CLOUD_RESOURCE_ID);
   }
 
   @Test
@@ -306,9 +313,12 @@ class GCPResourceProviderTest {
 
     verifyServerlessMapping(gotResource, mockPlatform);
     assertThat(gotResource.getAttributes())
-        .hasSize(8)
+        .hasSize(9)
         .containsEntry(CLOUD_PLATFORM, GCP_CLOUD_RUN)
-        .containsEntry(CLOUD_ACCOUNT_ID, DUMMY_PROJECT_ID);
+        .containsEntry(CLOUD_ACCOUNT_ID, DUMMY_PROJECT_ID)
+        .containsEntry(
+            CLOUD_RESOURCE_ID,
+            "//run.googleapis.com/projects/google-pid/locations/us-central1/services/serverless-app");
   }
 
   @Test
@@ -324,9 +334,12 @@ class GCPResourceProviderTest {
 
     verifyServerlessMapping(gotResource, mockPlatform);
     assertThat(gotResource.getAttributes())
-        .hasSize(8)
+        .hasSize(9)
         .containsEntry(CLOUD_PLATFORM, GCP_CLOUD_FUNCTIONS)
-        .containsEntry(CLOUD_ACCOUNT_ID, DUMMY_PROJECT_ID);
+        .containsEntry(CLOUD_ACCOUNT_ID, DUMMY_PROJECT_ID)
+        .containsEntry(
+            CLOUD_RESOURCE_ID,
+            "//cloudfunctions.googleapis.com/projects/google-pid/locations/us-central1/functions/serverless-app");
   }
 
   private static void verifyServerlessMapping(
@@ -353,10 +366,13 @@ class GCPResourceProviderTest {
     verify(mockPlatform, times(1)).getProjectId();
 
     assertThat(gotResource.getAttributes())
-        .hasSize(8)
+        .hasSize(9)
         .containsEntry(CLOUD_PROVIDER, GCP)
         .containsEntry(CLOUD_PLATFORM, GCP_CLOUD_RUN)
         .containsEntry(CLOUD_ACCOUNT_ID, DUMMY_PROJECT_ID)
+        .containsEntry(
+            CLOUD_RESOURCE_ID,
+            "//run.googleapis.com/projects/google-pid/locations/us-central1/jobs/serverless-job")
         .containsEntry(FAAS_NAME, detectedAttributes.get(SERVERLESS_COMPUTE_NAME))
         .containsEntry(FAAS_NAME, detectedAttributes.get(SERVERLESS_COMPUTE_NAME))
         .containsEntry(FAAS_INSTANCE, detectedAttributes.get(SERVERLESS_COMPUTE_INSTANCE_ID))
@@ -365,6 +381,82 @@ class GCPResourceProviderTest {
             GCP_CLOUD_RUN_JOB_TASK_INDEX,
             Integer.parseInt(detectedAttributes.get(GCR_JOB_TASK_INDEX)))
         .containsEntry(CLOUD_REGION, detectedAttributes.get(SERVERLESS_COMPUTE_CLOUD_REGION));
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideMissingCloudResourceIdCases")
+  void testServerlessOmitsCloudResourceIdWhenComponentMissing(
+      GcpPlatformDetector.SupportedPlatform platform,
+      String projectId,
+      String region,
+      String name) {
+    GcpPlatformDetector mockDetector = mock(GcpPlatformDetector.class);
+    DetectedPlatform mockPlatform =
+        platform == GcpPlatformDetector.SupportedPlatform.GOOGLE_CLOUD_RUN_JOB
+            ? generateMockGcrJobPlatform()
+            : generateMockServerlessPlatform(platform);
+    when(mockPlatform.getProjectId()).thenReturn(projectId);
+    if (region == null) {
+      mockPlatform.getAttributes().remove(SERVERLESS_COMPUTE_CLOUD_REGION);
+    } else {
+      mockPlatform.getAttributes().put(SERVERLESS_COMPUTE_CLOUD_REGION, region);
+    }
+    if (name == null) {
+      mockPlatform.getAttributes().remove(SERVERLESS_COMPUTE_NAME);
+    } else {
+      mockPlatform.getAttributes().put(SERVERLESS_COMPUTE_NAME, name);
+    }
+    when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
+
+    Resource gotResource = new GCPResourceProvider(mockDetector).createResource(mockConfigProps);
+
+    assertThat(gotResource.getAttributes())
+        .containsEntry(CLOUD_PROVIDER, GCP)
+        .doesNotContainKey(CLOUD_RESOURCE_ID);
+  }
+
+  private static Stream<Arguments> provideMissingCloudResourceIdCases() {
+    return Stream.of(
+        Arguments.of(
+            GcpPlatformDetector.SupportedPlatform.GOOGLE_CLOUD_RUN,
+            DUMMY_PROJECT_ID,
+            null,
+            "serverless-app"),
+        Arguments.of(
+            GcpPlatformDetector.SupportedPlatform.GOOGLE_CLOUD_RUN,
+            DUMMY_PROJECT_ID,
+            "",
+            "serverless-app"),
+        Arguments.of(
+            GcpPlatformDetector.SupportedPlatform.GOOGLE_CLOUD_RUN,
+            DUMMY_PROJECT_ID,
+            "us-central1",
+            null),
+        Arguments.of(
+            GcpPlatformDetector.SupportedPlatform.GOOGLE_CLOUD_RUN,
+            "",
+            "us-central1",
+            "serverless-app"),
+        Arguments.of(
+            GcpPlatformDetector.SupportedPlatform.GOOGLE_CLOUD_RUN_JOB,
+            DUMMY_PROJECT_ID,
+            null,
+            "serverless-job"),
+        Arguments.of(
+            GcpPlatformDetector.SupportedPlatform.GOOGLE_CLOUD_RUN_JOB,
+            DUMMY_PROJECT_ID,
+            "us-central1",
+            ""),
+        Arguments.of(
+            GcpPlatformDetector.SupportedPlatform.GOOGLE_CLOUD_FUNCTIONS,
+            DUMMY_PROJECT_ID,
+            null,
+            "serverless-app"),
+        Arguments.of(
+            GcpPlatformDetector.SupportedPlatform.GOOGLE_CLOUD_FUNCTIONS,
+            null,
+            "us-central1",
+            "serverless-app"));
   }
 
   @Test
@@ -400,7 +492,8 @@ class GCPResourceProviderTest {
         .containsEntry(FAAS_VERSION, detectedAttributes.get(GAE_APP_VERSION))
         .containsEntry(FAAS_INSTANCE, detectedAttributes.get(GAE_INSTANCE_ID))
         .containsEntry(CLOUD_AVAILABILITY_ZONE, detectedAttributes.get(GAE_AVAILABILITY_ZONE))
-        .containsEntry(CLOUD_REGION, detectedAttributes.get(GAE_CLOUD_REGION));
+        .containsEntry(CLOUD_REGION, detectedAttributes.get(GAE_CLOUD_REGION))
+        .doesNotContainKey(CLOUD_RESOURCE_ID);
   }
 
   @Test

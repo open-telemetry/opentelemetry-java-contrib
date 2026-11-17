@@ -34,6 +34,7 @@ import static io.opentelemetry.contrib.gcp.resource.IncubatingAttributes.CLOUD_A
 import static io.opentelemetry.contrib.gcp.resource.IncubatingAttributes.CLOUD_PLATFORM;
 import static io.opentelemetry.contrib.gcp.resource.IncubatingAttributes.CLOUD_PROVIDER;
 import static io.opentelemetry.contrib.gcp.resource.IncubatingAttributes.CLOUD_REGION;
+import static io.opentelemetry.contrib.gcp.resource.IncubatingAttributes.CLOUD_RESOURCE_ID;
 import static io.opentelemetry.contrib.gcp.resource.IncubatingAttributes.CloudPlatformIncubatingValues.GCP;
 import static io.opentelemetry.contrib.gcp.resource.IncubatingAttributes.CloudPlatformIncubatingValues.GCP_APP_ENGINE;
 import static io.opentelemetry.contrib.gcp.resource.IncubatingAttributes.CloudPlatformIncubatingValues.GCP_CLOUD_FUNCTIONS;
@@ -59,6 +60,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.Nullable;
 
 /** Resource provider for the detected Google Cloud Platform environment. */
 @SuppressWarnings("MemberName")
@@ -97,21 +99,22 @@ public class GCPResourceProvider implements ConditionalResourceProvider {
 
     // This is running on some sort of GCPCompute - figure out the platform
     AttributesBuilder attrBuilder = Attributes.builder();
+    String projectId = detectedPlatform.getProjectId();
     attrBuilder.put(CLOUD_PROVIDER, GCP);
-    attrBuilder.put(CLOUD_ACCOUNT_ID, detectedPlatform.getProjectId());
+    attrBuilder.put(CLOUD_ACCOUNT_ID, projectId);
 
     switch (detectedPlatform.getSupportedPlatform()) {
       case GOOGLE_KUBERNETES_ENGINE:
         addGkeAttributes(attrBuilder, detectedPlatform.getAttributes());
         break;
       case GOOGLE_CLOUD_RUN:
-        addGcrAttributes(attrBuilder, detectedPlatform.getAttributes());
+        addGcrAttributes(attrBuilder, detectedPlatform.getAttributes(), projectId);
         break;
       case GOOGLE_CLOUD_FUNCTIONS:
-        addGcfAttributes(attrBuilder, detectedPlatform.getAttributes());
+        addGcfAttributes(attrBuilder, detectedPlatform.getAttributes(), projectId);
         break;
       case GOOGLE_CLOUD_RUN_JOB:
-        addGcrJobAttributes(attrBuilder, detectedPlatform.getAttributes());
+        addGcrJobAttributes(attrBuilder, detectedPlatform.getAttributes(), projectId);
         break;
       case GOOGLE_APP_ENGINE:
         addGaeAttributes(attrBuilder, detectedPlatform.getAttributes());
@@ -203,9 +206,17 @@ public class GCPResourceProvider implements ConditionalResourceProvider {
    *     necessary keys.
    */
   private static void addGcrAttributes(
-      AttributesBuilder attrBuilder, Map<String, String> attributesMap) {
+      AttributesBuilder attrBuilder,
+      Map<String, String> attributesMap,
+      @Nullable String projectId) {
     attrBuilder.put(CLOUD_PLATFORM, GCP_CLOUD_RUN);
     addCommonAttributesForServerlessCompute(attrBuilder, attributesMap);
+    addCloudResourceId(
+        attrBuilder,
+        "//run.googleapis.com/projects/%s/locations/%s/services/%s",
+        projectId,
+        attributesMap.get(SERVERLESS_COMPUTE_CLOUD_REGION),
+        attributesMap.get(SERVERLESS_COMPUTE_NAME));
   }
 
   /**
@@ -216,9 +227,17 @@ public class GCPResourceProvider implements ConditionalResourceProvider {
    *     necessary keys.
    */
   private static void addGcfAttributes(
-      AttributesBuilder attrBuilder, Map<String, String> attributesMap) {
+      AttributesBuilder attrBuilder,
+      Map<String, String> attributesMap,
+      @Nullable String projectId) {
     attrBuilder.put(CLOUD_PLATFORM, GCP_CLOUD_FUNCTIONS);
     addCommonAttributesForServerlessCompute(attrBuilder, attributesMap);
+    addCloudResourceId(
+        attrBuilder,
+        "//cloudfunctions.googleapis.com/projects/%s/locations/%s/functions/%s",
+        projectId,
+        attributesMap.get(SERVERLESS_COMPUTE_CLOUD_REGION),
+        attributesMap.get(SERVERLESS_COMPUTE_NAME));
   }
 
   /**
@@ -229,7 +248,9 @@ public class GCPResourceProvider implements ConditionalResourceProvider {
    *     necessary keys.
    */
   private static void addGcrJobAttributes(
-      AttributesBuilder attrBuilder, Map<String, String> attributesMap) {
+      AttributesBuilder attrBuilder,
+      Map<String, String> attributesMap,
+      @Nullable String projectId) {
     attrBuilder.put(CLOUD_PLATFORM, GCP_CLOUD_RUN);
     Optional.ofNullable(attributesMap.get(SERVERLESS_COMPUTE_NAME))
         .ifPresent(name -> attrBuilder.put(FAAS_NAME, name));
@@ -254,6 +275,12 @@ public class GCPResourceProvider implements ConditionalResourceProvider {
                 e);
           }
         });
+    addCloudResourceId(
+        attrBuilder,
+        "//run.googleapis.com/projects/%s/locations/%s/jobs/%s",
+        projectId,
+        attributesMap.get(SERVERLESS_COMPUTE_CLOUD_REGION),
+        attributesMap.get(SERVERLESS_COMPUTE_NAME));
   }
 
   /**
@@ -298,5 +325,21 @@ public class GCPResourceProvider implements ConditionalResourceProvider {
         .ifPresent(zone -> attrBuilder.put(CLOUD_AVAILABILITY_ZONE, zone));
     Optional.ofNullable(attributesMap.get(SERVERLESS_COMPUTE_CLOUD_REGION))
         .ifPresent(region -> attrBuilder.put(CLOUD_REGION, region));
+  }
+
+  private static void addCloudResourceId(
+      AttributesBuilder attrBuilder,
+      String format,
+      @Nullable String projectId,
+      @Nullable String region,
+      @Nullable String name) {
+    if (projectId != null
+        && !projectId.isEmpty()
+        && region != null
+        && !region.isEmpty()
+        && name != null
+        && !name.isEmpty()) {
+      attrBuilder.put(CLOUD_RESOURCE_ID, String.format(format, projectId, region, name));
+    }
   }
 }
