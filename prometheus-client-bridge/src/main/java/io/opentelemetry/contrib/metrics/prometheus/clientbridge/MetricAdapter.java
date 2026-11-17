@@ -112,14 +112,13 @@ final class MetricAdapter {
       Attributes attributes = pointData.getAttributes();
       List<String> labelNames = new ArrayList<>(attributes.size());
       List<String> labelValues = new ArrayList<>(attributes.size());
-      attributes.forEach(
-          (key, value) -> {
-            String sanitizedLabelName = sanitizer.apply(key.getKey());
-            labelNames.add(sanitizedLabelName);
-            // TODO: We want to create an error-log if there is overlap in toString of attribute
-            // values for the same key name.
-            labelValues.add(value == null ? "" : value.toString());
-          });
+      attributes.forEach((key, value) -> {
+        String sanitizedLabelName = sanitizer.apply(key.getKey());
+        labelNames.add(sanitizedLabelName);
+        // TODO: We want to create an error-log if there is overlap in toString of attribute
+        // values for the same key name.
+        labelValues.add(value == null ? "" : value.toString());
+      });
 
       switch (type) {
         case DOUBLE_SUM:

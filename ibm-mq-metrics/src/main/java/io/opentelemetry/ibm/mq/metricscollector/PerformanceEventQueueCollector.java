@@ -23,7 +23,7 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// Captures metrics from events logged to the queue manager performance event queue.
+/** Captures metrics from events logged to the queue manager performance event queue. */
 public final class PerformanceEventQueueCollector implements Consumer<MetricsCollectorContext> {
 
   private static final Logger logger =

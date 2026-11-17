@@ -14,6 +14,7 @@ import com.google.auto.value.AutoValue;
 import java.util.List;
 import javax.annotation.Nullable;
 
+/** Configuration for X-Ray adaptive sampling. */
 @AutoValue
 @JsonSerialize(as = AwsXrayAdaptiveSamplingConfig.class)
 @JsonDeserialize(builder = AutoValue_AwsXrayAdaptiveSamplingConfig.Builder.class)
@@ -34,6 +35,7 @@ public abstract class AwsXrayAdaptiveSamplingConfig {
     return new AutoValue_AwsXrayAdaptiveSamplingConfig.Builder();
   }
 
+  /** Builder for {@link AwsXrayAdaptiveSamplingConfig}. */
   @AutoValue.Builder
   public abstract static class Builder {
     @JsonProperty("version")
@@ -48,6 +50,7 @@ public abstract class AwsXrayAdaptiveSamplingConfig {
     public abstract AwsXrayAdaptiveSamplingConfig build();
   }
 
+  /** Conditions that identify anomalous spans by error code, operation, or latency. */
   @AutoValue
   @JsonDeserialize(
       builder = AutoValue_AwsXrayAdaptiveSamplingConfig_AnomalyConditions.Builder.class)
@@ -72,6 +75,7 @@ public abstract class AwsXrayAdaptiveSamplingConfig {
       return new AutoValue_AwsXrayAdaptiveSamplingConfig_AnomalyConditions.Builder();
     }
 
+    /** Builder for {@link AnomalyConditions}. */
     @AutoValue.Builder
     public abstract static class Builder {
       @JsonProperty("errorCodeRegex")
@@ -90,6 +94,9 @@ public abstract class AwsXrayAdaptiveSamplingConfig {
     }
   }
 
+  /**
+   * Whether anomaly conditions apply to sampling boost, anomaly trace capture, both, or neither.
+   */
   public enum UsageType {
     BOTH("both"),
     SAMPLING_BOOST("sampling-boost"),
@@ -126,6 +133,7 @@ public abstract class AwsXrayAdaptiveSamplingConfig {
     }
   }
 
+  /** Limit on the number of anomaly traces captured per second. */
   @AutoValue
   @JsonDeserialize(
       builder = AutoValue_AwsXrayAdaptiveSamplingConfig_AnomalyCaptureLimit.Builder.class)
@@ -137,6 +145,7 @@ public abstract class AwsXrayAdaptiveSamplingConfig {
       return new AutoValue_AwsXrayAdaptiveSamplingConfig_AnomalyCaptureLimit.Builder();
     }
 
+    /** Builder for {@link AnomalyCaptureLimit}. */
     @AutoValue.Builder
     public abstract static class Builder {
       @JsonProperty("anomalyTracesPerSecond")

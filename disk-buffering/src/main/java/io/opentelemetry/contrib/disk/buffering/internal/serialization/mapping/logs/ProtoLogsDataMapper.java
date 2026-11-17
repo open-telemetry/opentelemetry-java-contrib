@@ -17,6 +17,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Maps between {@link LogRecordData} items and {@link ExportLogsServiceRequest} protos.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public final class ProtoLogsDataMapper
     extends BaseProtoSignalsDataMapper<
         LogRecordData, LogRecord, ExportLogsServiceRequest, ResourceLogs, ScopeLogs> {
@@ -47,17 +53,16 @@ public final class ProtoLogsDataMapper
   protected ExportLogsServiceRequest createProtoData(
       Map<Resource, Map<InstrumentationScopeInfo, List<LogRecord>>> itemsByResource) {
     List<ResourceLogs> items = new ArrayList<>();
-    itemsByResource.forEach(
-        (resource, instrumentationScopeInfoScopedLogsMap) -> {
-          ResourceLogs.Builder resourceLogsBuilder = createProtoResourceBuilder(resource);
-          for (Map.Entry<InstrumentationScopeInfo, List<LogRecord>> logsByScope :
-              instrumentationScopeInfoScopedLogsMap.entrySet()) {
-            ScopeLogs.Builder scopeBuilder = createProtoScopeBuilder(logsByScope.getKey());
-            scopeBuilder.log_records.addAll(logsByScope.getValue());
-            resourceLogsBuilder.scope_logs.add(scopeBuilder.build());
-          }
-          items.add(resourceLogsBuilder.build());
-        });
+    itemsByResource.forEach((resource, instrumentationScopeInfoScopedLogsMap) -> {
+      ResourceLogs.Builder resourceLogsBuilder = createProtoResourceBuilder(resource);
+      for (Map.Entry<InstrumentationScopeInfo, List<LogRecord>> logsByScope :
+          instrumentationScopeInfoScopedLogsMap.entrySet()) {
+        ScopeLogs.Builder scopeBuilder = createProtoScopeBuilder(logsByScope.getKey());
+        scopeBuilder.log_records.addAll(logsByScope.getValue());
+        resourceLogsBuilder.scope_logs.add(scopeBuilder.build());
+      }
+      items.add(resourceLogsBuilder.build());
+    });
     return new ExportLogsServiceRequest.Builder().resource_logs(items).build();
   }
 

@@ -5,6 +5,12 @@
 
 package io.opentelemetry.contrib.inferredspans.internal.util;
 
+/**
+ * Utility methods for hex encoding.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public class HexUtils {
 
   public static final char[] HEX_CHARS = "0123456789abcdef".toCharArray();

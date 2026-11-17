@@ -9,6 +9,7 @@ import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceWrapper;
 import javax.annotation.Nullable;
 
+/** Validates policy sources and converts them into {@link TelemetryPolicy} instances. */
 public interface PolicyValidator {
   /**
    * Validates a parsed policy configuration source from the supplied provider source kind.

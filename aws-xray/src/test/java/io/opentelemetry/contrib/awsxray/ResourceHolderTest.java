@@ -30,13 +30,12 @@ class ResourceHolderTest {
     AutoConfigurationCustomizer mockCustomizer = mock(AutoConfigurationCustomizer.class);
     ResourceHolder resourceHolder = new ResourceHolder();
     when(mockCustomizer.addResourceCustomizer(any()))
-        .thenAnswer(
-            invocation -> {
-              BiFunction<Resource, ConfigProperties, Resource> biFunction =
-                  (BiFunction<Resource, ConfigProperties, Resource>) invocation.getArguments()[0];
-              assertThat(biFunction.apply(customizedResource, null)).isEqualTo(customizedResource);
-              return mockCustomizer;
-            });
+        .thenAnswer(invocation -> {
+          BiFunction<Resource, ConfigProperties, Resource> biFunction =
+              (BiFunction<Resource, ConfigProperties, Resource>) invocation.getArguments()[0];
+          assertThat(biFunction.apply(customizedResource, null)).isEqualTo(customizedResource);
+          return mockCustomizer;
+        });
     resourceHolder.customize(mockCustomizer);
     assertThat(ResourceHolder.getResource()).isEqualTo(customizedResource);
   }

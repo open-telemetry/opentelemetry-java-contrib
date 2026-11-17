@@ -30,6 +30,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 
+/**
+ * Span processor that uses a sampling profiler to create inferred spans for method calls within
+ * traces.
+ */
 public class InferredSpansProcessor implements SpanProcessor {
 
   private static final Logger logger = Logger.getLogger(InferredSpansProcessor.class.getName());
@@ -116,16 +120,15 @@ public class InferredSpansProcessor implements SpanProcessor {
           return thread;
         };
     Executors.newSingleThreadExecutor(threadFactory)
-        .submit(
-            () -> {
-              try {
-                profiler.stop();
-                result.succeed();
-              } catch (Throwable e) {
-                logger.log(Level.SEVERE, "Failed to stop Inferred Spans Processor", e);
-                result.fail();
-              }
-            });
+        .submit(() -> {
+          try {
+            profiler.stop();
+            result.succeed();
+          } catch (Throwable e) {
+            logger.log(Level.SEVERE, "Failed to stop Inferred Spans Processor", e);
+            result.fail();
+          }
+        });
     return result;
   }
 

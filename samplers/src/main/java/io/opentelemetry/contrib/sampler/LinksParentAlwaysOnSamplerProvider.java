@@ -9,6 +9,7 @@ import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.traces.ConfigurableSamplerProvider;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 
+/** {@link ConfigurableSamplerProvider} for the {@code linksbased_parentbased_always_on} sampler. */
 public final class LinksParentAlwaysOnSamplerProvider implements ConfigurableSamplerProvider {
   @Override
   public Sampler createSampler(ConfigProperties config) {

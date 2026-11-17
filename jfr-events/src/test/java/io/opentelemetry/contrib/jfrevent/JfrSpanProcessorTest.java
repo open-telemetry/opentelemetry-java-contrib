@@ -81,12 +81,11 @@ class JfrSpanProcessorTest {
           .extracting(e -> e.getValue("operationName"))
           .containsExactly(OPERATION_NAME);
       assertThat(events)
-          .extracting(
-              e ->
-                  e.getFields().stream()
-                      .filter(f -> f.getName().equals("operationName"))
-                      .map(d -> d.getAnnotation(Contextual.class))
-                      .collect(Collectors.toList()))
+          .extracting(e ->
+              e.getFields().stream()
+                  .filter(f -> f.getName().equals("operationName"))
+                  .map(d -> d.getAnnotation(Contextual.class))
+                  .collect(Collectors.toList()))
           .doesNotContainNull();
     } finally {
       Files.delete(output);
@@ -132,12 +131,11 @@ class JfrSpanProcessorTest {
           .containsExactly(OPERATION_NAME);
       assertThat(events)
           .filteredOn(e -> "Scope".equals(e.getEventType().getLabel()))
-          .extracting(
-              e ->
-                  e.getFields().stream()
-                      .filter(f -> f.getName().equals("traceId"))
-                      .map(d -> d.getAnnotation(Contextual.class))
-                      .collect(Collectors.toList()))
+          .extracting(e ->
+              e.getFields().stream()
+                  .filter(f -> f.getName().equals("traceId"))
+                  .map(d -> d.getAnnotation(Contextual.class))
+                  .collect(Collectors.toList()))
           .doesNotContainNull();
 
     } finally {

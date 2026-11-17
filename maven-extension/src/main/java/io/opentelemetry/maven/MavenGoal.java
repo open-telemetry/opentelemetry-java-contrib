@@ -8,6 +8,7 @@ package io.opentelemetry.maven;
 import com.google.auto.value.AutoValue;
 import org.apache.maven.plugin.MojoExecution;
 
+/** Maven plugin goal identified by its group id, artifact id and goal name. */
 @AutoValue
 public abstract class MavenGoal {
   public static MavenGoal create(String groupId, String artifactId, String goal) {

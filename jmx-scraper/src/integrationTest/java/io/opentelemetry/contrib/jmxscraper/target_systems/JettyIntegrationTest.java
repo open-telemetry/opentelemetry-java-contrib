@@ -25,18 +25,17 @@ class JettyIntegrationTest extends TargetSystemIntegrationTest {
     GenericContainer<?> container =
         new GenericContainer<>(
             new ImageFromDockerfile()
-                .withDockerfileFromBuilder(
-                    builder ->
-                        builder
-                            .from("jetty:11")
-                            .run(
-                                "java",
-                                "-jar",
-                                "/usr/local/jetty/start.jar",
-                                "--add-to-startd=jmx,stats,http")
-                            .run("mkdir -p /var/lib/jetty/webapps/ROOT/")
-                            .run("touch /var/lib/jetty/webapps/ROOT/index.html")
-                            .build()));
+                .withDockerfileFromBuilder(builder ->
+                    builder
+                        .from("jetty:11")
+                        .run(
+                            "java",
+                            "-jar",
+                            "/usr/local/jetty/start.jar",
+                            "--add-to-startd=jmx,stats,http")
+                        .run("mkdir -p /var/lib/jetty/webapps/ROOT/")
+                        .run("touch /var/lib/jetty/webapps/ROOT/index.html")
+                        .build()));
 
     container
         .withEnv("JAVA_OPTIONS", genericJmxJvmArguments(jmxPort))

@@ -14,6 +14,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
+/** Utility methods for extracting values from PCF messages. */
 public final class MessageBuddy {
 
   private MessageBuddy() {}

@@ -128,14 +128,12 @@ class InstrumenterHelperTest {
       updateWithHelper(mBeanHelper, instrumentMethod, instrumentName, description, "Double");
 
       assertThat(metricReader.collectAllMetrics())
-          .satisfiesExactly(
-              metric ->
-                  assertThat(metric)
-                      .hasName(instrumentName)
-                      .hasDescription(description)
-                      .hasUnit("1")
-                      .hasDoubleSumSatisfying(
-                          sum -> sum.hasPointsSatisfying(this::assertDoublePoint)));
+          .satisfiesExactly(metric ->
+              assertThat(metric)
+                  .hasName(instrumentName)
+                  .hasDescription(description)
+                  .hasUnit("1")
+                  .hasDoubleSumSatisfying(sum -> sum.hasPointsSatisfying(this::assertDoublePoint)));
     }
 
     @ParameterizedTest
@@ -156,13 +154,12 @@ class InstrumenterHelperTest {
       updateWithHelper(mBeanHelper, instrumentMethod, instrumentName, description, "Long");
 
       assertThat(metricReader.collectAllMetrics())
-          .satisfiesExactly(
-              metric ->
-                  assertThat(metric)
-                      .hasName(instrumentName)
-                      .hasDescription(description)
-                      .hasUnit("1")
-                      .hasLongSumSatisfying(sum -> sum.hasPointsSatisfying(this::assertLongPoint)));
+          .satisfiesExactly(metric ->
+              assertThat(metric)
+                  .hasName(instrumentName)
+                  .hasDescription(description)
+                  .hasUnit("1")
+                  .hasLongSumSatisfying(sum -> sum.hasPointsSatisfying(this::assertLongPoint)));
     }
 
     @ParameterizedTest
@@ -177,24 +174,19 @@ class InstrumenterHelperTest {
       updateWithHelper(mBeanHelper, instrumentMethod, instrumentName, description, "Long");
 
       assertThat(metricReader.collectAllMetrics())
-          .satisfiesExactly(
-              metric ->
-                  assertThat(metric)
-                      .hasName(instrumentName)
-                      .hasDescription(description)
-                      .hasUnit("1")
-                      .hasHistogramSatisfying(
-                          histogram ->
-                              histogram.hasPointsSatisfying(
-                                  point ->
-                                      point
-                                          .hasSum(234)
-                                          .hasCount(1)
-                                          .hasAttributesSatisfying(
-                                              equalTo(
-                                                  AttributeKey.stringKey("labelOne"),
-                                                  "labelOneValue"),
-                                              equalTo(AttributeKey.stringKey("labelTwo"), "0")))));
+          .satisfiesExactly(metric ->
+              assertThat(metric)
+                  .hasName(instrumentName)
+                  .hasDescription(description)
+                  .hasUnit("1")
+                  .hasHistogramSatisfying(histogram ->
+                      histogram.hasPointsSatisfying(point ->
+                          point
+                              .hasSum(234)
+                              .hasCount(1)
+                              .hasAttributesSatisfying(
+                                  equalTo(AttributeKey.stringKey("labelOne"), "labelOneValue"),
+                                  equalTo(AttributeKey.stringKey("labelTwo"), "0")))));
     }
 
     @Test
@@ -209,14 +201,13 @@ class InstrumenterHelperTest {
       updateWithHelper(mBeanHelper, instrumentMethod, instrumentName, description, "Double");
 
       assertThat(metricReader.collectAllMetrics())
-          .satisfiesExactly(
-              metric ->
-                  assertThat(metric)
-                      .hasName(instrumentName)
-                      .hasDescription(description)
-                      .hasUnit("1")
-                      .hasDoubleGaugeSatisfying(
-                          gauge -> gauge.hasPointsSatisfying(this::assertDoublePoint)));
+          .satisfiesExactly(metric ->
+              assertThat(metric)
+                  .hasName(instrumentName)
+                  .hasDescription(description)
+                  .hasUnit("1")
+                  .hasDoubleGaugeSatisfying(
+                      gauge -> gauge.hasPointsSatisfying(this::assertDoublePoint)));
     }
 
     @Test
@@ -231,14 +222,13 @@ class InstrumenterHelperTest {
       updateWithHelper(mBeanHelper, instrumentMethod, instrumentName, description, "Long");
 
       assertThat(metricReader.collectAllMetrics())
-          .satisfiesExactly(
-              metric ->
-                  assertThat(metric)
-                      .hasName(instrumentName)
-                      .hasDescription(description)
-                      .hasUnit("1")
-                      .hasLongGaugeSatisfying(
-                          gauge -> gauge.hasPointsSatisfying(this::assertLongPoint)));
+          .satisfiesExactly(metric ->
+              assertThat(metric)
+                  .hasName(instrumentName)
+                  .hasDescription(description)
+                  .hasUnit("1")
+                  .hasLongGaugeSatisfying(
+                      gauge -> gauge.hasPointsSatisfying(this::assertLongPoint)));
     }
 
     private void assertDoublePoint(DoublePointAssert point) {
@@ -279,14 +269,12 @@ class InstrumenterHelperTest {
       updateWithHelper(mBeanHelper, instrumentMethod, instrumentName, description, "Double");
 
       assertThat(metricReader.collectAllMetrics())
-          .satisfiesExactly(
-              metric ->
-                  assertThat(metric)
-                      .hasName(instrumentName)
-                      .hasDescription(description)
-                      .hasUnit("1")
-                      .hasDoubleSumSatisfying(
-                          sum -> sum.hasPointsSatisfying(assertDoublePoints())));
+          .satisfiesExactly(metric ->
+              assertThat(metric)
+                  .hasName(instrumentName)
+                  .hasDescription(description)
+                  .hasUnit("1")
+                  .hasDoubleSumSatisfying(sum -> sum.hasPointsSatisfying(assertDoublePoints())));
     }
 
     @ParameterizedTest
@@ -310,14 +298,12 @@ class InstrumenterHelperTest {
       updateWithHelper(mBeanHelper, instrumentMethod, instrumentName, description, "Double");
 
       assertThat(metricReader.collectAllMetrics())
-          .satisfiesExactly(
-              metric ->
-                  assertThat(metric)
-                      .hasName(instrumentName)
-                      .hasDescription(description)
-                      .hasUnit("1")
-                      .hasDoubleSumSatisfying(
-                          sum -> sum.hasPointsSatisfying(assertDoublePoints())));
+          .satisfiesExactly(metric ->
+              assertThat(metric)
+                  .hasName(instrumentName)
+                  .hasDescription(description)
+                  .hasUnit("1")
+                  .hasDoubleSumSatisfying(sum -> sum.hasPointsSatisfying(assertDoublePoints())));
     }
 
     @ParameterizedTest
@@ -338,13 +324,12 @@ class InstrumenterHelperTest {
       updateWithHelper(mBeanHelper, instrumentMethod, instrumentName, description, "Long");
 
       assertThat(metricReader.collectAllMetrics())
-          .satisfiesExactly(
-              metric ->
-                  assertThat(metric)
-                      .hasName(instrumentName)
-                      .hasDescription(description)
-                      .hasUnit("1")
-                      .hasLongSumSatisfying(sum -> sum.hasPointsSatisfying(assertLongPoints())));
+          .satisfiesExactly(metric ->
+              assertThat(metric)
+                  .hasName(instrumentName)
+                  .hasDescription(description)
+                  .hasUnit("1")
+                  .hasLongSumSatisfying(sum -> sum.hasPointsSatisfying(assertLongPoints())));
     }
 
     @ParameterizedTest
@@ -359,51 +344,41 @@ class InstrumenterHelperTest {
       updateWithHelper(mBeanHelper, instrumentMethod, instrumentName, description, "Long");
 
       assertThat(metricReader.collectAllMetrics())
-          .satisfiesExactly(
-              metric ->
-                  assertThat(metric)
-                      .hasName(instrumentName)
-                      .hasDescription(description)
-                      .hasUnit("1")
-                      .hasHistogramSatisfying(
-                          histogram ->
-                              histogram.hasPointsSatisfying(
-                                  point ->
-                                      point
-                                          .hasSum(234)
-                                          .hasCount(1)
-                                          .hasAttributesSatisfying(
-                                              equalTo(
-                                                  AttributeKey.stringKey("labelOne"),
-                                                  "labelOneValue"),
-                                              equalTo(AttributeKey.stringKey("labelTwo"), "0")),
-                                  point ->
-                                      point
-                                          .hasSum(234)
-                                          .hasCount(1)
-                                          .hasAttributesSatisfying(
-                                              equalTo(
-                                                  AttributeKey.stringKey("labelOne"),
-                                                  "labelOneValue"),
-                                              equalTo(AttributeKey.stringKey("labelTwo"), "1")),
-                                  point ->
-                                      point
-                                          .hasSum(234)
-                                          .hasCount(1)
-                                          .hasAttributesSatisfying(
-                                              equalTo(
-                                                  AttributeKey.stringKey("labelOne"),
-                                                  "labelOneValue"),
-                                              equalTo(AttributeKey.stringKey("labelTwo"), "2")),
-                                  point ->
-                                      point
-                                          .hasSum(234)
-                                          .hasCount(1)
-                                          .hasAttributesSatisfying(
-                                              equalTo(
-                                                  AttributeKey.stringKey("labelOne"),
-                                                  "labelOneValue"),
-                                              equalTo(AttributeKey.stringKey("labelTwo"), "3")))));
+          .satisfiesExactly(metric ->
+              assertThat(metric)
+                  .hasName(instrumentName)
+                  .hasDescription(description)
+                  .hasUnit("1")
+                  .hasHistogramSatisfying(histogram ->
+                      histogram.hasPointsSatisfying(
+                          point ->
+                              point
+                                  .hasSum(234)
+                                  .hasCount(1)
+                                  .hasAttributesSatisfying(
+                                      equalTo(AttributeKey.stringKey("labelOne"), "labelOneValue"),
+                                      equalTo(AttributeKey.stringKey("labelTwo"), "0")),
+                          point ->
+                              point
+                                  .hasSum(234)
+                                  .hasCount(1)
+                                  .hasAttributesSatisfying(
+                                      equalTo(AttributeKey.stringKey("labelOne"), "labelOneValue"),
+                                      equalTo(AttributeKey.stringKey("labelTwo"), "1")),
+                          point ->
+                              point
+                                  .hasSum(234)
+                                  .hasCount(1)
+                                  .hasAttributesSatisfying(
+                                      equalTo(AttributeKey.stringKey("labelOne"), "labelOneValue"),
+                                      equalTo(AttributeKey.stringKey("labelTwo"), "2")),
+                          point ->
+                              point
+                                  .hasSum(234)
+                                  .hasCount(1)
+                                  .hasAttributesSatisfying(
+                                      equalTo(AttributeKey.stringKey("labelOne"), "labelOneValue"),
+                                      equalTo(AttributeKey.stringKey("labelTwo"), "3")))));
     }
 
     @Test
@@ -418,14 +393,13 @@ class InstrumenterHelperTest {
       updateWithHelper(mBeanHelper, instrumentMethod, instrumentName, description, "Double");
 
       assertThat(metricReader.collectAllMetrics())
-          .satisfiesExactly(
-              metric ->
-                  assertThat(metric)
-                      .hasName(instrumentName)
-                      .hasDescription(description)
-                      .hasUnit("1")
-                      .hasDoubleGaugeSatisfying(
-                          gauge -> gauge.hasPointsSatisfying(assertDoublePoints())));
+          .satisfiesExactly(metric ->
+              assertThat(metric)
+                  .hasName(instrumentName)
+                  .hasDescription(description)
+                  .hasUnit("1")
+                  .hasDoubleGaugeSatisfying(
+                      gauge -> gauge.hasPointsSatisfying(assertDoublePoints())));
     }
 
     @Test
@@ -447,14 +421,13 @@ class InstrumenterHelperTest {
           /* aggregateAcrossMBeans= */ true);
 
       assertThat(metricReader.collectAllMetrics())
-          .satisfiesExactly(
-              metric ->
-                  assertThat(metric)
-                      .hasName(instrumentName)
-                      .hasDescription(description)
-                      .hasUnit("1")
-                      .hasDoubleGaugeSatisfying(
-                          gauge -> gauge.hasPointsSatisfying(assertDoublePoint())));
+          .satisfiesExactly(metric ->
+              assertThat(metric)
+                  .hasName(instrumentName)
+                  .hasDescription(description)
+                  .hasUnit("1")
+                  .hasDoubleGaugeSatisfying(
+                      gauge -> gauge.hasPointsSatisfying(assertDoublePoint())));
     }
 
     @Test
@@ -472,14 +445,13 @@ class InstrumenterHelperTest {
       updateWithHelper(mBeanHelper, instrumentMethod, instrumentName, description, "Double");
 
       assertThat(metricReader.collectAllMetrics())
-          .satisfiesExactly(
-              metric ->
-                  assertThat(metric)
-                      .hasName(instrumentName)
-                      .hasDescription(description)
-                      .hasUnit("1")
-                      .hasDoubleGaugeSatisfying(
-                          gauge -> gauge.hasPointsSatisfying(assertDoublePoints())));
+          .satisfiesExactly(metric ->
+              assertThat(metric)
+                  .hasName(instrumentName)
+                  .hasDescription(description)
+                  .hasUnit("1")
+                  .hasDoubleGaugeSatisfying(
+                      gauge -> gauge.hasPointsSatisfying(assertDoublePoints())));
     }
 
     @Test
@@ -512,14 +484,13 @@ class InstrumenterHelperTest {
           mBeanHelper, instrumentMethod, instrumentName, description, attributes);
 
       assertThat(metricReader.collectAllMetrics())
-          .satisfiesExactly(
-              metric ->
-                  assertThat(metric)
-                      .hasName(instrumentName)
-                      .hasDescription(description)
-                      .hasUnit("1")
-                      .hasDoubleGaugeSatisfying(
-                          gauge -> gauge.hasPointsSatisfying(assertAttributeDoublePoints())));
+          .satisfiesExactly(metric ->
+              assertThat(metric)
+                  .hasName(instrumentName)
+                  .hasDescription(description)
+                  .hasUnit("1")
+                  .hasDoubleGaugeSatisfying(
+                      gauge -> gauge.hasPointsSatisfying(assertAttributeDoublePoints())));
     }
 
     @Test
@@ -534,14 +505,12 @@ class InstrumenterHelperTest {
       updateWithHelper(mBeanHelper, instrumentMethod, instrumentName, description, "Long");
 
       assertThat(metricReader.collectAllMetrics())
-          .satisfiesExactly(
-              metric ->
-                  assertThat(metric)
-                      .hasName(instrumentName)
-                      .hasDescription(description)
-                      .hasUnit("1")
-                      .hasLongGaugeSatisfying(
-                          gauge -> gauge.hasPointsSatisfying(assertLongPoints())));
+          .satisfiesExactly(metric ->
+              assertThat(metric)
+                  .hasName(instrumentName)
+                  .hasDescription(description)
+                  .hasUnit("1")
+                  .hasLongGaugeSatisfying(gauge -> gauge.hasPointsSatisfying(assertLongPoints())));
     }
 
     @SuppressWarnings("unchecked")

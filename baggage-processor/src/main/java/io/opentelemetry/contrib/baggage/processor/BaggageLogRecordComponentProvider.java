@@ -10,6 +10,7 @@ import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.ComponentProvider;
 import io.opentelemetry.sdk.logs.LogRecordProcessor;
 
+/** Declarative configuration SPI implementation for {@link BaggageLogRecordProcessor}. */
 @AutoService(ComponentProvider.class)
 public class BaggageLogRecordComponentProvider implements ComponentProvider {
   @Override

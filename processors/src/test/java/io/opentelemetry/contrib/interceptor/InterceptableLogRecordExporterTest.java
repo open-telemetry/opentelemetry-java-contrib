@@ -48,12 +48,11 @@ class InterceptableLogRecordExporterTest {
 
   @Test
   void verifyLogModification() {
-    interceptor.add(
-        item -> {
-          ModifiableLogRecordData modified = new ModifiableLogRecordData(item);
-          modified.attributes.put("global.attr", "from interceptor");
-          return modified;
-        });
+    interceptor.add(item -> {
+      ModifiableLogRecordData modified = new ModifiableLogRecordData(item);
+      modified.attributes.put("global.attr", "from interceptor");
+      return modified;
+    });
 
     logger
         .logRecordBuilder()
@@ -74,13 +73,12 @@ class InterceptableLogRecordExporterTest {
 
   @Test
   void verifyLogFiltering() {
-    interceptor.add(
-        item -> {
-          if (Objects.requireNonNull(item.getBodyValue()).asString().contains("deleted")) {
-            return null;
-          }
-          return item;
-        });
+    interceptor.add(item -> {
+      if (Objects.requireNonNull(item.getBodyValue()).asString().contains("deleted")) {
+        return null;
+      }
+      return item;
+    });
 
     logger.logRecordBuilder().setBody("One log").emit();
     logger.logRecordBuilder().setBody("This log will be deleted").emit();

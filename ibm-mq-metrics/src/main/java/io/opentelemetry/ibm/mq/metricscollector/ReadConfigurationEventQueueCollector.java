@@ -23,6 +23,10 @@ import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Reads queue manager configuration events from the configuration event queue and records the max
+ * handles metric.
+ */
 public final class ReadConfigurationEventQueueCollector
     implements Consumer<MetricsCollectorContext> {
 

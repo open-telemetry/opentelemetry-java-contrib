@@ -17,6 +17,7 @@ import io.opentelemetry.sdk.resources.Resource;
 import java.util.HashMap;
 import java.util.Map;
 
+/** Resource provider for Azure Container Apps. */
 public final class AzureContainersResourceProvider extends CloudResourceProvider {
 
   static final String CONTAINER_APP_NAME = "CONTAINER_APP_NAME";

@@ -28,16 +28,15 @@ public class AutoConfiguredDataCapture implements AutoConfigurationCustomizerPro
 
   @Override
   public void customize(AutoConfigurationCustomizer autoConfiguration) {
-    autoConfiguration.addSpanExporterCustomizer(
-        (spanExporter, config) -> {
-          // we piggy-back onto the autoconfigured logging exporter for now,
-          // because that one uses a SimpleSpanProcessor which does not impose a batching delay
-          if (spanExporter instanceof LoggingSpanExporter) {
-            inMemorySpanExporter.reset();
-            return SpanExporter.composite(inMemorySpanExporter, spanExporter);
-          }
-          return spanExporter;
-        });
+    autoConfiguration.addSpanExporterCustomizer((spanExporter, config) -> {
+      // we piggy-back onto the autoconfigured logging exporter for now,
+      // because that one uses a SimpleSpanProcessor which does not impose a batching delay
+      if (spanExporter instanceof LoggingSpanExporter) {
+        inMemorySpanExporter.reset();
+        return SpanExporter.composite(inMemorySpanExporter, spanExporter);
+      }
+      return spanExporter;
+    });
   }
 
   @Override

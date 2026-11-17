@@ -16,6 +16,12 @@ import okhttp3.Response;
 import okhttp3.WebSocketListener;
 import okio.ByteString;
 
+/**
+ * {@link WebSocket} implementation based on OkHttp.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public class OkHttpWebSocket implements WebSocket {
   private final String url;
   private final OkHttpClient client;
@@ -86,6 +92,8 @@ public class OkHttpWebSocket implements WebSocket {
     @Override
     public void onClosing(@Nonnull okhttp3.WebSocket webSocket, int code, @Nonnull String reason) {
       status.set(Status.CLOSING);
+      // Complete the close handshake so OkHttp can release the connection and call onClosed.
+      webSocket.close(1000, null);
       delegate.onClosing();
     }
 

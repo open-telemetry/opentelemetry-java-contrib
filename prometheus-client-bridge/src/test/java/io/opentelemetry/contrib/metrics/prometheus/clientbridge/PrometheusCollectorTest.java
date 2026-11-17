@@ -48,13 +48,12 @@ class PrometheusCollectorTest {
 
   @Test
   void registerWithSdkMeterProvider() {
-    assertThatCode(
-            () ->
-                SdkMeterProvider.builder()
-                    .registerMetricReader(PrometheusCollector.create())
-                    .build()
-                    .forceFlush()
-                    .join(10, TimeUnit.SECONDS))
+    assertThatCode(() ->
+            SdkMeterProvider.builder()
+                .registerMetricReader(PrometheusCollector.create())
+                .build()
+                .forceFlush()
+                .join(10, TimeUnit.SECONDS))
         .doesNotThrowAnyException();
   }
 

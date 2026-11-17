@@ -8,6 +8,7 @@ package io.opentelemetry.contrib.disk.buffering.exporters.callback;
 import java.util.Collection;
 import javax.annotation.Nullable;
 
+/** {@link ExporterCallback} implementation that does nothing. */
 public final class NoopExporterCallback<T> implements ExporterCallback<T> {
 
   @Override

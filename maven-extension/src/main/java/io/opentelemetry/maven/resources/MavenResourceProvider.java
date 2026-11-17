@@ -17,6 +17,7 @@ import org.apache.maven.Maven;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/** {@link ResourceProvider} that describes the Maven OpenTelemetry extension. */
 public class MavenResourceProvider implements ResourceProvider {
 
   private static final Logger logger = LoggerFactory.getLogger(MavenResourceProvider.class);

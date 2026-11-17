@@ -18,6 +18,7 @@ import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/** Command-line entry point that collects IBM MQ metrics using the given configuration file. */
 @SuppressWarnings("SystemOut")
 public final class Main {
 
@@ -66,9 +67,8 @@ public final class Main {
       ConfigWrapper config, ScheduledExecutorService service, MetricProducer producer) {
 
     AutoConfiguredOpenTelemetrySdk.builder()
-        .addMeterProviderCustomizer(
-            (builder, configProps) ->
-                builder.setResource(Resource.empty()).registerMetricProducer(producer))
+        .addMeterProviderCustomizer((builder, configProps) ->
+            builder.setResource(Resource.empty()).registerMetricProducer(producer))
         .build();
 
     WmqMonitor monitor = new WmqMonitor(config, service, producer);

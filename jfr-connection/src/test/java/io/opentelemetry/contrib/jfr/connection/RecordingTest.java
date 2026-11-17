@@ -76,14 +76,13 @@ class RecordingTest {
       files
           .filter(Files::isRegularFile)
           .filter(path -> path.toString().endsWith(".jfr"))
-          .forEach(
-              jfrFile -> {
-                try {
-                  Files.delete(jfrFile);
-                } catch (IOException ioException) {
-                  LOGGER.info(ioException::getMessage);
-                }
-              });
+          .forEach(jfrFile -> {
+            try {
+              Files.delete(jfrFile);
+            } catch (IOException ioException) {
+              LOGGER.info(ioException::getMessage);
+            }
+          });
     } catch (IOException ioException) {
       LOGGER.info(ioException::getMessage);
     }
@@ -320,35 +319,33 @@ class RecordingTest {
                   new String[] {long.class.getName()});
       assertThat(flightRecorderMXBeanOptions.isEmpty()).isFalse();
       ((Collection<CompositeData>) flightRecorderMXBeanOptions.values())
-          .forEach(
-              compositeData -> {
-                String key = (String) compositeData.get("key");
-                String getter =
-                    "get" + key.substring(0, 1).toUpperCase(Locale.ROOT) + key.substring(1);
-                String expected = (String) compositeData.get("value");
+          .forEach(compositeData -> {
+            String key = (String) compositeData.get("key");
+            String getter = "get" + key.substring(0, 1).toUpperCase(Locale.ROOT) + key.substring(1);
+            String expected = (String) compositeData.get("value");
 
-                // Special case for duration values. The FlightRecorderMXBean wants "<number><unit>"
-                // but returns "<number> <unit>", so we need to normalize the expected value.
-                if (expected != null && expected.matches("([-+]?\\d+)\\s*(\\w*)")) {
-                  expected = expected.replaceAll("\\s", "");
-                }
+            // Special case for duration values. The FlightRecorderMXBean wants "<number><unit>"
+            // but returns "<number> <unit>", so we need to normalize the expected value.
+            if (expected != null && expected.matches("([-+]?\\d+)\\s*(\\w*)")) {
+              expected = expected.replaceAll("\\s", "");
+            }
 
-                try {
-                  Method method = RecordingOptions.class.getMethod(getter);
-                  String actual = (String) method.invoke(recordingOptions);
-                  // special case for name since FlightRecorderMXBean returns id as default
-                  // and for destination since FlightRecorderMXBean returns null as default
-                  if (!("name".equals(key) && "".equals(actual))
-                      && !("destination".equals(key) && "".equals(actual))) {
-                    assertThat(actual).as(getter).isEqualTo(expected);
-                  }
-                } catch (NoSuchMethodException
-                    | IllegalArgumentException
-                    | IllegalAccessException
-                    | InvocationTargetException badAPI) {
-                  fail("Issue in RecordingOptions API: " + badAPI.getMessage());
-                }
-              });
+            try {
+              Method method = RecordingOptions.class.getMethod(getter);
+              String actual = (String) method.invoke(recordingOptions);
+              // special case for name since FlightRecorderMXBean returns id as default
+              // and for destination since FlightRecorderMXBean returns null as default
+              if (!("name".equals(key) && "".equals(actual))
+                  && !("destination".equals(key) && "".equals(actual))) {
+                assertThat(actual).as(getter).isEqualTo(expected);
+              }
+            } catch (NoSuchMethodException
+                | IllegalArgumentException
+                | IllegalAccessException
+                | InvocationTargetException badAPI) {
+              fail("Issue in RecordingOptions API: " + badAPI.getMessage());
+            }
+          });
       recording.stop();
     } catch (IOException ioe) {
       fail("IOException not expected: ", ioe);

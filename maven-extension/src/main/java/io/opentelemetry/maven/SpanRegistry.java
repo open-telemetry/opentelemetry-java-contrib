@@ -5,6 +5,8 @@
 
 package io.opentelemetry.maven;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.auto.value.AutoValue;
 import io.opentelemetry.api.trace.Span;
 import java.util.Map;
@@ -191,9 +193,7 @@ public final class SpanRegistry {
     abstract MavenProjectKey projectKey();
 
     static MojoExecutionKey fromMojoExecution(MojoExecution mojoExecution, MavenProject project) {
-      if (mojoExecution == null) {
-        throw new NullPointerException("Given MojoExecution is null");
-      }
+      requireNonNull(mojoExecution, "Given MojoExecution is null");
       Plugin plugin = mojoExecution.getPlugin();
       if (plugin == null) {
         throw new NullPointerException(

@@ -159,17 +159,15 @@ public final class OpampPolicyProvider extends AbstractPolicyProvider {
     OkHttpClient.Builder okHttpClientBuilder = new OkHttpClient().newBuilder();
     okHttpClientBuilder
         .interceptors()
-        .add(
-            chain -> {
-              Request.Builder modifiedRequest = chain.request().newBuilder();
-              headers.forEach(
-                  (key, value) -> {
-                    if (value != null) {
-                      modifiedRequest.addHeader(key, value);
-                    }
-                  });
-              return chain.proceed(modifiedRequest.build());
-            });
+        .add(chain -> {
+          Request.Builder modifiedRequest = chain.request().newBuilder();
+          headers.forEach((key, value) -> {
+            if (value != null) {
+              modifiedRequest.addHeader(key, value);
+            }
+          });
+          return chain.proceed(modifiedRequest.build());
+        });
     HttpRequestService requestService =
         HttpRequestService.create(
             OkHttpSender.create(endpoint, okHttpClientBuilder.build()),

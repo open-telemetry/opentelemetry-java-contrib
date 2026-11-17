@@ -11,8 +11,10 @@ import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.maven.MavenGoal;
 import io.opentelemetry.maven.semconv.MavenOtelSemanticAttributes;
+import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
+import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 import io.opentelemetry.semconv.HttpAttributes;
 import io.opentelemetry.semconv.UrlAttributes;
 import io.opentelemetry.semconv.incubating.PeerIncubatingAttributes;
@@ -69,7 +71,10 @@ class MojoGoalExecutionHandlerTest {
         .isEqualTo(
             Collections.singletonList(MavenGoal.create(mojoGroupId, mojoArtifactId, mojoGoal)));
 
-    try (SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder().build()) {
+    try (SdkTracerProvider sdkTracerProvider =
+        SdkTracerProvider.builder()
+            .addSpanProcessor(SimpleSpanProcessor.create(InMemorySpanExporter.create()))
+            .build()) {
       SpanBuilder spanBuilder =
           sdkTracerProvider.tracerBuilder("test-tracer").build().spanBuilder("deploy");
 
@@ -111,7 +116,10 @@ class MojoGoalExecutionHandlerTest {
         .isEqualTo(
             Collections.singletonList(MavenGoal.create(mojoGroupId, mojoArtifactId, mojoGoal)));
 
-    try (SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder().build()) {
+    try (SdkTracerProvider sdkTracerProvider =
+        SdkTracerProvider.builder()
+            .addSpanProcessor(SimpleSpanProcessor.create(InMemorySpanExporter.create()))
+            .build()) {
       SpanBuilder spanBuilder =
           sdkTracerProvider
               .tracerBuilder("test-tracer")
@@ -155,7 +163,10 @@ class MojoGoalExecutionHandlerTest {
         .isEqualTo(
             Collections.singletonList(MavenGoal.create(mojoGroupId, mojoArtifactId, mojoGoal)));
 
-    try (SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder().build()) {
+    try (SdkTracerProvider sdkTracerProvider =
+        SdkTracerProvider.builder()
+            .addSpanProcessor(SimpleSpanProcessor.create(InMemorySpanExporter.create()))
+            .build()) {
       SpanBuilder spanBuilder =
           sdkTracerProvider
               .tracerBuilder("test-tracer")
@@ -199,7 +210,10 @@ class MojoGoalExecutionHandlerTest {
         .isEqualTo(
             Collections.singletonList(MavenGoal.create(mojoGroupId, mojoArtifactId, mojoGoal)));
 
-    try (SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder().build()) {
+    try (SdkTracerProvider sdkTracerProvider =
+        SdkTracerProvider.builder()
+            .addSpanProcessor(SimpleSpanProcessor.create(InMemorySpanExporter.create()))
+            .build()) {
       SpanBuilder spanBuilder =
           sdkTracerProvider.tracerBuilder("test-tracer").build().spanBuilder("jib:build");
 
@@ -240,7 +254,10 @@ class MojoGoalExecutionHandlerTest {
         .isEqualTo(
             Collections.singletonList(MavenGoal.create(mojoGroupId, mojoArtifactId, mojoGoal)));
 
-    try (SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder().build()) {
+    try (SdkTracerProvider sdkTracerProvider =
+        SdkTracerProvider.builder()
+            .addSpanProcessor(SimpleSpanProcessor.create(InMemorySpanExporter.create()))
+            .build()) {
       SpanBuilder spanBuilder =
           sdkTracerProvider.tracerBuilder("test-tracer").build().spanBuilder("jib:build");
 
@@ -281,7 +298,10 @@ class MojoGoalExecutionHandlerTest {
         .isEqualTo(
             Collections.singletonList(MavenGoal.create(mojoGroupId, mojoArtifactId, mojoGoal)));
 
-    try (SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder().build()) {
+    try (SdkTracerProvider sdkTracerProvider =
+        SdkTracerProvider.builder()
+            .addSpanProcessor(SimpleSpanProcessor.create(InMemorySpanExporter.create()))
+            .build()) {
       SpanBuilder spanBuilder =
           sdkTracerProvider.tracerBuilder("test-tracer").build().spanBuilder("snyk:test");
 
@@ -317,7 +337,10 @@ class MojoGoalExecutionHandlerTest {
         .isEqualTo(
             Collections.singletonList(MavenGoal.create(mojoGroupId, mojoArtifactId, mojoGoal)));
 
-    try (SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder().build()) {
+    try (SdkTracerProvider sdkTracerProvider =
+        SdkTracerProvider.builder()
+            .addSpanProcessor(SimpleSpanProcessor.create(InMemorySpanExporter.create()))
+            .build()) {
       SpanBuilder spanBuilder =
           sdkTracerProvider.tracerBuilder("test-tracer").build().spanBuilder("snyk:monitor");
 

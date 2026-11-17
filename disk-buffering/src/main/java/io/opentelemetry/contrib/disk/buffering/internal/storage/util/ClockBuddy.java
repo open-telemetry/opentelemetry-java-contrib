@@ -9,6 +9,12 @@ import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
 import io.opentelemetry.sdk.common.Clock;
 
+/**
+ * Utility methods for working with {@link Clock}.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public class ClockBuddy {
 
   private ClockBuddy() {}

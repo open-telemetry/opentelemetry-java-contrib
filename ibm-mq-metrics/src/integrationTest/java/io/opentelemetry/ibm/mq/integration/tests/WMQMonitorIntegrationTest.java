@@ -65,11 +65,10 @@ class WMQMonitorIntegrationTest {
           4, /* one gets burned with our @BeforeAll message uzi, 4 is faster than 2 */
           r -> {
             Thread thread = new Thread(r);
-            thread.setUncaughtExceptionHandler(
-                (t, e) -> {
-                  logger.error("Uncaught exception", e);
-                  fail(e.getMessage());
-                });
+            thread.setUncaughtExceptionHandler((t, e) -> {
+              logger.error("Uncaught exception", e);
+              fail(e.getMessage());
+            });
             thread.setDaemon(true);
             thread.setName("WMQMonitorIntegrationTest");
             return thread;

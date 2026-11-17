@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.jmxscraper.testapp;
 
 import javax.management.MXBean;
 
+/** MXBean interface exposed by {@link TestApp}. */
 @MXBean
 @SuppressWarnings("unused")
 public interface TestAppMxBean {

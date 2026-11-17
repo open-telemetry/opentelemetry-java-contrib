@@ -181,15 +181,14 @@ class PolicyStoreTest {
 
     verify(implementer)
         .onPoliciesChanged(
-            argThat(
-                policies ->
-                    policies.size() == 1
-                        && policies.get(0) instanceof DeletedTelemetryPolicy
-                        && policies.get(0).isDeleted()
-                        && ((DeletedTelemetryPolicy) policies.get(0))
-                            .getIdentity()
-                            .equals(removedPolicy.getIdentity())
-                        && policies.get(0).getType().equals(removedPolicy.getType())));
+            argThat(policies ->
+                policies.size() == 1
+                    && policies.get(0) instanceof DeletedTelemetryPolicy
+                    && policies.get(0).isDeleted()
+                    && ((DeletedTelemetryPolicy) policies.get(0))
+                        .getIdentity()
+                        .equals(removedPolicy.getIdentity())
+                    && policies.get(0).getType().equals(removedPolicy.getType())));
     assertThat(store.getPolicies()).isEmpty();
   }
 
@@ -224,13 +223,12 @@ class PolicyStoreTest {
     assertThat(store.updatePolicies(Collections.emptyList())).isTrue();
     verify(implementer)
         .onPoliciesChanged(
-            argThat(
-                policies ->
-                    policies.size() == 1
-                        && policies.get(0) instanceof DeletedTelemetryPolicy
-                        && policies.get(0).isDeleted()
-                        && policies.get(0).getIdentity().equals(updated.getIdentity())
-                        && policies.get(0).getType().equals(updated.getType())));
+            argThat(policies ->
+                policies.size() == 1
+                    && policies.get(0) instanceof DeletedTelemetryPolicy
+                    && policies.get(0).isDeleted()
+                    && policies.get(0).getIdentity().equals(updated.getIdentity())
+                    && policies.get(0).getType().equals(updated.getType())));
   }
 
   @Test
@@ -248,15 +246,14 @@ class PolicyStoreTest {
 
     verify(implementer)
         .onPoliciesChanged(
-            argThat(
-                policies ->
-                    policies.size() == 1
-                        && policies.get(0) instanceof DeletedTelemetryPolicy
-                        && policies.get(0).isDeleted()
-                        && ((DeletedTelemetryPolicy) policies.get(0))
-                            .getIdentity()
-                            .equals(removedPolicy.getIdentity())
-                        && policies.get(0).getType().equals(removedPolicy.getType())));
+            argThat(policies ->
+                policies.size() == 1
+                    && policies.get(0) instanceof DeletedTelemetryPolicy
+                    && policies.get(0).isDeleted()
+                    && ((DeletedTelemetryPolicy) policies.get(0))
+                        .getIdentity()
+                        .equals(removedPolicy.getIdentity())
+                    && policies.get(0).getType().equals(removedPolicy.getType())));
   }
 
   @Test

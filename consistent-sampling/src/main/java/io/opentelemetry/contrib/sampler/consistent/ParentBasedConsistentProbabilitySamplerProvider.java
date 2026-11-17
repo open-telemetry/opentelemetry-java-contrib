@@ -9,6 +9,7 @@ import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.traces.ConfigurableSamplerProvider;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 
+/** Provides the {@code parentbased_consistent_probability} sampler. */
 public final class ParentBasedConsistentProbabilitySamplerProvider
     implements ConfigurableSamplerProvider {
 

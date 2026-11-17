@@ -41,12 +41,11 @@ class InterceptableSpanExporterTest {
 
   @Test
   void verifySpanModification() {
-    interceptor.add(
-        item -> {
-          ModifiableSpanData modified = new ModifiableSpanData(item);
-          modified.attributes.put("global.attr", "from interceptor");
-          return modified;
-        });
+    interceptor.add(item -> {
+      ModifiableSpanData modified = new ModifiableSpanData(item);
+      modified.attributes.put("global.attr", "from interceptor");
+      return modified;
+    });
 
     tracer.spanBuilder("Test span").setAttribute("local.attr", 10).startSpan().end();
 
@@ -61,13 +60,12 @@ class InterceptableSpanExporterTest {
 
   @Test
   void verifySpanFiltering() {
-    interceptor.add(
-        item -> {
-          if (item.getName().contains("deleted")) {
-            return null;
-          }
-          return item;
-        });
+    interceptor.add(item -> {
+      if (item.getName().contains("deleted")) {
+        return null;
+      }
+      return item;
+    });
 
     tracer.spanBuilder("One span").startSpan().end();
     tracer.spanBuilder("This will get deleted").startSpan().end();

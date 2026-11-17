@@ -49,6 +49,7 @@ public final class SpanToDiskExporter implements SpanExporter {
     return CompletableResultCode.ofSuccess();
   }
 
+  /** Builder for {@link SpanToDiskExporter}. */
   public static final class Builder {
     private final SignalStorage.Span storage;
     private ExporterCallback<SpanData> callback = DEFAULT_CALLBACK;

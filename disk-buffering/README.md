@@ -118,7 +118,7 @@ so a simple iteration is all that's needed:
 /**
  * Example of reading and exporting spans from disk.
  *
- * @return true, if the exporting was successful, false, if it needs to be retried
+ * @return true, if the exporting was successful, false, if an export failed or timed out
  */
 public boolean exportSpansFromDisk(SpanExporter networkExporter, long timeout) {
     for (Collection<SpanData> spanData : spanStorage) {
@@ -127,7 +127,7 @@ public boolean exportSpansFromDisk(SpanExporter networkExporter, long timeout) {
 
         if (!resultCode.isSuccess()) {
             logger.trace("Error while exporting", resultCode.getFailureThrowable());
-            // The iteration should be aborted here to avoid consuming batches, which were not exported successfully
+            // Stop before advancing the iterator and deleting the failed batch.
             return false;
         }
     }
@@ -135,6 +135,11 @@ public boolean exportSpansFromDisk(SpanExporter networkExporter, long timeout) {
     return true;
 }
 ```
+
+Returning `false` stops this iteration, but does not rewind the storage iterator. To retry after
+returning, retain the failed batch and retry it before querying the iterator again. See
+[Automatic vs explicit deletion](#automatic-vs-explicit-deletion) for an example that retains a
+pending batch across calls.
 
 ### Deleting data
 
@@ -157,24 +162,45 @@ FileStorageConfiguration config = FileStorageConfiguration.builder()
 SignalStorage.Span spanStorage = FileSpanStorage.create(new File(rootDir, "spans"), config);
 ```
 
-With this setting, items remain on disk until explicitly removed via `Iterator.remove()`:
+Disabling automatic deletion does not rewind the iterator after a failed export. To retry across
+calls, retain both the iterator and the pending batch. The following reader retries that batch
+before querying the iterator again, and removes it only after a successful export:
 
 ```java
-public boolean exportSpansFromDisk(SpanExporter networkExporter, long timeout) {
-  Iterator<Collection<SpanData>> spansIterator = spanStorage.iterator();
-  while (spansIterator.hasNext()) {
-    CompletableResultCode resultCode = networkExporter.export(spansIterator.next());
-    resultCode.join(timeout, TimeUnit.MILLISECONDS);
+public final class SpanStorageReader {
+  private final Iterator<Collection<SpanData>> spanBatches;
+  private Collection<SpanData> pendingBatch;
 
-    if (resultCode.isSuccess()) {
-      spansIterator.remove();
-    } else {
-      return false;
-    }
+  public SpanStorageReader(SignalStorage.Span spanStorage) {
+    this.spanBatches = spanStorage.iterator();
   }
-  return true;
+
+  /**
+   * @return true if all available batches were exported, false if the current batch needs a retry
+   */
+  public boolean exportSpansFromDisk(SpanExporter networkExporter, long timeout) {
+    while (pendingBatch != null || spanBatches.hasNext()) {
+      if (pendingBatch == null) {
+        pendingBatch = spanBatches.next();
+      }
+
+      CompletableResultCode resultCode = networkExporter.export(pendingBatch);
+      resultCode.join(timeout, TimeUnit.MILLISECONDS);
+      if (!resultCode.isSuccess()) {
+        return false;
+      }
+
+      spanBatches.remove();
+      pendingBatch = null;
+    }
+    return true;
+  }
 }
 ```
+
+Create one reader for the configured storage and reuse it after a failed attempt so that it retries
+the pending batch first. Call it sequentially; the caller controls retry delays and limits. A timed-out
+export might still complete, so retrying can deliver duplicates.
 
 Note that even with explicit deletion, disk usage is still bounded by the configured max folder size and max file
 age, so stale files are automatically purged when there's not enough space available before new data is written.

@@ -10,6 +10,7 @@ import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.ComponentProvider;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 
+/** Declarative configuration SPI implementation for {@link BaggageSpanProcessor}. */
 @AutoService(ComponentProvider.class)
 public class BaggageSpanComponentProvider implements ComponentProvider {
   @Override

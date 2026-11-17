@@ -24,6 +24,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 
+/** Autoconfiguration customizer that adds the {@link StackTraceSpanProcessor}. */
 @AutoService(AutoConfigurationCustomizerProvider.class)
 public class StackTraceAutoConfig implements AutoConfigurationCustomizerProvider {
 
@@ -33,14 +34,13 @@ public class StackTraceAutoConfig implements AutoConfigurationCustomizerProvider
 
   @Override
   public void customize(AutoConfigurationCustomizer config) {
-    config.addTracerProviderCustomizer(
-        (providerBuilder, properties) -> {
-          DeclarativeConfigProperties declarativeConfig = createDeclarativeConfig(properties);
-          if (getMinDuration(declarativeConfig) >= 0) {
-            providerBuilder.addSpanProcessor(create(declarativeConfig));
-          }
-          return providerBuilder;
-        });
+    config.addTracerProviderCustomizer((providerBuilder, properties) -> {
+      DeclarativeConfigProperties declarativeConfig = createDeclarativeConfig(properties);
+      if (getMinDuration(declarativeConfig) >= 0) {
+        providerBuilder.addSpanProcessor(create(declarativeConfig));
+      }
+      return providerBuilder;
+    });
   }
 
   static StackTraceSpanProcessor create(DeclarativeConfigProperties properties) {

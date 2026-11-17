@@ -178,15 +178,14 @@ class PolicyInitTest {
             : "service.name=opamp-resource-service,deployment.environment.name=opamp-environment");
     properties.put("otel.experimental.opamp.headers", "Authorization=Bearer token");
     Map<String, String> previous = new HashMap<>();
-    properties.forEach(
-        (key, value) -> {
-          previous.put(key, System.getProperty(key));
-          if (value == null) {
-            System.clearProperty(key);
-          } else {
-            System.setProperty(key, value);
-          }
-        });
+    properties.forEach((key, value) -> {
+      previous.put(key, System.getProperty(key));
+      if (value == null) {
+        System.clearProperty(key);
+      } else {
+        System.setProperty(key, value);
+      }
+    });
     server.enqueue(emptyServerResponse());
     try {
       String yaml =
@@ -226,40 +225,35 @@ class PolicyInitTest {
         AgentToServer message = AgentToServer.ADAPTER.decode(request.getBody());
         assertThat(message.agent_description).isNotNull();
         assertThat(message.agent_description.identifying_attributes)
-            .anySatisfy(
-                attribute -> {
-                  assertThat(attribute.key).isEqualTo("service.name");
-                  assertThat(attribute.value.string_value)
-                      .isEqualTo(
-                          identitySource.equals("fallback")
-                              ? "opamp-resource-service"
-                              : result
-                                  .getResource()
-                                  .getAttribute(AttributeKey.stringKey("service.name")));
-                });
+            .anySatisfy(attribute -> {
+              assertThat(attribute.key).isEqualTo("service.name");
+              assertThat(attribute.value.string_value)
+                  .isEqualTo(
+                      identitySource.equals("fallback")
+                          ? "opamp-resource-service"
+                          : result
+                              .getResource()
+                              .getAttribute(AttributeKey.stringKey("service.name")));
+            });
         assertThat(message.agent_description.non_identifying_attributes)
-            .anySatisfy(
-                attribute -> {
-                  assertThat(attribute.key).isEqualTo("deployment.environment.name");
-                  assertThat(attribute.value.string_value)
-                      .isEqualTo(
-                          identitySource.equals("fallback")
-                              ? "opamp-environment"
-                              : "sdk-environment");
-                });
+            .anySatisfy(attribute -> {
+              assertThat(attribute.key).isEqualTo("deployment.environment.name");
+              assertThat(attribute.value.string_value)
+                  .isEqualTo(
+                      identitySource.equals("fallback") ? "opamp-environment" : "sdk-environment");
+            });
       } finally {
         result.getSdk().close();
       }
     } finally {
       PolicyInit.resetForTest();
-      previous.forEach(
-          (key, value) -> {
-            if (value == null) {
-              System.clearProperty(key);
-            } else {
-              System.setProperty(key, value);
-            }
-          });
+      previous.forEach((key, value) -> {
+        if (value == null) {
+          System.clearProperty(key);
+        } else {
+          System.setProperty(key, value);
+        }
+      });
     }
   }
 
@@ -288,10 +282,9 @@ class PolicyInitTest {
 
   @Test
   void throwsWhenDeclarativeConfigUsesUnknownPolicyType() {
-    assertThatThrownBy(
-            () ->
-                PolicyInit.prepareFromDeclarativeConfig(
-                    telemetryPolicyNodeConfig("trace_sampling_rate_policy")))
+    assertThatThrownBy(() ->
+            PolicyInit.prepareFromDeclarativeConfig(
+                telemetryPolicyNodeConfig("trace_sampling_rate_policy")))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("Unknown policyType");
   }

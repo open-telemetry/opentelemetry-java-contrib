@@ -98,12 +98,11 @@ public abstract class BaseTargetSystemIntegrationTest {
     }
 
     if (prerequisiteContainers != null) {
-      prerequisiteContainers.forEach(
-          container -> {
-            if (container.isRunning()) {
-              container.stop();
-            }
-          });
+      prerequisiteContainers.forEach(container -> {
+        if (container.isRunning()) {
+          container.stop();
+        }
+      });
     }
 
     if (otlpServer != null) {
@@ -156,28 +155,27 @@ public abstract class BaseTargetSystemIntegrationTest {
     await()
         .atMost(Duration.ofSeconds(60))
         .pollInterval(Duration.ofSeconds(1))
-        .untilAsserted(
-            () -> {
-              List<ExportMetricsServiceRequest> receivedMetrics = otlpServer.getMetrics();
-              assertThat(receivedMetrics).describedAs("No metric received").isNotEmpty();
+        .untilAsserted(() -> {
+          List<ExportMetricsServiceRequest> receivedMetrics = otlpServer.getMetrics();
+          assertThat(receivedMetrics).describedAs("No metric received").isNotEmpty();
 
-              List<Metric> metrics =
-                  receivedMetrics.stream()
-                      .map(ExportMetricsServiceRequest::getResourceMetricsList)
-                      .flatMap(rm -> rm.stream().map(ResourceMetrics::getScopeMetricsList))
-                      .flatMap(Collection::stream)
-                      .filter(
-                          // TODO: disabling batch span exporter might help remove unwanted metrics
-                          sm -> sm.getScope().getName().equals("io.opentelemetry.jmx"))
-                      .flatMap(sm -> sm.getMetricsList().stream())
-                      .collect(Collectors.toList());
+          List<Metric> metrics =
+              receivedMetrics.stream()
+                  .map(ExportMetricsServiceRequest::getResourceMetricsList)
+                  .flatMap(rm -> rm.stream().map(ResourceMetrics::getScopeMetricsList))
+                  .flatMap(Collection::stream)
+                  .filter(
+                      // TODO: disabling batch span exporter might help remove unwanted metrics
+                      sm -> sm.getScope().getName().equals("io.opentelemetry.jmx"))
+                  .flatMap(sm -> sm.getMetricsList().stream())
+                  .collect(Collectors.toList());
 
-              assertThat(metrics)
-                  .describedAs("Metrics received but not suitable for JMX scraper")
-                  .isNotEmpty();
+          assertThat(metrics)
+              .describedAs("Metrics received but not suitable for JMX scraper")
+              .isNotEmpty();
 
-              metricsVerifier.verify(metrics);
-            });
+          metricsVerifier.verify(metrics);
+        });
   }
 
   protected abstract MetricsVerifier createMetricsVerifier();

@@ -34,6 +34,7 @@ import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.sasl.RealmCallback;
 
+/** Builder for {@link JMXConnector} instances connecting to a remote JMX endpoint. */
 public final class JmxConnectorBuilder {
 
   private static final Logger logger = Logger.getLogger(JmxConnectorBuilder.class.getName());

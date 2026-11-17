@@ -17,6 +17,7 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.trace.data.LinkData;
 import java.util.List;
 
+/** Abstract base class for consistent samplers that sample based on a threshold. */
 public abstract class ConsistentThresholdSampler extends ConsistentSampler {
 
   protected abstract long getThreshold();

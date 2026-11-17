@@ -14,6 +14,10 @@ import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import java.util.Map;
 
+/**
+ * {@link ConfigurableSamplerProvider} for the {@code xray} sampler, which creates an {@link
+ * AwsXrayRemoteSampler}.
+ */
 @AutoService(ConfigurableSamplerProvider.class)
 public class AwsXrayRemoteSamplerProvider implements ConfigurableSamplerProvider {
 

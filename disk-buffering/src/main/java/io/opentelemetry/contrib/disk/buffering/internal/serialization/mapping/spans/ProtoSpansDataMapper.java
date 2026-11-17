@@ -17,6 +17,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Maps between {@link SpanData} items and {@link ExportTraceServiceRequest} protos.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public final class ProtoSpansDataMapper
     extends BaseProtoSignalsDataMapper<
         SpanData, Span, ExportTraceServiceRequest, ResourceSpans, ScopeSpans> {
@@ -47,17 +53,16 @@ public final class ProtoSpansDataMapper
   protected ExportTraceServiceRequest createProtoData(
       Map<Resource, Map<InstrumentationScopeInfo, List<Span>>> itemsByResource) {
     List<ResourceSpans> items = new ArrayList<>();
-    itemsByResource.forEach(
-        (resource, instrumentationScopeInfoScopedSpansMap) -> {
-          ResourceSpans.Builder resourceSpansBuilder = createProtoResourceBuilder(resource);
-          for (Map.Entry<InstrumentationScopeInfo, List<Span>> spansByScope :
-              instrumentationScopeInfoScopedSpansMap.entrySet()) {
-            ScopeSpans.Builder scopeBuilder = createProtoScopeBuilder(spansByScope.getKey());
-            scopeBuilder.spans.addAll(spansByScope.getValue());
-            resourceSpansBuilder.scope_spans.add(scopeBuilder.build());
-          }
-          items.add(resourceSpansBuilder.build());
-        });
+    itemsByResource.forEach((resource, instrumentationScopeInfoScopedSpansMap) -> {
+      ResourceSpans.Builder resourceSpansBuilder = createProtoResourceBuilder(resource);
+      for (Map.Entry<InstrumentationScopeInfo, List<Span>> spansByScope :
+          instrumentationScopeInfoScopedSpansMap.entrySet()) {
+        ScopeSpans.Builder scopeBuilder = createProtoScopeBuilder(spansByScope.getKey());
+        scopeBuilder.spans.addAll(spansByScope.getValue());
+        resourceSpansBuilder.scope_spans.add(scopeBuilder.build());
+      }
+      items.add(resourceSpansBuilder.build());
+    });
     return new ExportTraceServiceRequest.Builder().resource_spans(items).build();
   }
 

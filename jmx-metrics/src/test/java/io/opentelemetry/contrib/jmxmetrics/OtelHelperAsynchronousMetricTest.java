@@ -65,57 +65,48 @@ class OtelHelperAsynchronousMetricTest {
                     .hasName("double-counter")
                     .hasDescription("a double counter")
                     .hasUnit("ms")
-                    .hasDoubleSumSatisfying(
-                        sum ->
-                            sum.hasPointsSatisfying(
-                                point ->
-                                    point
-                                        .hasValue(123.456)
-                                        .hasAttributesSatisfying(
-                                            equalTo(AttributeKey.stringKey("key"), "value")))),
+                    .hasDoubleSumSatisfying(sum ->
+                        sum.hasPointsSatisfying(point ->
+                            point
+                                .hasValue(123.456)
+                                .hasAttributesSatisfying(
+                                    equalTo(AttributeKey.stringKey("key"), "value")))),
             metric ->
                 assertThat(metric)
                     .hasName("my-double-counter")
                     .hasDescription("another double counter")
                     .hasUnit("us")
-                    .hasDoubleSumSatisfying(
-                        sum ->
-                            sum.hasPointsSatisfying(
-                                point ->
-                                    point
-                                        .hasValue(234.567)
-                                        .hasAttributesSatisfying(
-                                            equalTo(AttributeKey.stringKey("myKey"), "myValue")))),
+                    .hasDoubleSumSatisfying(sum ->
+                        sum.hasPointsSatisfying(point ->
+                            point
+                                .hasValue(234.567)
+                                .hasAttributesSatisfying(
+                                    equalTo(AttributeKey.stringKey("myKey"), "myValue")))),
             metric ->
                 assertThat(metric)
                     .hasName("another-double-counter")
                     .hasDescription("double counter")
                     .hasUnit("1")
-                    .hasDoubleSumSatisfying(
-                        sum ->
-                            sum.hasPointsSatisfying(
-                                point ->
-                                    point
-                                        .hasValue(345.678)
-                                        .hasAttributesSatisfying(
-                                            equalTo(
-                                                AttributeKey.stringKey("anotherKey"),
-                                                "anotherValue")))),
+                    .hasDoubleSumSatisfying(sum ->
+                        sum.hasPointsSatisfying(point ->
+                            point
+                                .hasValue(345.678)
+                                .hasAttributesSatisfying(
+                                    equalTo(
+                                        AttributeKey.stringKey("anotherKey"), "anotherValue")))),
             metric ->
                 assertThat(metric)
                     .hasName("yet-another-double-counter")
                     .hasDescription("")
                     .hasUnit("1")
-                    .hasDoubleSumSatisfying(
-                        sum ->
-                            sum.hasPointsSatisfying(
-                                point ->
-                                    point
-                                        .hasValue(456.789)
-                                        .hasAttributesSatisfying(
-                                            equalTo(
-                                                AttributeKey.stringKey("yetAnotherKey"),
-                                                "yetAnotherValue")))));
+                    .hasDoubleSumSatisfying(sum ->
+                        sum.hasPointsSatisfying(point ->
+                            point
+                                .hasValue(456.789)
+                                .hasAttributesSatisfying(
+                                    equalTo(
+                                        AttributeKey.stringKey("yetAnotherKey"),
+                                        "yetAnotherValue")))));
   }
 
   @Test
@@ -141,36 +132,30 @@ class OtelHelperAsynchronousMetricTest {
     Collection<MetricData> secondMetrics = metricReader.collectAllMetrics();
 
     assertThat(firstMetrics)
-        .satisfiesExactly(
-            metric ->
-                assertThat(metric)
-                    .hasName("dc")
-                    .hasDescription("double")
-                    .hasUnit("1")
-                    .hasDoubleSumSatisfying(
-                        sum ->
-                            sum.hasPointsSatisfying(
-                                point ->
-                                    point
-                                        .hasValue(20.2)
-                                        .hasAttributesSatisfying(
-                                            equalTo(AttributeKey.stringKey("key2"), "value2")))));
+        .satisfiesExactly(metric ->
+            assertThat(metric)
+                .hasName("dc")
+                .hasDescription("double")
+                .hasUnit("1")
+                .hasDoubleSumSatisfying(sum ->
+                    sum.hasPointsSatisfying(point ->
+                        point
+                            .hasValue(20.2)
+                            .hasAttributesSatisfying(
+                                equalTo(AttributeKey.stringKey("key2"), "value2")))));
 
     assertThat(secondMetrics)
-        .satisfiesExactly(
-            metric ->
-                assertThat(metric)
-                    .hasName("dc")
-                    .hasDescription("double")
-                    .hasUnit("1")
-                    .hasDoubleSumSatisfying(
-                        sum ->
-                            sum.hasPointsSatisfying(
-                                point ->
-                                    point
-                                        .hasValue(40.4)
-                                        .hasAttributesSatisfying(
-                                            equalTo(AttributeKey.stringKey("key4"), "value4")))));
+        .satisfiesExactly(metric ->
+            assertThat(metric)
+                .hasName("dc")
+                .hasDescription("double")
+                .hasUnit("1")
+                .hasDoubleSumSatisfying(sum ->
+                    sum.hasPointsSatisfying(point ->
+                        point
+                            .hasValue(40.4)
+                            .hasAttributesSatisfying(
+                                equalTo(AttributeKey.stringKey("key4"), "value4")))));
   }
 
   @Test
@@ -206,57 +191,48 @@ class OtelHelperAsynchronousMetricTest {
                     .hasName("long-counter")
                     .hasDescription("a long counter")
                     .hasUnit("ms")
-                    .hasLongSumSatisfying(
-                        sum ->
-                            sum.hasPointsSatisfying(
-                                point ->
-                                    point
-                                        .hasValue(123)
-                                        .hasAttributesSatisfying(
-                                            equalTo(AttributeKey.stringKey("key"), "value")))),
+                    .hasLongSumSatisfying(sum ->
+                        sum.hasPointsSatisfying(point ->
+                            point
+                                .hasValue(123)
+                                .hasAttributesSatisfying(
+                                    equalTo(AttributeKey.stringKey("key"), "value")))),
             metric ->
                 assertThat(metric)
                     .hasName("my-long-counter")
                     .hasDescription("another long counter")
                     .hasUnit("us")
-                    .hasLongSumSatisfying(
-                        sum ->
-                            sum.hasPointsSatisfying(
-                                point ->
-                                    point
-                                        .hasValue(234)
-                                        .hasAttributesSatisfying(
-                                            equalTo(AttributeKey.stringKey("myKey"), "myValue")))),
+                    .hasLongSumSatisfying(sum ->
+                        sum.hasPointsSatisfying(point ->
+                            point
+                                .hasValue(234)
+                                .hasAttributesSatisfying(
+                                    equalTo(AttributeKey.stringKey("myKey"), "myValue")))),
             metric ->
                 assertThat(metric)
                     .hasName("another-long-counter")
                     .hasDescription("long counter")
                     .hasUnit("1")
-                    .hasLongSumSatisfying(
-                        sum ->
-                            sum.hasPointsSatisfying(
-                                point ->
-                                    point
-                                        .hasValue(345)
-                                        .hasAttributesSatisfying(
-                                            equalTo(
-                                                AttributeKey.stringKey("anotherKey"),
-                                                "anotherValue")))),
+                    .hasLongSumSatisfying(sum ->
+                        sum.hasPointsSatisfying(point ->
+                            point
+                                .hasValue(345)
+                                .hasAttributesSatisfying(
+                                    equalTo(
+                                        AttributeKey.stringKey("anotherKey"), "anotherValue")))),
             metric ->
                 assertThat(metric)
                     .hasName("yet-another-long-counter")
                     .hasDescription("")
                     .hasUnit("1")
-                    .hasLongSumSatisfying(
-                        sum ->
-                            sum.hasPointsSatisfying(
-                                point ->
-                                    point
-                                        .hasValue(456)
-                                        .hasAttributesSatisfying(
-                                            equalTo(
-                                                AttributeKey.stringKey("yetAnotherKey"),
-                                                "yetAnotherValue")))));
+                    .hasLongSumSatisfying(sum ->
+                        sum.hasPointsSatisfying(point ->
+                            point
+                                .hasValue(456)
+                                .hasAttributesSatisfying(
+                                    equalTo(
+                                        AttributeKey.stringKey("yetAnotherKey"),
+                                        "yetAnotherValue")))));
   }
 
   @Test
@@ -282,36 +258,30 @@ class OtelHelperAsynchronousMetricTest {
     Collection<MetricData> secondMetrics = metricReader.collectAllMetrics();
 
     assertThat(firstMetrics)
-        .satisfiesExactly(
-            metric ->
-                assertThat(metric)
-                    .hasName("dc")
-                    .hasDescription("long")
-                    .hasUnit("1")
-                    .hasLongSumSatisfying(
-                        sum ->
-                            sum.hasPointsSatisfying(
-                                point ->
-                                    point
-                                        .hasValue(20)
-                                        .hasAttributesSatisfying(
-                                            equalTo(AttributeKey.stringKey("key2"), "value2")))));
+        .satisfiesExactly(metric ->
+            assertThat(metric)
+                .hasName("dc")
+                .hasDescription("long")
+                .hasUnit("1")
+                .hasLongSumSatisfying(sum ->
+                    sum.hasPointsSatisfying(point ->
+                        point
+                            .hasValue(20)
+                            .hasAttributesSatisfying(
+                                equalTo(AttributeKey.stringKey("key2"), "value2")))));
 
     assertThat(secondMetrics)
-        .satisfiesExactly(
-            metric ->
-                assertThat(metric)
-                    .hasName("dc")
-                    .hasDescription("long")
-                    .hasUnit("1")
-                    .hasLongSumSatisfying(
-                        sum ->
-                            sum.hasPointsSatisfying(
-                                point ->
-                                    point
-                                        .hasValue(40)
-                                        .hasAttributesSatisfying(
-                                            equalTo(AttributeKey.stringKey("key4"), "value4")))));
+        .satisfiesExactly(metric ->
+            assertThat(metric)
+                .hasName("dc")
+                .hasDescription("long")
+                .hasUnit("1")
+                .hasLongSumSatisfying(sum ->
+                    sum.hasPointsSatisfying(point ->
+                        point
+                            .hasValue(40)
+                            .hasAttributesSatisfying(
+                                equalTo(AttributeKey.stringKey("key4"), "value4")))));
   }
 
   @Test
@@ -347,57 +317,48 @@ class OtelHelperAsynchronousMetricTest {
                     .hasName("double-counter")
                     .hasDescription("a double counter")
                     .hasUnit("ms")
-                    .hasDoubleSumSatisfying(
-                        sum ->
-                            sum.hasPointsSatisfying(
-                                point ->
-                                    point
-                                        .hasValue(-123.456)
-                                        .hasAttributesSatisfying(
-                                            equalTo(AttributeKey.stringKey("key"), "value")))),
+                    .hasDoubleSumSatisfying(sum ->
+                        sum.hasPointsSatisfying(point ->
+                            point
+                                .hasValue(-123.456)
+                                .hasAttributesSatisfying(
+                                    equalTo(AttributeKey.stringKey("key"), "value")))),
             metric ->
                 assertThat(metric)
                     .hasName("my-double-counter")
                     .hasDescription("another double counter")
                     .hasUnit("us")
-                    .hasDoubleSumSatisfying(
-                        sum ->
-                            sum.hasPointsSatisfying(
-                                point ->
-                                    point
-                                        .hasValue(-234.567)
-                                        .hasAttributesSatisfying(
-                                            equalTo(AttributeKey.stringKey("myKey"), "myValue")))),
+                    .hasDoubleSumSatisfying(sum ->
+                        sum.hasPointsSatisfying(point ->
+                            point
+                                .hasValue(-234.567)
+                                .hasAttributesSatisfying(
+                                    equalTo(AttributeKey.stringKey("myKey"), "myValue")))),
             metric ->
                 assertThat(metric)
                     .hasName("another-double-counter")
                     .hasDescription("double counter")
                     .hasUnit("1")
-                    .hasDoubleSumSatisfying(
-                        sum ->
-                            sum.hasPointsSatisfying(
-                                point ->
-                                    point
-                                        .hasValue(345.678)
-                                        .hasAttributesSatisfying(
-                                            equalTo(
-                                                AttributeKey.stringKey("anotherKey"),
-                                                "anotherValue")))),
+                    .hasDoubleSumSatisfying(sum ->
+                        sum.hasPointsSatisfying(point ->
+                            point
+                                .hasValue(345.678)
+                                .hasAttributesSatisfying(
+                                    equalTo(
+                                        AttributeKey.stringKey("anotherKey"), "anotherValue")))),
             metric ->
                 assertThat(metric)
                     .hasName("yet-another-double-counter")
                     .hasDescription("")
                     .hasUnit("1")
-                    .hasDoubleSumSatisfying(
-                        sum ->
-                            sum.hasPointsSatisfying(
-                                point ->
-                                    point
-                                        .hasValue(456.789)
-                                        .hasAttributesSatisfying(
-                                            equalTo(
-                                                AttributeKey.stringKey("yetAnotherKey"),
-                                                "yetAnotherValue")))));
+                    .hasDoubleSumSatisfying(sum ->
+                        sum.hasPointsSatisfying(point ->
+                            point
+                                .hasValue(456.789)
+                                .hasAttributesSatisfying(
+                                    equalTo(
+                                        AttributeKey.stringKey("yetAnotherKey"),
+                                        "yetAnotherValue")))));
   }
 
   @Test
@@ -423,36 +384,30 @@ class OtelHelperAsynchronousMetricTest {
     Collection<MetricData> secondMetrics = metricReader.collectAllMetrics();
 
     assertThat(firstMetrics)
-        .satisfiesExactly(
-            metric ->
-                assertThat(metric)
-                    .hasName("dc")
-                    .hasDescription("double")
-                    .hasUnit("1")
-                    .hasDoubleSumSatisfying(
-                        sum ->
-                            sum.hasPointsSatisfying(
-                                point ->
-                                    point
-                                        .hasValue(-20.2)
-                                        .hasAttributesSatisfying(
-                                            equalTo(AttributeKey.stringKey("key2"), "value2")))));
+        .satisfiesExactly(metric ->
+            assertThat(metric)
+                .hasName("dc")
+                .hasDescription("double")
+                .hasUnit("1")
+                .hasDoubleSumSatisfying(sum ->
+                    sum.hasPointsSatisfying(point ->
+                        point
+                            .hasValue(-20.2)
+                            .hasAttributesSatisfying(
+                                equalTo(AttributeKey.stringKey("key2"), "value2")))));
 
     assertThat(secondMetrics)
-        .satisfiesExactly(
-            metric ->
-                assertThat(metric)
-                    .hasName("dc")
-                    .hasDescription("double")
-                    .hasUnit("1")
-                    .hasDoubleSumSatisfying(
-                        sum ->
-                            sum.hasPointsSatisfying(
-                                point ->
-                                    point
-                                        .hasValue(40.4)
-                                        .hasAttributesSatisfying(
-                                            equalTo(AttributeKey.stringKey("key4"), "value4")))));
+        .satisfiesExactly(metric ->
+            assertThat(metric)
+                .hasName("dc")
+                .hasDescription("double")
+                .hasUnit("1")
+                .hasDoubleSumSatisfying(sum ->
+                    sum.hasPointsSatisfying(point ->
+                        point
+                            .hasValue(40.4)
+                            .hasAttributesSatisfying(
+                                equalTo(AttributeKey.stringKey("key4"), "value4")))));
   }
 
   @Test
@@ -488,57 +443,48 @@ class OtelHelperAsynchronousMetricTest {
                     .hasName("long-counter")
                     .hasDescription("a long counter")
                     .hasUnit("ms")
-                    .hasLongSumSatisfying(
-                        sum ->
-                            sum.hasPointsSatisfying(
-                                point ->
-                                    point
-                                        .hasValue(-123)
-                                        .hasAttributesSatisfying(
-                                            equalTo(AttributeKey.stringKey("key"), "value")))),
+                    .hasLongSumSatisfying(sum ->
+                        sum.hasPointsSatisfying(point ->
+                            point
+                                .hasValue(-123)
+                                .hasAttributesSatisfying(
+                                    equalTo(AttributeKey.stringKey("key"), "value")))),
             metric ->
                 assertThat(metric)
                     .hasName("my-long-counter")
                     .hasDescription("another long counter")
                     .hasUnit("us")
-                    .hasLongSumSatisfying(
-                        sum ->
-                            sum.hasPointsSatisfying(
-                                point ->
-                                    point
-                                        .hasValue(-234)
-                                        .hasAttributesSatisfying(
-                                            equalTo(AttributeKey.stringKey("myKey"), "myValue")))),
+                    .hasLongSumSatisfying(sum ->
+                        sum.hasPointsSatisfying(point ->
+                            point
+                                .hasValue(-234)
+                                .hasAttributesSatisfying(
+                                    equalTo(AttributeKey.stringKey("myKey"), "myValue")))),
             metric ->
                 assertThat(metric)
                     .hasName("another-long-counter")
                     .hasDescription("long counter")
                     .hasUnit("1")
-                    .hasLongSumSatisfying(
-                        sum ->
-                            sum.hasPointsSatisfying(
-                                point ->
-                                    point
-                                        .hasValue(345)
-                                        .hasAttributesSatisfying(
-                                            equalTo(
-                                                AttributeKey.stringKey("anotherKey"),
-                                                "anotherValue")))),
+                    .hasLongSumSatisfying(sum ->
+                        sum.hasPointsSatisfying(point ->
+                            point
+                                .hasValue(345)
+                                .hasAttributesSatisfying(
+                                    equalTo(
+                                        AttributeKey.stringKey("anotherKey"), "anotherValue")))),
             metric ->
                 assertThat(metric)
                     .hasName("yet-another-long-counter")
                     .hasDescription("")
                     .hasUnit("1")
-                    .hasLongSumSatisfying(
-                        sum ->
-                            sum.hasPointsSatisfying(
-                                point ->
-                                    point
-                                        .hasValue(456)
-                                        .hasAttributesSatisfying(
-                                            equalTo(
-                                                AttributeKey.stringKey("yetAnotherKey"),
-                                                "yetAnotherValue")))));
+                    .hasLongSumSatisfying(sum ->
+                        sum.hasPointsSatisfying(point ->
+                            point
+                                .hasValue(456)
+                                .hasAttributesSatisfying(
+                                    equalTo(
+                                        AttributeKey.stringKey("yetAnotherKey"),
+                                        "yetAnotherValue")))));
   }
 
   @Test
@@ -564,36 +510,30 @@ class OtelHelperAsynchronousMetricTest {
     Collection<MetricData> secondMetrics = metricReader.collectAllMetrics();
 
     assertThat(firstMetrics)
-        .satisfiesExactly(
-            metric ->
-                assertThat(metric)
-                    .hasName("dc")
-                    .hasDescription("long")
-                    .hasUnit("1")
-                    .hasLongSumSatisfying(
-                        sum ->
-                            sum.hasPointsSatisfying(
-                                point ->
-                                    point
-                                        .hasValue(-20)
-                                        .hasAttributesSatisfying(
-                                            equalTo(AttributeKey.stringKey("key2"), "value2")))));
+        .satisfiesExactly(metric ->
+            assertThat(metric)
+                .hasName("dc")
+                .hasDescription("long")
+                .hasUnit("1")
+                .hasLongSumSatisfying(sum ->
+                    sum.hasPointsSatisfying(point ->
+                        point
+                            .hasValue(-20)
+                            .hasAttributesSatisfying(
+                                equalTo(AttributeKey.stringKey("key2"), "value2")))));
 
     assertThat(secondMetrics)
-        .satisfiesExactly(
-            metric ->
-                assertThat(metric)
-                    .hasName("dc")
-                    .hasDescription("long")
-                    .hasUnit("1")
-                    .hasLongSumSatisfying(
-                        sum ->
-                            sum.hasPointsSatisfying(
-                                point ->
-                                    point
-                                        .hasValue(40)
-                                        .hasAttributesSatisfying(
-                                            equalTo(AttributeKey.stringKey("key4"), "value4")))));
+        .satisfiesExactly(metric ->
+            assertThat(metric)
+                .hasName("dc")
+                .hasDescription("long")
+                .hasUnit("1")
+                .hasLongSumSatisfying(sum ->
+                    sum.hasPointsSatisfying(point ->
+                        point
+                            .hasValue(40)
+                            .hasAttributesSatisfying(
+                                equalTo(AttributeKey.stringKey("key4"), "value4")))));
   }
 
   @Test
@@ -629,57 +569,48 @@ class OtelHelperAsynchronousMetricTest {
                     .hasName("double-value")
                     .hasDescription("a double value")
                     .hasUnit("ms")
-                    .hasDoubleGaugeSatisfying(
-                        gauge ->
-                            gauge.hasPointsSatisfying(
-                                point ->
-                                    point
-                                        .hasValue(123.456)
-                                        .hasAttributesSatisfying(
-                                            equalTo(AttributeKey.stringKey("key"), "value")))),
+                    .hasDoubleGaugeSatisfying(gauge ->
+                        gauge.hasPointsSatisfying(point ->
+                            point
+                                .hasValue(123.456)
+                                .hasAttributesSatisfying(
+                                    equalTo(AttributeKey.stringKey("key"), "value")))),
             metric ->
                 assertThat(metric)
                     .hasName("my-double-value")
                     .hasDescription("another double value")
                     .hasUnit("us")
-                    .hasDoubleGaugeSatisfying(
-                        gauge ->
-                            gauge.hasPointsSatisfying(
-                                point ->
-                                    point
-                                        .hasValue(234.567)
-                                        .hasAttributesSatisfying(
-                                            equalTo(AttributeKey.stringKey("myKey"), "myValue")))),
+                    .hasDoubleGaugeSatisfying(gauge ->
+                        gauge.hasPointsSatisfying(point ->
+                            point
+                                .hasValue(234.567)
+                                .hasAttributesSatisfying(
+                                    equalTo(AttributeKey.stringKey("myKey"), "myValue")))),
             metric ->
                 assertThat(metric)
                     .hasName("another-double-value")
                     .hasDescription("double value")
                     .hasUnit("1")
-                    .hasDoubleGaugeSatisfying(
-                        gauge ->
-                            gauge.hasPointsSatisfying(
-                                point ->
-                                    point
-                                        .hasValue(345.678)
-                                        .hasAttributesSatisfying(
-                                            equalTo(
-                                                AttributeKey.stringKey("anotherKey"),
-                                                "anotherValue")))),
+                    .hasDoubleGaugeSatisfying(gauge ->
+                        gauge.hasPointsSatisfying(point ->
+                            point
+                                .hasValue(345.678)
+                                .hasAttributesSatisfying(
+                                    equalTo(
+                                        AttributeKey.stringKey("anotherKey"), "anotherValue")))),
             metric ->
                 assertThat(metric)
                     .hasName("yet-another-double-value")
                     .hasDescription("")
                     .hasUnit("1")
-                    .hasDoubleGaugeSatisfying(
-                        gauge ->
-                            gauge.hasPointsSatisfying(
-                                point ->
-                                    point
-                                        .hasValue(456.789)
-                                        .hasAttributesSatisfying(
-                                            equalTo(
-                                                AttributeKey.stringKey("yetAnotherKey"),
-                                                "yetAnotherValue")))));
+                    .hasDoubleGaugeSatisfying(gauge ->
+                        gauge.hasPointsSatisfying(point ->
+                            point
+                                .hasValue(456.789)
+                                .hasAttributesSatisfying(
+                                    equalTo(
+                                        AttributeKey.stringKey("yetAnotherKey"),
+                                        "yetAnotherValue")))));
   }
 
   @Test
@@ -708,41 +639,36 @@ class OtelHelperAsynchronousMetricTest {
     Collection<MetricData> secondMetrics = metricReader.collectAllMetrics();
 
     assertThat(firstMetrics)
-        .satisfiesExactly(
-            metric ->
-                assertThat(metric)
-                    .hasName("dc")
-                    .hasDescription("double")
-                    .hasUnit("1")
-                    .hasDoubleGaugeSatisfying(
-                        gauge ->
-                            gauge.hasPointsSatisfying(
-                                point ->
-                                    point
-                                        .hasValue(20.2)
-                                        .hasAttributesSatisfying(
-                                            equalTo(AttributeKey.stringKey("key2"), "value2")))));
+        .satisfiesExactly(metric ->
+            assertThat(metric)
+                .hasName("dc")
+                .hasDescription("double")
+                .hasUnit("1")
+                .hasDoubleGaugeSatisfying(gauge ->
+                    gauge.hasPointsSatisfying(point ->
+                        point
+                            .hasValue(20.2)
+                            .hasAttributesSatisfying(
+                                equalTo(AttributeKey.stringKey("key2"), "value2")))));
 
     assertThat(secondMetrics)
-        .satisfiesExactly(
-            metric ->
-                assertThat(metric)
-                    .hasName("dc")
-                    .hasDescription("double")
-                    .hasUnit("1")
-                    .hasDoubleGaugeSatisfying(
-                        gauge ->
-                            gauge.hasPointsSatisfying(
-                                point ->
-                                    point
-                                        .hasValue(40.4)
-                                        .hasAttributesSatisfying(
-                                            equalTo(AttributeKey.stringKey("key4"), "value4")),
-                                point ->
-                                    point
-                                        .hasValue(50.5)
-                                        .hasAttributesSatisfying(
-                                            equalTo(AttributeKey.stringKey("key2"), "value2")))));
+        .satisfiesExactly(metric ->
+            assertThat(metric)
+                .hasName("dc")
+                .hasDescription("double")
+                .hasUnit("1")
+                .hasDoubleGaugeSatisfying(gauge ->
+                    gauge.hasPointsSatisfying(
+                        point ->
+                            point
+                                .hasValue(40.4)
+                                .hasAttributesSatisfying(
+                                    equalTo(AttributeKey.stringKey("key4"), "value4")),
+                        point ->
+                            point
+                                .hasValue(50.5)
+                                .hasAttributesSatisfying(
+                                    equalTo(AttributeKey.stringKey("key2"), "value2")))));
   }
 
   @Test
@@ -778,57 +704,48 @@ class OtelHelperAsynchronousMetricTest {
                     .hasName("long-value")
                     .hasDescription("a long value")
                     .hasUnit("ms")
-                    .hasLongGaugeSatisfying(
-                        gauge ->
-                            gauge.hasPointsSatisfying(
-                                point ->
-                                    point
-                                        .hasValue(123)
-                                        .hasAttributesSatisfying(
-                                            equalTo(AttributeKey.stringKey("key"), "value")))),
+                    .hasLongGaugeSatisfying(gauge ->
+                        gauge.hasPointsSatisfying(point ->
+                            point
+                                .hasValue(123)
+                                .hasAttributesSatisfying(
+                                    equalTo(AttributeKey.stringKey("key"), "value")))),
             metric ->
                 assertThat(metric)
                     .hasName("my-long-value")
                     .hasDescription("another long value")
                     .hasUnit("us")
-                    .hasLongGaugeSatisfying(
-                        gauge ->
-                            gauge.hasPointsSatisfying(
-                                point ->
-                                    point
-                                        .hasValue(234)
-                                        .hasAttributesSatisfying(
-                                            equalTo(AttributeKey.stringKey("myKey"), "myValue")))),
+                    .hasLongGaugeSatisfying(gauge ->
+                        gauge.hasPointsSatisfying(point ->
+                            point
+                                .hasValue(234)
+                                .hasAttributesSatisfying(
+                                    equalTo(AttributeKey.stringKey("myKey"), "myValue")))),
             metric ->
                 assertThat(metric)
                     .hasName("another-long-value")
                     .hasDescription("long value")
                     .hasUnit("1")
-                    .hasLongGaugeSatisfying(
-                        gauge ->
-                            gauge.hasPointsSatisfying(
-                                point ->
-                                    point
-                                        .hasValue(345)
-                                        .hasAttributesSatisfying(
-                                            equalTo(
-                                                AttributeKey.stringKey("anotherKey"),
-                                                "anotherValue")))),
+                    .hasLongGaugeSatisfying(gauge ->
+                        gauge.hasPointsSatisfying(point ->
+                            point
+                                .hasValue(345)
+                                .hasAttributesSatisfying(
+                                    equalTo(
+                                        AttributeKey.stringKey("anotherKey"), "anotherValue")))),
             metric ->
                 assertThat(metric)
                     .hasName("yet-another-long-value")
                     .hasDescription("")
                     .hasUnit("1")
-                    .hasLongGaugeSatisfying(
-                        gauge ->
-                            gauge.hasPointsSatisfying(
-                                point ->
-                                    point
-                                        .hasValue(456)
-                                        .hasAttributesSatisfying(
-                                            equalTo(
-                                                AttributeKey.stringKey("yetAnotherKey"),
-                                                "yetAnotherValue")))));
+                    .hasLongGaugeSatisfying(gauge ->
+                        gauge.hasPointsSatisfying(point ->
+                            point
+                                .hasValue(456)
+                                .hasAttributesSatisfying(
+                                    equalTo(
+                                        AttributeKey.stringKey("yetAnotherKey"),
+                                        "yetAnotherValue")))));
   }
 
   @Test
@@ -854,35 +771,29 @@ class OtelHelperAsynchronousMetricTest {
     Collection<MetricData> secondMetrics = metricReader.collectAllMetrics();
 
     assertThat(firstMetrics)
-        .satisfiesExactly(
-            metric ->
-                assertThat(metric)
-                    .hasName("dc")
-                    .hasDescription("long")
-                    .hasUnit("1")
-                    .hasLongGaugeSatisfying(
-                        gauge ->
-                            gauge.hasPointsSatisfying(
-                                point ->
-                                    point
-                                        .hasValue(20)
-                                        .hasAttributesSatisfying(
-                                            equalTo(AttributeKey.stringKey("key2"), "value2")))));
+        .satisfiesExactly(metric ->
+            assertThat(metric)
+                .hasName("dc")
+                .hasDescription("long")
+                .hasUnit("1")
+                .hasLongGaugeSatisfying(gauge ->
+                    gauge.hasPointsSatisfying(point ->
+                        point
+                            .hasValue(20)
+                            .hasAttributesSatisfying(
+                                equalTo(AttributeKey.stringKey("key2"), "value2")))));
 
     assertThat(secondMetrics)
-        .satisfiesExactly(
-            metric ->
-                assertThat(metric)
-                    .hasName("dc")
-                    .hasDescription("long")
-                    .hasUnit("1")
-                    .hasLongGaugeSatisfying(
-                        gauge ->
-                            gauge.hasPointsSatisfying(
-                                point ->
-                                    point
-                                        .hasValue(40)
-                                        .hasAttributesSatisfying(
-                                            equalTo(AttributeKey.stringKey("key4"), "value4")))));
+        .satisfiesExactly(metric ->
+            assertThat(metric)
+                .hasName("dc")
+                .hasDescription("long")
+                .hasUnit("1")
+                .hasLongGaugeSatisfying(gauge ->
+                    gauge.hasPointsSatisfying(point ->
+                        point
+                            .hasValue(40)
+                            .hasAttributesSatisfying(
+                                equalTo(AttributeKey.stringKey("key4"), "value4")))));
   }
 }

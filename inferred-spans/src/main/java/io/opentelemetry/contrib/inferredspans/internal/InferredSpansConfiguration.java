@@ -13,6 +13,12 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import javax.annotation.Nullable;
 
+/**
+ * Configuration settings for the inferred spans processor.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public class InferredSpansConfiguration {
 
   private final boolean enabled;

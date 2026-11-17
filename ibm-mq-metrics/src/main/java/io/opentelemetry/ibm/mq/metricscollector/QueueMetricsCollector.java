@@ -16,6 +16,7 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/** Collects IBM MQ queue metrics. */
 public final class QueueMetricsCollector implements Consumer<MetricsCollectorContext> {
 
   private static final Logger logger = LoggerFactory.getLogger(QueueMetricsCollector.class);
@@ -46,11 +47,10 @@ public final class QueueMetricsCollector implements Consumer<MetricsCollectorCon
     // schedule all other jobs in parallel.
     List<Callable<Void>> taskJobs = new ArrayList<>();
     for (Consumer<MetricsCollectorContext> p : publishers) {
-      taskJobs.add(
-          () -> {
-            p.accept(context);
-            return null;
-          });
+      taskJobs.add(() -> {
+        p.accept(context);
+        return null;
+      });
     }
 
     try {

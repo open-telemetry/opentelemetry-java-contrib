@@ -11,6 +11,7 @@ import io.opentelemetry.context.ContextStorage;
 import io.opentelemetry.context.Scope;
 import javax.annotation.Nullable;
 
+/** {@link ContextStorage} wrapper that records a JFR event for each attached scope. */
 public final class JfrContextStorageWrapper implements ContextStorage {
 
   private final ContextStorage wrapped;

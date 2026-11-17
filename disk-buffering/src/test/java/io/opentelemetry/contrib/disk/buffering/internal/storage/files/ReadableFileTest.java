@@ -81,6 +81,17 @@ class ReadableFileTest {
   }
 
   @Test
+  void whenRemovingTopItemAfterClosed_leaveFileUntouched() throws IOException {
+    assertThat(readableFile.readNext()).isNotNull();
+    long sizeBeforeClose = source.length();
+    readableFile.close();
+
+    readableFile.removeTopItem();
+
+    assertThat(source.length()).isEqualTo(sizeBeforeClose);
+  }
+
+  @Test
   void whenReadingLastLine_deleteOriginalFile_and_close() throws IOException {
     getRemainingDataAndClose(readableFile);
 

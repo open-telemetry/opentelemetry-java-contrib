@@ -10,6 +10,7 @@ import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUt
 import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.checkThreshold;
 import static io.opentelemetry.contrib.sampler.consistent56.ConsistentSamplingUtil.getMaxThreshold;
 
+/** A consistent sampler whose threshold can be updated by setting a new sampling probability. */
 public class ConsistentVariableThresholdSampler extends ConsistentThresholdSampler {
 
   private volatile long threshold;

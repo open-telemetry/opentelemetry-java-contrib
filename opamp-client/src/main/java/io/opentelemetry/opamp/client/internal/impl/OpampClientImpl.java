@@ -105,9 +105,9 @@ public final class OpampClientImpl
         new OpampClientImpl(
             requestService, appenders, state, RecipeManager.create(REQUIRED_FIELDS), callbacks);
 
-    // Start
-    requestService.start(client, client);
+    // Start. The full status must be pending before the service can build the first request.
     client.disableCompression();
+    requestService.start(client, client);
     client.startObservingStateChange();
     requestService.sendRequest();
 

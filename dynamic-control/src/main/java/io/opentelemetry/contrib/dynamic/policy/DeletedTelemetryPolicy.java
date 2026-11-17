@@ -8,6 +8,7 @@ package io.opentelemetry.contrib.dynamic.policy;
 import io.opentelemetry.contrib.dynamic.policy.source.SourceKind;
 import java.util.Objects;
 
+/** {@link TelemetryPolicy} representing the deletion of a previously provided policy. */
 public final class DeletedTelemetryPolicy implements TelemetryPolicy {
   private final TelemetryPolicyIdentity identity;
   private final String type;

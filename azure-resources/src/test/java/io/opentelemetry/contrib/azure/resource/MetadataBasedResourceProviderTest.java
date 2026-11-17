@@ -34,14 +34,13 @@ abstract class MetadataBasedResourceProviderTest {
 
   @NotNull
   private AttributesAssert mockServerResponse() {
-    return createResource(
-        () -> {
-          try {
-            return AzureMetadataService.fetchMetadata(server.httpUri().toURL());
-          } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-          }
-        });
+    return createResource(() -> {
+      try {
+        return AzureMetadataService.fetchMetadata(server.httpUri().toURL());
+      } catch (MalformedURLException e) {
+        throw new RuntimeException(e);
+      }
+    });
   }
 
   @NotNull

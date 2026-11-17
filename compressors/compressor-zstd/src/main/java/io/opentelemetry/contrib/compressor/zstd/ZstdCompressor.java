@@ -10,6 +10,7 @@ import io.opentelemetry.sdk.common.export.Compressor;
 import java.io.IOException;
 import java.io.OutputStream;
 
+/** {@link Compressor} that uses zstd compression. */
 public final class ZstdCompressor implements Compressor {
 
   public ZstdCompressor() {}

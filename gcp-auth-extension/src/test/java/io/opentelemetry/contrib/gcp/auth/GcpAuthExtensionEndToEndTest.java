@@ -121,16 +121,14 @@ class GcpAuthExtensionEndToEndTest {
 
     await()
         .atMost(Duration.ofSeconds(10))
-        .untilAsserted(
-            () -> {
-              HttpRequest[] requests = backendServer.retrieveRecordedRequests(request());
-              List<Headers> extractedHeaders = extractHeadersFromRequests(requests);
-              verifyRequestHeaders(extractedHeaders);
+        .untilAsserted(() -> {
+          HttpRequest[] requests = backendServer.retrieveRecordedRequests(request());
+          List<Headers> extractedHeaders = extractHeadersFromRequests(requests);
+          verifyRequestHeaders(extractedHeaders);
 
-              List<ResourceSpans> extractedResourceSpans =
-                  extractResourceSpansFromRequests(requests);
-              verifyResourceAttributes(extractedResourceSpans);
-            });
+          List<ResourceSpans> extractedResourceSpans = extractResourceSpansFromRequests(requests);
+          verifyResourceAttributes(extractedResourceSpans);
+        });
   }
 
   // Helper methods
@@ -158,25 +156,23 @@ class GcpAuthExtensionEndToEndTest {
   }
 
   private static void verifyResourceAttributes(List<ResourceSpans> extractedResourceSpans) {
-    extractedResourceSpans.forEach(
-        resourceSpan ->
-            assertThat(resourceSpan.getResource().getAttributesList())
-                .contains(
-                    KeyValue.newBuilder()
-                        .setKey(GCP_USER_PROJECT_ID_KEY)
-                        .setValue(AnyValue.newBuilder().setStringValue(DUMMY_GCP_PROJECT))
-                        .build()));
+    extractedResourceSpans.forEach(resourceSpan ->
+        assertThat(resourceSpan.getResource().getAttributesList())
+            .contains(
+                KeyValue.newBuilder()
+                    .setKey(GCP_USER_PROJECT_ID_KEY)
+                    .setValue(AnyValue.newBuilder().setStringValue(DUMMY_GCP_PROJECT))
+                    .build()));
   }
 
   private static void verifyRequestHeaders(List<Headers> extractedHeaders) {
     assertThat(extractedHeaders).isNotEmpty();
     // verify if extension added the required headers
-    extractedHeaders.forEach(
-        headers -> {
-          assertThat(headers.containsEntry(QUOTA_USER_PROJECT_HEADER, DUMMY_GCP_QUOTA_PROJECT))
-              .isTrue();
-          assertThat(headers.containsEntry("Authorization", "Bearer fake.access_token")).isTrue();
-        });
+    extractedHeaders.forEach(headers -> {
+      assertThat(headers.containsEntry(QUOTA_USER_PROJECT_HEADER, DUMMY_GCP_QUOTA_PROJECT))
+          .isTrue();
+      assertThat(headers.containsEntry("Authorization", "Bearer fake.access_token")).isTrue();
+    });
   }
 
   private static List<Headers> extractHeadersFromRequests(HttpRequest[] requests) {

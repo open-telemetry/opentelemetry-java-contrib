@@ -243,10 +243,8 @@ public class RecordingOptions {
       // This stream does not modify builder.options.
       Map<String, String> initRecordingOptions =
           Stream.of(Option.values())
-              .filter(
-                  option ->
-                      !option.defaultValue.equals(
-                          options.getOrDefault(option, option.defaultValue)))
+              .filter(option ->
+                  !option.defaultValue.equals(options.getOrDefault(option, option.defaultValue)))
               .collect(Collectors.toMap(option -> option.name, options::get));
 
       // Due to a bug, some JVMs default "disk=true". So include "disk=false" (the documented

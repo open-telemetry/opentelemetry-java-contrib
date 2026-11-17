@@ -94,17 +94,16 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
     this.initialSampler = initialSampler;
     client = new XraySamplerClient(endpoint);
     executor =
-        Executors.newSingleThreadScheduledExecutor(
-            runnable -> {
-              Thread t = Executors.defaultThreadFactory().newThread(runnable);
-              try {
-                t.setDaemon(true);
-                t.setName("xray-rules-poller");
-              } catch (SecurityException e) {
-                // Well, we tried.
-              }
-              return t;
-            });
+        Executors.newSingleThreadScheduledExecutor(runnable -> {
+          Thread t = Executors.defaultThreadFactory().newThread(runnable);
+          try {
+            t.setDaemon(true);
+            t.setName("xray-rules-poller");
+          } catch (SecurityException e) {
+            // Well, we tried.
+          }
+          return t;
+        });
 
     clientId = generateClientId();
 
@@ -232,16 +231,15 @@ public final class AwsXrayRemoteSampler implements Sampler, Closeable {
       List<SamplingBoostStatisticsDocument> boostStatistics =
           new ArrayList<SamplingBoostStatisticsDocument>();
       statisticsSnapshot.stream()
-          .forEach(
-              snapshot -> {
-                if (snapshot.getStatisticsDocument() != null) {
-                  statistics.add(snapshot.getStatisticsDocument());
-                }
-                if (snapshot.getBoostStatisticsDocument() != null
-                    && snapshot.getBoostStatisticsDocument().getTotalCount() > 0) {
-                  boostStatistics.add(snapshot.getBoostStatisticsDocument());
-                }
-              });
+          .forEach(snapshot -> {
+            if (snapshot.getStatisticsDocument() != null) {
+              statistics.add(snapshot.getStatisticsDocument());
+            }
+            if (snapshot.getBoostStatisticsDocument() != null
+                && snapshot.getBoostStatisticsDocument().getTotalCount() > 0) {
+              boostStatistics.add(snapshot.getBoostStatisticsDocument());
+            }
+          });
       Set<String> requestedTargetRuleNames =
           statistics.stream().map(SamplingStatisticsDocument::getRuleName).collect(toSet());
 

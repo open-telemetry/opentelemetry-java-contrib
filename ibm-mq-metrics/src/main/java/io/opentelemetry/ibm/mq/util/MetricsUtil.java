@@ -7,6 +7,7 @@ package io.opentelemetry.ibm.mq.util;
 
 import java.util.function.Function;
 
+/** Utility functions for converting metric values. */
 public final class MetricsUtil {
 
   private MetricsUtil() {}

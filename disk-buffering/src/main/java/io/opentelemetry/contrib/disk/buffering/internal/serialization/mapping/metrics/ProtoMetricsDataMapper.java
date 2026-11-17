@@ -17,6 +17,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Maps between {@link MetricData} items and {@link ExportMetricsServiceRequest} protos.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public final class ProtoMetricsDataMapper
     extends BaseProtoSignalsDataMapper<
         MetricData, Metric, ExportMetricsServiceRequest, ResourceMetrics, ScopeMetrics> {
@@ -47,17 +53,16 @@ public final class ProtoMetricsDataMapper
   protected ExportMetricsServiceRequest createProtoData(
       Map<Resource, Map<InstrumentationScopeInfo, List<Metric>>> itemsByResource) {
     List<ResourceMetrics> items = new ArrayList<>();
-    itemsByResource.forEach(
-        (resource, instrumentationScopeInfoScopedMetricsMap) -> {
-          ResourceMetrics.Builder resourceMetricsBuilder = createProtoResourceBuilder(resource);
-          for (Map.Entry<InstrumentationScopeInfo, List<Metric>> metricsByScope :
-              instrumentationScopeInfoScopedMetricsMap.entrySet()) {
-            ScopeMetrics.Builder scopeBuilder = createProtoScopeBuilder(metricsByScope.getKey());
-            scopeBuilder.metrics.addAll(metricsByScope.getValue());
-            resourceMetricsBuilder.scope_metrics.add(scopeBuilder.build());
-          }
-          items.add(resourceMetricsBuilder.build());
-        });
+    itemsByResource.forEach((resource, instrumentationScopeInfoScopedMetricsMap) -> {
+      ResourceMetrics.Builder resourceMetricsBuilder = createProtoResourceBuilder(resource);
+      for (Map.Entry<InstrumentationScopeInfo, List<Metric>> metricsByScope :
+          instrumentationScopeInfoScopedMetricsMap.entrySet()) {
+        ScopeMetrics.Builder scopeBuilder = createProtoScopeBuilder(metricsByScope.getKey());
+        scopeBuilder.metrics.addAll(metricsByScope.getValue());
+        resourceMetricsBuilder.scope_metrics.add(scopeBuilder.build());
+      }
+      items.add(resourceMetricsBuilder.build());
+    });
     return new ExportMetricsServiceRequest.Builder().resource_metrics(items).build();
   }
 

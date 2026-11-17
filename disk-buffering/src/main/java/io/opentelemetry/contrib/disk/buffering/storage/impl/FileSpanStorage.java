@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import javax.annotation.Nonnull;
 
+/** File-based storage for spans. */
 public final class FileSpanStorage implements SignalStorage.Span {
   private final FileSignalStorage<SpanData> fileSignalStorage;
 

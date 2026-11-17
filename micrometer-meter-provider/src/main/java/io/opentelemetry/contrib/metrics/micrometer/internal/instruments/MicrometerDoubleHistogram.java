@@ -15,6 +15,12 @@ import io.opentelemetry.contrib.metrics.micrometer.internal.state.InstrumentStat
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.MeterSharedState;
 import java.util.List;
 
+/**
+ * Double histogram instrument delegating to Micrometer.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public final class MicrometerDoubleHistogram extends AbstractHistogram implements DoubleHistogram {
 
   private MicrometerDoubleHistogram(InstrumentState instrumentState) {

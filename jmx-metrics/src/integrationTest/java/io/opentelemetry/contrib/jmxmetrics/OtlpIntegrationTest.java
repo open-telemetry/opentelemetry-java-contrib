@@ -22,23 +22,21 @@ abstract class OtlpIntegrationTest extends AbstractIntegrationTest {
 
   @Test
   void endToEnd() {
-    waitAndAssertMetrics(
-        metric -> {
-          assertThat(metric.getName()).isEqualTo("cassandra.storage.load");
-          assertThat(metric.getDescription())
-              .isEqualTo("Size, in bytes, of the on disk data size this node manages");
-          assertThat(metric.getUnit()).isEqualTo("By");
-          assertThat(metric.hasHistogram()).isTrue();
-          assertThat(metric.getHistogram().getDataPointsList())
-              .satisfiesExactly(
-                  point ->
-                      assertThat(point.getAttributesList())
-                          .containsExactly(
-                              KeyValue.newBuilder()
-                                  .setKey("myKey")
-                                  .setValue(AnyValue.newBuilder().setStringValue("myVal"))
-                                  .build()));
-        });
+    waitAndAssertMetrics(metric -> {
+      assertThat(metric.getName()).isEqualTo("cassandra.storage.load");
+      assertThat(metric.getDescription())
+          .isEqualTo("Size, in bytes, of the on disk data size this node manages");
+      assertThat(metric.getUnit()).isEqualTo("By");
+      assertThat(metric.hasHistogram()).isTrue();
+      assertThat(metric.getHistogram().getDataPointsList())
+          .satisfiesExactly(point ->
+              assertThat(point.getAttributesList())
+                  .containsExactly(
+                      KeyValue.newBuilder()
+                          .setKey("myKey")
+                          .setValue(AnyValue.newBuilder().setStringValue("myVal"))
+                          .build()));
+    });
   }
 
   static class ConfigFromStdin extends OtlpIntegrationTest {

@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+/** Servlet that responds to GET requests with a fixed text. */
 public class SimpleServlet extends HttpServlet {
 
   private static final long serialVersionUID = 3726145372238690099L;

@@ -91,14 +91,13 @@ class KafkaSpanExporterBuilderTest {
             VALUE_SERIALIZER_CLASS_CONFIG,
             valueSerializerMock.getClass().getName());
 
-    assertThatThrownBy(
-            () ->
-                new KafkaSpanExporterBuilder()
-                    .setProducer(
-                        KafkaSpanExporterBuilder.ProducerBuilder.newInstance()
-                            .setConfig(producerConfig)
-                            .build())
-                    .build())
+    assertThatThrownBy(() ->
+            new KafkaSpanExporterBuilder()
+                .setProducer(
+                    KafkaSpanExporterBuilder.ProducerBuilder.newInstance()
+                        .setConfig(producerConfig)
+                        .build())
+                .build())
         .isInstanceOf(IllegalArgumentException.class);
   }
 
@@ -110,12 +109,11 @@ class KafkaSpanExporterBuilderTest {
 
   @Test
   void buildWithMissingProducerConfig() {
-    assertThatThrownBy(
-            () ->
-                new KafkaSpanExporterBuilder()
-                    .setTopicName("a-topic")
-                    .setProducer(KafkaSpanExporterBuilder.ProducerBuilder.newInstance().build())
-                    .build())
+    assertThatThrownBy(() ->
+            new KafkaSpanExporterBuilder()
+                .setTopicName("a-topic")
+                .setProducer(KafkaSpanExporterBuilder.ProducerBuilder.newInstance().build())
+                .build())
         .isInstanceOf(IllegalArgumentException.class);
   }
 
@@ -128,15 +126,14 @@ class KafkaSpanExporterBuilderTest {
             ProducerConfig.CLIENT_ID_CONFIG,
             "some clientId");
 
-    assertThatThrownBy(
-            () ->
-                new KafkaSpanExporterBuilder()
-                    .setTopicName("a-topic")
-                    .setProducer(
-                        KafkaSpanExporterBuilder.ProducerBuilder.newInstance()
-                            .setConfig(producerConfig)
-                            .build())
-                    .build())
+    assertThatThrownBy(() ->
+            new KafkaSpanExporterBuilder()
+                .setTopicName("a-topic")
+                .setProducer(
+                    KafkaSpanExporterBuilder.ProducerBuilder.newInstance()
+                        .setConfig(producerConfig)
+                        .build())
+                .build())
         .isInstanceOf(IllegalArgumentException.class);
   }
 
@@ -151,16 +148,15 @@ class KafkaSpanExporterBuilderTest {
             KEY_SERIALIZER_CLASS_CONFIG,
             keySerializerMock.getClass().getName());
 
-    assertThatThrownBy(
-            () ->
-                new KafkaSpanExporterBuilder()
-                    .setTopicName("a-topic")
-                    .setProducer(
-                        KafkaSpanExporterBuilder.ProducerBuilder.newInstance()
-                            .setConfig(producerConfig)
-                            .setValueSerializer(valueSerializerMock)
-                            .build())
-                    .build())
+    assertThatThrownBy(() ->
+            new KafkaSpanExporterBuilder()
+                .setTopicName("a-topic")
+                .setProducer(
+                    KafkaSpanExporterBuilder.ProducerBuilder.newInstance()
+                        .setConfig(producerConfig)
+                        .setValueSerializer(valueSerializerMock)
+                        .build())
+                .build())
         .isInstanceOf(IllegalArgumentException.class);
   }
 
@@ -175,16 +171,15 @@ class KafkaSpanExporterBuilderTest {
             VALUE_SERIALIZER_CLASS_CONFIG,
             valueSerializerMock.getClass().getName());
 
-    assertThatThrownBy(
-            () ->
-                new KafkaSpanExporterBuilder()
-                    .setTopicName("a-topic")
-                    .setProducer(
-                        KafkaSpanExporterBuilder.ProducerBuilder.newInstance()
-                            .setConfig(producerConfig)
-                            .setKeySerializer(keySerializerMock)
-                            .build())
-                    .build())
+    assertThatThrownBy(() ->
+            new KafkaSpanExporterBuilder()
+                .setTopicName("a-topic")
+                .setProducer(
+                    KafkaSpanExporterBuilder.ProducerBuilder.newInstance()
+                        .setConfig(producerConfig)
+                        .setKeySerializer(keySerializerMock)
+                        .build())
+                .build())
         .isInstanceOf(IllegalArgumentException.class);
   }
 
@@ -201,17 +196,16 @@ class KafkaSpanExporterBuilderTest {
             VALUE_SERIALIZER_CLASS_CONFIG,
             valueSerializerMock.getClass().getName());
 
-    assertThatThrownBy(
-            () ->
-                new KafkaSpanExporterBuilder()
-                    .setTopicName("a-topic")
-                    .setProducer(
-                        KafkaSpanExporterBuilder.ProducerBuilder.newInstance()
-                            .setConfig(producerConfig)
-                            .setKeySerializer(keySerializerMock)
-                            .setValueSerializer(valueSerializerMock)
-                            .build())
-                    .build())
+    assertThatThrownBy(() ->
+            new KafkaSpanExporterBuilder()
+                .setTopicName("a-topic")
+                .setProducer(
+                    KafkaSpanExporterBuilder.ProducerBuilder.newInstance()
+                        .setConfig(producerConfig)
+                        .setKeySerializer(keySerializerMock)
+                        .setValueSerializer(valueSerializerMock)
+                        .build())
+                .build())
         .isInstanceOf(IllegalArgumentException.class);
   }
 }

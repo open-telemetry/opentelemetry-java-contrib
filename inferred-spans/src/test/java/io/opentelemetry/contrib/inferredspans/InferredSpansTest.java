@@ -61,11 +61,10 @@ class InferredSpansTest {
     InferredSpans.setProfilerInterval(Duration.ofMillis(10));
 
     setup =
-        ProfilerTestSetup.create(
-            c ->
-                c.profilerInterval(Duration.ofSeconds(10))
-                    .profilingDuration(Duration.ofMillis(500))
-                    .tempDir(tempDir.toFile()));
+        ProfilerTestSetup.create(c ->
+            c.profilerInterval(Duration.ofSeconds(10))
+                .profilingDuration(Duration.ofMillis(500))
+                .tempDir(tempDir.toFile()));
 
     // assert that the interval set before the profiler was initialized is ignored
     assertThat(setup.profiler.getConfig().getProfilingInterval()).isEqualTo(Duration.ofSeconds(10));
@@ -74,11 +73,10 @@ class InferredSpansTest {
   @Test
   void testSetProfilerInterval() {
     setup =
-        ProfilerTestSetup.create(
-            c ->
-                c.profilerInterval(Duration.ofSeconds(10))
-                    .profilingDuration(Duration.ofMillis(500))
-                    .tempDir(tempDir.toFile()));
+        ProfilerTestSetup.create(c ->
+            c.profilerInterval(Duration.ofSeconds(10))
+                .profilingDuration(Duration.ofMillis(500))
+                .tempDir(tempDir.toFile()));
 
     SamplingProfiler profiler = setup.profiler;
     await()

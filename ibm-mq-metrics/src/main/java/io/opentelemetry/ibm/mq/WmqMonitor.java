@@ -40,6 +40,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/** Connects to the configured IBM MQ queue managers and runs the metric collectors against each. */
 public final class WmqMonitor {
 
   private static final Logger logger = LoggerFactory.getLogger(WmqMonitor.class);
@@ -143,29 +144,24 @@ public final class WmqMonitor {
         new MetricsCollectorContext(queueManager, agent, mqQueueManager, this.metricsConfig);
     List<Callable<Void>> tasks = new ArrayList<>();
     for (Consumer<MetricsCollectorContext> collector : jobs) {
-      tasks.add(
-          () -> {
-            try {
-              long startTime = System.currentTimeMillis();
-              collector.accept(context);
-              long diffTime = System.currentTimeMillis() - startTime;
-              if (diffTime > 60000L) {
-                logger.warn(
-                    "{} Task took {} ms to complete",
-                    collector.getClass().getSimpleName(),
-                    diffTime);
-              } else {
-                logger.debug(
-                    "{} Task took {} ms to complete",
-                    collector.getClass().getSimpleName(),
-                    diffTime);
-              }
-            } catch (RuntimeException e) {
-              logger.error(
-                  "Error while running task name = {}", collector.getClass().getSimpleName(), e);
-            }
-            return null;
-          });
+      tasks.add(() -> {
+        try {
+          long startTime = System.currentTimeMillis();
+          collector.accept(context);
+          long diffTime = System.currentTimeMillis() - startTime;
+          if (diffTime > 60000L) {
+            logger.warn(
+                "{} Task took {} ms to complete", collector.getClass().getSimpleName(), diffTime);
+          } else {
+            logger.debug(
+                "{} Task took {} ms to complete", collector.getClass().getSimpleName(), diffTime);
+          }
+        } catch (RuntimeException e) {
+          logger.error(
+              "Error while running task name = {}", collector.getClass().getSimpleName(), e);
+        }
+        return null;
+      });
     }
 
     try {

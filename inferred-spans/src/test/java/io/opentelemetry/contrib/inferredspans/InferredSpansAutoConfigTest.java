@@ -142,18 +142,15 @@ class InferredSpansAutoConfigTest {
       }
 
       await()
-          .untilAsserted(
-              () ->
-                  assertThat(AutoConfiguredDataCapture.getSpans())
-                      .hasSizeGreaterThanOrEqualTo(2)
-                      .anySatisfy(
-                          span -> {
-                            assertThat(span.getName()).startsWith("InferredSpansAutoConfigTest#");
-                            assertThat(span.getInstrumentationScopeInfo().getName())
-                                .isEqualTo(InferredSpansProcessor.TRACER_NAME);
-                            assertThat(span.getInstrumentationScopeInfo().getVersion())
-                                .isNotBlank();
-                          }));
+          .untilAsserted(() ->
+              assertThat(AutoConfiguredDataCapture.getSpans())
+                  .hasSizeGreaterThanOrEqualTo(2)
+                  .anySatisfy(span -> {
+                    assertThat(span.getName()).startsWith("InferredSpansAutoConfigTest#");
+                    assertThat(span.getInstrumentationScopeInfo().getName())
+                        .isEqualTo(InferredSpansProcessor.TRACER_NAME);
+                    assertThat(span.getInstrumentationScopeInfo().getVersion()).isNotBlank();
+                  }));
     }
   }
 

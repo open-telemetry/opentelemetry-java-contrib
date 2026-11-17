@@ -16,6 +16,12 @@ import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
 
+/**
+ * Notifies the sampling profiler when spans are activated and deactivated.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public class ProfilingActivationListener implements Closeable {
 
   static {

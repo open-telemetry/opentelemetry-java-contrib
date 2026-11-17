@@ -161,17 +161,15 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
   public MetricAssert hasDataPointsWithoutAttributes() {
     isNotNull();
 
-    return checkDataPoints(
-        dataPoints -> {
-          dataPointsCommonCheck(dataPoints);
+    return checkDataPoints(dataPoints -> {
+      dataPointsCommonCheck(dataPoints);
 
-          // all data points must not have any attribute
-          for (NumberDataPoint dataPoint : dataPoints) {
-            info.description(
-                "no attribute expected on data point for metric '%s'", actual.getName());
-            iterables.assertEmpty(info, dataPoint.getAttributesList());
-          }
-        });
+      // all data points must not have any attribute
+      for (NumberDataPoint dataPoint : dataPoints) {
+        info.description("no attribute expected on data point for metric '%s'", actual.getName());
+        iterables.assertEmpty(info, dataPoint.getAttributesList());
+      }
+    });
   }
 
   @CanIgnoreReturnValue
@@ -228,39 +226,37 @@ public class MetricAssert extends AbstractAssert<MetricAssert, Metric> {
    */
   @CanIgnoreReturnValue
   public final MetricAssert hasDataPointsWithAttributes(AttributeMatcherGroup... matcherGroups) {
-    return checkDataPoints(
-        dataPoints -> {
-          dataPointsCommonCheck(dataPoints);
+    return checkDataPoints(dataPoints -> {
+      dataPointsCommonCheck(dataPoints);
 
-          boolean[] matchedSets = new boolean[matcherGroups.length];
+      boolean[] matchedSets = new boolean[matcherGroups.length];
 
-          // validate each datapoint attributes match exactly one of the provided attributes sets
-          for (NumberDataPoint dataPoint : dataPoints) {
-            Map<String, String> dataPointAttributes =
-                dataPoint.getAttributesList().stream()
-                    .collect(
-                        Collectors.toMap(KeyValue::getKey, kv -> kv.getValue().getStringValue()));
-            int matchCount = 0;
-            for (int i = 0; i < matcherGroups.length; i++) {
-              if (matcherGroups[i].matches(dataPointAttributes)) {
-                matchedSets[i] = true;
-                matchCount++;
-              }
-            }
-
-            info.description(
-                "data point attributes '%s' for metric '%s' must match exactly one of the attribute sets '%s'.\nActual data points: %s",
-                dataPointAttributes, actual.getName(), Arrays.asList(matcherGroups), dataPoints);
-            integers.assertEqual(info, matchCount, 1);
+      // validate each datapoint attributes match exactly one of the provided attributes sets
+      for (NumberDataPoint dataPoint : dataPoints) {
+        Map<String, String> dataPointAttributes =
+            dataPoint.getAttributesList().stream()
+                .collect(Collectors.toMap(KeyValue::getKey, kv -> kv.getValue().getStringValue()));
+        int matchCount = 0;
+        for (int i = 0; i < matcherGroups.length; i++) {
+          if (matcherGroups[i].matches(dataPointAttributes)) {
+            matchedSets[i] = true;
+            matchCount++;
           }
+        }
 
-          // check that all attribute sets matched at least once
-          for (int i = 0; i < matchedSets.length; i++) {
-            info.description(
-                "no data point matched attribute set '%s' for metric '%s'",
-                matcherGroups[i], actual.getName());
-            objects.assertEqual(info, matchedSets[i], true);
-          }
-        });
+        info.description(
+            "data point attributes '%s' for metric '%s' must match exactly one of the attribute sets '%s'.\nActual data points: %s",
+            dataPointAttributes, actual.getName(), Arrays.asList(matcherGroups), dataPoints);
+        integers.assertEqual(info, matchCount, 1);
+      }
+
+      // check that all attribute sets matched at least once
+      for (int i = 0; i < matchedSets.length; i++) {
+        info.description(
+            "no data point matched attribute set '%s' for metric '%s'",
+            matcherGroups[i], actual.getName());
+        objects.assertEqual(info, matchedSets[i], true);
+      }
+    });
   }
 }

@@ -30,6 +30,9 @@ dependencies {
   runtimeOnly("com.github.luben:zstd-jni") {
     because("CVE-2026-87795, CVE-2026-87823, CVE-2026-89045")
   }
+  runtimeOnly("org.xerial.snappy:snappy-java") {
+    because("CVE-2026-90559, CVE-2026-93451, CVE-2026-108106, CVE-2026-93452, CVE-2026-108104")
+  }
 
   implementation("io.opentelemetry:opentelemetry-exporter-otlp-common")
   implementation("com.google.protobuf:protobuf-java")

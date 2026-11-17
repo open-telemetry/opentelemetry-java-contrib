@@ -32,6 +32,12 @@ import opamp.proto.ServerErrorResponse;
 import opamp.proto.ServerErrorResponseType;
 import opamp.proto.ServerToAgent;
 
+/**
+ * {@link RequestService} that sends requests to the server over HTTP.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public final class HttpRequestService implements RequestService {
   private final HttpSender requestSender;
   // must be a single threaded executor, the code in this class relies on requests being processed
@@ -107,6 +113,13 @@ public final class HttpRequestService implements RequestService {
   public void stop() {
     if (isRunning.compareAndSet(true, false)) {
       hasStopped.set(true);
+
+      ScheduledFuture<?> scheduledFuture = scheduledTask.getAndSet(null);
+      if (scheduledFuture != null) {
+        scheduledFuture.cancel(false);
+      }
+
+      executorService.execute(this::doSendRequest);
       executorService.shutdown();
     }
   }
@@ -117,19 +130,21 @@ public final class HttpRequestService implements RequestService {
       throw new IllegalStateException("HttpRequestService is not running");
     }
 
-    executorService.execute(
-        () -> {
-          // cancel the already scheduled task, a new one is created after current request is
-          // processed
-          ScheduledFuture<?> scheduledFuture = scheduledTask.get();
-          if (scheduledFuture != null) {
-            scheduledFuture.cancel(false);
-          }
-          sendAndScheduleNext();
-        });
+    executorService.execute(() -> {
+      // Cancel the already scheduled task.
+      ScheduledFuture<?> scheduledFuture = scheduledTask.get();
+      if (scheduledFuture != null) {
+        scheduledFuture.cancel(false);
+      }
+      sendAndScheduleNext();
+    });
   }
 
   private void sendAndScheduleNext() {
+    if (!isRunning.get()) {
+      return;
+    }
+
     doSendRequest();
     scheduleNextExecution();
   }

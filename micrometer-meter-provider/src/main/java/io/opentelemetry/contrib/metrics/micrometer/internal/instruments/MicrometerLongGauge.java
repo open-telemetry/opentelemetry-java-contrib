@@ -15,6 +15,12 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.contrib.metrics.micrometer.internal.state.InstrumentState;
 import java.util.function.Consumer;
 
+/**
+ * Long gauge instrument delegating to Micrometer.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public final class MicrometerLongGauge extends AbstractGauge
     implements LongGauge, ObservableLongMeasurement {
   public MicrometerLongGauge(InstrumentState instrumentState) {

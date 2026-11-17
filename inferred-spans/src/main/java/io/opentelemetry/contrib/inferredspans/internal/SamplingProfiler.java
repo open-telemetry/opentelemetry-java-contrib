@@ -180,13 +180,12 @@ public class SamplingProfiler implements Runnable {
     this.tracerProvider = tracerProvider;
     this.tempDir = tempDir;
     this.scheduler =
-        Executors.newSingleThreadScheduledExecutor(
-            r -> {
-              Thread thread = new Thread(r);
-              thread.setDaemon(true);
-              thread.setName("otel-inferred-spans");
-              return thread;
-            });
+        Executors.newSingleThreadScheduledExecutor(r -> {
+          Thread thread = new Thread(r);
+          thread.setDaemon(true);
+          thread.setName("otel-inferred-spans");
+          return thread;
+        });
     this.clock = nanoClock;
     activationEventTranslator =
         (event, sequence, active, previouslyActive) ->
@@ -860,6 +859,7 @@ public class SamplingProfiler implements Runnable {
     return clock;
   }
 
+  /** A stack trace sample recorded for a thread at a point in time. */
   public static class StackTraceEvent implements Comparable<StackTraceEvent> {
     private final long nanoTime;
     private final long stackTraceId;

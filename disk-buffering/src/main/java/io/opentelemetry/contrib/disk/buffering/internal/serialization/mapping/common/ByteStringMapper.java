@@ -7,6 +7,12 @@ package io.opentelemetry.contrib.disk.buffering.internal.serialization.mapping.c
 
 import okio.ByteString;
 
+/**
+ * Maps between hex strings and proto {@link ByteString} values.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public final class ByteStringMapper {
 
   private static final ByteStringMapper INSTANCE = new ByteStringMapper();

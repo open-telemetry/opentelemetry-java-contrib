@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import javax.annotation.Nonnull;
 
+/** File-based storage for log records. */
 public final class FileLogRecordStorage implements SignalStorage.LogRecord {
   private final FileSignalStorage<LogRecordData> fileSignalStorage;
 

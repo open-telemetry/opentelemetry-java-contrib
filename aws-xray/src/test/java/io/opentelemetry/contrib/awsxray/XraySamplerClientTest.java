@@ -161,22 +161,19 @@ class XraySamplerClientTest {
               assertThat(document.getIntervalSecs()).isNull();
             });
     assertThat(response.getUnprocessedStatistics())
-        .satisfiesExactly(
-            statistics -> {
-              assertThat(statistics.getRuleName()).isEqualTo("cats-rule");
-              assertThat(statistics.getErrorCode()).isEqualTo("400");
-              assertThat(statistics.getMessage()).isEqualTo("Unknown rule");
-            });
+        .satisfiesExactly(statistics -> {
+          assertThat(statistics.getRuleName()).isEqualTo("cats-rule");
+          assertThat(statistics.getErrorCode()).isEqualTo("400");
+          assertThat(statistics.getMessage()).isEqualTo("Unknown rule");
+        });
   }
 
   @Test
   void getSamplingTargets_malformed() {
     server.enqueue(HttpResponse.of(HttpStatus.OK, MediaType.JSON, "notjson"));
-    assertThatThrownBy(
-            () ->
-                client.getSamplingTargets(
-                    GetSamplingTargetsRequest.create(
-                        Collections.emptyList(), Collections.emptyList())))
+    assertThatThrownBy(() ->
+            client.getSamplingTargets(
+                GetSamplingTargetsRequest.create(Collections.emptyList(), Collections.emptyList())))
         .isInstanceOf(UncheckedIOException.class)
         .hasMessage("Failed to deserialize response.");
   }

@@ -18,33 +18,37 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
 
+/**
+ * Base class for mapping between SDK signal items and proto export requests.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public abstract class BaseProtoSignalsDataMapper<
     SIGNAL_ITEM, PROTO_SIGNAL_ITEM, PROTO_DATA, PROTO_RESOURCE_ITEM, PROTO_SCOPE_ITEM> {
 
   public PROTO_DATA toProto(Collection<SIGNAL_ITEM> sourceItems) {
     Map<Resource, Map<InstrumentationScopeInfo, List<PROTO_SIGNAL_ITEM>>> itemsByResourceAndScope =
         new HashMap<>();
-    sourceItems.forEach(
-        sourceData -> {
-          Resource resource = getResourceFromSignal(sourceData);
-          InstrumentationScopeInfo instrumentationScopeInfo =
-              getInstrumentationScopeInfo(sourceData);
+    sourceItems.forEach(sourceData -> {
+      Resource resource = getResourceFromSignal(sourceData);
+      InstrumentationScopeInfo instrumentationScopeInfo = getInstrumentationScopeInfo(sourceData);
 
-          Map<InstrumentationScopeInfo, List<PROTO_SIGNAL_ITEM>> itemsByResource =
-              itemsByResourceAndScope.get(resource);
-          if (itemsByResource == null) {
-            itemsByResource = new HashMap<>();
-            itemsByResourceAndScope.put(resource, itemsByResource);
-          }
+      Map<InstrumentationScopeInfo, List<PROTO_SIGNAL_ITEM>> itemsByResource =
+          itemsByResourceAndScope.get(resource);
+      if (itemsByResource == null) {
+        itemsByResource = new HashMap<>();
+        itemsByResourceAndScope.put(resource, itemsByResource);
+      }
 
-          List<PROTO_SIGNAL_ITEM> scopeSignals = itemsByResource.get(instrumentationScopeInfo);
-          if (scopeSignals == null) {
-            scopeSignals = new ArrayList<>();
-            itemsByResource.put(instrumentationScopeInfo, scopeSignals);
-          }
+      List<PROTO_SIGNAL_ITEM> scopeSignals = itemsByResource.get(instrumentationScopeInfo);
+      if (scopeSignals == null) {
+        scopeSignals = new ArrayList<>();
+        itemsByResource.put(instrumentationScopeInfo, scopeSignals);
+      }
 
-          scopeSignals.add(signalItemToProto(sourceData));
-        });
+      scopeSignals.add(signalItemToProto(sourceData));
+    });
 
     return createProtoData(itemsByResourceAndScope);
   }

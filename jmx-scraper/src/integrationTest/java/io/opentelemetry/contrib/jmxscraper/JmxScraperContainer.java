@@ -292,14 +292,13 @@ public class JmxScraperContainer extends GenericContainer<JmxScraperContainer> {
       case ENVIRONMENT_VARIABLES:
         Map<String, String> env = new HashMap<>();
         Map<String, String> other = new HashMap<>();
-        config.forEach(
-            (k, v) -> {
-              if (k.startsWith("otel.")) {
-                env.put(k.toUpperCase(Locale.ROOT).replace(".", "_"), v);
-              } else {
-                other.put(k, v);
-              }
-            });
+        config.forEach((k, v) -> {
+          if (k.startsWith("otel.")) {
+            env.put(k.toUpperCase(Locale.ROOT).replace(".", "_"), v);
+          } else {
+            other.put(k, v);
+          }
+        });
 
         if (!other.isEmpty()) {
           env.put(

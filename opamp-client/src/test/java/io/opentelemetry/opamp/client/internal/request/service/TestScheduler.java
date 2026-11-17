@@ -40,25 +40,23 @@ public final class TestScheduler {
     ScheduledExecutorService service = mock();
 
     lenient()
-        .doAnswer(
-            invocation -> {
-              Runnable runnable = invocation.getArgument(0);
-              runnable.run();
-              return null;
-            })
+        .doAnswer(invocation -> {
+          Runnable runnable = invocation.getArgument(0);
+          runnable.run();
+          return null;
+        })
         .when(service)
         .execute(any());
 
     lenient()
         .when(service.schedule(any(Runnable.class), anyLong(), any(TimeUnit.class)))
-        .thenAnswer(
-            invocation -> {
-              Task task = new Task(invocation.getArgument(0), invocation.getArgument(1));
+        .thenAnswer(invocation -> {
+          Task task = new Task(invocation.getArgument(0), invocation.getArgument(1));
 
-              tasks.add(task);
+          tasks.add(task);
 
-              return task;
-            });
+          return task;
+        });
 
     return service;
   }

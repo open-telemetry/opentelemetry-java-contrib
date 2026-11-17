@@ -9,6 +9,7 @@ import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.ComponentProvider;
 import io.opentelemetry.sdk.resources.Resource;
 
+/** Declarative configuration SPI implementation for {@link MavenResourceProvider}. */
 public class MavenResourceDetector implements ComponentProvider {
 
   @Override

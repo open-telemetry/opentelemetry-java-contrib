@@ -63,27 +63,26 @@ class ZstdCompressorProviderTest {
                 httpRequests.add(ctx.request());
                 return HttpResponse.of(
                     req.aggregate()
-                        .thenApply(
-                            aggReq -> {
-                              byte[] payload = aggReq.content().array();
-                              try {
-                                if (req.headers().contains("content-encoding", "zstd")) {
-                                  ZstdInputStream is =
-                                      new ZstdInputStream(new ByteArrayInputStream(payload));
-                                  ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                                  for (int result = is.read(); result != -1; result = is.read()) {
-                                    baos.write((byte) result);
-                                  }
-                                  payload = baos.toByteArray();
-                                }
-                                ExportLogsServiceRequest parsed =
-                                    ExportLogsServiceRequest.parseFrom(payload);
-                                exportedTelemetry.addAll(parsed.getResourceLogsList());
-                                return SUCCESS;
-                              } catch (IOException e) {
-                                throw new UncheckedIOException(e);
+                        .thenApply(aggReq -> {
+                          byte[] payload = aggReq.content().array();
+                          try {
+                            if (req.headers().contains("content-encoding", "zstd")) {
+                              ZstdInputStream is =
+                                  new ZstdInputStream(new ByteArrayInputStream(payload));
+                              ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                              for (int result = is.read(); result != -1; result = is.read()) {
+                                baos.write((byte) result);
                               }
-                            }));
+                              payload = baos.toByteArray();
+                            }
+                            ExportLogsServiceRequest parsed =
+                                ExportLogsServiceRequest.parseFrom(payload);
+                            exportedTelemetry.addAll(parsed.getResourceLogsList());
+                            return SUCCESS;
+                          } catch (IOException e) {
+                            throw new UncheckedIOException(e);
+                          }
+                        }));
               });
           sb.http(0);
         }
@@ -107,38 +106,31 @@ class ZstdCompressorProviderTest {
           .satisfiesExactly(
               req -> assertThat(req.headers().contains("content-encoding", "zstd")).isTrue());
       assertThat(exportedTelemetry)
-          .satisfiesExactly(
-              resourceLogs ->
-                  assertThat(resourceLogs.getScopeLogsList())
-                      .satisfiesExactly(
-                          scopeLogs -> {
-                            InstrumentationScope scope = scopeLogs.getScope();
-                            assertThat(scope.getName()).isEqualTo("testLib");
-                            assertThat(scope.getVersion()).isEqualTo("1.0");
-                            assertThat(scopeLogs.getSchemaUrl()).isEqualTo("http://url");
-                            assertThat(scopeLogs.getLogRecordsList())
-                                .satisfiesExactly(
-                                    logRecord -> {
-                                      assertThat(logRecord.getBody().getStringValue())
-                                          .isEqualTo("log body");
-                                      assertThat(logRecord.getAttributesList())
-                                          .isEqualTo(
-                                              Collections.singletonList(
-                                                  KeyValue.newBuilder()
-                                                      .setKey("key")
-                                                      .setValue(
-                                                          AnyValue.newBuilder()
-                                                              .setStringValue("value")
-                                                              .build())
-                                                      .build()));
-                                      assertThat(logRecord.getSeverityText()).isEqualTo("INFO");
-                                      assertThat(logRecord.getSeverityNumber())
-                                          .isEqualTo(SeverityNumber.SEVERITY_NUMBER_INFO);
-                                      assertThat(logRecord.getTimeUnixNano()).isGreaterThan(0);
-                                      assertThat(logRecord.getObservedTimeUnixNano())
-                                          .isGreaterThan(0);
-                                    });
-                          }));
+          .satisfiesExactly(resourceLogs ->
+              assertThat(resourceLogs.getScopeLogsList())
+                  .satisfiesExactly(scopeLogs -> {
+                    InstrumentationScope scope = scopeLogs.getScope();
+                    assertThat(scope.getName()).isEqualTo("testLib");
+                    assertThat(scope.getVersion()).isEqualTo("1.0");
+                    assertThat(scopeLogs.getSchemaUrl()).isEqualTo("http://url");
+                    assertThat(scopeLogs.getLogRecordsList())
+                        .satisfiesExactly(logRecord -> {
+                          assertThat(logRecord.getBody().getStringValue()).isEqualTo("log body");
+                          assertThat(logRecord.getAttributesList())
+                              .isEqualTo(
+                                  Collections.singletonList(
+                                      KeyValue.newBuilder()
+                                          .setKey("key")
+                                          .setValue(
+                                              AnyValue.newBuilder().setStringValue("value").build())
+                                          .build()));
+                          assertThat(logRecord.getSeverityText()).isEqualTo("INFO");
+                          assertThat(logRecord.getSeverityNumber())
+                              .isEqualTo(SeverityNumber.SEVERITY_NUMBER_INFO);
+                          assertThat(logRecord.getTimeUnixNano()).isGreaterThan(0);
+                          assertThat(logRecord.getObservedTimeUnixNano()).isGreaterThan(0);
+                        });
+                  }));
     }
   }
 

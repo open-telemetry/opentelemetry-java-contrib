@@ -47,17 +47,16 @@ class JfrParserTest {
             caseSensitiveMatcher("io.opentelemetry.contrib.inferredspans.*")));
     AtomicInteger stackTraces = new AtomicInteger();
     ArrayList<StackFrame> stackFrames = new ArrayList<>();
-    jfrParser.consumeStackTraces(
-        (threadId, stackTraceId, nanoTime) -> {
-          jfrParser.resolveStackTrace(stackTraceId, stackFrames, MAX_STACK_DEPTH);
-          if (!stackFrames.isEmpty()) {
-            stackTraces.incrementAndGet();
-            assertThat(stackFrames.get(stackFrames.size() - 1).getMethodName())
-                .isEqualTo("testProfileTransaction");
-            assertThat(stackFrames).hasSizeLessThanOrEqualTo(MAX_STACK_DEPTH);
-          }
-          stackFrames.clear();
-        });
+    jfrParser.consumeStackTraces((threadId, stackTraceId, nanoTime) -> {
+      jfrParser.resolveStackTrace(stackTraceId, stackFrames, MAX_STACK_DEPTH);
+      if (!stackFrames.isEmpty()) {
+        stackTraces.incrementAndGet();
+        assertThat(stackFrames.get(stackFrames.size() - 1).getMethodName())
+            .isEqualTo("testProfileTransaction");
+        assertThat(stackFrames).hasSizeLessThanOrEqualTo(MAX_STACK_DEPTH);
+      }
+      stackFrames.clear();
+    });
     assertThat(stackTraces.get()).isEqualTo(92);
   }
 

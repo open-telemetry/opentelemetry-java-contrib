@@ -302,11 +302,9 @@ class ConsistentReservoirSamplingSpanProcessorTest {
 
   private static void awaitReservoirEmpty(SpanProcessor processor) {
     await()
-        .untilAsserted(
-            () ->
-                assertThat(
-                        ((ConsistentReservoirSamplingSpanProcessor) processor).isReservoirEmpty())
-                    .isTrue());
+        .untilAsserted(() ->
+            assertThat(((ConsistentReservoirSamplingSpanProcessor) processor).isReservoirEmpty())
+                .isTrue());
   }
 
   @Test

@@ -18,6 +18,12 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okio.BufferedSink;
 
+/**
+ * {@link HttpSender} implementation based on OkHttp.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public final class OkHttpSender implements HttpSender {
   private final OkHttpClient client;
   private final String url;
@@ -51,14 +57,13 @@ public final class OkHttpSender implements HttpSender {
     AtomicReference<IOException> errorRef = new AtomicReference<>();
     // By suppressing instrumentations, we prevent automatic instrumentations for the okhttp request
     // that polls the opamp server.
-    InstrumentationUtil.suppressInstrumentation(
-        () -> {
-          try {
-            responseRef.set(doSendRequest(builder.build()));
-          } catch (IOException e) {
-            errorRef.set(e);
-          }
-        });
+    InstrumentationUtil.suppressInstrumentation(() -> {
+      try {
+        responseRef.set(doSendRequest(builder.build()));
+      } catch (IOException e) {
+        errorRef.set(e);
+      }
+    });
     if (errorRef.get() != null) {
       throw errorRef.get();
     }

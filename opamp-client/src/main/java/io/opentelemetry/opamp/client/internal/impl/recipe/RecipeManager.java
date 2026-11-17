@@ -50,6 +50,7 @@ public final class RecipeManager {
     }
   }
 
+  /** Builder for {@link RequestRecipe}. */
   public final class RecipeBuilder {
     private final Set<Field> fields = new HashSet<>();
 

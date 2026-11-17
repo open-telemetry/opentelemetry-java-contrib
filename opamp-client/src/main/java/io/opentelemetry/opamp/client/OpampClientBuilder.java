@@ -39,7 +39,7 @@ public final class OpampClientBuilder {
   private final Map<String, AnyValue> identifyingAttributes = new HashMap<>();
   private final Map<String, AnyValue> nonIdentifyingAttributes = new HashMap<>();
   private final Set<String> customCapabilities = new HashSet<>();
-  private long capabilities = 0;
+  private long capabilities = AgentCapabilities.AgentCapabilities_ReportsStatus.getValue();
   private RequestService service =
       HttpRequestService.create(OkHttpSender.create("http://localhost:4320/v1/opamp"));
   @Nullable private byte[] instanceUid;

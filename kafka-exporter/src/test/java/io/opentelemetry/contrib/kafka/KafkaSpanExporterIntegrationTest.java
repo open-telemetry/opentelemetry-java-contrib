@@ -68,6 +68,8 @@ class KafkaSpanExporterIntegrationTest {
         ImmutableMap.of(
             ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
             kafka.getBootstrapServers(),
+            ProducerConfig.COMPRESSION_TYPE_CONFIG,
+            "snappy",
             ProducerConfig.CLIENT_ID_CONFIG,
             UUID.randomUUID().toString());
 
@@ -100,11 +102,10 @@ class KafkaSpanExporterIntegrationTest {
     CompletableResultCode actual = testSubject.export(spans);
 
     await()
-        .untilAsserted(
-            () -> {
-              assertThat(actual.isSuccess()).isTrue();
-              assertThat(actual.isDone()).isTrue();
-            });
+        .untilAsserted(() -> {
+          assertThat(actual.isSuccess()).isTrue();
+          assertThat(actual.isDone()).isTrue();
+        });
     Unreliables.retryUntilTrue(
         10,
         TimeUnit.SECONDS,
@@ -136,10 +137,9 @@ class KafkaSpanExporterIntegrationTest {
                 KafkaSpanExporterBuilder.ProducerBuilder.newInstance()
                     .setConfig(producerConfig)
                     .setKeySerializer(new StringSerializer())
-                    .setValueSerializer(
-                        (topic, data) -> {
-                          throw new ApiException("Producer error");
-                        })
+                    .setValueSerializer((topic, data) -> {
+                      throw new ApiException("Producer error");
+                    })
                     .build())
             .build();
 
@@ -149,11 +149,10 @@ class KafkaSpanExporterIntegrationTest {
     CompletableResultCode actual = testSubject.export(spans);
 
     await()
-        .untilAsserted(
-            () -> {
-              assertThat(actual.isSuccess()).isFalse();
-              assertThat(actual.isDone()).isTrue();
-            });
+        .untilAsserted(() -> {
+          assertThat(actual.isSuccess()).isFalse();
+          assertThat(actual.isDone()).isTrue();
+        });
 
     testSubject.shutdown();
   }
@@ -171,11 +170,10 @@ class KafkaSpanExporterIntegrationTest {
     CompletableResultCode actual = testSubjectWithMockProducer.export(spans);
 
     await()
-        .untilAsserted(
-            () -> {
-              assertThat(actual.isSuccess()).isFalse();
-              assertThat(actual.isDone()).isTrue();
-            });
+        .untilAsserted(() -> {
+          assertThat(actual.isSuccess()).isFalse();
+          assertThat(actual.isDone()).isTrue();
+        });
 
     testSubjectWithMockProducer.shutdown();
   }

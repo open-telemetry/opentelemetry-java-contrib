@@ -11,6 +11,12 @@ import io.opentelemetry.sdk.logs.data.LogRecordData;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Deserializes protobuf-encoded logs into {@link LogRecordData} items.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public final class LogRecordDataDeserializer implements SignalDeserializer<LogRecordData> {
   private static final LogRecordDataDeserializer INSTANCE = new LogRecordDataDeserializer();
 

@@ -294,11 +294,10 @@ class IntegrationTest {
    */
   private static List<MetricData> filterTestMetrics(List<MetricData> metrics) {
     return metrics.stream()
-        .filter(
-            m ->
-                m.getInstrumentationScopeInfo()
-                    .getName()
-                    .equals(TEST_METRIC_INSTRUMENTATION_SCOPE_NAME))
+        .filter(m ->
+            m.getInstrumentationScopeInfo()
+                .getName()
+                .equals(TEST_METRIC_INSTRUMENTATION_SCOPE_NAME))
         .collect(Collectors.toList());
   }
 

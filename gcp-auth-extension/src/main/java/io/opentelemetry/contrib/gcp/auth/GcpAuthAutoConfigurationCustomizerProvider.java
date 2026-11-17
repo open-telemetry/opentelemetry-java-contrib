@@ -118,18 +118,14 @@ public class GcpAuthAutoConfigurationCustomizerProvider
   public void customize(@Nonnull AutoConfigurationCustomizer autoConfiguration) {
     LazyOAuth2CredentialsHolder credentialsHolder = new LazyOAuth2CredentialsHolder();
     autoConfiguration
-        .addSpanExporterCustomizer(
-            (spanExporter, configProperties) ->
-                customizeSpanExporter(spanExporter, credentialsHolder, configProperties))
-        .addMetricExporterCustomizer(
-            (metricExporter, configProperties) ->
-                customizeMetricExporter(metricExporter, credentialsHolder, configProperties))
-        .addLogRecordExporterCustomizer(
-            (logRecordExporter, configProperties) ->
-                customizeLogRecordExporter(logRecordExporter, credentialsHolder, configProperties))
-        .addResourceCustomizer(
-            (resource, configProperties) ->
-                customizeResource(resource, credentialsHolder, configProperties));
+        .addSpanExporterCustomizer((spanExporter, configProperties) ->
+            customizeSpanExporter(spanExporter, credentialsHolder, configProperties))
+        .addMetricExporterCustomizer((metricExporter, configProperties) ->
+            customizeMetricExporter(metricExporter, credentialsHolder, configProperties))
+        .addLogRecordExporterCustomizer((logRecordExporter, configProperties) ->
+            customizeLogRecordExporter(logRecordExporter, credentialsHolder, configProperties))
+        .addResourceCustomizer((resource, configProperties) ->
+            customizeResource(resource, credentialsHolder, configProperties));
   }
 
   @Override
@@ -365,9 +361,8 @@ public class GcpAuthAutoConfigurationCustomizerProvider
       Optional<String> maybeConfiguredQuotaProjectId =
           ConfigurableOption.GOOGLE_CLOUD_QUOTA_PROJECT.getConfiguredValueAsOptional(
               configProperties);
-      maybeConfiguredQuotaProjectId.ifPresent(
-          configuredQuotaProjectId ->
-              flattenedHeaders.put(QUOTA_USER_PROJECT_HEADER, configuredQuotaProjectId));
+      maybeConfiguredQuotaProjectId.ifPresent(configuredQuotaProjectId ->
+          flattenedHeaders.put(QUOTA_USER_PROJECT_HEADER, configuredQuotaProjectId));
     }
     return flattenedHeaders;
   }

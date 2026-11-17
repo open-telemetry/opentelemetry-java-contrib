@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 
+/** Resource provider that detects the service name from the application server deployment. */
 @AutoService(ResourceProvider.class)
 public final class AppServerServiceNameProvider implements ConditionalResourceProvider {
 

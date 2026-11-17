@@ -11,7 +11,6 @@ import static java.util.Collections.singletonList;
 import io.opentelemetry.api.baggage.Baggage;
 import io.opentelemetry.api.baggage.BaggageBuilder;
 import io.opentelemetry.api.baggage.propagation.W3CBaggagePropagator;
-import io.opentelemetry.api.internal.StringUtils;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.SpanId;
@@ -265,7 +264,7 @@ public final class AwsXrayPropagator implements TextMapPropagator {
     SpanContext upstreamSpanContext = Span.fromContext(context).getSpanContext();
     SpanContext spanContext =
         SpanContext.createFromRemoteParent(
-            StringUtils.padLeft(traceId, TraceId.getLength()),
+            padLeft(traceId, TraceId.getLength()),
             spanId,
             isSampled ? TraceFlags.getSampled() : TraceFlags.getDefault(),
             upstreamSpanContext.isValid()
@@ -283,6 +282,17 @@ public final class AwsXrayPropagator implements TextMapPropagator {
     }
 
     return context;
+  }
+
+  private static String padLeft(String value, int length) {
+    if (value.length() >= length) {
+      return value;
+    }
+    StringBuilder padded = new StringBuilder(length);
+    for (int i = value.length(); i < length; i++) {
+      padded.append('0');
+    }
+    return padded.append(value).toString();
   }
 
   private static String parseTraceId(String xrayTraceId) {

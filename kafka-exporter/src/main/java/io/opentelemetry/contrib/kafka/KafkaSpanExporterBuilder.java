@@ -20,6 +20,7 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.common.serialization.Serializer;
 
+/** Builder for {@link KafkaSpanExporter}. */
 public final class KafkaSpanExporterBuilder {
   private static final long DEFAULT_TIMEOUT_IN_SECONDS = 5L;
   private String topicName;
@@ -67,6 +68,7 @@ public final class KafkaSpanExporterBuilder {
     return new KafkaSpanExporter(topicName, producer, executorService, timeoutInSeconds);
   }
 
+  /** Builder for the Kafka {@link Producer} used by {@link KafkaSpanExporter}. */
   public static class ProducerBuilder {
     private Map<String, Object> config;
     private Serializer<String> keySerializer;

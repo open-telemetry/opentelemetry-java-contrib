@@ -102,17 +102,16 @@ public final class OtelTransferListener extends AbstractTransferListener {
                 return Optional.empty();
               }
             })
-        .ifPresent(
-            uri -> {
-              spanBuilder.setAttribute(ServerAttributes.SERVER_ADDRESS, uri.getHost());
-              if (uri.getPort() != -1) {
-                spanBuilder.setAttribute(ServerAttributes.SERVER_PORT, uri.getPort());
-              }
-              // prevent ever increasing size
-              if (repositoryUriMapping.size() > 128) {
-                repositoryUriMapping.clear();
-              }
-            });
+        .ifPresent(uri -> {
+          spanBuilder.setAttribute(ServerAttributes.SERVER_ADDRESS, uri.getHost());
+          if (uri.getPort() != -1) {
+            spanBuilder.setAttribute(ServerAttributes.SERVER_PORT, uri.getPort());
+          }
+          // prevent ever increasing size
+          if (repositoryUriMapping.size() > 128) {
+            repositoryUriMapping.clear();
+          }
+        });
     spanRegistry.putSpan(spanBuilder.startSpan(), event);
   }
 
@@ -121,11 +120,10 @@ public final class OtelTransferListener extends AbstractTransferListener {
     logger.debug("OpenTelemetry: OtelTransferListener#transferSucceeded({})", event);
 
     Optional.ofNullable(spanRegistry.removeSpan(event))
-        .ifPresent(
-            span -> {
-              span.setStatus(StatusCode.OK);
-              finish(span, event);
-            });
+        .ifPresent(span -> {
+          span.setStatus(StatusCode.OK);
+          finish(span, event);
+        });
   }
 
   @Override

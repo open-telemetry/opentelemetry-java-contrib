@@ -129,11 +129,10 @@ class PrometheusIntegrationTest {
             .setDescription("LongCounter test")
             .setUnit("units")
             .buildWithCallback(
-                onlyOnce(
-                    measurement -> {
-                      measurement.record(1, FIRST_ATTRIBUTES);
-                      measurement.record(2, SECOND_ATTRIBUTES);
-                    }))) {
+                onlyOnce(measurement -> {
+                  measurement.record(1, FIRST_ATTRIBUTES);
+                  measurement.record(2, SECOND_ATTRIBUTES);
+                }))) {
 
       String output = scrapeFor("longCounter");
       assertThat(output)
@@ -155,11 +154,10 @@ class PrometheusIntegrationTest {
 
     try (ObservableLongCounter observableLongCounter =
         builder.buildWithCallback(
-            onlyOnce(
-                measurement -> {
-                  measurement.record(1, FIRST_ATTRIBUTES);
-                  measurement.record(2, SECOND_ATTRIBUTES);
-                }))) {
+            onlyOnce(measurement -> {
+              measurement.record(1, FIRST_ATTRIBUTES);
+              measurement.record(2, SECOND_ATTRIBUTES);
+            }))) {
 
       String output = scrapeFor("longCounter");
       assertThat(output)
@@ -233,11 +231,10 @@ class PrometheusIntegrationTest {
             .setDescription("DoubleCounter test")
             .setUnit("units")
             .buildWithCallback(
-                onlyOnce(
-                    measurement -> {
-                      measurement.record(1.5, FIRST_ATTRIBUTES);
-                      measurement.record(2.5, SECOND_ATTRIBUTES);
-                    }))) {
+                onlyOnce(measurement -> {
+                  measurement.record(1.5, FIRST_ATTRIBUTES);
+                  measurement.record(2.5, SECOND_ATTRIBUTES);
+                }))) {
 
       String output = scrapeFor("doubleCounter");
       assertThat(output)
@@ -263,11 +260,10 @@ class PrometheusIntegrationTest {
 
     try (ObservableDoubleCounter observableDoubleCounter =
         builder.buildWithCallback(
-            onlyOnce(
-                measurement -> {
-                  measurement.record(1.0, FIRST_ATTRIBUTES);
-                  measurement.record(2.0, SECOND_ATTRIBUTES);
-                }))) {
+            onlyOnce(measurement -> {
+              measurement.record(1.0, FIRST_ATTRIBUTES);
+              measurement.record(2.0, SECOND_ATTRIBUTES);
+            }))) {
 
       String output = scrapeFor("doubleCounter");
       assertThat(output)
@@ -360,11 +356,10 @@ class PrometheusIntegrationTest {
             .upDownCounterBuilder("longUpDownCounter")
             .setDescription("LongUpDownCounter test")
             .setUnit("units")
-            .buildWithCallback(
-                measurement -> {
-                  measurement.record(1, FIRST_ATTRIBUTES);
-                  measurement.record(-2, SECOND_ATTRIBUTES);
-                })) {
+            .buildWithCallback(measurement -> {
+              measurement.record(1, FIRST_ATTRIBUTES);
+              measurement.record(-2, SECOND_ATTRIBUTES);
+            })) {
 
       String output = scrapeFor("longUpDownCounter");
       assertThat(output)
@@ -389,11 +384,10 @@ class PrometheusIntegrationTest {
         .setAttributesAdvice(Collections.singletonList(KEY1));
 
     try (ObservableLongUpDownCounter observableLongUpDownCounter =
-        builder.buildWithCallback(
-            measurement -> {
-              measurement.record(1, FIRST_ATTRIBUTES);
-              measurement.record(-2, SECOND_ATTRIBUTES);
-            })) {
+        builder.buildWithCallback(measurement -> {
+          measurement.record(1, FIRST_ATTRIBUTES);
+          measurement.record(-2, SECOND_ATTRIBUTES);
+        })) {
 
       String output = scrapeFor("longUpDownCounter");
       assertThat(output)
@@ -478,11 +472,10 @@ class PrometheusIntegrationTest {
             .setDescription("DoubleUpDownCounter test")
             .setUnit("units")
             .buildWithCallback(
-                onlyOnce(
-                    measurement -> {
-                      measurement.record(1.5, FIRST_ATTRIBUTES);
-                      measurement.record(-2.5, SECOND_ATTRIBUTES);
-                    }))) {
+                onlyOnce(measurement -> {
+                  measurement.record(1.5, FIRST_ATTRIBUTES);
+                  measurement.record(-2.5, SECOND_ATTRIBUTES);
+                }))) {
 
       String output = scrapeFor("doubleUpDownCounter");
       assertThat(output)
@@ -509,11 +502,10 @@ class PrometheusIntegrationTest {
 
     try (ObservableDoubleUpDownCounter observableDoubleUpDownCounter =
         builder.buildWithCallback(
-            onlyOnce(
-                measurement -> {
-                  measurement.record(1.5, FIRST_ATTRIBUTES);
-                  measurement.record(-2.5, SECOND_ATTRIBUTES);
-                }))) {
+            onlyOnce(measurement -> {
+              measurement.record(1.5, FIRST_ATTRIBUTES);
+              measurement.record(-2.5, SECOND_ATTRIBUTES);
+            }))) {
 
       String output = scrapeFor("doubleUpDownCounter");
       assertThat(output)
@@ -821,11 +813,10 @@ class PrometheusIntegrationTest {
             .gaugeBuilder("doubleGauge")
             .setDescription("DoubleGauge test")
             .setUnit("units")
-            .buildWithCallback(
-                measurement -> {
-                  measurement.record(1.5, FIRST_ATTRIBUTES);
-                  measurement.record(2.5, SECOND_ATTRIBUTES);
-                })) {
+            .buildWithCallback(measurement -> {
+              measurement.record(1.5, FIRST_ATTRIBUTES);
+              measurement.record(2.5, SECOND_ATTRIBUTES);
+            })) {
 
       String output = scrapeFor("doubleGauge");
       assertThat(output)
@@ -846,11 +837,10 @@ class PrometheusIntegrationTest {
     ((ExtendedDoubleGaugeBuilder) builder).setAttributesAdvice(Collections.singletonList(KEY1));
 
     try (ObservableDoubleGauge observableDoubleGauge =
-        builder.buildWithCallback(
-            measurement -> {
-              measurement.record(1.5, FIRST_ATTRIBUTES);
-              measurement.record(2.5, SECOND_ATTRIBUTES);
-            })) {
+        builder.buildWithCallback(measurement -> {
+          measurement.record(1.5, FIRST_ATTRIBUTES);
+          measurement.record(2.5, SECOND_ATTRIBUTES);
+        })) {
 
       String output = scrapeFor("doubleGauge");
       assertThat(output)
@@ -871,11 +861,10 @@ class PrometheusIntegrationTest {
             .ofLongs()
             .setDescription("LongGauge test")
             .setUnit("units")
-            .buildWithCallback(
-                measurement -> {
-                  measurement.record(1, FIRST_ATTRIBUTES);
-                  measurement.record(2, SECOND_ATTRIBUTES);
-                })) {
+            .buildWithCallback(measurement -> {
+              measurement.record(1, FIRST_ATTRIBUTES);
+              measurement.record(2, SECOND_ATTRIBUTES);
+            })) {
 
       String output = scrapeFor("longGauge");
       assertThat(output)
@@ -896,11 +885,10 @@ class PrometheusIntegrationTest {
     ((ExtendedLongGaugeBuilder) builder).setAttributesAdvice(Collections.singletonList(KEY1));
 
     try (ObservableLongGauge observableLongGauge =
-        builder.buildWithCallback(
-            measurement -> {
-              measurement.record(1, FIRST_ATTRIBUTES);
-              measurement.record(2, SECOND_ATTRIBUTES);
-            })) {
+        builder.buildWithCallback(measurement -> {
+          measurement.record(1, FIRST_ATTRIBUTES);
+          measurement.record(2, SECOND_ATTRIBUTES);
+        })) {
 
       String output = scrapeFor("longGauge");
       assertThat(output)

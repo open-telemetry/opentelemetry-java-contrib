@@ -8,6 +8,12 @@ package io.opentelemetry.contrib.inferredspans.internal;
 import java.util.Objects;
 import javax.annotation.Nullable;
 
+/**
+ * A stack frame identified by class name and method name.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public final class StackFrame {
   @Nullable private final String className;
   private final String methodName;

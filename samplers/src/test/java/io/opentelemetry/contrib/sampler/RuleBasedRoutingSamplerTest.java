@@ -92,10 +92,8 @@ class RuleBasedRoutingSamplerTest {
             () -> RuleBasedRoutingSampler.builder(SPAN_KIND, delegate).recordAndSample(null, ""));
 
     assertThatExceptionOfType(NullPointerException.class)
-        .isThrownBy(
-            () ->
-                RuleBasedRoutingSampler.builder(SPAN_KIND, delegate)
-                    .recordAndSample(URL_FULL, null));
+        .isThrownBy(() ->
+            RuleBasedRoutingSampler.builder(SPAN_KIND, delegate).recordAndSample(URL_FULL, null));
   }
 
   @Test

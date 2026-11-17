@@ -25,11 +25,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.annotation.concurrent.GuardedBy;
 import opamp.proto.ServerErrorResponse;
 import opamp.proto.ServerErrorResponseType;
 import opamp.proto.ServerToAgent;
 
+/**
+ * {@link RequestService} that sends requests to the server over a WebSocket.
+ *
+ * <p>This class is internal and is hence not for public use. Its APIs are unstable and can change
+ * at any time.
+ */
 public final class WebSocketRequestService implements RequestService, WebSocket.Listener {
   private static final PeriodicDelay DEFAULT_DELAY_BETWEEN_RETRIES =
       RetryPeriodicDelay.create(Duration.ofSeconds(30));
@@ -37,16 +42,14 @@ public final class WebSocketRequestService implements RequestService, WebSocket.
   private final WebSocket webSocket;
   private final AtomicBoolean isRunning = new AtomicBoolean(false);
   private final AtomicBoolean hasStopped = new AtomicBoolean(false);
+  private final AtomicBoolean isConnected = new AtomicBoolean(false);
   private final ConnectionStatus connectionStatus;
   private final ScheduledExecutorService executorService;
 
   /** Defined <a href="https://datatracker.ietf.org/doc/html/rfc6455#section-7.4.1">here</a>. */
   private static final int WEBSOCKET_NORMAL_CLOSURE_CODE = 1000;
 
-  @GuardedBy("hasPendingRequestLock")
-  private boolean hasPendingRequest = false;
-
-  private final Object hasPendingRequestLock = new Object();
+  private final Object sendLock = new Object();
   @Nullable private Callback callback;
   @Nullable private Supplier<Request> requestSupplier;
 
@@ -114,9 +117,10 @@ public final class WebSocketRequestService implements RequestService, WebSocket.
 
   private void doSendRequest() {
     try {
-      synchronized (hasPendingRequestLock) {
-        if (!trySendRequest()) {
-          hasPendingRequest = true;
+      synchronized (sendLock) {
+        // Building a request consumes the pending fields and a sequence number, so wait for onOpen.
+        if (isConnected.get()) {
+          trySendRequest();
         }
       }
     } catch (IOException e) {
@@ -124,12 +128,15 @@ public final class WebSocketRequestService implements RequestService, WebSocket.
     }
   }
 
-  private boolean trySendRequest() throws IOException {
+  private void trySendRequest() throws IOException {
     try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
       ProtoAdapter.UINT64.encode(outputStream, 0L);
       byte[] payload = getRequest().getAgentToServer().encode();
       outputStream.write(payload);
-      return webSocket.send(outputStream.toByteArray());
+      if (!webSocket.send(outputStream.toByteArray())) {
+        // Reported under sendLock so the client restores the fields of this request.
+        getCallback().onRequestFailed(new IOException("The WebSocket did not accept the request"));
+      }
     }
   }
 
@@ -155,13 +162,20 @@ public final class WebSocketRequestService implements RequestService, WebSocket.
 
   @Override
   public void onOpen() {
+    if (hasStopped.get()) {
+      webSocket.close(WEBSOCKET_NORMAL_CLOSURE_CODE, null);
+      return;
+    }
     connectionStatus.success();
-    getCallback().onConnectionSuccess();
-    synchronized (hasPendingRequestLock) {
-      if (hasPendingRequest) {
-        hasPendingRequest = false;
-        sendRequest();
+    synchronized (sendLock) {
+      if (!hasStopped.get()) {
+        isConnected.set(true);
+        // Every new connection needs a status report, even without pending state changes.
+        doSendRequest();
       }
+    }
+    if (!hasStopped.get()) {
+      getCallback().onConnectionSuccess();
     }
   }
 
@@ -201,6 +215,7 @@ public final class WebSocketRequestService implements RequestService, WebSocket.
         retryAfter = Duration.ofNanos(errorResponse.retry_info.retry_after_nanoseconds);
       }
 
+      isConnected.set(false);
       webSocket.close(WEBSOCKET_NORMAL_CLOSURE_CODE, null);
       connectionStatus.retryAfter(retryAfter);
     }
@@ -212,17 +227,19 @@ public final class WebSocketRequestService implements RequestService, WebSocket.
 
   @Override
   public void onClosing() {
-    // Noop
+    isConnected.set(false);
   }
 
   @Override
   public void onClosed() {
+    isConnected.set(false);
     // If this service isn't stopped, we should retry connecting.
     connectionStatus.retryAfter(null);
   }
 
   @Override
   public void onFailure(Throwable t) {
+    isConnected.set(false);
     getCallback().onConnectionFailed(t);
     connectionStatus.retryAfter(null);
   }
