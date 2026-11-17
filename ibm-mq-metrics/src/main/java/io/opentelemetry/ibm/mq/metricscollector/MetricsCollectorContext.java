@@ -15,6 +15,7 @@ import io.opentelemetry.ibm.mq.config.ExcludeFilters;
 import io.opentelemetry.ibm.mq.config.QueueManager;
 import io.opentelemetry.ibm.mq.metrics.MetricsConfig;
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -79,6 +80,9 @@ public final class MetricsCollectorContext {
 
   @NotNull
   List<PCFMessage> send(PCFMessage request) throws IOException, MQDataException {
+    if (Thread.currentThread().isInterrupted()) {
+      throw new InterruptedIOException("Collection cancelled");
+    }
     PCFMessage[] result = agent.send(request);
     return result == null ? emptyList() : Arrays.asList(result);
   }
