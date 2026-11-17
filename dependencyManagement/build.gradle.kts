@@ -47,7 +47,7 @@ dependencies {
 
     api("com.google.code.findbugs:annotations:3.0.1u2")
     api("com.google.code.findbugs:jsr305:3.0.2")
-    api("com.uber.nullaway:nullaway:0.14.3")
+    api("com.uber.nullaway:nullaway:0.14.4")
     api("org.assertj:assertj-core:3.27.7")
     api("org.awaitility:awaitility:4.3.0")
     api("org.bouncycastle:bcpkix-jdk15on:1.70")
@@ -58,8 +58,8 @@ dependencies {
     api("org.apache.kafka:kafka-clients:4.4.0")
     // transitive deps of kafka-clients, pinned for CVE fixes (see kafka-exporter/build.gradle.kts)
     // remove once kafka-clients depends on fixed versions
-    api("at.yawk.lz4:lz4-java:1.14.0")
-    api("com.github.luben:zstd-jni:1.5.7-26")
+    api("at.yawk.lz4:lz4-java:1.14.1")
+    api("com.github.luben:zstd-jni:1.5.7-28")
     api("org.xerial.snappy:snappy-java:1.1.10.12")
     api("org.testcontainers:testcontainers-kafka:2.0.5")
     api("org.jctools:jctools-core:4.0.7")
