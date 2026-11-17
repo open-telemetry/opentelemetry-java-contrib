@@ -32,17 +32,14 @@ public final class ChannelMetricsCollector implements Consumer<MetricsCollectorC
 
   private static final Logger logger = LoggerFactory.getLogger(ChannelMetricsCollector.class);
 
-  private final MetricProducer producer;
-
   /*
    * The Channel Status values are mentioned here http://www.ibm.com/support/knowledgecenter/SSFKSJ_7.5.0/com.ibm.mq.ref.dev.doc/q090880_.htm
    */
-  public ChannelMetricsCollector(MetricProducer producer) {
-    this.producer = producer;
-  }
+  public ChannelMetricsCollector() {}
 
   @Override
   public void accept(MetricsCollectorContext context) {
+    MetricProducer producer = context.getMetricProducer();
     logger.info("Collecting metrics for command MQCMD_INQUIRE_CHANNEL_STATUS");
     long entryTime = System.currentTimeMillis();
 
@@ -143,14 +140,14 @@ public final class ChannelMetricsCollector implements Consumer<MetricsCollectorC
 
     logger.info(
         "Active Channels in queueManager {} are {}", context.getQueueManagerName(), activeChannels);
-    this.producer.recordIbmMqManagerActiveChannels(
+    producer.recordIbmMqManagerActiveChannels(
         activeChannels.size(), Attributes.of(IBM_MQ_QUEUE_MANAGER, context.getQueueManagerName()));
 
     long exitTime = System.currentTimeMillis() - entryTime;
     logger.debug("Time taken to publish metrics for all channels is {} milliseconds", exitTime);
   }
 
-  private void updateMetrics(
+  private static void updateMetrics(
       MetricsCollectorContext context,
       PCFMessage message,
       String channelName,
@@ -159,6 +156,7 @@ public final class ChannelMetricsCollector implements Consumer<MetricsCollectorC
       String jobName,
       List<String> activeChannels)
       throws PCFException {
+    MetricProducer producer = context.getMetricProducer();
     Attributes attributes =
         Attributes.builder()
             .put(IBM_MQ_CHANNEL_NAME, channelName)
@@ -169,11 +167,11 @@ public final class ChannelMetricsCollector implements Consumer<MetricsCollectorC
             .build();
     if (context.getMetricsConfig().isIbmMqMessageCountEnabled()) {
       int received = message.getIntParameterValue(CMQCFC.MQIACH_MSGS);
-      this.producer.recordIbmMqMessageCount(received, attributes);
+      producer.recordIbmMqMessageCount(received, attributes);
     }
     int status = message.getIntParameterValue(CMQCFC.MQIACH_CHANNEL_STATUS);
     if (context.getMetricsConfig().isIbmMqStatusEnabled()) {
-      this.producer.recordIbmMqStatus(status, attributes);
+      producer.recordIbmMqStatus(status, attributes);
     }
     // We follow the definition of active channel as documented in
     // https://www.ibm.com/docs/en/ibm-mq/9.2.x?topic=states-current-active
@@ -183,19 +181,19 @@ public final class ChannelMetricsCollector implements Consumer<MetricsCollectorC
       activeChannels.add(channelName);
     }
     if (context.getMetricsConfig().isIbmMqByteSentEnabled()) {
-      this.producer.recordIbmMqByteSent(
+      producer.recordIbmMqByteSent(
           message.getIntParameterValue(CMQCFC.MQIACH_BYTES_SENT), attributes);
     }
     if (context.getMetricsConfig().isIbmMqByteReceivedEnabled()) {
-      this.producer.recordIbmMqByteReceived(
+      producer.recordIbmMqByteReceived(
           message.getIntParameterValue(CMQCFC.MQIACH_BYTES_RECEIVED), attributes);
     }
     if (context.getMetricsConfig().isIbmMqBuffersSentEnabled()) {
-      this.producer.recordIbmMqBuffersSent(
+      producer.recordIbmMqBuffersSent(
           message.getIntParameterValue(CMQCFC.MQIACH_BUFFERS_SENT), attributes);
     }
     if (context.getMetricsConfig().isIbmMqBuffersReceivedEnabled()) {
-      this.producer.recordIbmMqBuffersReceived(
+      producer.recordIbmMqBuffersReceived(
           message.getIntParameterValue(CMQCFC.MQIACH_BUFFERS_RECEIVED), attributes);
     }
     if (context.getMetricsConfig().isIbmMqCurrentSharingConversationsEnabled()) {
@@ -203,14 +201,14 @@ public final class ChannelMetricsCollector implements Consumer<MetricsCollectorC
       if (message.getParameter(CMQCFC.MQIACH_CURRENT_SHARING_CONVS) != null) {
         currentSharingConvs = message.getIntParameterValue(CMQCFC.MQIACH_CURRENT_SHARING_CONVS);
       }
-      this.producer.recordIbmMqCurrentSharingConversations(currentSharingConvs, attributes);
+      producer.recordIbmMqCurrentSharingConversations(currentSharingConvs, attributes);
     }
     if (context.getMetricsConfig().isIbmMqMaxSharingConversationsEnabled()) {
       int maxSharingConvs = 0;
       if (message.getParameter(CMQCFC.MQIACH_MAX_SHARING_CONVS) != null) {
         maxSharingConvs = message.getIntParameterValue(CMQCFC.MQIACH_MAX_SHARING_CONVS);
       }
-      this.producer.recordIbmMqMaxSharingConversations(maxSharingConvs, attributes);
+      producer.recordIbmMqMaxSharingConversations(maxSharingConvs, attributes);
     }
   }
 }

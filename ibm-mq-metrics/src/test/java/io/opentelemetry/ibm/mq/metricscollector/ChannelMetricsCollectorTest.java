@@ -52,16 +52,19 @@ class ChannelMetricsCollectorTest {
     ObjectMapper mapper = new ObjectMapper();
     queueManager = mapper.convertValue(config.getQueueManagers().get(0), QueueManager.class);
     context =
-        new MetricsCollectorContext(queueManager, pcfMessageAgent, null, new MetricsConfig(config));
+        new MetricsCollectorContext(
+            queueManager,
+            pcfMessageAgent,
+            null,
+            new MetricsConfig(config),
+            new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty()));
   }
 
   @Test
   void testPublishMetrics() throws Exception {
     when(pcfMessageAgent.send(any(PCFMessage.class)))
         .thenReturn(createPCFResponseForInquireChannelStatusCmd());
-    MetricProducer producer =
-        new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
-    classUnderTest = new ChannelMetricsCollector(producer);
+    classUnderTest = new ChannelMetricsCollector();
 
     classUnderTest.accept(context);
 
@@ -74,6 +77,8 @@ class ChannelMetricsCollectorTest {
                 "ibm.mq.byte.received",
                 "ibm.mq.buffers.sent",
                 "ibm.mq.buffers.received"));
+
+    MetricProducer producer = context.getMetricProducer();
 
     for (MetricData metric : producer.produce(Resource.empty())) {
       if (metricsList.remove(metric.getName())) {
@@ -185,37 +190,31 @@ class ChannelMetricsCollectorTest {
 
   @Test
   void testPublishMetrics_nullResponse() throws Exception {
-    MetricProducer producer =
-        new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
     when(pcfMessageAgent.send(any(PCFMessage.class))).thenReturn(null);
-    classUnderTest = new ChannelMetricsCollector(producer);
+    classUnderTest = new ChannelMetricsCollector();
 
     classUnderTest.accept(context);
-    assertThat(producer.produce(Resource.empty())).isEmpty();
+    assertThat(context.getMetricProducer().produce(Resource.empty())).isEmpty();
   }
 
   @Test
   void testPublishMetrics_emptyResponse() throws Exception {
-    MetricProducer producer =
-        new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
     when(pcfMessageAgent.send(any(PCFMessage.class))).thenReturn(new PCFMessage[] {});
-    classUnderTest = new ChannelMetricsCollector(producer);
+    classUnderTest = new ChannelMetricsCollector();
 
     classUnderTest.accept(context);
-    assertThat(producer.produce(Resource.empty())).isEmpty();
+    assertThat(context.getMetricProducer().produce(Resource.empty())).isEmpty();
   }
 
   @ParameterizedTest
   @MethodSource("exceptionsToThrow")
   void testPublishMetrics_pfException(Exception exceptionToThrow) throws Exception {
-    MetricProducer producer =
-        new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
     when(pcfMessageAgent.send(any(PCFMessage.class))).thenThrow(exceptionToThrow);
-    classUnderTest = new ChannelMetricsCollector(producer);
+    classUnderTest = new ChannelMetricsCollector();
 
     classUnderTest.accept(context);
 
-    List<MetricData> exported = producer.produce(Resource.empty());
+    List<MetricData> exported = context.getMetricProducer().produce(Resource.empty());
     assertThat(exported.get(0).getLongGaugeData().getPoints()).hasSize(1);
     assertThatMetric(exported.get(0), 0).hasName("ibm.mq.manager.active.channels").hasValue(0);
   }

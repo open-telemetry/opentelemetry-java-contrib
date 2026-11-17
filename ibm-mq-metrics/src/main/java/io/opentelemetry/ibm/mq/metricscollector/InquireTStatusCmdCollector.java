@@ -25,11 +25,8 @@ import org.slf4j.LoggerFactory;
 final class InquireTStatusCmdCollector implements Consumer<MetricsCollectorContext> {
 
   private static final Logger logger = LoggerFactory.getLogger(InquireTStatusCmdCollector.class);
-  private final MetricProducer producer;
 
-  public InquireTStatusCmdCollector(MetricProducer producer) {
-    this.producer = producer;
-  }
+  public InquireTStatusCmdCollector() {}
 
   @Override
   public void accept(MetricsCollectorContext context) {
@@ -70,7 +67,7 @@ final class InquireTStatusCmdCollector implements Consumer<MetricsCollectorConte
         exitTime);
   }
 
-  private void processPcfRequestAndPublishQMetrics(
+  private static void processPcfRequestAndPublishQMetrics(
       MetricsCollectorContext context, String topicGenericName, PCFMessage request)
       throws IOException, MQDataException {
     logger.debug(
@@ -104,9 +101,10 @@ final class InquireTStatusCmdCollector implements Consumer<MetricsCollectorConte
     }
   }
 
-  private void extractMetrics(
+  private static void extractMetrics(
       MetricsCollectorContext context, PCFMessage pcfMessage, String topicString)
       throws PCFException {
+    MetricProducer producer = context.getMetricProducer();
     Attributes attributes =
         Attributes.of(
             MESSAGING_DESTINATION_NAME,
@@ -118,14 +116,14 @@ final class InquireTStatusCmdCollector implements Consumer<MetricsCollectorConte
       if (pcfMessage.getParameter(CMQC.MQIA_PUB_COUNT) != null) {
         publisherCount = pcfMessage.getIntParameterValue(CMQC.MQIA_PUB_COUNT);
       }
-      this.producer.recordIbmMqPublishCount(publisherCount, attributes);
+      producer.recordIbmMqPublishCount(publisherCount, attributes);
     }
     if (context.getMetricsConfig().isIbmMqSubscriptionCountEnabled()) {
       int subscriberCount = 0;
       if (pcfMessage.getParameter(CMQC.MQIA_SUB_COUNT) != null) {
         subscriberCount = pcfMessage.getIntParameterValue(CMQC.MQIA_SUB_COUNT);
       }
-      this.producer.recordIbmMqSubscriptionCount(subscriberCount, attributes);
+      producer.recordIbmMqSubscriptionCount(subscriberCount, attributes);
     }
   }
 }

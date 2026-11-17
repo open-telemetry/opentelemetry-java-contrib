@@ -28,22 +28,19 @@ import org.slf4j.LoggerFactory;
 public final class QueueManagerEventCollector implements Consumer<MetricsCollectorContext> {
 
   private static final Logger logger = LoggerFactory.getLogger(QueueManagerEventCollector.class);
-  private final MetricProducer producer;
 
-  public QueueManagerEventCollector(MetricProducer producer) {
-    this.producer = producer;
-  }
+  public QueueManagerEventCollector() {}
 
-  private void readEvents(MetricsCollectorContext context, String queueManagerEventsQueueName)
-      throws Exception {
-
+  private static void readEvents(
+      MetricsCollectorContext context, String queueManagerEventsQueueName) throws Exception {
+    MetricProducer producer = context.getMetricProducer();
     MQQueue queue = null;
     try {
       int queueAccessOptions = MQConstants.MQOO_FAIL_IF_QUIESCING | MQConstants.MQOO_INPUT_SHARED;
       queue =
           context.getMqQueueManager().accessQueue(queueManagerEventsQueueName, queueAccessOptions);
       // keep going until receiving the exception MQConstants.MQRC_NO_MSG_AVAILABLE
-      while (true) {
+      while (!Thread.currentThread().isInterrupted()) {
         try {
           MQGetMessageOptions getOptions = new MQGetMessageOptions();
           getOptions.options = MQConstants.MQGMO_NO_WAIT | MQConstants.MQGMO_FAIL_IF_QUIESCING;
@@ -56,7 +53,7 @@ public final class QueueManagerEventCollector implements Consumer<MetricsCollect
             if (context.getMetricsConfig().isIbmMqUnauthorizedEventEnabled()) {
               String username = received.getStringParameterValue(CMQCFC.MQCACF_USER_IDENTIFIER);
               String applicationName = received.getStringParameterValue(CMQCFC.MQCACF_APPL_NAME);
-              this.producer.addIbmMqUnauthorizedEvent(
+              producer.addIbmMqUnauthorizedEvent(
                   1,
                   Attributes.of(
                       IBM_MQ_QUEUE_MANAGER,

@@ -48,11 +48,15 @@ class ListenerMetricsCollectorTest {
         .thenReturn(createPCFResponseForInquireListenerStatusCmd());
 
     MetricsCollectorContext context =
-        new MetricsCollectorContext(queueManager, pcfMessageAgent, null, new MetricsConfig(config));
-    MetricProducer producer =
-        new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
-    classUnderTest = new ListenerMetricsCollector(producer);
+        new MetricsCollectorContext(
+            queueManager,
+            pcfMessageAgent,
+            null,
+            new MetricsConfig(config),
+            new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty()));
+    classUnderTest = new ListenerMetricsCollector();
     classUnderTest.accept(context);
+    MetricProducer producer = context.getMetricProducer();
 
     List<MetricData> result = producer.produce(Resource.empty());
     assertThat(result.size()).isEqualTo(2);

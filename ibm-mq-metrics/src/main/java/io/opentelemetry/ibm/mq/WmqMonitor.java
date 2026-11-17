@@ -29,11 +29,15 @@ import io.opentelemetry.ibm.mq.metricscollector.ReadConfigurationEventQueueColle
 import io.opentelemetry.ibm.mq.metricscollector.TopicMetricsCollector;
 import io.opentelemetry.ibm.mq.opentelemetry.ConfigWrapper;
 import io.opentelemetry.ibm.mq.util.WmqUtil;
+import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
+import io.opentelemetry.sdk.resources.Resource;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import org.jetbrains.annotations.NotNull;
@@ -45,50 +49,48 @@ public final class WmqMonitor {
 
   private static final Logger logger = LoggerFactory.getLogger(WmqMonitor.class);
 
-  private final List<QueueManager> queueManagers;
-  private final List<Consumer<MetricsCollectorContext>> jobs = new ArrayList<>();
-  private final ExecutorService threadPool;
-  private final MetricsConfig metricsConfig;
-  private final MetricProducer producer;
+  private static final long CANCELLATION_GRACE_SECONDS = 30;
 
-  public WmqMonitor(ConfigWrapper config, ExecutorService threadPool, MetricProducer producer) {
-    List<Map<String, ?>> queueManagers = getQueueManagers(config);
+  private final Map<QueueManager, MetricProducer> queueManagers;
+  private final List<Consumer<MetricsCollectorContext>> jobs = new ArrayList<>();
+  private final MetricsConfig metricsConfig;
+
+  public WmqMonitor(ConfigWrapper config) {
+    List<Map<String, ?>> queueManagers = getMetricProducersByQueueManagers(config);
     ObjectMapper mapper = new ObjectMapper();
 
-    this.producer = producer;
-    this.queueManagers = new ArrayList<>();
+    this.queueManagers = new HashMap<>();
 
     for (Map<String, ?> queueManager : queueManagers) {
       try {
         QueueManager qManager = mapper.convertValue(queueManager, QueueManager.class);
-        this.queueManagers.add(qManager);
+        this.queueManagers.put(
+            qManager,
+            new MetricProducer(Resource.empty(), InstrumentationScopeInfo.create("websphere/mq")));
       } catch (Throwable t) {
         logger.error("Error preparing queue manager {}", queueManager, t);
       }
     }
 
     this.metricsConfig = new MetricsConfig(config);
-    this.threadPool = threadPool;
 
-    jobs.add(new QueueManagerMetricsCollector(producer));
-    jobs.add(new InquireQueueManagerCmdCollector(producer));
-    jobs.add(new ChannelMetricsCollector(producer));
-    jobs.add(new InquireChannelCmdCollector(producer));
-    jobs.add(new QueueMetricsCollector(producer, threadPool, config));
-    jobs.add(new ListenerMetricsCollector(producer));
-    jobs.add(new TopicMetricsCollector(producer));
-    jobs.add(new ReadConfigurationEventQueueCollector(producer));
-    jobs.add(new PerformanceEventQueueCollector(producer));
-    jobs.add(new QueueManagerEventCollector(producer));
+    jobs.add(new QueueManagerMetricsCollector());
+    jobs.add(new InquireQueueManagerCmdCollector());
+    jobs.add(new ChannelMetricsCollector());
+    jobs.add(new InquireChannelCmdCollector());
+    jobs.add(new QueueMetricsCollector());
+    jobs.add(new ListenerMetricsCollector());
+    jobs.add(new TopicMetricsCollector());
+    jobs.add(new ReadConfigurationEventQueueCollector());
+    jobs.add(new PerformanceEventQueueCollector());
+    jobs.add(new QueueManagerEventCollector());
   }
 
-  public void run() {
-    for (QueueManager qm : this.queueManagers) {
-      run(qm);
-    }
-  }
-
-  public void run(QueueManager queueManager) {
+  public void run(
+      QueueManager queueManager,
+      MetricProducer producer,
+      ExecutorService threadPool,
+      @Nullable Integer timeoutSeconds) {
     String queueManagerName = queueManager.getName();
     logger.debug("WMQMonitor thread for queueManager {} started.", queueManagerName);
     long startTime = System.currentTimeMillis();
@@ -99,7 +101,8 @@ public final class WmqMonitor {
       ibmQueueManager = WmqUtil.connectToQueueManager(queueManager);
       heartBeatMetricValue = 1;
       agent = WmqUtil.initPcfMessageAgent(queueManager, ibmQueueManager);
-      extractAndReportMetrics(ibmQueueManager, queueManager, agent);
+      extractAndReportMetrics(
+          ibmQueueManager, queueManager, agent, producer, threadPool, timeoutSeconds);
     } catch (RuntimeException e) {
       logger.error(
           "Error connecting to QueueManager {} by thread {}: {}",
@@ -127,8 +130,12 @@ public final class WmqMonitor {
     }
   }
 
+  public Map<QueueManager, MetricProducer> getMetricProducersByQueueManagers() {
+    return this.queueManagers;
+  }
+
   @NotNull
-  private static List<Map<String, ?>> getQueueManagers(ConfigWrapper config) {
+  private static List<Map<String, ?>> getMetricProducersByQueueManagers(ConfigWrapper config) {
     List<Map<String, ?>> queueManagers = config.getQueueManagers();
     if (queueManagers.isEmpty()) {
       throw new IllegalStateException(
@@ -138,36 +145,82 @@ public final class WmqMonitor {
   }
 
   private void extractAndReportMetrics(
-      MQQueueManager mqQueueManager, QueueManager queueManager, PCFMessageAgent agent) {
+      MQQueueManager mqQueueManager,
+      QueueManager queueManager,
+      PCFMessageAgent agent,
+      MetricProducer producer,
+      ExecutorService threadPool,
+      @Nullable Integer timeoutSeconds) {
     logger.debug("Queueing {} jobs", jobs.size());
     MetricsCollectorContext context =
-        new MetricsCollectorContext(queueManager, agent, mqQueueManager, this.metricsConfig);
-    List<Callable<Void>> tasks = new ArrayList<>();
+        new MetricsCollectorContext(
+            queueManager, agent, mqQueueManager, this.metricsConfig, producer);
+    CountDownLatch finished = new CountDownLatch(jobs.size());
+    List<CollectorTask> tasks = new ArrayList<>();
     for (Consumer<MetricsCollectorContext> collector : jobs) {
-      tasks.add(() -> {
-        try {
-          long startTime = System.currentTimeMillis();
-          collector.accept(context);
-          long diffTime = System.currentTimeMillis() - startTime;
-          if (diffTime > 60000L) {
-            logger.warn(
-                "{} Task took {} ms to complete", collector.getClass().getSimpleName(), diffTime);
-          } else {
-            logger.debug(
-                "{} Task took {} ms to complete", collector.getClass().getSimpleName(), diffTime);
-          }
-        } catch (RuntimeException e) {
-          logger.error(
-              "Error while running task name = {}", collector.getClass().getSimpleName(), e);
-        }
-        return null;
-      });
+      tasks.add(
+          new CollectorTask(
+              () -> {
+                try {
+                  long startTime = System.currentTimeMillis();
+                  collector.accept(context);
+                  long diffTime = System.currentTimeMillis() - startTime;
+                  if (diffTime > 60000L) {
+                    logger.warn(
+                        "{} Task took {} ms to complete",
+                        collector.getClass().getSimpleName(),
+                        diffTime);
+                  } else {
+                    logger.debug(
+                        "{} Task took {} ms to complete",
+                        collector.getClass().getSimpleName(),
+                        diffTime);
+                  }
+                } catch (RuntimeException e) {
+                  logger.error(
+                      "Error while running task name = {}",
+                      collector.getClass().getSimpleName(),
+                      e);
+                }
+              },
+              finished));
     }
-
     try {
-      this.threadPool.invokeAll(tasks);
+      if (timeoutSeconds != null) {
+        threadPool.invokeAll(tasks, timeoutSeconds, TimeUnit.SECONDS);
+      } else {
+        threadPool.invokeAll(tasks);
+      }
     } catch (InterruptedException e) {
-      logger.error("Error while the thread {} is waiting ", Thread.currentThread().getName(), e);
+      Thread.currentThread().interrupt();
+      logger.error("Interrupted while collecting metrics for {}", queueManager.getName(), e);
+    }
+    awaitRunningCollectors(queueManager, tasks, finished);
+  }
+
+  // invokeAll only cancels (interrupts) unfinished futures; it does not wait for the collectors to
+  // react. Wait for the ones that actually started before the caller closes the connections.
+  private static void awaitRunningCollectors(
+      QueueManager queueManager, List<CollectorTask> tasks, CountDownLatch finished) {
+    for (CollectorTask task : tasks) {
+      task.cancelIfNotStarted();
+    }
+    boolean interrupted = Thread.interrupted();
+    try {
+      if (!finished.await(CANCELLATION_GRACE_SECONDS, TimeUnit.SECONDS)) {
+        logger.warn(
+            "{} of {} collectors for queue manager {} did not stop within {}s of cancellation",
+            finished.getCount(),
+            tasks.size(),
+            queueManager.getName(),
+            CANCELLATION_GRACE_SECONDS);
+      }
+    } catch (InterruptedException e) {
+      interrupted = true;
+    } finally {
+      if (interrupted) {
+        Thread.currentThread().interrupt();
+      }
     }
   }
 
