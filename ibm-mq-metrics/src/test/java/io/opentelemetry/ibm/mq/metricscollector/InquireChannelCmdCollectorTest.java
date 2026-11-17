@@ -37,6 +37,7 @@ class InquireChannelCmdCollectorTest {
 
   MetricsCollectorContext context;
   @Mock PCFMessageAgent pcfMessageAgent;
+  MetricProducer producer;
 
   @BeforeEach
   public void setup() throws Exception {
@@ -44,17 +45,18 @@ class InquireChannelCmdCollectorTest {
     ObjectMapper mapper = new ObjectMapper();
     QueueManager queueManager =
         mapper.convertValue(config.getQueueManagers().get(0), QueueManager.class);
+
+    producer = new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
     context =
-        new MetricsCollectorContext(queueManager, pcfMessageAgent, null, new MetricsConfig(config));
+        new MetricsCollectorContext(
+            queueManager, pcfMessageAgent, null, new MetricsConfig(config), producer);
   }
 
   @Test
   void testProcessPCFRequestAndPublishQMetricsForInquireQStatusCmd() throws Exception {
     when(pcfMessageAgent.send(any(PCFMessage.class)))
         .thenReturn(createPCFResponseForInquireChannelCmd());
-    MetricProducer producer =
-        new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
-    classUnderTest = new InquireChannelCmdCollector(producer);
+    classUnderTest = new InquireChannelCmdCollector();
     classUnderTest.accept(context);
     List<String> metricsList =
         new ArrayList<>(

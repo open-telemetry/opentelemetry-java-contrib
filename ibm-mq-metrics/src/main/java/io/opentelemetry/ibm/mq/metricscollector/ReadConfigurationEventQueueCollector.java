@@ -33,11 +33,9 @@ public final class ReadConfigurationEventQueueCollector
   private static final Logger logger =
       LoggerFactory.getLogger(ReadConfigurationEventQueueCollector.class);
   private final long bootTime;
-  private final MetricProducer producer;
 
-  public ReadConfigurationEventQueueCollector(MetricProducer producer) {
+  public ReadConfigurationEventQueueCollector() {
     this.bootTime = System.currentTimeMillis();
-    this.producer = producer;
   }
 
   @Nullable
@@ -100,6 +98,7 @@ public final class ReadConfigurationEventQueueCollector
   @Override
   public void accept(MetricsCollectorContext context) {
     long entryTime = System.currentTimeMillis();
+    MetricProducer producer = context.getMetricProducer();
     String configurationQueueName = context.getQueueManager().getConfigurationQueueName();
     logger.info(
         "sending PCF agent request to read configuration events from queue {}",
@@ -126,7 +125,7 @@ public final class ReadConfigurationEventQueueCollector
       if (candidate != null) {
         if (context.getMetricsConfig().isIbmMqManagerMaxHandlesEnabled()) {
           int maxHandles = candidate.getIntParameterValue(CMQC.MQIA_MAX_HANDLES);
-          this.producer.recordIbmMqManagerMaxHandles(
+          producer.recordIbmMqManagerMaxHandles(
               maxHandles, Attributes.of(IBM_MQ_QUEUE_MANAGER, context.getQueueManager().getName()));
         }
       }

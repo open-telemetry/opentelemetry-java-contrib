@@ -22,14 +22,11 @@ public final class QueueManagerMetricsCollector implements Consumer<MetricsColle
 
   private static final Logger logger = LoggerFactory.getLogger(QueueManagerMetricsCollector.class);
 
-  private final MetricProducer producer;
-
-  public QueueManagerMetricsCollector(MetricProducer producer) {
-    this.producer = producer;
-  }
+  public QueueManagerMetricsCollector() {}
 
   @Override
   public void accept(MetricsCollectorContext context) {
+    MetricProducer producer = context.getMetricProducer();
     long entryTime = System.currentTimeMillis();
     logger.debug(
         "publishMetrics entry time for queuemanager {} is {} milliseconds",
