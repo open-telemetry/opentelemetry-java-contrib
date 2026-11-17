@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -120,6 +121,18 @@ public final class ConfigWrapper {
       throw new IllegalArgumentException("config metrics section is missing");
     }
     return (Map<String, ?>) metrics;
+  }
+
+  public Map<String, String> getOtlpConfiguration() {
+    Map<String, String> properties = new HashMap<>();
+    if (config.get("otlpExporter") instanceof Map) {
+      Map<?, ?> otlpExporterConfig = (Map<?, ?>) config.get("otlpExporter");
+
+      for (Map.Entry<?, ?> entry : otlpExporterConfig.entrySet()) {
+        properties.put(String.valueOf(entry.getKey()), String.valueOf(entry.getValue()));
+      }
+    }
+    return properties;
   }
 
   private static int defaultedInt(Map<String, ?> section, String key, int defaultValue) {
