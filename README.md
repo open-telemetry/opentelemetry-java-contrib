@@ -33,7 +33,6 @@ feature or via instrumentation, this project is hopefully for you.
 | beta    | [IBM MQ Metrics](./ibm-mq-metrics/README.md)                      |
 | alpha   | [JFR Connection](./jfr-connection/README.md)                      |
 | alpha   | [JFR Events](./jfr-events/README.md)                              |
-| alpha   | [JMX Metric Gatherer](./jmx-metrics/README.md)                    |
 | alpha   | [JMX Metric Scraper](./jmx-scraper/README.md)                     |
 | alpha   | [Kafka Support](./kafka-exporter/README.md)                       |
 | alpha   | [OpenTelemetry Maven Extension](./maven-extension/README.md)      |

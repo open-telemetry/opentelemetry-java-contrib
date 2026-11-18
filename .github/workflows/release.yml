@@ -116,14 +116,9 @@ jobs:
       - name: Download artifacts from Maven Central (when already published)
         if: ${{ inputs.already-published }}
         run: |
-          mkdir -p jmx-metrics/build/libs
           mkdir -p jmx-scraper/build/libs
           mkdir -p ibm-mq-metrics/build/libs
           
-          curl -L -o jmx-metrics/build/libs/opentelemetry-jmx-metrics-$VERSION-alpha.jar \
-            "https://repo1.maven.org/maven2/io/opentelemetry/contrib/opentelemetry-jmx-metrics/$VERSION-alpha/opentelemetry-jmx-metrics-$VERSION-alpha.jar"
-          curl -L -o jmx-metrics/build/libs/opentelemetry-jmx-metrics-$VERSION-alpha.jar.asc \
-            "https://repo1.maven.org/maven2/io/opentelemetry/contrib/opentelemetry-jmx-metrics/$VERSION-alpha/opentelemetry-jmx-metrics-$VERSION-alpha.jar.asc"
           curl -L -o jmx-scraper/build/libs/opentelemetry-jmx-scraper-$VERSION-alpha.jar \
             "https://repo1.maven.org/maven2/io/opentelemetry/contrib/opentelemetry-jmx-scraper/$VERSION-alpha/opentelemetry-jmx-scraper-$VERSION-alpha.jar"
           curl -L -o jmx-scraper/build/libs/opentelemetry-jmx-scraper-$VERSION-alpha.jar.asc \
@@ -176,8 +171,6 @@ jobs:
 
       - name: Simplify paths for attaching
         run: |
-          cp jmx-metrics/build/libs/opentelemetry-jmx-metrics-$VERSION-alpha.jar opentelemetry-jmx-metrics.jar
-          cp jmx-metrics/build/libs/opentelemetry-jmx-metrics-$VERSION-alpha.jar.asc opentelemetry-jmx-metrics.jar.asc
           cp jmx-scraper/build/libs/opentelemetry-jmx-scraper-$VERSION-alpha.jar opentelemetry-jmx-scraper.jar
           cp jmx-scraper/build/libs/opentelemetry-jmx-scraper-$VERSION-alpha.jar.asc opentelemetry-jmx-scraper.jar.asc
           cp ibm-mq-metrics/build/libs/opentelemetry-ibm-mq-metrics-$VERSION-alpha-all.jar opentelemetry-ibm-mq-metrics-all.jar
@@ -186,7 +179,6 @@ jobs:
       - uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
           subject-path: |
-            opentelemetry-jmx-metrics.jar
             opentelemetry-jmx-scraper.jar
             opentelemetry-ibm-mq-metrics-all.jar
 
@@ -199,8 +191,6 @@ jobs:
                             --title "Version $VERSION" \
                             --notes-file /tmp/release-notes.txt \
                             v$VERSION \
-                            opentelemetry-jmx-metrics.jar \
-                            opentelemetry-jmx-metrics.jar.asc \
                             opentelemetry-jmx-scraper.jar \
                             opentelemetry-jmx-scraper.jar.asc \
                             opentelemetry-ibm-mq-metrics-all.jar \

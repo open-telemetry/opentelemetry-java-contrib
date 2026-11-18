@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### JMX metrics
+
+- Remove the deprecated `jmx-metrics` (JMX Gatherer) module. Use the
+  [JMX Scraper](https://github.com/open-telemetry/opentelemetry-java-contrib/blob/main/jmx-scraper/README.md) instead, see the
+  [migration guide](https://github.com/open-telemetry/opentelemetry-java-contrib/blob/main/jmx-scraper/README.md#migration-from-jmx-gatherer).
+
 ## Version 1.62.1 (2026-11-06)
 
 ### 🛠️ Bug fixes
