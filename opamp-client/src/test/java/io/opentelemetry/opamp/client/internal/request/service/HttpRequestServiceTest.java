@@ -29,6 +29,7 @@ import io.opentelemetry.opamp.client.request.service.RequestService;
 import java.io.ByteArrayInputStream;
 import java.io.EOFException;
 import java.io.IOException;
+import java.net.ProtocolException;
 import java.net.SocketTimeoutException;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -242,10 +243,10 @@ class HttpRequestServiceTest {
   }
 
   @Test
-  void verifyIllegalStateExceptionInParsingIsConsideredRequestFailure() {
+  void verifyExceptionInParsingIsConsideredRequestFailure() {
     ServerToAgent serverToAgent = new ServerToAgent.Builder().build();
     byte[] responseBody = new byte[9024];
-    // This will generate an IllegalStateException
+    // This will generate an ProtocolException
     Arrays.fill(responseBody, (byte) 0x11);
     HttpSender.Response httpResponse = createFailedResponse(200, responseBody, null);
     requestSender.enqueueResponse(httpResponse);
@@ -255,8 +256,8 @@ class HttpRequestServiceTest {
     verifySingleRequestSent();
     verify(callback, never()).onRequestSuccess(Response.create(serverToAgent));
     verify(callback, never()).onConnectionSuccess();
-    verify(callback, never()).onConnectionFailed(any());
-    verify(callback).onRequestFailed(any(IllegalStateException.class));
+    verify(callback).onConnectionFailed(any(ProtocolException.class));
+    verify(callback, never()).onRequestFailed(any());
   }
 
   @Test
