@@ -14,6 +14,8 @@ feature or via instrumentation, this project is hopefully for you.
 
 ## Provided Libraries
 
+Every component requires at least two active owners. See the [component maintenance policy](MAINTENANCE.md) for owner responsibilities, admission requirements, and the recruitment and retirement process for components that lose owners.
+
 | Status* | Library                                                           |
 | ------- | ----------------------------------------------------------------- |
 | beta    | [AWS Resources](./aws-resources/README.md)                        |
@@ -56,7 +58,7 @@ This could get complicated, so `stable` has a high bar.
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md). Before proposing a new component or volunteering as an owner, read the [component maintenance policy](MAINTENANCE.md).
 
 ### Maintainers
 

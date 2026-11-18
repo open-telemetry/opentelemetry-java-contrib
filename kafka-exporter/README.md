@@ -20,4 +20,4 @@ For a sample usage, see `KafkaSpanExporterIntegrationTest`.
 * [Alessandro Vermeulen](https://github.com/spockz)
 * [Vincent Free](https://github.com/vincentfree)
 
-Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).
+See the [component maintenance policy](../MAINTENANCE.md#component-ownership) for owner responsibilities and requirements.

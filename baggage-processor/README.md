@@ -101,4 +101,4 @@ new BaggageLogRecordProcessor(Collections.singletonList("my-key*"), Collections.
 * [Mike Golsmith](https://github.com/MikeGoldsmith), Honeycomb
 * [Gregor Zeitlinger](https://github.com/zeitlinger), Grafana
 
-Learn more about component owners in [component_owners.yml](../.github/component_owners.yml).
+See the [component maintenance policy](../MAINTENANCE.md#component-ownership) for owner responsibilities and requirements.
