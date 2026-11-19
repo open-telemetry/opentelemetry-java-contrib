@@ -51,7 +51,7 @@ class InterceptableMetricExporterTest {
     });
 
     meter.counterBuilder("OneCounter").build().add(1);
-    meterProvider.forceFlush();
+    meterProvider.forceFlush().join(10, TimeUnit.SECONDS);
 
     List<MetricData> finishedMetricItems = memoryMetricExporter.getFinishedMetricItems();
     assertThat(finishedMetricItems.size()).isEqualTo(1);
