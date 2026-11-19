@@ -11,9 +11,7 @@ import com.ibm.mq.headers.pcf.PCFMessage;
 import io.opentelemetry.ibm.mq.config.ExcludeFilters;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,15 +51,15 @@ class MessageFilter {
   static class MessageFilterBuilder {
 
     private final String kind;
-    private Set<ExcludeFilters> filters = new HashSet<>();
+    private List<ExcludeFilters> filters = new ArrayList<>();
 
     public MessageFilterBuilder(String kind) {
       this.kind = kind;
     }
 
     @CanIgnoreReturnValue
-    public MessageFilterBuilder excluding(Set<ExcludeFilters> filters) {
-      this.filters = new HashSet<>(filters);
+    public MessageFilterBuilder excluding(List<ExcludeFilters> filters) {
+      this.filters = new ArrayList<>(filters);
       return this;
     }
 

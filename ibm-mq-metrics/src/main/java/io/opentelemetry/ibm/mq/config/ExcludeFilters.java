@@ -6,16 +6,17 @@
 package io.opentelemetry.ibm.mq.config;
 
 import io.opentelemetry.ibm.mq.metricscollector.FilterType;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /** A jackson databind class used for config. */
 public final class ExcludeFilters {
 
   private String type = "UNKNOWN";
-  private Set<String> values = new HashSet<>();
+  private List<String> values = new ArrayList<>();
 
   public String getType() {
     return type;
@@ -25,12 +26,12 @@ public final class ExcludeFilters {
     this.type = type;
   }
 
-  public Set<String> getValues() {
-    return Collections.unmodifiableSet(values);
+  public List<String> getValues() {
+    return Collections.unmodifiableList(values);
   }
 
   public void setValues(Set<String> values) {
-    this.values = new HashSet<>(values);
+    this.values = new ArrayList<>(values);
   }
 
   public static boolean isExcluded(String resourceName, Collection<ExcludeFilters> excludeFilters) {
