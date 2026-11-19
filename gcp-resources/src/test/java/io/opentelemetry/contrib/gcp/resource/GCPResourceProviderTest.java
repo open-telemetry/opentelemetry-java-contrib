@@ -175,6 +175,21 @@ class GCPResourceProviderTest {
     return mockServerlessPlatform;
   }
 
+  private static DetectedPlatform generateMockGcrInstancePlatform() {
+    Map<String, String> mockAttributes =
+        new HashMap<>(
+            ImmutableMap.of(
+                SERVERLESS_COMPUTE_NAME, "serverless-instance",
+                SERVERLESS_COMPUTE_INSTANCE_ID, "serverless-instance-id",
+                SERVERLESS_COMPUTE_CLOUD_REGION, "us-west1"));
+    DetectedPlatform mockInstancePlatform = mock(DetectedPlatform.class);
+    when(mockInstancePlatform.getSupportedPlatform())
+        .thenReturn(GcpPlatformDetector.SupportedPlatform.GOOGLE_CLOUD_RUN_INSTANCE);
+    when(mockInstancePlatform.getAttributes()).thenReturn(mockAttributes);
+    when(mockInstancePlatform.getProjectId()).thenReturn(DUMMY_PROJECT_ID);
+    return mockInstancePlatform;
+  }
+
   private static DetectedPlatform generateMockGaePlatform() {
     Map<String, String> mockAttributes =
         new HashMap<>(
@@ -443,6 +458,31 @@ class GCPResourceProviderTest {
         .doesNotContainKey(FAAS_VERSION);
   }
 
+  @Test
+  void testGcrInstanceResourceAttributesMapping() {
+    GcpPlatformDetector mockDetector = mock(GcpPlatformDetector.class);
+    DetectedPlatform mockPlatform = generateMockGcrInstancePlatform();
+    when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
+    Map<String, String> detectedAttributes = mockPlatform.getAttributes();
+
+    Resource gotResource = new GCPResourceProvider(mockDetector).createResource(mockConfigProps);
+    verify(mockPlatform, times(1)).getProjectId();
+
+    assertThat(gotResource.getAttributes())
+        .hasSize(7)
+        .containsEntry(CLOUD_PROVIDER, GCP)
+        .containsEntry(CLOUD_PLATFORM, GCP_CLOUD_RUN)
+        .containsEntry(CLOUD_ACCOUNT_ID, DUMMY_PROJECT_ID)
+        .containsEntry(
+            CLOUD_RESOURCE_ID,
+            "//run.googleapis.com/projects/google-pid/locations/us-west1/instances/serverless-instance")
+        .containsEntry(FAAS_NAME, detectedAttributes.get(SERVERLESS_COMPUTE_NAME))
+        .containsEntry(FAAS_INSTANCE, detectedAttributes.get(SERVERLESS_COMPUTE_INSTANCE_ID))
+        .containsEntry(CLOUD_REGION, detectedAttributes.get(SERVERLESS_COMPUTE_CLOUD_REGION))
+        .doesNotContainKey(FAAS_VERSION)
+        .doesNotContainKey(CLOUD_AVAILABILITY_ZONE);
+  }
+
   @ParameterizedTest
   @MethodSource("provideMissingCloudResourceIdCases")
   void testServerlessOmitsCloudResourceIdWhenComponentMissing(
@@ -458,6 +498,9 @@ class GCPResourceProviderTest {
         break;
       case GOOGLE_CLOUD_RUN_WORKER_POOL:
         mockPlatform = generateMockGcrWorkerPoolPlatform();
+        break;
+      case GOOGLE_CLOUD_RUN_INSTANCE:
+        mockPlatform = generateMockGcrInstancePlatform();
         break;
       default:
         mockPlatform = generateMockServerlessPlatform(platform);
@@ -524,6 +567,16 @@ class GCPResourceProviderTest {
             GcpPlatformDetector.SupportedPlatform.GOOGLE_CLOUD_RUN_WORKER_POOL,
             DUMMY_PROJECT_ID,
             "us-central1",
+            ""),
+        Arguments.of(
+            GcpPlatformDetector.SupportedPlatform.GOOGLE_CLOUD_RUN_INSTANCE,
+            DUMMY_PROJECT_ID,
+            null,
+            "serverless-instance"),
+        Arguments.of(
+            GcpPlatformDetector.SupportedPlatform.GOOGLE_CLOUD_RUN_INSTANCE,
+            DUMMY_PROJECT_ID,
+            "us-west1",
             ""),
         Arguments.of(
             GcpPlatformDetector.SupportedPlatform.GOOGLE_CLOUD_FUNCTIONS,

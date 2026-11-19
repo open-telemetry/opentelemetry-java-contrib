@@ -49,6 +49,8 @@ class GcpPlatformDetector {
       return SupportedPlatform.GOOGLE_CLOUD_RUN_JOB;
     } else if (environmentVariables.get("CLOUD_RUN_WORKER_POOL") != null) {
       return SupportedPlatform.GOOGLE_CLOUD_RUN_WORKER_POOL;
+    } else if (environmentVariables.get("CLOUD_RUN_INSTANCE") != null) {
+      return SupportedPlatform.GOOGLE_CLOUD_RUN_INSTANCE;
     } else if (environmentVariables.get("GAE_SERVICE") != null) {
       return SupportedPlatform.GOOGLE_APP_ENGINE;
     }
@@ -76,6 +78,9 @@ class GcpPlatformDetector {
         break;
       case GOOGLE_CLOUD_RUN_WORKER_POOL:
         detectedPlatform = new GoogleCloudRunWorkerPool(environmentVariables, metadataConfig);
+        break;
+      case GOOGLE_CLOUD_RUN_INSTANCE:
+        detectedPlatform = new GoogleCloudRunInstance(environmentVariables, metadataConfig);
         break;
       case GOOGLE_APP_ENGINE:
         detectedPlatform = new GoogleAppEngine(environmentVariables, metadataConfig);
@@ -106,6 +111,8 @@ class GcpPlatformDetector {
     GOOGLE_CLOUD_RUN_JOB,
     /** Represents the Google Cloud Run platform (Worker Pools). */
     GOOGLE_CLOUD_RUN_WORKER_POOL,
+    /** Represents the Google Cloud Run platform (Instances). */
+    GOOGLE_CLOUD_RUN_INSTANCE,
     /** Represents the Google Cloud Functions platform. */
     GOOGLE_CLOUD_FUNCTIONS,
     /** Represents the case when the application is not running on GCP. */
