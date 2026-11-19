@@ -1,0 +1,83 @@
+display_name: Span Stacktrace Capture
+description: >-
+  Adds a code.stacktrace attribute to qualifying spans when they end, capturing
+  the stack trace of the thread ending the span. Enriches existing spans without
+  creating new telemetry. Skips spans that already have a stack trace and inferred
+  spans produced by the inferred-spans component.
+source_path: span-stacktrace
+component_type:
+  - library
+docs_url: https://github.com/open-telemetry/opentelemetry-java-contrib/blob/main/span-stacktrace/README.md#usage-and-configuration
+usage: >-
+  Include the artifact in application runtime dependencies and configure the
+  OpenTelemetry SDK using one of the methods below. Stack trace capture runs
+  when eligible spans end and can add overhead.
+status:
+  stability: beta
+artifact:
+  group_id: io.opentelemetry.contrib
+  artifact_id: opentelemetry-span-stacktrace
+min_java_version: 8
+configurations:
+  - type: sdk-autoconfiguration
+    display_name: SDK autoconfiguration properties
+    description: >-
+      When the application uses OpenTelemetry SDK autoconfiguration, the processor
+      is registered automatically from the runtime classpath. Set these system
+      properties as JVM arguments to customize it. The example sets a 10 ms
+      threshold; no custom filter is required.
+    example:
+      language: shell
+      code: |-
+        -Dotel.java.experimental.span-stacktrace.min.duration=10ms
+    settings:
+      - name: otel.java.experimental.span-stacktrace.min.duration
+        type: duration
+        default: "5ms"
+        description: >-
+          Minimum span duration for capturing a stack trace, expressed as a duration
+          such as 5ms. Zero removes the duration threshold; other filters still apply.
+          A negative value disables registration through SDK autoconfiguration.
+      - name: otel.java.experimental.span-stacktrace.filter
+        type: string
+        default: null
+        description: >-
+          Fully qualified name of a publicly accessible class implementing
+          java.util.function.Predicate<ReadableSpan> with a public no-argument
+          constructor. Returning false excludes the span from stack trace capture.
+          When unset, all otherwise eligible spans are included. If the class cannot
+          be loaded or instantiated, an error is logged and the same fallback applies.
+  - type: declarative
+    display_name: Declarative SDK configuration
+    description: >-
+      When the application uses declarative SDK configuration, add
+      stacktrace/development to tracer_provider.processors in the SDK YAML file.
+      The example shows its placement and sets a 10 ms threshold. Omit the processor
+      to disable stack trace capture. These settings belong to the processor mapping
+      and are configured independently of the SDK autoconfiguration properties.
+    example:
+      language: yaml
+      code: |-
+        file_format: '1.0'
+        tracer_provider:
+          processors:
+            - stacktrace/development:
+                min_duration: 10
+    settings:
+      - name: min_duration
+        type: int
+        default: 5
+        description: >-
+          Minimum span duration in milliseconds for capturing a stack trace.
+          Must be a nonnegative integer. Zero removes the duration threshold;
+          other filters still apply. Negative values are rejected; omit the
+          processor from the configuration to disable it.
+      - name: filter
+        type: string
+        default: null
+        description: >-
+          Fully qualified name of a publicly accessible class implementing
+          java.util.function.Predicate<ReadableSpan> with a public no-argument
+          constructor. Returning false excludes the span from stack trace capture.
+          When unset, all otherwise eligible spans are included. If the class cannot
+          be loaded or instantiated, an error is logged and the same fallback applies.
