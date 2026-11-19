@@ -5,14 +5,12 @@
 
 package io.opentelemetry.maven.resources;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 
-import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.common.ComponentLoader;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.ComponentProvider;
-import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions;
-import org.assertj.core.api.InstanceOfAssertFactory;
+import io.opentelemetry.sdk.internal.ExtendedOpenTelemetrySdk;
 import org.junit.jupiter.api.Test;
 
 class ResourceComponentProviderTest {
@@ -28,16 +26,11 @@ class ResourceComponentProviderTest {
 
   @Test
   void endToEnd() {
-    assertThat(
-            AutoConfiguredOpenTelemetrySdk.builder()
-                .build()
-                .getOpenTelemetrySdk()
-                .getSdkTracerProvider())
-        .extracting("sharedState")
-        .extracting("resource")
-        .extracting(
-            "attributes",
-            new InstanceOfAssertFactory<>(Attributes.class, OpenTelemetryAssertions::assertThat))
+    ExtendedOpenTelemetrySdk sdk =
+        (ExtendedOpenTelemetrySdk)
+            AutoConfiguredOpenTelemetrySdk.builder().build().getOpenTelemetrySdk();
+
+    assertThat(sdk.getSdkResourceProvider().getResource().getAttributes())
         .containsEntry("telemetry.distro.name", "opentelemetry-maven-extension");
   }
 }
