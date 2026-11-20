@@ -141,6 +141,13 @@ class GcpMetadataConfigTest {
   }
 
   @Test
+  void testGetCreatedBy() {
+    String createdBy = "projects/123456789/zones/us-central1-a/instanceGroupManagers/my-mig";
+    TestUtils.stubEndpoint("/instance/attributes/created-by", createdBy);
+    assertEquals(createdBy, mockMetadataConfig.getCreatedBy());
+  }
+
+  @Test
   void testOversizedResponseIsTruncatedTo4096Chars() {
     String oversized = new String(new char[8192]).replace('\0', 'x');
     TestUtils.stubEndpoint("/project/project-id", oversized);

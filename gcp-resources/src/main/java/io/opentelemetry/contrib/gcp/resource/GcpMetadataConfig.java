@@ -136,6 +136,11 @@ final class GcpMetadataConfig {
   }
 
   // Returns null on failure to retrieve from metadata server
+  String getCreatedBy() {
+    return getAttribute("instance/attributes/created-by");
+  }
+
+  // Returns null on failure to retrieve from metadata server
   private String getAttribute(String attributeName) {
     return cachedAttributes.computeIfAbsent(attributeName, this::fetchAttribute);
   }
