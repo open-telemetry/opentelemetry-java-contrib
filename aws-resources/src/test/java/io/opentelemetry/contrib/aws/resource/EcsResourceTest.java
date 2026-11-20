@@ -68,7 +68,7 @@ class EcsResourceTest {
     Resource resource = EcsResource.buildResource(mockSysEnv, mockHttpClient);
     Attributes attributes = resource.getAttributes();
 
-    assertThat(resource.getSchemaUrl()).isEqualTo(SchemaUrls.V1_25_0);
+    assertThat(resource.getSchemaUrl()).isEqualTo(SchemaUrls.V1_40_0);
     assertThat(attributes)
         .containsOnly(
             entry(CLOUD_PROVIDER, "aws"),
@@ -105,7 +105,7 @@ class EcsResourceTest {
     Resource resource = EcsResource.buildResource(mockSysEnv, mockHttpClient);
     Attributes attributes = resource.getAttributes();
 
-    assertThat(resource.getSchemaUrl()).isEqualTo(SchemaUrls.V1_25_0);
+    assertThat(resource.getSchemaUrl()).isEqualTo(SchemaUrls.V1_40_0);
     assertThat(attributes)
         .containsOnly(
             entry(CLOUD_PROVIDER, "aws"),
