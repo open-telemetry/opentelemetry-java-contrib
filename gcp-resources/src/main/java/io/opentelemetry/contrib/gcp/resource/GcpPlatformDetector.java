@@ -38,13 +38,19 @@ class GcpPlatformDetector {
     // Note: Order of detection matters here
     if (environmentVariables.get("KUBERNETES_SERVICE_HOST") != null) {
       return SupportedPlatform.GOOGLE_KUBERNETES_ENGINE;
-    } else if (environmentVariables.get("K_CONFIGURATION") != null
-        && environmentVariables.get("FUNCTION_TARGET") == null) {
+    } else if (environmentVariables.get("K_CONFIGURATION") != null) {
+      // Check Cloud Run before Cloud Functions because Cloud Run functions (including
+      // Cloud Functions 2nd gen) set both K_CONFIGURATION and FUNCTION_TARGET, whereas
+      // Cloud Functions 1st gen only sets FUNCTION_TARGET.
       return SupportedPlatform.GOOGLE_CLOUD_RUN;
     } else if (environmentVariables.get("FUNCTION_TARGET") != null) {
       return SupportedPlatform.GOOGLE_CLOUD_FUNCTIONS;
     } else if (environmentVariables.get("CLOUD_RUN_JOB") != null) {
       return SupportedPlatform.GOOGLE_CLOUD_RUN_JOB;
+    } else if (environmentVariables.get("CLOUD_RUN_WORKER_POOL") != null) {
+      return SupportedPlatform.GOOGLE_CLOUD_RUN_WORKER_POOL;
+    } else if (environmentVariables.get("CLOUD_RUN_INSTANCE") != null) {
+      return SupportedPlatform.GOOGLE_CLOUD_RUN_INSTANCE;
     } else if (environmentVariables.get("GAE_SERVICE") != null) {
       return SupportedPlatform.GOOGLE_APP_ENGINE;
     }
@@ -69,6 +75,12 @@ class GcpPlatformDetector {
         break;
       case GOOGLE_CLOUD_RUN_JOB:
         detectedPlatform = new GoogleCloudRunJob(environmentVariables, metadataConfig);
+        break;
+      case GOOGLE_CLOUD_RUN_WORKER_POOL:
+        detectedPlatform = new GoogleCloudRunWorkerPool(environmentVariables, metadataConfig);
+        break;
+      case GOOGLE_CLOUD_RUN_INSTANCE:
+        detectedPlatform = new GoogleCloudRunInstance(environmentVariables, metadataConfig);
         break;
       case GOOGLE_APP_ENGINE:
         detectedPlatform = new GoogleAppEngine(environmentVariables, metadataConfig);
@@ -97,6 +109,10 @@ class GcpPlatformDetector {
     GOOGLE_CLOUD_RUN,
     /** Represents the Google Cloud Run platform (Jobs). */
     GOOGLE_CLOUD_RUN_JOB,
+    /** Represents the Google Cloud Run platform (Worker Pools). */
+    GOOGLE_CLOUD_RUN_WORKER_POOL,
+    /** Represents the Google Cloud Run platform (Instances). */
+    GOOGLE_CLOUD_RUN_INSTANCE,
     /** Represents the Google Cloud Functions platform. */
     GOOGLE_CLOUD_FUNCTIONS,
     /** Represents the case when the application is not running on GCP. */
