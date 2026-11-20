@@ -46,12 +46,13 @@ class ListenerMetricsCollectorTest {
   void testPublishMetrics() throws Exception {
     when(pcfMessageAgent.send(any(PCFMessage.class)))
         .thenReturn(createPCFResponseForInquireListenerStatusCmd());
-
-    MetricsCollectorContext context =
-        new MetricsCollectorContext(queueManager, pcfMessageAgent, null, new MetricsConfig(config));
     MetricProducer producer =
         new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
-    classUnderTest = new ListenerMetricsCollector(producer);
+    MetricsCollectorContext context =
+        new MetricsCollectorContext(
+            queueManager, pcfMessageAgent, null, new MetricsConfig(config), producer);
+
+    classUnderTest = new ListenerMetricsCollector();
     classUnderTest.accept(context);
 
     List<MetricData> result = producer.produce(Resource.empty());

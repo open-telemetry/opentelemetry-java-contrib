@@ -45,11 +45,12 @@ class TopicMetricsCollectorTest {
 
   @Test
   void testPublishMetrics() throws Exception {
-    MetricsCollectorContext context =
-        new MetricsCollectorContext(queueManager, pcfMessageAgent, null, new MetricsConfig(config));
     MetricProducer producer =
         new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
-    classUnderTest = new TopicMetricsCollector(producer);
+    MetricsCollectorContext context =
+        new MetricsCollectorContext(
+            queueManager, pcfMessageAgent, null, new MetricsConfig(config), producer);
+    classUnderTest = new TopicMetricsCollector();
 
     when(pcfMessageAgent.send(any(PCFMessage.class)))
         .thenReturn(createPCFResponseForInquireTopicStatusCmd());

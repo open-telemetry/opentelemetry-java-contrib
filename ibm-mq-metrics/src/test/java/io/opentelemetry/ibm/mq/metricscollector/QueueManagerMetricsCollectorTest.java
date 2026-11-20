@@ -37,6 +37,7 @@ class QueueManagerMetricsCollectorTest {
   QueueManager queueManager;
   MetricsCollectorContext context;
   @Mock PCFMessageAgent pcfMessageAgent;
+  private MetricProducer producer;
 
   @BeforeEach
   public void setup() throws Exception {
@@ -44,17 +45,17 @@ class QueueManagerMetricsCollectorTest {
     ConfigWrapper config = ConfigWrapper.parse("src/test/resources/conf/config.yml");
     ObjectMapper mapper = new ObjectMapper();
     queueManager = mapper.convertValue(config.getQueueManagers().get(0), QueueManager.class);
+    producer = new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
     context =
-        new MetricsCollectorContext(queueManager, pcfMessageAgent, null, new MetricsConfig(config));
+        new MetricsCollectorContext(
+            queueManager, pcfMessageAgent, null, new MetricsConfig(config), producer);
   }
 
   @Test
   void testProcessPCFRequestAndPublishQMetricsForInquireQStatusCmd() throws Exception {
     when(pcfMessageAgent.send(any(PCFMessage.class)))
         .thenReturn(createPCFResponseForInquireQMgrStatusCmd());
-    MetricProducer producer =
-        new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
-    classUnderTest = new QueueManagerMetricsCollector(producer);
+    classUnderTest = new QueueManagerMetricsCollector();
     classUnderTest.accept(context);
     List<String> metricsList = new ArrayList<>(singletonList("ibm.mq.manager.status"));
     metricsList.add("ibm.mq.queue_manager.uptime");

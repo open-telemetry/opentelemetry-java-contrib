@@ -45,23 +45,25 @@ class ChannelMetricsCollectorTest {
   QueueManager queueManager;
   MetricsCollectorContext context;
   @Mock PCFMessageAgent pcfMessageAgent;
+  MetricProducer producer;
 
   @BeforeEach
   void setup() throws Exception {
     ConfigWrapper config = ConfigWrapper.parse("src/test/resources/conf/config.yml");
     ObjectMapper mapper = new ObjectMapper();
     queueManager = mapper.convertValue(config.getQueueManagers().get(0), QueueManager.class);
+    producer = new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
     context =
-        new MetricsCollectorContext(queueManager, pcfMessageAgent, null, new MetricsConfig(config));
+        new MetricsCollectorContext(
+            queueManager, pcfMessageAgent, null, new MetricsConfig(config), producer);
   }
 
   @Test
   void testPublishMetrics() throws Exception {
     when(pcfMessageAgent.send(any(PCFMessage.class)))
         .thenReturn(createPCFResponseForInquireChannelStatusCmd());
-    MetricProducer producer =
-        new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
-    classUnderTest = new ChannelMetricsCollector(producer);
+
+    classUnderTest = new ChannelMetricsCollector();
 
     classUnderTest.accept(context);
 
@@ -185,10 +187,8 @@ class ChannelMetricsCollectorTest {
 
   @Test
   void testPublishMetrics_nullResponse() throws Exception {
-    MetricProducer producer =
-        new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
     when(pcfMessageAgent.send(any(PCFMessage.class))).thenReturn(null);
-    classUnderTest = new ChannelMetricsCollector(producer);
+    classUnderTest = new ChannelMetricsCollector();
 
     classUnderTest.accept(context);
     assertThat(producer.produce(Resource.empty())).isEmpty();
@@ -196,10 +196,8 @@ class ChannelMetricsCollectorTest {
 
   @Test
   void testPublishMetrics_emptyResponse() throws Exception {
-    MetricProducer producer =
-        new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
     when(pcfMessageAgent.send(any(PCFMessage.class))).thenReturn(new PCFMessage[] {});
-    classUnderTest = new ChannelMetricsCollector(producer);
+    classUnderTest = new ChannelMetricsCollector();
 
     classUnderTest.accept(context);
     assertThat(producer.produce(Resource.empty())).isEmpty();
@@ -208,10 +206,8 @@ class ChannelMetricsCollectorTest {
   @ParameterizedTest
   @MethodSource("exceptionsToThrow")
   void testPublishMetrics_pfException(Exception exceptionToThrow) throws Exception {
-    MetricProducer producer =
-        new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
     when(pcfMessageAgent.send(any(PCFMessage.class))).thenThrow(exceptionToThrow);
-    classUnderTest = new ChannelMetricsCollector(producer);
+    classUnderTest = new ChannelMetricsCollector();
 
     classUnderTest.accept(context);
 
