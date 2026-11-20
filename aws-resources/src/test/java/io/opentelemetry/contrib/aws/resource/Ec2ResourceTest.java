@@ -62,7 +62,7 @@ class Ec2ResourceTest {
     server.enqueue(HttpResponse.of("ec2-1-2-3-4"));
 
     Resource resource = Ec2Resource.buildResource("localhost:" + server.httpPort());
-    assertThat(resource.getSchemaUrl()).isEqualTo(SchemaUrls.V1_25_0);
+    assertThat(resource.getSchemaUrl()).isEqualTo(SchemaUrls.V1_40_0);
     Attributes attributes = resource.getAttributes();
 
     assertThat(attributes)
@@ -97,7 +97,7 @@ class Ec2ResourceTest {
     server.enqueue(HttpResponse.of("ec2-1-2-3-4"));
 
     Resource resource = Ec2Resource.buildResource("localhost:" + server.httpPort());
-    assertThat(resource.getSchemaUrl()).isEqualTo(SchemaUrls.V1_25_0);
+    assertThat(resource.getSchemaUrl()).isEqualTo(SchemaUrls.V1_40_0);
     Attributes attributes = resource.getAttributes();
 
     assertThat(attributes)

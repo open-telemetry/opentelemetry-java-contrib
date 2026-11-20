@@ -131,7 +131,7 @@ public final class Ec2Resource {
 
     attrBuilders.put(HOST_NAME, hostname);
 
-    return Resource.create(attrBuilders.build(), SchemaUrls.V1_25_0);
+    return Resource.create(attrBuilders.build(), SchemaUrls.V1_40_0);
   }
 
   private static String fetchToken(URL tokenUrl) {

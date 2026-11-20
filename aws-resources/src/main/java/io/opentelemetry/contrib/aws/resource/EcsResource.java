@@ -82,7 +82,7 @@ public final class EcsResource {
       // For TaskARN, Family, Revision.
       // May put the same attribute twice but that shouldn't matter.
       fetchMetadata(httpClient, ecsMetadataUrl + "/task", attrBuilders);
-      return Resource.create(attrBuilders.build(), SchemaUrls.V1_25_0);
+      return Resource.create(attrBuilders.build(), SchemaUrls.V1_40_0);
     }
     // Not running on ECS
     return Resource.empty();

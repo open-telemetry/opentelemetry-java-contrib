@@ -63,7 +63,7 @@ class EksResourceTest {
             mockK8sKeystoreFile.getPath());
     Attributes attributes = eksResource.getAttributes();
 
-    assertThat(eksResource.getSchemaUrl()).isEqualTo(SchemaUrls.V1_25_0);
+    assertThat(eksResource.getSchemaUrl()).isEqualTo(SchemaUrls.V1_40_0);
     assertThat(attributes)
         .containsOnly(
             entry(CLOUD_PROVIDER, "aws"),
