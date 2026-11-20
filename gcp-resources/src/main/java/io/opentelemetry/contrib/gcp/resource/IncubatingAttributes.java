@@ -46,6 +46,12 @@ class IncubatingAttributes {
   public static final AttributeKey<Long> GCP_CLOUD_RUN_JOB_TASK_INDEX =
       AttributeKey.longKey("gcp.cloud_run.job.task_index");
 
+  public static final AttributeKey<String> GCP_GCE_INSTANCE_GROUP_MANAGER_NAME =
+      AttributeKey.stringKey("gcp.gce.instance_group_manager.name");
+  public static final AttributeKey<String> GCP_GCE_INSTANCE_GROUP_MANAGER_REGION =
+      AttributeKey.stringKey("gcp.gce.instance_group_manager.region");
+  public static final AttributeKey<String> GCP_GCE_INSTANCE_GROUP_MANAGER_ZONE =
+      AttributeKey.stringKey("gcp.gce.instance_group_manager.zone");
   public static final AttributeKey<String> GCP_GCE_INSTANCE_HOSTNAME =
       AttributeKey.stringKey("gcp.gce.instance.hostname");
   public static final AttributeKey<String> GCP_GCE_INSTANCE_NAME =
