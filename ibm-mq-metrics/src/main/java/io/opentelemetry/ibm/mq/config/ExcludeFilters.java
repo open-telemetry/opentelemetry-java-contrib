@@ -79,6 +79,12 @@ public final class ExcludeFilters {
           }
         }
         break;
+      case ENDSWITH:
+        for (String filterValue : values) {
+          if (resourceName.endsWith(filterValue)) {
+            return true;
+          }
+        }
     }
     return false;
   }
@@ -97,6 +103,7 @@ public final class ExcludeFilters {
           op = CMQCFC.MQCFOP_NOT_EQUAL;
           break;
         case CONTAINS:
+        case ENDSWITH:
           op = CMQCFC.MQCFOP_EXCLUDES;
           break;
         case NONE:
