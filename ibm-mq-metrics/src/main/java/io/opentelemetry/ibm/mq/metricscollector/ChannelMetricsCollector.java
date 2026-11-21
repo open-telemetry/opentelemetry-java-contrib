@@ -140,9 +140,11 @@ public final class ChannelMetricsCollector implements Consumer<MetricsCollectorC
 
     logger.info(
         "Active Channels in queueManager {} are {}", context.getQueueManagerName(), activeChannels);
-    producer.recordIbmMqManagerActiveChannels(
-        activeChannels.size(), Attributes.of(IBM_MQ_QUEUE_MANAGER, context.getQueueManagerName()));
-
+    if (context.getMetricsConfig().isIbmMqManagerActiveChannelsEnabled()) {
+      producer.recordIbmMqManagerActiveChannels(
+          activeChannels.size(),
+          Attributes.of(IBM_MQ_QUEUE_MANAGER, context.getQueueManagerName()));
+    }
     long exitTime = System.currentTimeMillis() - entryTime;
     logger.debug("Time taken to publish metrics for all channels is {} milliseconds", exitTime);
   }
