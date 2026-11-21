@@ -52,7 +52,6 @@ public final class ExcludeFilters {
   }
 
   public boolean isExcluded(String resourceName) {
-    logger.warn("isExcluded {}", resourceName);
     if (resourceName == null || resourceName.isEmpty()) {
       return true;
     }
@@ -65,7 +64,6 @@ public final class ExcludeFilters {
         }
         break;
       case STARTSWITH:
-        logger.warn("values {}", values);
         for (String filterValue : values) {
           if (resourceName.startsWith(filterValue)) {
             return true;
