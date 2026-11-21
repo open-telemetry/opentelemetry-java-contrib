@@ -57,42 +57,8 @@ final class InquireQCmdCollector implements Consumer<MetricsCollectorContext> {
       request.addParameter(CMQC.MQCA_Q_NAME, queueGenericName);
       request.addParameter(CMQC.MQIA_Q_TYPE, CMQC.MQQT_ALL);
 
-      // take the first filter, and apply it, as we can only apply one filter.
-      if (!context.getQueueExcludeFilters().isEmpty()) {
-        ExcludeFilters filter = context.getQueueExcludeFilters().iterator().next();
-        if ((!filter.getValues().isEmpty())
-            && (FilterType.valueOf(filter.getType()) != FilterType.NONE)) {
-
-          String value = filter.getValues().get(0);
-          int op = 0;
-          switch (FilterType.valueOf(filter.getType())) {
-            case STARTSWITH:
-              op = CMQCFC.MQCFOP_NOT_LIKE;
-              break;
-            case EQUALS:
-              op = CMQCFC.MQCFOP_NOT_EQUAL;
-              break;
-            case ENDSWITH:
-              op = CMQCFC.MQCFOP_NOT_LIKE;
-              if (!value.startsWith("*")) {
-                value = "*" + value;
-              }
-              break;
-            case CONTAINS:
-              op = CMQCFC.MQCFOP_NOT_LIKE;
-              if (!value.startsWith("*")) {
-                value = "*" + value;
-              }
-              if (!value.endsWith("*")) {
-                value += "*";
-              }
-              break;
-            case NONE:
-              logger.warn("Invalid type of filter {}", filter.getType());
-              continue;
-          }
-          request.addFilterParameter(CMQC.MQCA_Q_NAME, op, value);
-        }
+      for (ExcludeFilters filter : context.getQueueExcludeFilters()) {
+        filter.addFilter(request, CMQC.MQCA_Q_NAME);
       }
       request.addParameter(CMQCFC.MQIACF_Q_ATTRS, ATTRIBUTES);
 

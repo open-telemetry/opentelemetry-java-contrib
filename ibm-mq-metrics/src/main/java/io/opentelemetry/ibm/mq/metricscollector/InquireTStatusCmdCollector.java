@@ -14,6 +14,7 @@ import com.ibm.mq.headers.MQDataException;
 import com.ibm.mq.headers.pcf.PCFException;
 import com.ibm.mq.headers.pcf.PCFMessage;
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.ibm.mq.config.ExcludeFilters;
 import io.opentelemetry.ibm.mq.metrics.MetricProducer;
 import java.io.IOException;
 import java.util.List;
@@ -46,7 +47,9 @@ final class InquireTStatusCmdCollector implements Consumer<MetricsCollectorConte
       // https://www.ibm.com/support/knowledgecenter/SSFKSJ_8.0.0/com.ibm.mq.ref.adm.doc/q088150_.htm
       PCFMessage request = new PCFMessage(CMQCFC.MQCMD_INQUIRE_TOPIC_STATUS);
       request.addParameter(CMQC.MQCA_TOPIC_STRING, topicGenericName);
-
+      for (ExcludeFilters filter : context.getTopicExcludeFilters()) {
+        filter.addFilter(request, CMQC.MQCA_TOPIC_STRING);
+      }
       try {
         processPcfRequestAndPublishQMetrics(context, topicGenericName, request);
       } catch (PCFException pcfe) {
@@ -89,13 +92,7 @@ final class InquireTStatusCmdCollector implements Consumer<MetricsCollectorConte
       return;
     }
 
-    List<PCFMessage> messages =
-        MessageFilter.ofKind("topic")
-            .excluding(context.getTopicExcludeFilters())
-            .withResourceExtractor(MessageBuddy::topicName)
-            .filter(response);
-
-    for (PCFMessage message : messages) {
+    for (PCFMessage message : response) {
       String topicName = MessageBuddy.topicName(message);
       logger.debug(
           "Pulling out metrics for topic name {} for command MQCMD_INQUIRE_TOPIC_STATUS",
