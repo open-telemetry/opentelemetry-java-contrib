@@ -5,14 +5,20 @@
 
 package io.opentelemetry.ibm.mq.config;
 
+import com.ibm.mq.constants.CMQCFC;
+import com.ibm.mq.headers.pcf.PCFMessage;
 import io.opentelemetry.ibm.mq.metricscollector.FilterType;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** A jackson databind class used for config. */
 public final class ExcludeFilters {
+
+  private static final Logger logger = LoggerFactory.getLogger(ExcludeFilters.class);
 
   private String type = "UNKNOWN";
   private Set<String> values = new HashSet<>();
@@ -81,5 +87,30 @@ public final class ExcludeFilters {
         }
     }
     return false;
+  }
+
+  public void addFilter(PCFMessage request, int field) {
+    for (String value : this.getValues()) {
+      int op = 0;
+      switch (FilterType.valueOf(this.getType())) {
+        case STARTSWITH:
+          op = CMQCFC.MQCFOP_NOT_LIKE;
+          if (!value.endsWith("*")) {
+            value += "*";
+          }
+          break;
+        case EQUALS:
+          op = CMQCFC.MQCFOP_NOT_EQUAL;
+          break;
+        case CONTAINS:
+        case ENDSWITH:
+          op = CMQCFC.MQCFOP_EXCLUDES;
+          break;
+        case NONE:
+          logger.warn("Invalid type of filter {}", this.getType());
+          continue;
+      }
+      request.addFilterParameter(field, op, value);
+    }
   }
 }
