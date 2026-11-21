@@ -125,5 +125,7 @@ sslConnection:
 otlpExporter:
   otel.exporter.otlp.endpoint: http://localhost:4318
   otel.exporter.otlp.protocol: http/protobuf
-  # Set an export interval lower than the collection interval `taskDelaySeconds` to avoid sending all metrics in one batch.
+  # Set an export interval lower than the collection interval `taskDelaySeconds` to send data more often than it is collected.
   otel.metric.export.interval: 30000
+  # Set a limit to batch the number of metric data points sent per payload, to avoid sending requests larger than allowed.
+  otel.metric.export.max.batch.size: 5000
