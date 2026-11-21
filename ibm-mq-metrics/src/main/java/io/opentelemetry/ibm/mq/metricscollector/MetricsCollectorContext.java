@@ -49,7 +49,7 @@ public final class MetricsCollectorContext {
     return queueManager.getChannelFilters().getInclude();
   }
 
-  List<ExcludeFilters> getChannelExcludeFilters() {
+  Set<ExcludeFilters> getChannelExcludeFilters() {
     return queueManager.getChannelFilters().getExclude();
   }
 
@@ -57,7 +57,7 @@ public final class MetricsCollectorContext {
     return queueManager.getListenerFilters().getInclude();
   }
 
-  List<ExcludeFilters> getListenerExcludeFilters() {
+  Set<ExcludeFilters> getListenerExcludeFilters() {
     return queueManager.getListenerFilters().getExclude();
   }
 
@@ -65,7 +65,7 @@ public final class MetricsCollectorContext {
     return queueManager.getTopicFilters().getInclude();
   }
 
-  List<ExcludeFilters> getTopicExcludeFilters() {
+  Set<ExcludeFilters> getTopicExcludeFilters() {
     return queueManager.getTopicFilters().getExclude();
   }
 
@@ -73,7 +73,7 @@ public final class MetricsCollectorContext {
     return queueManager.getQueueFilters().getInclude();
   }
 
-  List<ExcludeFilters> getQueueExcludeFilters() {
+  Set<ExcludeFilters> getQueueExcludeFilters() {
     return queueManager.getQueueFilters().getExclude();
   }
 

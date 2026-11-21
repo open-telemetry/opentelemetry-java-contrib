@@ -5,16 +5,14 @@
 
 package io.opentelemetry.ibm.mq.config;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /** Include and exclude filters for IBM MQ resource names. */
 public final class ResourceFilters {
 
   private Set<String> include = new HashSet<>();
-  private List<ExcludeFilters> exclude = new ArrayList<>();
+  private Set<ExcludeFilters> exclude = new HashSet<>();
 
   public Set<String> getInclude() {
     return include;
@@ -24,11 +22,11 @@ public final class ResourceFilters {
     this.include = include;
   }
 
-  public List<ExcludeFilters> getExclude() {
+  public Set<ExcludeFilters> getExclude() {
     return exclude;
   }
 
-  public void setExclude(List<ExcludeFilters> exclude) {
+  public void setExclude(Set<ExcludeFilters> exclude) {
     this.exclude = exclude;
   }
 }

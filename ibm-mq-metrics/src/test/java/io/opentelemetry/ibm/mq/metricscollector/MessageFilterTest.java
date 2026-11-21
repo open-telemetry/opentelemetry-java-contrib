@@ -30,7 +30,7 @@ public class MessageFilterTest {
     values.add("BAR");
     filter.setValues(values);
 
-    List<ExcludeFilters> filters = new ArrayList<>();
+    Set<ExcludeFilters> filters = new HashSet<>();
     filters.add(filter);
 
     List<PCFMessage> response = new ArrayList<>();
