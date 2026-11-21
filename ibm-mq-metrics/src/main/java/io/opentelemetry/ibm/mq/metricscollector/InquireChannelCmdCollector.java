@@ -15,7 +15,6 @@ import com.ibm.mq.headers.pcf.MQCFIL;
 import com.ibm.mq.headers.pcf.PCFException;
 import com.ibm.mq.headers.pcf.PCFMessage;
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.ibm.mq.config.ExcludeFilters;
 import io.opentelemetry.ibm.mq.metrics.MetricProducer;
 import java.util.List;
 import java.util.Set;
@@ -44,9 +43,6 @@ public final class InquireChannelCmdCollector implements Consumer<MetricsCollect
       request.addParameter(CMQCFC.MQCACH_CHANNEL_NAME, channelGenericName);
       request.addParameter(
           new MQCFIL(MQConstants.MQIACF_CHANNEL_ATTRS, new int[] {MQConstants.MQIACF_ALL}));
-      for (ExcludeFilters filter : context.getChannelExcludeFilters()) {
-        filter.addFilter(request, CMQCFC.MQCACH_CHANNEL_NAME);
-      }
       try {
         logger.debug(
             "sending PCF agent request to query metrics for generic channel {}",
@@ -63,7 +59,13 @@ public final class InquireChannelCmdCollector implements Consumer<MetricsCollect
           return;
         }
 
-        for (PCFMessage message : response) {
+        List<PCFMessage> messages =
+            MessageFilter.ofKind("channel")
+                .excluding(context.getChannelExcludeFilters())
+                .withResourceExtractor(MessageBuddy::channelName)
+                .filter(response);
+
+        for (PCFMessage message : messages) {
           String channelName = MessageBuddy.channelName(message);
           String channelType = MessageBuddy.channelType(message);
           logger.debug("Pulling out metrics for channel name {}", channelName);
