@@ -264,7 +264,7 @@ class GcpPlatformDetectorTest {
 
   @Test
   void testCloudRunDetectionWhenFunctionTargetPresent() {
-    // Cloud Run functions (including Cloud Functions 2nd gen) set both K_CONFIGURATION
+    // Cloud Run functions run as Cloud Run services and set both K_CONFIGURATION
     // and FUNCTION_TARGET; they should be detected as Cloud Run.
     envVars.put("K_SERVICE", "cloud-function-hello");
     envVars.put("K_REVISION", "cloud-function-hello.1");

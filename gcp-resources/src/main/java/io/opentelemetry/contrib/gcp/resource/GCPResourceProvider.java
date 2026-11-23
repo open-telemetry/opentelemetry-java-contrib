@@ -357,8 +357,10 @@ public class GCPResourceProvider implements ConditionalResourceProvider {
   }
 
   /**
-   * This function adds common attributes required for most serverless compute platforms within GCP.
-   * Currently, these attributes are required for both GCF and GCR.
+   * Adds common attributes shared across GCP serverless compute platforms (Cloud Run services,
+   * worker pools, and instances, as well as Cloud Run functions 1st gen). Only attributes present
+   * in {@code attributesMap} are added (for example, worker pools and instances do not provide
+   * {@code cloud.availability_zone}, and instances do not provide {@code faas.version}).
    *
    * @param attrBuilder The {@link AttributesBuilder} object that needs to be updated with the
    *     necessary keys.

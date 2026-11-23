@@ -39,9 +39,13 @@ class GcpPlatformDetector {
     if (environmentVariables.get("KUBERNETES_SERVICE_HOST") != null) {
       return SupportedPlatform.GOOGLE_KUBERNETES_ENGINE;
     } else if (environmentVariables.get("K_CONFIGURATION") != null) {
-      // Check Cloud Run before Cloud Functions because Cloud Run functions (including
-      // Cloud Functions 2nd gen) set both K_CONFIGURATION and FUNCTION_TARGET, whereas
-      // Cloud Functions 1st gen only sets FUNCTION_TARGET.
+      // Check K_CONFIGURATION before FUNCTION_TARGET: Cloud Run functions run as Cloud Run
+      // services and set both K_CONFIGURATION and FUNCTION_TARGET, whereas Cloud Run functions
+      // (1st gen) set FUNCTION_TARGET without K_CONFIGURATION.
+      // See:
+      // https://cloud.google.com/run/docs/container-contract#services-env-vars
+      // https://cloud.google.com/run/docs/configuring/services/environment-variables#reserved
+      // https://cloud.google.com/functions/1stgendocs/configuring/env-var#runtime_environment_variables_set_automatically
       return SupportedPlatform.GOOGLE_CLOUD_RUN;
     } else if (environmentVariables.get("FUNCTION_TARGET") != null) {
       return SupportedPlatform.GOOGLE_CLOUD_FUNCTIONS;
@@ -113,7 +117,7 @@ class GcpPlatformDetector {
     GOOGLE_CLOUD_RUN_WORKER_POOL,
     /** Represents the Google Cloud Run platform (Instances). */
     GOOGLE_CLOUD_RUN_INSTANCE,
-    /** Represents the Google Cloud Functions platform. */
+    /** Represents the Google Cloud Run platform (Functions). */
     GOOGLE_CLOUD_FUNCTIONS,
     /** Represents the case when the application is not running on GCP. */
     UNKNOWN_PLATFORM,
