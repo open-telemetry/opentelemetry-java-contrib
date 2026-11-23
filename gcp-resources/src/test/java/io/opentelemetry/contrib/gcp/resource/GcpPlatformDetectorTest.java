@@ -114,7 +114,7 @@ class GcpPlatformDetectorTest {
     assertEquals("GCE-pid", detector.detectPlatform().getProjectId());
     Map<String, String> detectedAttributes = detector.detectPlatform().getAttributes();
     assertEquals(new GoogleComputeEngine(mockMetadataConfig).getAttributes(), detectedAttributes);
-    assertEquals(6, detectedAttributes.size());
+    assertEquals(9, detectedAttributes.size());
 
     assertEquals("country-gce_region-gce_zone", detectedAttributes.get(GCE_AVAILABILITY_ZONE));
     assertEquals("country-gce_region", detectedAttributes.get(GCE_CLOUD_REGION));
@@ -122,6 +122,9 @@ class GcpPlatformDetectorTest {
     assertEquals("GCE-instance-name", detectedAttributes.get(GCE_INSTANCE_NAME));
     assertEquals("GCE-instance-type", detectedAttributes.get(GCE_MACHINE_TYPE));
     assertEquals("GCE-instance-hostname", detectedAttributes.get(GCE_INSTANCE_HOSTNAME));
+    assertNull(detectedAttributes.get(GCE_INSTANCE_GROUP_MANAGER_NAME));
+    assertNull(detectedAttributes.get(GCE_INSTANCE_GROUP_MANAGER_ZONE));
+    assertNull(detectedAttributes.get(GCE_INSTANCE_GROUP_MANAGER_REGION));
   }
 
   @Test
@@ -140,7 +143,7 @@ class GcpPlatformDetectorTest {
         new GcpPlatformDetector(mockMetadataConfig, new EnvVarMock(envVars));
 
     Map<String, String> detectedAttributes = detector.detectPlatform().getAttributes();
-    assertEquals(8, detectedAttributes.size());
+    assertEquals(9, detectedAttributes.size());
     assertEquals("my-zonal-mig", detectedAttributes.get(GCE_INSTANCE_GROUP_MANAGER_NAME));
     assertEquals("us-central1-a", detectedAttributes.get(GCE_INSTANCE_GROUP_MANAGER_ZONE));
     assertNull(detectedAttributes.get(GCE_INSTANCE_GROUP_MANAGER_REGION));
@@ -162,7 +165,7 @@ class GcpPlatformDetectorTest {
         new GcpPlatformDetector(mockMetadataConfig, new EnvVarMock(envVars));
 
     Map<String, String> detectedAttributes = detector.detectPlatform().getAttributes();
-    assertEquals(8, detectedAttributes.size());
+    assertEquals(9, detectedAttributes.size());
     assertEquals("my-regional-mig", detectedAttributes.get(GCE_INSTANCE_GROUP_MANAGER_NAME));
     assertEquals("us-central1", detectedAttributes.get(GCE_INSTANCE_GROUP_MANAGER_REGION));
     assertNull(detectedAttributes.get(GCE_INSTANCE_GROUP_MANAGER_ZONE));
@@ -184,7 +187,7 @@ class GcpPlatformDetectorTest {
         new GcpPlatformDetector(mockMetadataConfig, new EnvVarMock(envVars));
 
     Map<String, String> detectedAttributes = detector.detectPlatform().getAttributes();
-    assertEquals(6, detectedAttributes.size());
+    assertEquals(9, detectedAttributes.size());
     assertNull(detectedAttributes.get(GCE_INSTANCE_GROUP_MANAGER_NAME));
     assertNull(detectedAttributes.get(GCE_INSTANCE_GROUP_MANAGER_REGION));
     assertNull(detectedAttributes.get(GCE_INSTANCE_GROUP_MANAGER_ZONE));

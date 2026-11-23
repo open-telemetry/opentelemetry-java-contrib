@@ -99,6 +99,9 @@ class GCPResourceProviderTest {
                 GCE_INSTANCE_NAME, "instance-name",
                 GCE_MACHINE_TYPE, "gce-m2",
                 GCE_INSTANCE_HOSTNAME, "instance-hostname"));
+    mockAttributes.put(GCE_INSTANCE_GROUP_MANAGER_NAME, null);
+    mockAttributes.put(GCE_INSTANCE_GROUP_MANAGER_ZONE, null);
+    mockAttributes.put(GCE_INSTANCE_GROUP_MANAGER_REGION, null);
     DetectedPlatform mockGCEPlatform = mock(DetectedPlatform.class);
     when(mockGCEPlatform.getSupportedPlatform())
         .thenReturn(GcpPlatformDetector.SupportedPlatform.GOOGLE_COMPUTE_ENGINE);
@@ -219,7 +222,9 @@ class GCPResourceProviderTest {
         .containsEntry(CLOUD_AVAILABILITY_ZONE, detectedAttributes.get(GCE_AVAILABILITY_ZONE))
         .containsEntry(CLOUD_REGION, detectedAttributes.get(GCE_CLOUD_REGION))
         .doesNotContainKey(CLOUD_RESOURCE_ID)
-        .doesNotContainKey(GCP_GCE_INSTANCE_GROUP_MANAGER_NAME);
+        .doesNotContainKey(GCP_GCE_INSTANCE_GROUP_MANAGER_NAME)
+        .doesNotContainKey(GCP_GCE_INSTANCE_GROUP_MANAGER_REGION)
+        .doesNotContainKey(GCP_GCE_INSTANCE_GROUP_MANAGER_ZONE);
   }
 
   @Test
