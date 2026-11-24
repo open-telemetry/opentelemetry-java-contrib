@@ -20,14 +20,14 @@ dependencies {
   annotationProcessor("com.google.auto.value:auto-value")
   compileOnly("com.google.auto.value:auto-value-annotations")
 
-  testImplementation("io.micrometer:micrometer-core:1.17.2")
+  testImplementation("io.micrometer:micrometer-core:1.18.0")
 }
 
 testing {
   suites {
     register<JvmTestSuite>("integrationTest") {
       dependencies {
-        implementation("io.micrometer:micrometer-registry-prometheus:1.17.2")
+        implementation("io.micrometer:micrometer-registry-prometheus:1.18.0")
       }
     }
   }
