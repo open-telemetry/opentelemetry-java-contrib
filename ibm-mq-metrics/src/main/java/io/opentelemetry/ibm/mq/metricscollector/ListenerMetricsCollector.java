@@ -12,11 +12,11 @@ import com.ibm.mq.constants.CMQCFC;
 import com.ibm.mq.headers.pcf.PCFException;
 import com.ibm.mq.headers.pcf.PCFMessage;
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.ibm.mq.metrics.MetricProducer;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
-import io.opentelemetry.ibm.mq.metrics.MetricProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

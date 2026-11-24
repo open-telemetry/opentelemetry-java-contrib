@@ -56,16 +56,14 @@ public final class Main {
 
     AutoConfiguredOpenTelemetrySdk.builder()
         .addPropertiesSupplier(config::getOtlpConfiguration)
-        .addMeterProviderCustomizer((builder, configProps) ->
-            builder.setResource(Resource.empty()))
-        .addMeterProviderCustomizer(
-            (builder, configProps) -> {
-              builder.setResource(Resource.empty());
-              for (MetricProducer mp : monitor.getMetricProducersByQueueManagers().values()) {
-                builder.registerMetricProducer(mp);
-              }
-              return builder;
-            })
+        .addMeterProviderCustomizer((builder, configProps) -> builder.setResource(Resource.empty()))
+        .addMeterProviderCustomizer((builder, configProps) -> {
+          builder.setResource(Resource.empty());
+          for (MetricProducer mp : monitor.getMetricProducersByQueueManagers().values()) {
+            builder.registerMetricProducer(mp);
+          }
+          return builder;
+        })
         .build();
 
     int numQueueManagers = monitor.getMetricProducersByQueueManagers().size();
