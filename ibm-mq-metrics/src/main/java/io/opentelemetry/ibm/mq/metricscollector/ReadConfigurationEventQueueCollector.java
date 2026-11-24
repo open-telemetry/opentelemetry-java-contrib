@@ -97,7 +97,6 @@ public final class ReadConfigurationEventQueueCollector
 
   @Override
   public void accept(MetricsCollectorContext context) {
-    MetricProducer producer = context.getMetricProducer();
     long entryTime = System.currentTimeMillis();
     MetricProducer producer = context.getMetricProducer();
     String configurationQueueName = context.getQueueManager().getConfigurationQueueName();

@@ -12,7 +12,6 @@ import com.ibm.mq.constants.CMQCFC;
 import com.ibm.mq.headers.pcf.PCFException;
 import com.ibm.mq.headers.pcf.PCFMessage;
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.ibm.mq.metrics.MetricProducer;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -94,16 +93,17 @@ public final class ListenerMetricsCollector implements Consumer<MetricsCollector
   private static void updateMetrics(
       PCFMessage message, String listenerName, MetricsCollectorContext context)
       throws PCFException {
-    MetricProducer producer = context.getMetricProducer();
     if (context.getMetricsConfig().isIbmMqListenerStatusEnabled()) {
       int status = message.getIntParameterValue(CMQCFC.MQIACH_LISTENER_STATUS);
-      producer.recordIbmMqListenerStatus(
-          status,
-          Attributes.of(
-              IBM_MQ_LISTENER_NAME,
-              listenerName,
-              IBM_MQ_QUEUE_MANAGER,
-              context.getQueueManagerName()));
+      context
+          .getMetricProducer()
+          .recordIbmMqListenerStatus(
+              status,
+              Attributes.of(
+                  IBM_MQ_LISTENER_NAME,
+                  listenerName,
+                  IBM_MQ_QUEUE_MANAGER,
+                  context.getQueueManagerName()));
     }
   }
 }

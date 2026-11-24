@@ -34,6 +34,7 @@ public final class QueueManagerEventCollector implements Consumer<MetricsCollect
   private static void readEvents(
       MetricsCollectorContext context, String queueManagerEventsQueueName) throws Exception {
     MetricProducer producer = context.getMetricProducer();
+
     MQQueue queue = null;
     try {
       int queueAccessOptions = MQConstants.MQOO_FAIL_IF_QUIESCING | MQConstants.MQOO_INPUT_SHARED;

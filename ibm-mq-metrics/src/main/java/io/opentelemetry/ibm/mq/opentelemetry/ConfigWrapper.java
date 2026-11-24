@@ -146,16 +146,4 @@ public final class ConfigWrapper {
     }
     return Collections.emptyMap();
   }
-
-  public Map<String, String> getOtlpConfiguration() {
-    Map<String, String> properties = new HashMap<>();
-    if (config.get("otlpExporter") instanceof Map) {
-      Map<?, ?> otlpExporterConfig = (Map<?, ?>) config.get("otlpExporter");
-
-      for (Map.Entry<?, ?> entry : otlpExporterConfig.entrySet()) {
-        properties.put(String.valueOf(entry.getKey()), String.valueOf(entry.getValue()));
-      }
-    }
-    return properties;
-  }
 }
