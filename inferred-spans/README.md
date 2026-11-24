@@ -105,6 +105,7 @@ The `setTracerProvider(..)` call shown at the end may be omitted, in that case
 
 * After each profiling session, while the stack traces and activation events are processed, no traces are collected.
   * Under load, processing can take seconds; ~200ms are normal.
+
   * Log:
 
     ```text
@@ -129,10 +130,12 @@ The `setTracerProvider(..)` call shown at the end may be omitted, in that case
   ```
 
 * Under load, the activation event ring buffer can also get full
+
 * The actual `otel.inferred.spans.sampling.interval` might be a bit lower.
   async-profiler aims to keep the interval relatively consistent but if there
   are too many threads actively running transactions or if there's a traffic
   spike, the interval can be lower.
+
 * As a result of the above, some transactions don't contain inferred spans, even if their duration is longer than `otel.inferred.spans.sampling.interval`.
   Log:
 
