@@ -6,6 +6,7 @@
 package io.opentelemetry.contrib.inferredspans;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.condition.OS.WINDOWS;
 
 import io.opentelemetry.api.trace.SpanBuilder;
@@ -21,6 +22,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 @DisabledOnOs(WINDOWS) // Uses async-profiler, which is not supported on Windows
 class InferredSpansSpanProcessorProviderTest {
@@ -148,6 +151,52 @@ class InferredSpansSpanProcessorProviderTest {
               assertThat(p.getClass().getName())
                   .isEqualTo("io.opentelemetry.sdk.trace.NoopSpanProcessor"));
     }
+  }
+
+  @Test
+  void declarativeConfigNullDurationUsesDefault() {
+    String yaml =
+        "file_format: '1.0'\n"
+            + "tracer_provider:\n"
+            + "  processors:\n"
+            + "    - inferred_spans/development:\n"
+            + "        min_duration:\n";
+
+    try (OpenTelemetrySdk sdk =
+        DeclarativeConfiguration.parseAndCreate(
+                new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)))
+            .getSdk()) {
+      assertThat(sdk)
+          .extracting("tracerProvider")
+          .extracting("delegate")
+          .extracting("sharedState")
+          .extracting("activeSpanProcessor")
+          .extracting("profiler")
+          .extracting("config")
+          .extracting("inferredSpansMinDuration")
+          .isEqualTo(Duration.ZERO);
+    }
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"sampling_interval", "min_duration", "interval", "duration"})
+  void declarativeConfigRejectsNonIntegerDuration(String key) {
+    String yaml =
+        "file_format: '1.0'\n"
+            + "tracer_provider:\n"
+            + "  processors:\n"
+            + "    - inferred_spans/development:\n"
+            + "        "
+            + key
+            + ": 10ms\n";
+
+    assertThatThrownBy(() ->
+            DeclarativeConfiguration.parseAndCreate(
+                new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8))))
+        .hasStackTraceContaining(
+            "inferred_spans/development ."
+                + key
+                + " must be an integer number of milliseconds, got: 10ms");
   }
 
   public static class TestParentOverrideHandler implements BiConsumer<SpanBuilder, SpanContext> {

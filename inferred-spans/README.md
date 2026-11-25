@@ -65,12 +65,12 @@ tracer_provider:
   processors:
     - inferred_spans/development:
         enabled: true # true by default unlike autoconfiguration described above
-        sampling_interval: 25ms
+        sampling_interval: 25 # milliseconds
         included_classes: "org.example.myapp.*"
         excluded_classes: "java.*"
-        min_duration: 10ms
-        interval: 5s
-        duration: 5s
+        min_duration: 10 # milliseconds
+        interval: 5000 # milliseconds
+        duration: 5000 # milliseconds
         lib_directory: "/var/tmp"
         parent_override_handler: "com.example.MyParentOverrideHandler"
 ```
@@ -78,6 +78,8 @@ tracer_provider:
 All the same settings as for [autoconfiguration](#autoconfiguration) can be used here,
 just with the `otel.inferred.spans.` prefix stripped.
 For example, `otel.inferred.spans.sampling.interval` becomes `sampling_interval` in YAML.
+Duration settings (`sampling_interval`, `min_duration`, `interval`, `duration`) must be
+integers in milliseconds; duration strings such as `10ms` are rejected.
 
 ### Manual SDK setup
 
