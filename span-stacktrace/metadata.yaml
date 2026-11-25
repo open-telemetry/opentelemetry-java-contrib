@@ -5,13 +5,13 @@ description: >-
   creating new telemetry. Skips spans that already have a stack trace and inferred
   spans produced by the inferred-spans component.
 source_path: span-stacktrace
-component_type:
+component_types:
   - library
 docs_url: https://github.com/open-telemetry/opentelemetry-java-contrib/blob/main/span-stacktrace/README.md#usage-and-configuration
 usage: >-
-  Include the artifact in application runtime dependencies and configure the
-  OpenTelemetry SDK using one of the methods below. Stack trace capture runs
-  when eligible spans end and can add overhead.
+  Include the artifact in application runtime dependencies. The application must
+  use SDK autoconfiguration or declarative SDK configuration. Stack trace capture
+  runs when eligible spans end and can add overhead.
 status:
   stability: beta
 artifact:
@@ -23,13 +23,14 @@ configurations:
     display_name: SDK autoconfiguration properties
     description: >-
       When the application uses OpenTelemetry SDK autoconfiguration, the processor
-      is registered automatically from the runtime classpath. Set these system
-      properties as JVM arguments to customize it. The example sets a 10 ms
-      threshold; no custom filter is required.
+      is registered automatically from the runtime classpath with default settings.
+      Set these system properties as JVM arguments, or the equivalent environment
+      variables, to customize it. The example sets a 10 ms threshold for an
+      application packaged as app.jar; no custom filter is required.
     example:
       language: shell
       code: |-
-        -Dotel.java.experimental.span-stacktrace.min.duration=10ms
+        java -Dotel.java.experimental.span-stacktrace.min.duration=10ms -jar app.jar
     settings:
       - name: otel.java.experimental.span-stacktrace.min.duration
         type: duration
@@ -46,7 +47,8 @@ configurations:
           java.util.function.Predicate<ReadableSpan> with a public no-argument
           constructor. Returning false excludes the span from stack trace capture.
           When unset, all otherwise eligible spans are included. If the class cannot
-          be loaded or instantiated, an error is logged and the same fallback applies.
+          be loaded, does not implement Predicate, or cannot be instantiated, an error
+          is logged and the same fallback applies.
   - type: declarative
     display_name: Declarative SDK configuration
     description: >-
@@ -71,7 +73,9 @@ configurations:
           Minimum span duration in milliseconds for capturing a stack trace.
           Must be a nonnegative integer. Zero removes the duration threshold;
           other filters still apply. Negative values are rejected; omit the
-          processor from the configuration to disable it.
+          processor from the configuration to disable it. Non-integer values,
+          including duration strings such as "10ms", are ignored and the default
+          applies.
       - name: filter
         type: string
         default: null
@@ -80,4 +84,5 @@ configurations:
           java.util.function.Predicate<ReadableSpan> with a public no-argument
           constructor. Returning false excludes the span from stack trace capture.
           When unset, all otherwise eligible spans are included. If the class cannot
-          be loaded or instantiated, an error is logged and the same fallback applies.
+          be loaded, does not implement Predicate, or cannot be instantiated, an error
+          is logged and the same fallback applies.
