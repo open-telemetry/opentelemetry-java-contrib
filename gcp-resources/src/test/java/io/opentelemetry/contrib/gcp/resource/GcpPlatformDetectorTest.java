@@ -16,6 +16,9 @@ import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GAE_INSTANCE_I
 import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GAE_MODULE_NAME;
 import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_AVAILABILITY_ZONE;
 import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_CLOUD_REGION;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_INSTANCE_GROUP_MANAGER_NAME;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_INSTANCE_GROUP_MANAGER_REGION;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_INSTANCE_GROUP_MANAGER_ZONE;
 import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_INSTANCE_HOSTNAME;
 import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_INSTANCE_ID;
 import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_INSTANCE_NAME;
@@ -111,7 +114,7 @@ class GcpPlatformDetectorTest {
     assertEquals("GCE-pid", detector.detectPlatform().getProjectId());
     Map<String, String> detectedAttributes = detector.detectPlatform().getAttributes();
     assertEquals(new GoogleComputeEngine(mockMetadataConfig).getAttributes(), detectedAttributes);
-    assertEquals(6, detectedAttributes.size());
+    assertEquals(9, detectedAttributes.size());
 
     assertEquals("country-gce_region-gce_zone", detectedAttributes.get(GCE_AVAILABILITY_ZONE));
     assertEquals("country-gce_region", detectedAttributes.get(GCE_CLOUD_REGION));
@@ -119,6 +122,75 @@ class GcpPlatformDetectorTest {
     assertEquals("GCE-instance-name", detectedAttributes.get(GCE_INSTANCE_NAME));
     assertEquals("GCE-instance-type", detectedAttributes.get(GCE_MACHINE_TYPE));
     assertEquals("GCE-instance-hostname", detectedAttributes.get(GCE_INSTANCE_HOSTNAME));
+    assertNull(detectedAttributes.get(GCE_INSTANCE_GROUP_MANAGER_NAME));
+    assertNull(detectedAttributes.get(GCE_INSTANCE_GROUP_MANAGER_ZONE));
+    assertNull(detectedAttributes.get(GCE_INSTANCE_GROUP_MANAGER_REGION));
+  }
+
+  @Test
+  void testGCEResourceWithZonalMigAttributesSucceeds() {
+    TestUtils.stubEndpoint("/project/project-id", "GCE-pid");
+    TestUtils.stubEndpoint("/instance/zone", "country-gce_region-gce_zone");
+    TestUtils.stubEndpoint("/instance/id", "GCE-instance-id");
+    TestUtils.stubEndpoint("/instance/name", "GCE-instance-name");
+    TestUtils.stubEndpoint("/instance/machine-type", "GCE-instance-type");
+    TestUtils.stubEndpoint("/instance/hostname", "GCE-instance-hostname");
+    TestUtils.stubEndpoint(
+        "/instance/attributes/created-by",
+        "projects/123456789/zones/us-central1-a/instanceGroupManagers/my-zonal-mig");
+
+    GcpPlatformDetector detector =
+        new GcpPlatformDetector(mockMetadataConfig, new EnvVarMock(envVars));
+
+    Map<String, String> detectedAttributes = detector.detectPlatform().getAttributes();
+    assertEquals(9, detectedAttributes.size());
+    assertEquals("my-zonal-mig", detectedAttributes.get(GCE_INSTANCE_GROUP_MANAGER_NAME));
+    assertEquals("us-central1-a", detectedAttributes.get(GCE_INSTANCE_GROUP_MANAGER_ZONE));
+    assertNull(detectedAttributes.get(GCE_INSTANCE_GROUP_MANAGER_REGION));
+  }
+
+  @Test
+  void testGCEResourceWithRegionalMigAttributesSucceeds() {
+    TestUtils.stubEndpoint("/project/project-id", "GCE-pid");
+    TestUtils.stubEndpoint("/instance/zone", "country-gce_region-gce_zone");
+    TestUtils.stubEndpoint("/instance/id", "GCE-instance-id");
+    TestUtils.stubEndpoint("/instance/name", "GCE-instance-name");
+    TestUtils.stubEndpoint("/instance/machine-type", "GCE-instance-type");
+    TestUtils.stubEndpoint("/instance/hostname", "GCE-instance-hostname");
+    TestUtils.stubEndpoint(
+        "/instance/attributes/created-by",
+        "projects/123456789/regions/us-central1/instanceGroupManagers/my-regional-mig");
+
+    GcpPlatformDetector detector =
+        new GcpPlatformDetector(mockMetadataConfig, new EnvVarMock(envVars));
+
+    Map<String, String> detectedAttributes = detector.detectPlatform().getAttributes();
+    assertEquals(9, detectedAttributes.size());
+    assertEquals("my-regional-mig", detectedAttributes.get(GCE_INSTANCE_GROUP_MANAGER_NAME));
+    assertEquals("us-central1", detectedAttributes.get(GCE_INSTANCE_GROUP_MANAGER_REGION));
+    assertNull(detectedAttributes.get(GCE_INSTANCE_GROUP_MANAGER_ZONE));
+  }
+
+  @Test
+  void testGCEResourceWithNonMigCreatedByIgnored() {
+    TestUtils.stubEndpoint("/project/project-id", "GCE-pid");
+    TestUtils.stubEndpoint("/instance/zone", "country-gce_region-gce_zone");
+    TestUtils.stubEndpoint("/instance/id", "GCE-instance-id");
+    TestUtils.stubEndpoint("/instance/name", "GCE-instance-name");
+    TestUtils.stubEndpoint("/instance/machine-type", "GCE-instance-type");
+    TestUtils.stubEndpoint("/instance/hostname", "GCE-instance-hostname");
+    TestUtils.stubEndpoint(
+        "/instance/attributes/created-by",
+        "projects/123456789/zones/us-central1-a/otherResource/not-a-mig");
+
+    GcpPlatformDetector detector =
+        new GcpPlatformDetector(mockMetadataConfig, new EnvVarMock(envVars));
+
+    Map<String, String> detectedAttributes = detector.detectPlatform().getAttributes();
+    assertEquals(9, detectedAttributes.size());
+    assertNull(detectedAttributes.get(GCE_INSTANCE_GROUP_MANAGER_NAME));
+    assertNull(detectedAttributes.get(GCE_INSTANCE_GROUP_MANAGER_REGION));
+    assertNull(detectedAttributes.get(GCE_INSTANCE_GROUP_MANAGER_ZONE));
   }
 
   /** Google Kubernetes Engine Tests * */

@@ -141,6 +141,52 @@ class GcpMetadataConfigTest {
   }
 
   @Test
+  void testGetCreatedBy() {
+    String createdBy = "projects/123456789/zones/us-central1-a/instanceGroupManagers/my-mig";
+    TestUtils.stubEndpoint("/instance/attributes/created-by", createdBy);
+    assertEquals(createdBy, mockMetadataConfig.getCreatedBy());
+  }
+
+  /** Test MIG Retrieval from created-by */
+  @ParameterizedTest
+  @MethodSource("provideCreatedByArguments")
+  void testGetMigFromCreatedBy(
+      String stubbedCreatedBy,
+      String expectedMigName,
+      String expectedMigZone,
+      String expectedMigRegion) {
+    TestUtils.stubEndpoint("/instance/attributes/created-by", stubbedCreatedBy);
+    assertEquals(expectedMigName, mockMetadataConfig.getMigNameFromCreatedBy());
+    assertEquals(expectedMigZone, mockMetadataConfig.getMigZoneFromCreatedBy());
+    assertEquals(expectedMigRegion, mockMetadataConfig.getMigRegionFromCreatedBy());
+  }
+
+  private static Stream<Arguments> provideCreatedByArguments() {
+    return Stream.of(
+        Arguments.of(
+            "projects/123456789/zones/us-central1-a/instanceGroupManagers/my-zonal-mig",
+            "my-zonal-mig",
+            "us-central1-a",
+            null),
+        Arguments.of(
+            "projects/123456789/regions/us-central1/instanceGroupManagers/my-regional-mig",
+            "my-regional-mig",
+            null,
+            "us-central1"),
+        Arguments.of(
+            "projects/123456789/zones/us-central1-a/otherResource/not-a-mig", null, null, null),
+        Arguments.of("", null, null, null),
+        Arguments.of(null, null, null, null));
+  }
+
+  @Test
+  void testGetMigFromCreatedByWhenMissing() {
+    assertThat(mockMetadataConfig.getMigNameFromCreatedBy()).isNull();
+    assertThat(mockMetadataConfig.getMigZoneFromCreatedBy()).isNull();
+    assertThat(mockMetadataConfig.getMigRegionFromCreatedBy()).isNull();
+  }
+
+  @Test
   void testOversizedResponseIsTruncatedTo4096Chars() {
     String oversized = new String(new char[8192]).replace('\0', 'x');
     TestUtils.stubEndpoint("/project/project-id", oversized);

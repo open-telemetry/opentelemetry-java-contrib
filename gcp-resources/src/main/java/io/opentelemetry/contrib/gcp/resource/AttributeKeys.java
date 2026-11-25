@@ -19,6 +19,10 @@ final class AttributeKeys {
   public static final String GCE_INSTANCE_NAME = AttributeKeys.INSTANCE_NAME;
   public static final String GCE_MACHINE_TYPE = AttributeKeys.MACHINE_TYPE;
   public static final String GCE_INSTANCE_HOSTNAME = "instance_hostname";
+  public static final String GCE_INSTANCE_GROUP_MANAGER_NAME = "gce_instance_group_manager_name";
+  public static final String GCE_INSTANCE_GROUP_MANAGER_REGION =
+      "gce_instance_group_manager_region";
+  public static final String GCE_INSTANCE_GROUP_MANAGER_ZONE = "gce_instance_group_manager_zone";
 
   // GKE Attributes
   public static final String GKE_CLUSTER_NAME = "gke_cluster_name";
