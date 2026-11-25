@@ -9,6 +9,7 @@ import static java.util.logging.Level.FINE;
 import static java.util.logging.Level.SEVERE;
 
 import com.google.auto.service.AutoService;
+import io.opentelemetry.api.incubator.config.DeclarativeConfigException;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.instrumentation.config.bridge.DeclarativeConfigBridge;
 import io.opentelemetry.instrumentation.config.bridge.DeclarativeConfigDurationUtil;
@@ -56,6 +57,13 @@ public class StackTraceAutoConfig implements AutoConfigurationCustomizerProvider
   static long getMinDuration(DeclarativeConfigProperties properties) {
     Duration minDuration = DeclarativeConfigDurationUtil.getDuration(properties, "min_duration");
     if (minDuration == null) {
+      // declarative config returns null for non-integer values, which must not be treated as unset
+      Object rawValue = DeclarativeConfigProperties.toMap(properties).get("min_duration");
+      if (rawValue != null) {
+        throw new DeclarativeConfigException(
+            "stacktrace/development .min_duration must be an integer number of milliseconds, got string: "
+                + rawValue);
+      }
       minDuration = CONFIG_MIN_DURATION_DEFAULT;
     }
     long minDurationNanos = minDuration.toNanos();
