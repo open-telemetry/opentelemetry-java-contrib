@@ -122,6 +122,12 @@ public class GCPResourceProvider implements ConditionalResourceProvider {
       case GOOGLE_CLOUD_RUN_JOB:
         addGcrJobAttributes(attrBuilder, detectedPlatform.getAttributes(), projectId);
         break;
+      case GOOGLE_CLOUD_RUN_WORKER_POOL:
+        addGcrWorkerPoolAttributes(attrBuilder, detectedPlatform.getAttributes(), projectId);
+        break;
+      case GOOGLE_CLOUD_RUN_INSTANCE:
+        addGcrInstanceAttributes(attrBuilder, detectedPlatform.getAttributes(), projectId);
+        break;
       case GOOGLE_APP_ENGINE:
         addGaeAttributes(attrBuilder, detectedPlatform.getAttributes());
         break;
@@ -296,6 +302,50 @@ public class GCPResourceProvider implements ConditionalResourceProvider {
   }
 
   /**
+   * Updates the attributes with the required keys for a GCR (Google Cloud Run) Worker Pool
+   * environment. The attributes are not updated in case the environment is not deemed to be a GCR
+   * worker pool environment.
+   *
+   * @param attrBuilder The {@link AttributesBuilder} object that needs to be updated with the
+   *     necessary keys.
+   */
+  private static void addGcrWorkerPoolAttributes(
+      AttributesBuilder attrBuilder,
+      Map<String, String> attributesMap,
+      @Nullable String projectId) {
+    attrBuilder.put(CLOUD_PLATFORM, GCP_CLOUD_RUN);
+    addCommonAttributesForServerlessCompute(attrBuilder, attributesMap);
+    addCloudResourceId(
+        attrBuilder,
+        "//run.googleapis.com/projects/%s/locations/%s/workerPools/%s",
+        projectId,
+        attributesMap.get(SERVERLESS_COMPUTE_CLOUD_REGION),
+        attributesMap.get(SERVERLESS_COMPUTE_NAME));
+  }
+
+  /**
+   * Updates the attributes with the required keys for a GCR (Google Cloud Run) Instance
+   * environment. The attributes are not updated in case the environment is not deemed to be a GCR
+   * instance environment.
+   *
+   * @param attrBuilder The {@link AttributesBuilder} object that needs to be updated with the
+   *     necessary keys.
+   */
+  private static void addGcrInstanceAttributes(
+      AttributesBuilder attrBuilder,
+      Map<String, String> attributesMap,
+      @Nullable String projectId) {
+    attrBuilder.put(CLOUD_PLATFORM, GCP_CLOUD_RUN);
+    addCommonAttributesForServerlessCompute(attrBuilder, attributesMap);
+    addCloudResourceId(
+        attrBuilder,
+        "//run.googleapis.com/projects/%s/locations/%s/instances/%s",
+        projectId,
+        attributesMap.get(SERVERLESS_COMPUTE_CLOUD_REGION),
+        attributesMap.get(SERVERLESS_COMPUTE_NAME));
+  }
+
+  /**
    * Updates the attributes with the required keys for a GAE (Google App Engine) environment. The
    * attributes are not updated in case the environment is not deemed to be GAE.
    *
@@ -319,8 +369,10 @@ public class GCPResourceProvider implements ConditionalResourceProvider {
   }
 
   /**
-   * This function adds common attributes required for most serverless compute platforms within GCP.
-   * Currently, these attributes are required for both GCF and GCR.
+   * Adds common attributes shared across GCP serverless compute platforms (Cloud Run services,
+   * worker pools, and instances, as well as Cloud Run functions 1st gen). Only attributes present
+   * in {@code attributesMap} are added (for example, worker pools and instances do not provide
+   * {@code cloud.availability_zone}, and instances do not provide {@code faas.version}).
    *
    * @param attrBuilder The {@link AttributesBuilder} object that needs to be updated with the
    *     necessary keys.

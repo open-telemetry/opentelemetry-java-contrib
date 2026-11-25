@@ -38,13 +38,23 @@ class GcpPlatformDetector {
     // Note: Order of detection matters here
     if (environmentVariables.get("KUBERNETES_SERVICE_HOST") != null) {
       return SupportedPlatform.GOOGLE_KUBERNETES_ENGINE;
-    } else if (environmentVariables.get("K_CONFIGURATION") != null
-        && environmentVariables.get("FUNCTION_TARGET") == null) {
+    } else if (environmentVariables.get("K_CONFIGURATION") != null) {
+      // Check K_CONFIGURATION before FUNCTION_TARGET: Cloud Run functions run as Cloud Run
+      // services and set both K_CONFIGURATION and FUNCTION_TARGET, whereas Cloud Run functions
+      // (1st gen) set FUNCTION_TARGET without K_CONFIGURATION.
+      // See:
+      // https://cloud.google.com/run/docs/container-contract#services-env-vars
+      // https://cloud.google.com/run/docs/configuring/services/environment-variables#reserved
+      // https://cloud.google.com/functions/1stgendocs/configuring/env-var#runtime_environment_variables_set_automatically
       return SupportedPlatform.GOOGLE_CLOUD_RUN;
     } else if (environmentVariables.get("FUNCTION_TARGET") != null) {
       return SupportedPlatform.GOOGLE_CLOUD_FUNCTIONS;
     } else if (environmentVariables.get("CLOUD_RUN_JOB") != null) {
       return SupportedPlatform.GOOGLE_CLOUD_RUN_JOB;
+    } else if (environmentVariables.get("CLOUD_RUN_WORKER_POOL") != null) {
+      return SupportedPlatform.GOOGLE_CLOUD_RUN_WORKER_POOL;
+    } else if (environmentVariables.get("CLOUD_RUN_INSTANCE") != null) {
+      return SupportedPlatform.GOOGLE_CLOUD_RUN_INSTANCE;
     } else if (environmentVariables.get("GAE_SERVICE") != null) {
       return SupportedPlatform.GOOGLE_APP_ENGINE;
     }
@@ -69,6 +79,12 @@ class GcpPlatformDetector {
         break;
       case GOOGLE_CLOUD_RUN_JOB:
         detectedPlatform = new GoogleCloudRunJob(environmentVariables, metadataConfig);
+        break;
+      case GOOGLE_CLOUD_RUN_WORKER_POOL:
+        detectedPlatform = new GoogleCloudRunWorkerPool(environmentVariables, metadataConfig);
+        break;
+      case GOOGLE_CLOUD_RUN_INSTANCE:
+        detectedPlatform = new GoogleCloudRunInstance(environmentVariables, metadataConfig);
         break;
       case GOOGLE_APP_ENGINE:
         detectedPlatform = new GoogleAppEngine(environmentVariables, metadataConfig);
@@ -97,7 +113,11 @@ class GcpPlatformDetector {
     GOOGLE_CLOUD_RUN,
     /** Represents the Google Cloud Run platform (Jobs). */
     GOOGLE_CLOUD_RUN_JOB,
-    /** Represents the Google Cloud Functions platform. */
+    /** Represents the Google Cloud Run platform (Worker Pools). */
+    GOOGLE_CLOUD_RUN_WORKER_POOL,
+    /** Represents the Google Cloud Run platform (Instances). */
+    GOOGLE_CLOUD_RUN_INSTANCE,
+    /** Represents the Google Cloud Run platform (Functions). */
     GOOGLE_CLOUD_FUNCTIONS,
     /** Represents the case when the application is not running on GCP. */
     UNKNOWN_PLATFORM,

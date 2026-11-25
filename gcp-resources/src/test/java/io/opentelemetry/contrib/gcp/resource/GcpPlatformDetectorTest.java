@@ -335,27 +335,27 @@ class GcpPlatformDetectorTest {
   }
 
   @Test
-  void testGCFDetectionWhenGCRAttributesPresent() {
-    // Setup GCF required env vars
+  void testCloudRunDetectionWhenFunctionTargetPresent() {
+    // Cloud Run functions run as Cloud Run services and set both K_CONFIGURATION
+    // and FUNCTION_TARGET; they should be detected as Cloud Run.
     envVars.put("K_SERVICE", "cloud-function-hello");
     envVars.put("K_REVISION", "cloud-function-hello.1");
     envVars.put("FUNCTION_TARGET", "cloud-function-hello");
-    // This should be ignored and detected platform should still be GCF
     envVars.put("K_CONFIGURATION", "cloud-run-hello");
 
-    TestUtils.stubEndpoint("/project/project-id", "GCF-pid");
+    TestUtils.stubEndpoint("/project/project-id", "GCR-pid");
     TestUtils.stubEndpoint("/instance/zone", "country-region-zone");
-    TestUtils.stubEndpoint("/instance/id", "GCF-instance-id");
+    TestUtils.stubEndpoint("/instance/id", "GCR-instance-id");
 
     EnvironmentVariables mockEnv = new EnvVarMock(envVars);
     GcpPlatformDetector detector = new GcpPlatformDetector(mockMetadataConfig, mockEnv);
 
     assertEquals(
-        GcpPlatformDetector.SupportedPlatform.GOOGLE_CLOUD_FUNCTIONS,
+        GcpPlatformDetector.SupportedPlatform.GOOGLE_CLOUD_RUN,
         detector.detectPlatform().getSupportedPlatform());
-    assertEquals("GCF-pid", detector.detectPlatform().getProjectId());
+    assertEquals("GCR-pid", detector.detectPlatform().getProjectId());
     assertEquals(
-        new GoogleCloudFunction(mockEnv, mockMetadataConfig).getAttributes(),
+        new GoogleCloudRun(mockEnv, mockMetadataConfig).getAttributes(),
         detector.detectPlatform().getAttributes());
   }
 
@@ -420,6 +420,65 @@ class GcpPlatformDetectorTest {
     assertEquals("cloud-run-hello-job", detectedAttributes.get(SERVERLESS_COMPUTE_NAME));
     assertEquals("country-region", detectedAttributes.get(SERVERLESS_COMPUTE_CLOUD_REGION));
     assertEquals("GCR-job-instance-id", detectedAttributes.get(SERVERLESS_COMPUTE_INSTANCE_ID));
+  }
+
+  /** Google Cloud Run Tests (Worker Pools) * */
+  @Test
+  void testCloudRunWorkerPoolResourceWithAttributesSucceeds() {
+    // Setup GCR Worker Pool required env vars
+    envVars.put("CLOUD_RUN_WORKER_POOL", "cloud-run-hello-worker-pool");
+    envVars.put("CLOUD_RUN_REVISION", "cloud-run-hello-worker-pool-00001");
+
+    TestUtils.stubEndpoint("/project/project-id", "GCR-pid");
+    TestUtils.stubEndpoint("/instance/region", "projects/123456789/regions/us-central1");
+    TestUtils.stubEndpoint("/instance/id", "GCR-worker-pool-instance-id");
+
+    EnvironmentVariables mockEnv = new EnvVarMock(envVars);
+    GcpPlatformDetector detector = new GcpPlatformDetector(mockMetadataConfig, mockEnv);
+
+    Map<String, String> detectedAttributes = detector.detectPlatform().getAttributes();
+    assertEquals(
+        GcpPlatformDetector.SupportedPlatform.GOOGLE_CLOUD_RUN_WORKER_POOL,
+        detector.detectPlatform().getSupportedPlatform());
+    assertEquals(
+        new GoogleCloudRunWorkerPool(mockEnv, mockMetadataConfig).getAttributes(),
+        detectedAttributes);
+    assertEquals("GCR-pid", detector.detectPlatform().getProjectId());
+    assertEquals(4, detectedAttributes.size());
+
+    assertEquals("cloud-run-hello-worker-pool", detectedAttributes.get(SERVERLESS_COMPUTE_NAME));
+    assertEquals(
+        "cloud-run-hello-worker-pool-00001", detectedAttributes.get(SERVERLESS_COMPUTE_REVISION));
+    assertEquals("us-central1", detectedAttributes.get(SERVERLESS_COMPUTE_CLOUD_REGION));
+    assertEquals(
+        "GCR-worker-pool-instance-id", detectedAttributes.get(SERVERLESS_COMPUTE_INSTANCE_ID));
+  }
+
+  /** Google Cloud Run Tests (Instances) * */
+  @Test
+  void testCloudRunInstanceResourceWithAttributesSucceeds() {
+    envVars.put("CLOUD_RUN_INSTANCE", "cloud-run-hello-instance");
+
+    TestUtils.stubEndpoint("/project/project-id", "GCR-pid");
+    TestUtils.stubEndpoint("/instance/region", "projects/123456789/regions/us-west1");
+    TestUtils.stubEndpoint("/instance/id", "GCR-instance-id");
+
+    EnvironmentVariables mockEnv = new EnvVarMock(envVars);
+    GcpPlatformDetector detector = new GcpPlatformDetector(mockMetadataConfig, mockEnv);
+
+    Map<String, String> detectedAttributes = detector.detectPlatform().getAttributes();
+    assertEquals(
+        GcpPlatformDetector.SupportedPlatform.GOOGLE_CLOUD_RUN_INSTANCE,
+        detector.detectPlatform().getSupportedPlatform());
+    assertEquals(
+        new GoogleCloudRunInstance(mockEnv, mockMetadataConfig).getAttributes(),
+        detectedAttributes);
+    assertEquals("GCR-pid", detector.detectPlatform().getProjectId());
+    assertEquals(3, detectedAttributes.size());
+
+    assertEquals("cloud-run-hello-instance", detectedAttributes.get(SERVERLESS_COMPUTE_NAME));
+    assertEquals("us-west1", detectedAttributes.get(SERVERLESS_COMPUTE_CLOUD_REGION));
+    assertEquals("GCR-instance-id", detectedAttributes.get(SERVERLESS_COMPUTE_INSTANCE_ID));
   }
 
   /** Google App Engine Tests * */
