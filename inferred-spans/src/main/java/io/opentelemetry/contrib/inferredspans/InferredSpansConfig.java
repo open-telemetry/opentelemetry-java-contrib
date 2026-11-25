@@ -7,6 +7,7 @@ package io.opentelemetry.contrib.inferredspans;
 
 import static java.util.stream.Collectors.toList;
 
+import io.opentelemetry.api.incubator.config.DeclarativeConfigException;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
 import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanContext;
@@ -14,6 +15,7 @@ import io.opentelemetry.instrumentation.config.bridge.DeclarativeConfigBridge;
 import io.opentelemetry.instrumentation.config.bridge.DeclarativeConfigDurationUtil;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.trace.SpanProcessor;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -42,20 +44,12 @@ class InferredSpansConfig {
     applyValue(properties.getBoolean("backup_diagnostic_files"), builder::backupDiagnosticFiles);
     applyValue(properties.getInt("safe_mode"), builder::asyncProfilerSafeMode);
     applyValue(properties.getBoolean("post_processing_enabled"), builder::postProcessingEnabled);
-    applyValue(
-        DeclarativeConfigDurationUtil.getDuration(properties, "sampling_interval"),
-        builder::samplingInterval);
-    applyValue(
-        DeclarativeConfigDurationUtil.getDuration(properties, "min_duration"),
-        builder::inferredSpansMinDuration);
+    applyValue(getDuration(properties, "sampling_interval"), builder::samplingInterval);
+    applyValue(getDuration(properties, "min_duration"), builder::inferredSpansMinDuration);
     applyWildcards(properties, "included_classes", builder::includedClasses);
     applyWildcards(properties, "excluded_classes", builder::excludedClasses);
-    applyValue(
-        DeclarativeConfigDurationUtil.getDuration(properties, "interval"),
-        builder::profilerInterval);
-    applyValue(
-        DeclarativeConfigDurationUtil.getDuration(properties, "duration"),
-        builder::profilingDuration);
+    applyValue(getDuration(properties, "interval"), builder::profilerInterval);
+    applyValue(getDuration(properties, "duration"), builder::profilingDuration);
     applyValue(properties.getString("lib_directory"), builder::profilerLibDirectory);
 
     String parentOverrideHandlerName = properties.getString("parent_override_handler");
@@ -74,6 +68,23 @@ class InferredSpansConfig {
     } catch (Exception e) {
       throw new IllegalArgumentException("Could not construct parent override handler", e);
     }
+  }
+
+  @Nullable
+  private static Duration getDuration(DeclarativeConfigProperties properties, String key) {
+    Duration duration = DeclarativeConfigDurationUtil.getDuration(properties, key);
+    if (duration == null) {
+      // declarative config returns null for non-integer values, which must not be treated as unset
+      Object rawValue = DeclarativeConfigProperties.toMap(properties).get(key);
+      if (rawValue != null) {
+        throw new DeclarativeConfigException(
+            "inferred_spans/development ."
+                + key
+                + " must be an integer number of milliseconds, got: "
+                + rawValue);
+      }
+    }
+    return duration;
   }
 
   private static <T> void applyValue(@Nullable T value, Consumer<T> funcToApply) {
