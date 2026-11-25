@@ -61,7 +61,7 @@ public class StackTraceAutoConfig implements AutoConfigurationCustomizerProvider
       Object rawValue = DeclarativeConfigProperties.toMap(properties).get("min_duration");
       if (rawValue != null) {
         throw new DeclarativeConfigException(
-            "stacktrace/development .min_duration must be an integer number of milliseconds, got: "
+            "stacktrace/development .min_duration must be an integer number of milliseconds, got string: "
                 + rawValue);
       }
       minDuration = CONFIG_MIN_DURATION_DEFAULT;
