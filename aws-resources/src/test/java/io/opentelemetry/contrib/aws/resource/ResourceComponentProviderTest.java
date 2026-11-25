@@ -5,28 +5,21 @@
 
 package io.opentelemetry.contrib.aws.resource;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 
-import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
-import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions;
+import io.opentelemetry.sdk.internal.ExtendedOpenTelemetrySdk;
 import io.opentelemetry.semconv.incubating.CloudIncubatingAttributes;
-import org.assertj.core.api.InstanceOfAssertFactory;
 import org.junit.jupiter.api.Test;
 
 class ResourceComponentProviderTest {
   @Test
   void endToEnd() {
-    assertThat(
-            AutoConfiguredOpenTelemetrySdk.builder()
-                .build()
-                .getOpenTelemetrySdk()
-                .getSdkTracerProvider())
-        .extracting("sharedState")
-        .extracting("resource")
-        .extracting(
-            "attributes",
-            new InstanceOfAssertFactory<>(Attributes.class, OpenTelemetryAssertions::assertThat))
+    ExtendedOpenTelemetrySdk sdk =
+        (ExtendedOpenTelemetrySdk)
+            AutoConfiguredOpenTelemetrySdk.builder().build().getOpenTelemetrySdk();
+
+    assertThat(sdk.getSdkResourceProvider().getResource().getAttributes())
         .containsEntry(
             CloudIncubatingAttributes.CLOUD_PROVIDER,
             CloudIncubatingAttributes.CloudProviderIncubatingValues.AWS);

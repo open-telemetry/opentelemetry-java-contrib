@@ -15,6 +15,8 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 
 /**
@@ -28,6 +30,10 @@ final class GcpMetadataConfig {
 
   private static final String DEFAULT_URL = "http://metadata.google.internal/computeMetadata/v1/";
   private static final int MAX_METADATA_VALUE_CHARS = 4096;
+  // Format described in:
+  // https://cloud.google.com/compute/docs/instance-groups/getting-info-about-migs#checking_if_a_vm_instance_is_part_of_a_mig
+  private static final Pattern CREATED_BY_MIG_PATTERN =
+      Pattern.compile("^projects/[^/]+/(zones|regions)/([^/]+)/instanceGroupManagers/([^/]+)$");
   private final String url;
   private final Map<String, String> cachedAttributes = new ConcurrentHashMap<>();
 
@@ -133,6 +139,60 @@ final class GcpMetadataConfig {
   // Returns null on failure to retrieve from metadata server
   String getInstanceName() {
     return getAttribute("instance/name");
+  }
+
+  // Returns null on failure to retrieve from metadata server
+  String getCreatedBy() {
+    return getAttribute("instance/attributes/created-by");
+  }
+
+  /**
+   * Parses the managed instance group (MIG) name from the {@code instance/attributes/created-by}
+   * metadata attribute.
+   *
+   * <p>Example response: {@code
+   * projects/123456789/zones/us-central1-a/instanceGroupManagers/my-mig}
+   *
+   * @return parsed MIG name, or null if the instance was not created by a MIG.
+   */
+  @Nullable
+  String getMigNameFromCreatedBy() {
+    Matcher matcher = matchCreatedByMig();
+    return matcher != null ? matcher.group(3) : null;
+  }
+
+  /**
+   * Parses the managed instance group (MIG) zone from the {@code instance/attributes/created-by}
+   * metadata attribute for zonal MIGs.
+   *
+   * @return parsed MIG zone, or null if the instance was not created by a zonal MIG.
+   */
+  @Nullable
+  String getMigZoneFromCreatedBy() {
+    Matcher matcher = matchCreatedByMig();
+    return matcher != null && "zones".equals(matcher.group(1)) ? matcher.group(2) : null;
+  }
+
+  /**
+   * Parses the managed instance group (MIG) region from the {@code instance/attributes/created-by}
+   * metadata attribute for regional MIGs.
+   *
+   * @return parsed MIG region, or null if the instance was not created by a regional MIG.
+   */
+  @Nullable
+  String getMigRegionFromCreatedBy() {
+    Matcher matcher = matchCreatedByMig();
+    return matcher != null && "regions".equals(matcher.group(1)) ? matcher.group(2) : null;
+  }
+
+  @Nullable
+  private Matcher matchCreatedByMig() {
+    String createdBy = getCreatedBy();
+    if (createdBy == null) {
+      return null;
+    }
+    Matcher matcher = CREATED_BY_MIG_PATTERN.matcher(createdBy);
+    return matcher.matches() ? matcher : null;
   }
 
   // Returns null on failure to retrieve from metadata server

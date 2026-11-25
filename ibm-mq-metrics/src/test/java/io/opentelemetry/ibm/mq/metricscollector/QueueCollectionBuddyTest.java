@@ -37,6 +37,7 @@ class QueueCollectionBuddyTest {
 
   QueueCollectionBuddy classUnderTest;
   QueueManager queueManager;
+  MetricProducer producer;
   MetricsCollectorContext collectorContext;
   @Mock private PCFMessageAgent pcfMessageAgent;
 
@@ -45,8 +46,10 @@ class QueueCollectionBuddyTest {
     ConfigWrapper config = ConfigWrapper.parse("src/test/resources/conf/config.yml");
     ObjectMapper mapper = new ObjectMapper();
     queueManager = mapper.convertValue(config.getQueueManagers().get(0), QueueManager.class);
+    producer = new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
     collectorContext =
-        new MetricsCollectorContext(queueManager, pcfMessageAgent, null, new MetricsConfig(config));
+        new MetricsCollectorContext(
+            queueManager, pcfMessageAgent, null, new MetricsConfig(config), producer);
   }
 
   @Test
@@ -57,9 +60,7 @@ class QueueCollectionBuddyTest {
     sharedState.putQueueType("DEV.QUEUE.1", "local-transmission");
     PCFMessage request = createPCFRequestForInquireQStatusCmd();
     when(pcfMessageAgent.send(request)).thenReturn(createPCFResponseForInquireQStatusCmd());
-    MetricProducer producer =
-        new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
-    classUnderTest = new QueueCollectionBuddy(producer, sharedState);
+    classUnderTest = new QueueCollectionBuddy(sharedState);
     classUnderTest.processPcfRequestAndPublishQMetrics(
         collectorContext, request, "*", InquireQStatusCmdCollector.ATTRIBUTES);
 
@@ -102,9 +103,7 @@ class QueueCollectionBuddyTest {
   void testProcessPcfRequestAndPublishQMetricsForInquireQCmd() throws Exception {
     PCFMessage request = createPCFRequestForInquireQCmd();
     when(pcfMessageAgent.send(request)).thenReturn(createPCFResponseForInquireQCmd());
-    MetricProducer producer =
-        new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
-    classUnderTest = new QueueCollectionBuddy(producer, new QueueCollectorSharedState());
+    classUnderTest = new QueueCollectionBuddy(new QueueCollectorSharedState());
     classUnderTest.processPcfRequestAndPublishQMetrics(
         collectorContext, request, "*", InquireQCmdCollector.ATTRIBUTES);
 
@@ -147,9 +146,7 @@ class QueueCollectionBuddyTest {
     sharedState.putQueueType("DEV.QUEUE.1", "local-transmission");
     PCFMessage request = createPCFRequestForResetQStatsCmd();
     when(pcfMessageAgent.send(request)).thenReturn(createPCFResponseForResetQStatsCmd());
-    MetricProducer producer =
-        new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
-    classUnderTest = new QueueCollectionBuddy(producer, sharedState);
+    classUnderTest = new QueueCollectionBuddy(sharedState);
     classUnderTest.processPcfRequestAndPublishQMetrics(
         collectorContext, request, "*", ResetQStatsCmdCollector.ATTRIBUTES);
 

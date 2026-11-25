@@ -8,6 +8,7 @@ package io.opentelemetry.ibm.mq.metricscollector;
 import static com.ibm.mq.constants.CMQC.MQRC_SELECTOR_ERROR;
 import static com.ibm.mq.constants.CMQCFC.MQRCCF_CHL_STATUS_NOT_FOUND;
 import static io.opentelemetry.ibm.mq.metricscollector.MetricAssert.assertThatMetric;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
@@ -25,6 +26,9 @@ import io.opentelemetry.ibm.mq.opentelemetry.ConfigWrapper;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.resources.Resource;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -32,6 +36,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -45,23 +50,25 @@ class ChannelMetricsCollectorTest {
   QueueManager queueManager;
   MetricsCollectorContext context;
   @Mock PCFMessageAgent pcfMessageAgent;
+  MetricProducer producer;
 
   @BeforeEach
   void setup() throws Exception {
     ConfigWrapper config = ConfigWrapper.parse("src/test/resources/conf/config.yml");
     ObjectMapper mapper = new ObjectMapper();
     queueManager = mapper.convertValue(config.getQueueManagers().get(0), QueueManager.class);
+    producer = new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
     context =
-        new MetricsCollectorContext(queueManager, pcfMessageAgent, null, new MetricsConfig(config));
+        new MetricsCollectorContext(
+            queueManager, pcfMessageAgent, null, new MetricsConfig(config), producer);
   }
 
   @Test
   void testPublishMetrics() throws Exception {
     when(pcfMessageAgent.send(any(PCFMessage.class)))
         .thenReturn(createPCFResponseForInquireChannelStatusCmd());
-    MetricProducer producer =
-        new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
-    classUnderTest = new ChannelMetricsCollector(producer);
+
+    classUnderTest = new ChannelMetricsCollector();
 
     classUnderTest.accept(context);
 
@@ -185,10 +192,8 @@ class ChannelMetricsCollectorTest {
 
   @Test
   void testPublishMetrics_nullResponse() throws Exception {
-    MetricProducer producer =
-        new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
     when(pcfMessageAgent.send(any(PCFMessage.class))).thenReturn(null);
-    classUnderTest = new ChannelMetricsCollector(producer);
+    classUnderTest = new ChannelMetricsCollector();
 
     classUnderTest.accept(context);
     assertThat(producer.produce(Resource.empty())).isEmpty();
@@ -196,10 +201,8 @@ class ChannelMetricsCollectorTest {
 
   @Test
   void testPublishMetrics_emptyResponse() throws Exception {
-    MetricProducer producer =
-        new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
     when(pcfMessageAgent.send(any(PCFMessage.class))).thenReturn(new PCFMessage[] {});
-    classUnderTest = new ChannelMetricsCollector(producer);
+    classUnderTest = new ChannelMetricsCollector();
 
     classUnderTest.accept(context);
     assertThat(producer.produce(Resource.empty())).isEmpty();
@@ -208,16 +211,65 @@ class ChannelMetricsCollectorTest {
   @ParameterizedTest
   @MethodSource("exceptionsToThrow")
   void testPublishMetrics_pfException(Exception exceptionToThrow) throws Exception {
-    MetricProducer producer =
-        new MetricProducer(Resource.empty(), InstrumentationScopeInfo.empty());
     when(pcfMessageAgent.send(any(PCFMessage.class))).thenThrow(exceptionToThrow);
-    classUnderTest = new ChannelMetricsCollector(producer);
+    classUnderTest = new ChannelMetricsCollector();
 
     classUnderTest.accept(context);
 
     List<MetricData> exported = producer.produce(Resource.empty());
     assertThat(exported.get(0).getLongGaugeData().getPoints()).hasSize(1);
     assertThatMetric(exported.get(0), 0).hasName("ibm.mq.manager.active.channels").hasValue(0);
+  }
+
+  @Test
+  void testPublishMetrics_activeChannelsDisabled(@TempDir Path tempDir) throws Exception {
+    when(pcfMessageAgent.send(any(PCFMessage.class)))
+        .thenReturn(createPCFResponseForInquireChannelStatusCmd());
+    MetricsCollectorContext disabledContext = contextWithActiveChannelsDisabled(tempDir);
+
+    new ChannelMetricsCollector().accept(disabledContext);
+
+    List<String> exportedNames = new ArrayList<>();
+    for (MetricData metric : producer.produce(Resource.empty())) {
+      exportedNames.add(metric.getName());
+    }
+    assertThat(exportedNames)
+        .doesNotContain("ibm.mq.manager.active.channels")
+        .contains(
+            "ibm.mq.message.count",
+            "ibm.mq.status",
+            "ibm.mq.byte.sent",
+            "ibm.mq.byte.received",
+            "ibm.mq.buffers.sent",
+            "ibm.mq.buffers.received");
+  }
+
+  @ParameterizedTest
+  @MethodSource("exceptionsToThrow")
+  void testPublishMetrics_exceptionWithActiveChannelsDisabled(
+      Exception exceptionToThrow, @TempDir Path tempDir) throws Exception {
+    when(pcfMessageAgent.send(any(PCFMessage.class))).thenThrow(exceptionToThrow);
+    MetricsCollectorContext disabledContext = contextWithActiveChannelsDisabled(tempDir);
+
+    new ChannelMetricsCollector().accept(disabledContext);
+
+    assertThat(producer.produce(Resource.empty())).isEmpty();
+  }
+
+  private MetricsCollectorContext contextWithActiveChannelsDisabled(Path tempDir) throws Exception {
+    Path source = Paths.get("src/test/resources/conf/config.yml");
+    String yaml = new String(Files.readAllBytes(source), UTF_8);
+    String enabledEntry = "\"ibm.mq.manager.active.channels\":";
+    int start = yaml.indexOf(enabledEntry);
+    int flag = yaml.indexOf("enabled: true", start);
+    String modified = yaml.substring(0, flag) + "enabled: false" + yaml.substring(flag + 13);
+    Path disabledConfig = tempDir.resolve("config.yml");
+    Files.write(disabledConfig, modified.getBytes(UTF_8));
+    ConfigWrapper config = ConfigWrapper.parse(disabledConfig.toString());
+    MetricsConfig metricsConfig = new MetricsConfig(config);
+    assertThat(metricsConfig.isIbmMqManagerActiveChannelsEnabled()).isFalse();
+    return new MetricsCollectorContext(
+        queueManager, pcfMessageAgent, null, metricsConfig, producer);
   }
 
   static Stream<Arguments> exceptionsToThrow() {

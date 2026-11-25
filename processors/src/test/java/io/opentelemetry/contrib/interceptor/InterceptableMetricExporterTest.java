@@ -19,6 +19,7 @@ import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.testing.exporter.InMemoryMetricExporter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -50,7 +51,7 @@ class InterceptableMetricExporterTest {
     });
 
     meter.counterBuilder("OneCounter").build().add(1);
-    meterProvider.forceFlush();
+    meterProvider.forceFlush().join(10, TimeUnit.SECONDS);
 
     List<MetricData> finishedMetricItems = memoryMetricExporter.getFinishedMetricItems();
     assertThat(finishedMetricItems.size()).isEqualTo(1);
@@ -69,7 +70,7 @@ class InterceptableMetricExporterTest {
     meter.counterBuilder("OneCounter").build().add(1);
     meter.counterBuilder("DeletedCounter").build().add(1);
     meter.counterBuilder("AnotherCounter").build().add(1);
-    meterProvider.forceFlush();
+    meterProvider.forceFlush().join(10, TimeUnit.SECONDS);
 
     List<MetricData> finishedMetricItems = memoryMetricExporter.getFinishedMetricItems();
     assertThat(finishedMetricItems.size()).isEqualTo(2);

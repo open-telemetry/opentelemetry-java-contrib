@@ -22,7 +22,7 @@ val ibmClientJar = configurations.create("ibmClientJar") {
 dependencies {
   api("com.google.auto.value:auto-value-annotations:1.11.1")
   api("com.google.code.findbugs:jsr305:3.0.2")
-  api("io.swagger:swagger-annotations:1.6.16")
+  api("io.swagger:swagger-annotations:1.6.17")
   api("org.jetbrains:annotations:26.1.0")
   api("com.ibm.mq:com.ibm.mq.allclient:10.0.1.0")
   api("org.snakeyaml:snakeyaml-engine:2.10")

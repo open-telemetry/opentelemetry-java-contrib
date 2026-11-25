@@ -87,7 +87,7 @@ public final class LambdaResource {
       }
     }
 
-    return Resource.create(builder.build(), SchemaUrls.V1_25_0);
+    return Resource.create(builder.build(), SchemaUrls.V1_40_0);
   }
 
   private static boolean isLambda(String... envVariables) {

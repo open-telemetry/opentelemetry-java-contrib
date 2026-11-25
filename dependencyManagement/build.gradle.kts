@@ -2,7 +2,7 @@ plugins {
   `java-platform`
 }
 
-val otelInstrumentationVersion = "2.33.1-alpha"
+val otelInstrumentationVersion = "2.34.0-alpha"
 val semconvVersion = "1.45.0"
 
 javaPlatform {
@@ -28,9 +28,9 @@ dependencies {
     api("com.google.auto.service:auto-service-annotations:1.1.1")
     api("com.google.auto.value:auto-value:1.11.1")
     api("com.google.auto.value:auto-value-annotations:1.11.1")
-    api("com.google.errorprone:error_prone_annotations:2.52.0")
-    api("com.google.errorprone:error_prone_core:2.52.0")
-    api("com.google.errorprone:error_prone_test_helpers:2.52.0")
+    api("com.google.errorprone:error_prone_annotations:2.53.0")
+    api("com.google.errorprone:error_prone_core:2.53.0")
+    api("com.google.errorprone:error_prone_test_helpers:2.53.0")
     api("io.github.netmikey.logunit:logunit-jul:2.0.0")
     api("io.opentelemetry.proto:opentelemetry-proto:1.11.1-alpha")
     api("io.prometheus:simpleclient:0.16.0")
@@ -59,7 +59,7 @@ dependencies {
     // transitive deps of kafka-clients, pinned for CVE fixes (see kafka-exporter/build.gradle.kts)
     // remove once kafka-clients depends on fixed versions
     api("at.yawk.lz4:lz4-java:1.14.1")
-    api("com.github.luben:zstd-jni:1.5.7-28")
+    api("com.github.luben:zstd-jni:1.5.7-29")
     api("org.xerial.snappy:snappy-java:1.1.10.12")
     api("org.testcontainers:testcontainers-kafka:2.0.5")
     api("org.jctools:jctools-core:4.0.7")

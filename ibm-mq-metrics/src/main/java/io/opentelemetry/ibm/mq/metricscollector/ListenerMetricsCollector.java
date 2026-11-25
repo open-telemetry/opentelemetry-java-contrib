@@ -12,7 +12,6 @@ import com.ibm.mq.constants.CMQCFC;
 import com.ibm.mq.headers.pcf.PCFException;
 import com.ibm.mq.headers.pcf.PCFMessage;
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.ibm.mq.metrics.MetricProducer;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -38,11 +37,8 @@ import org.slf4j.LoggerFactory;
 public final class ListenerMetricsCollector implements Consumer<MetricsCollectorContext> {
 
   private static final Logger logger = LoggerFactory.getLogger(ListenerMetricsCollector.class);
-  private final MetricProducer producer;
 
-  public ListenerMetricsCollector(MetricProducer producer) {
-    this.producer = producer;
-  }
+  public ListenerMetricsCollector() {}
 
   @Override
   public void accept(MetricsCollectorContext context) {
@@ -94,18 +90,20 @@ public final class ListenerMetricsCollector implements Consumer<MetricsCollector
     logger.debug("Time taken to publish metrics for all listener is {} milliseconds", exitTime);
   }
 
-  private void updateMetrics(
+  private static void updateMetrics(
       PCFMessage message, String listenerName, MetricsCollectorContext context)
       throws PCFException {
     if (context.getMetricsConfig().isIbmMqListenerStatusEnabled()) {
       int status = message.getIntParameterValue(CMQCFC.MQIACH_LISTENER_STATUS);
-      this.producer.recordIbmMqListenerStatus(
-          status,
-          Attributes.of(
-              IBM_MQ_LISTENER_NAME,
-              listenerName,
-              IBM_MQ_QUEUE_MANAGER,
-              context.getQueueManagerName()));
+      context
+          .getMetricProducer()
+          .recordIbmMqListenerStatus(
+              status,
+              Attributes.of(
+                  IBM_MQ_LISTENER_NAME,
+                  listenerName,
+                  IBM_MQ_QUEUE_MANAGER,
+                  context.getQueueManagerName()));
     }
   }
 }

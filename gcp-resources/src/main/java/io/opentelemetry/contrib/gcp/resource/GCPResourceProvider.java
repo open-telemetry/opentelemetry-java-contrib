@@ -12,6 +12,9 @@ import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GAE_INSTANCE_I
 import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GAE_MODULE_NAME;
 import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_AVAILABILITY_ZONE;
 import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_CLOUD_REGION;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_INSTANCE_GROUP_MANAGER_NAME;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_INSTANCE_GROUP_MANAGER_REGION;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_INSTANCE_GROUP_MANAGER_ZONE;
 import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_INSTANCE_HOSTNAME;
 import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_INSTANCE_ID;
 import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_INSTANCE_NAME;
@@ -44,6 +47,9 @@ import static io.opentelemetry.contrib.gcp.resource.IncubatingAttributes.CloudPl
 import static io.opentelemetry.contrib.gcp.resource.IncubatingAttributes.FAAS_INSTANCE;
 import static io.opentelemetry.contrib.gcp.resource.IncubatingAttributes.FAAS_NAME;
 import static io.opentelemetry.contrib.gcp.resource.IncubatingAttributes.FAAS_VERSION;
+import static io.opentelemetry.contrib.gcp.resource.IncubatingAttributes.GCP_GCE_INSTANCE_GROUP_MANAGER_NAME;
+import static io.opentelemetry.contrib.gcp.resource.IncubatingAttributes.GCP_GCE_INSTANCE_GROUP_MANAGER_REGION;
+import static io.opentelemetry.contrib.gcp.resource.IncubatingAttributes.GCP_GCE_INSTANCE_GROUP_MANAGER_ZONE;
 import static io.opentelemetry.contrib.gcp.resource.IncubatingAttributes.GCP_GCE_INSTANCE_HOSTNAME;
 import static io.opentelemetry.contrib.gcp.resource.IncubatingAttributes.GCP_GCE_INSTANCE_NAME;
 import static io.opentelemetry.contrib.gcp.resource.IncubatingAttributes.HOST_ID;
@@ -166,6 +172,12 @@ public class GCPResourceProvider implements ConditionalResourceProvider {
             instanceHostname -> attrBuilder.put(GCP_GCE_INSTANCE_HOSTNAME, instanceHostname));
     Optional.ofNullable(attributesMap.get(GCE_MACHINE_TYPE))
         .ifPresent(machineType -> attrBuilder.put(HOST_TYPE, machineType));
+    Optional.ofNullable(attributesMap.get(GCE_INSTANCE_GROUP_MANAGER_NAME))
+        .ifPresent(migName -> attrBuilder.put(GCP_GCE_INSTANCE_GROUP_MANAGER_NAME, migName));
+    Optional.ofNullable(attributesMap.get(GCE_INSTANCE_GROUP_MANAGER_REGION))
+        .ifPresent(migRegion -> attrBuilder.put(GCP_GCE_INSTANCE_GROUP_MANAGER_REGION, migRegion));
+    Optional.ofNullable(attributesMap.get(GCE_INSTANCE_GROUP_MANAGER_ZONE))
+        .ifPresent(migZone -> attrBuilder.put(GCP_GCE_INSTANCE_GROUP_MANAGER_ZONE, migZone));
   }
 
   /**

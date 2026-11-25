@@ -22,7 +22,7 @@ class SdkResourceAccessTest {
         OpenTelemetrySdk.builder()
             .setTracerProvider(SdkTracerProvider.builder().setResource(resource).build())
             .build()) {
-      assertThat(SdkResourceAccess.getResource(sdk)).isSameAs(resource);
+      assertThat(SdkResourceAccess.getResource(sdk)).isEqualTo(resource);
     }
   }
 

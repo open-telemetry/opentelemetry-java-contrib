@@ -66,7 +66,7 @@ public final class BeanstalkResource {
 
       if (!parser.isExpectedStartObjectToken()) {
         logger.log(WARNING, "Invalid Beanstalk config: ", configPath);
-        return Resource.create(attrBuilders.build(), SchemaUrls.V1_25_0);
+        return Resource.create(attrBuilders.build(), SchemaUrls.V1_40_0);
       }
 
       while (parser.nextToken() != JsonToken.END_OBJECT) {
@@ -94,7 +94,7 @@ public final class BeanstalkResource {
     attrBuilders.put(CLOUD_PROVIDER, AWS);
     attrBuilders.put(CLOUD_PLATFORM, AWS_ELASTIC_BEANSTALK);
 
-    return Resource.create(attrBuilders.build(), SchemaUrls.V1_25_0);
+    return Resource.create(attrBuilders.build(), SchemaUrls.V1_40_0);
   }
 
   private BeanstalkResource() {}

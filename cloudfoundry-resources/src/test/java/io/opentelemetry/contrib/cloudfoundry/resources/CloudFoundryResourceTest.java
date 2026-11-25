@@ -66,7 +66,7 @@ class CloudFoundryResourceTest {
 
     Resource resource = CloudFoundryResource.buildResource(env::get);
 
-    assertThat(resource.getSchemaUrl()).isEqualTo(SchemaUrls.V1_24_0);
+    assertThat(resource.getSchemaUrl()).isEqualTo(SchemaUrls.V1_40_0);
     assertThat(resource.getAttribute(CloudfoundryIncubatingAttributes.CLOUDFOUNDRY_APP_ID))
         .isEqualTo("0193a038-e615-7e5e-92ca-f4bcd7ba0a25");
     assertThat(resource.getAttribute(CloudfoundryIncubatingAttributes.CLOUDFOUNDRY_APP_INSTANCE_ID))

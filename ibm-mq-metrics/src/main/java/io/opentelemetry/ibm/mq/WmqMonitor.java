@@ -70,16 +70,16 @@ public final class WmqMonitor {
     this.metricsConfig = new MetricsConfig(config);
     this.threadPool = threadPool;
 
-    jobs.add(new QueueManagerMetricsCollector(producer));
-    jobs.add(new InquireQueueManagerCmdCollector(producer));
-    jobs.add(new ChannelMetricsCollector(producer));
-    jobs.add(new InquireChannelCmdCollector(producer));
-    jobs.add(new QueueMetricsCollector(producer, threadPool, config));
-    jobs.add(new ListenerMetricsCollector(producer));
-    jobs.add(new TopicMetricsCollector(producer));
-    jobs.add(new ReadConfigurationEventQueueCollector(producer));
-    jobs.add(new PerformanceEventQueueCollector(producer));
-    jobs.add(new QueueManagerEventCollector(producer));
+    jobs.add(new QueueManagerMetricsCollector());
+    jobs.add(new InquireQueueManagerCmdCollector());
+    jobs.add(new ChannelMetricsCollector());
+    jobs.add(new InquireChannelCmdCollector());
+    jobs.add(new QueueMetricsCollector(threadPool, config));
+    jobs.add(new ListenerMetricsCollector());
+    jobs.add(new TopicMetricsCollector());
+    jobs.add(new ReadConfigurationEventQueueCollector());
+    jobs.add(new PerformanceEventQueueCollector());
+    jobs.add(new QueueManagerEventCollector());
   }
 
   public void run() {
@@ -141,7 +141,8 @@ public final class WmqMonitor {
       MQQueueManager mqQueueManager, QueueManager queueManager, PCFMessageAgent agent) {
     logger.debug("Queueing {} jobs", jobs.size());
     MetricsCollectorContext context =
-        new MetricsCollectorContext(queueManager, agent, mqQueueManager, this.metricsConfig);
+        new MetricsCollectorContext(
+            queueManager, agent, mqQueueManager, this.metricsConfig, this.producer);
     List<Callable<Void>> tasks = new ArrayList<>();
     for (Consumer<MetricsCollectorContext> collector : jobs) {
       tasks.add(() -> {

@@ -102,6 +102,6 @@ public final class CloudFoundryResource {
       LOG.warning("Cannot parse contents of environment variable VCAP_APPLICATION. Invalid JSON");
     }
 
-    return Resource.create(builder.build(), SchemaUrls.V1_24_0);
+    return Resource.create(builder.build(), SchemaUrls.V1_40_0);
   }
 }

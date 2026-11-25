@@ -44,7 +44,7 @@ class LambdaResourceTest {
         LambdaResource.buildResource(singletonMap("AWS_LAMBDA_FUNCTION_NAME", "my-function"));
     Attributes attributes = resource.getAttributes();
 
-    assertThat(resource.getSchemaUrl()).isEqualTo(SchemaUrls.V1_25_0);
+    assertThat(resource.getSchemaUrl()).isEqualTo(SchemaUrls.V1_40_0);
     assertThat(attributes)
         .containsOnly(
             entry(CLOUD_PROVIDER, "aws"),
@@ -62,7 +62,7 @@ class LambdaResourceTest {
     Resource resource = LambdaResource.buildResource(envVars);
     Attributes attributes = resource.getAttributes();
 
-    assertThat(resource.getSchemaUrl()).isEqualTo(SchemaUrls.V1_25_0);
+    assertThat(resource.getSchemaUrl()).isEqualTo(SchemaUrls.V1_40_0);
     assertThat(attributes)
         .containsOnly(
             entry(CLOUD_PROVIDER, "aws"),

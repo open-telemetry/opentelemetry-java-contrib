@@ -86,7 +86,7 @@ public final class EksResource {
       attrBuilders.put(CONTAINER_ID, containerId);
     }
 
-    return Resource.create(attrBuilders.build(), SchemaUrls.V1_25_0);
+    return Resource.create(attrBuilders.build(), SchemaUrls.V1_40_0);
   }
 
   private static boolean isEks(

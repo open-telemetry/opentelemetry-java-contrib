@@ -12,6 +12,9 @@ import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GAE_INSTANCE_I
 import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GAE_MODULE_NAME;
 import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_AVAILABILITY_ZONE;
 import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_CLOUD_REGION;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_INSTANCE_GROUP_MANAGER_NAME;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_INSTANCE_GROUP_MANAGER_REGION;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_INSTANCE_GROUP_MANAGER_ZONE;
 import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_INSTANCE_HOSTNAME;
 import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_INSTANCE_ID;
 import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_INSTANCE_NAME;
@@ -48,6 +51,9 @@ import static io.opentelemetry.semconv.incubating.FaasIncubatingAttributes.FAAS_
 import static io.opentelemetry.semconv.incubating.FaasIncubatingAttributes.FAAS_NAME;
 import static io.opentelemetry.semconv.incubating.FaasIncubatingAttributes.FAAS_VERSION;
 import static io.opentelemetry.semconv.incubating.GcpIncubatingAttributes.GCP_CLOUD_RUN_JOB_EXECUTION;
+import static io.opentelemetry.semconv.incubating.GcpIncubatingAttributes.GCP_GCE_INSTANCE_GROUP_MANAGER_NAME;
+import static io.opentelemetry.semconv.incubating.GcpIncubatingAttributes.GCP_GCE_INSTANCE_GROUP_MANAGER_REGION;
+import static io.opentelemetry.semconv.incubating.GcpIncubatingAttributes.GCP_GCE_INSTANCE_GROUP_MANAGER_ZONE;
 import static io.opentelemetry.semconv.incubating.GcpIncubatingAttributes.GCP_GCE_INSTANCE_HOSTNAME;
 import static io.opentelemetry.semconv.incubating.GcpIncubatingAttributes.GCP_GCE_INSTANCE_NAME;
 import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_ID;
@@ -93,6 +99,9 @@ class GCPResourceProviderTest {
                 GCE_INSTANCE_NAME, "instance-name",
                 GCE_MACHINE_TYPE, "gce-m2",
                 GCE_INSTANCE_HOSTNAME, "instance-hostname"));
+    mockAttributes.put(GCE_INSTANCE_GROUP_MANAGER_NAME, null);
+    mockAttributes.put(GCE_INSTANCE_GROUP_MANAGER_ZONE, null);
+    mockAttributes.put(GCE_INSTANCE_GROUP_MANAGER_REGION, null);
     DetectedPlatform mockGCEPlatform = mock(DetectedPlatform.class);
     when(mockGCEPlatform.getSupportedPlatform())
         .thenReturn(GcpPlatformDetector.SupportedPlatform.GOOGLE_COMPUTE_ENGINE);
@@ -243,7 +252,46 @@ class GCPResourceProviderTest {
         .containsEntry(HOST_TYPE, detectedAttributes.get(GCE_MACHINE_TYPE))
         .containsEntry(CLOUD_AVAILABILITY_ZONE, detectedAttributes.get(GCE_AVAILABILITY_ZONE))
         .containsEntry(CLOUD_REGION, detectedAttributes.get(GCE_CLOUD_REGION))
-        .doesNotContainKey(CLOUD_RESOURCE_ID);
+        .doesNotContainKey(CLOUD_RESOURCE_ID)
+        .doesNotContainKey(GCP_GCE_INSTANCE_GROUP_MANAGER_NAME)
+        .doesNotContainKey(GCP_GCE_INSTANCE_GROUP_MANAGER_REGION)
+        .doesNotContainKey(GCP_GCE_INSTANCE_GROUP_MANAGER_ZONE);
+  }
+
+  @Test
+  void testGceResourceAttributesMappingWithZonalMig() {
+    GcpPlatformDetector mockDetector = mock(GcpPlatformDetector.class);
+    DetectedPlatform mockPlatform = generateMockGcePlatform();
+    mockPlatform.getAttributes().put(GCE_INSTANCE_GROUP_MANAGER_NAME, "my-zonal-mig");
+    mockPlatform.getAttributes().put(GCE_INSTANCE_GROUP_MANAGER_ZONE, "australia-southeast1-b");
+    when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
+
+    Resource gotResource = new GCPResourceProvider(mockDetector).createResource(mockConfigProps);
+
+    assertThat(gotResource.getAttributes())
+        .hasSize(12)
+        .containsEntry(CLOUD_PLATFORM, GCP_COMPUTE_ENGINE)
+        .containsEntry(GCP_GCE_INSTANCE_GROUP_MANAGER_NAME, "my-zonal-mig")
+        .containsEntry(GCP_GCE_INSTANCE_GROUP_MANAGER_ZONE, "australia-southeast1-b")
+        .doesNotContainKey(GCP_GCE_INSTANCE_GROUP_MANAGER_REGION);
+  }
+
+  @Test
+  void testGceResourceAttributesMappingWithRegionalMig() {
+    GcpPlatformDetector mockDetector = mock(GcpPlatformDetector.class);
+    DetectedPlatform mockPlatform = generateMockGcePlatform();
+    mockPlatform.getAttributes().put(GCE_INSTANCE_GROUP_MANAGER_NAME, "my-regional-mig");
+    mockPlatform.getAttributes().put(GCE_INSTANCE_GROUP_MANAGER_REGION, "australia-southeast1");
+    when(mockDetector.detectPlatform()).thenReturn(mockPlatform);
+
+    Resource gotResource = new GCPResourceProvider(mockDetector).createResource(mockConfigProps);
+
+    assertThat(gotResource.getAttributes())
+        .hasSize(12)
+        .containsEntry(CLOUD_PLATFORM, GCP_COMPUTE_ENGINE)
+        .containsEntry(GCP_GCE_INSTANCE_GROUP_MANAGER_NAME, "my-regional-mig")
+        .containsEntry(GCP_GCE_INSTANCE_GROUP_MANAGER_REGION, "australia-southeast1")
+        .doesNotContainKey(GCP_GCE_INSTANCE_GROUP_MANAGER_ZONE);
   }
 
   @Test

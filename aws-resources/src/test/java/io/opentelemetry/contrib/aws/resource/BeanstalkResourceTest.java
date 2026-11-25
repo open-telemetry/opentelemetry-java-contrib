@@ -43,7 +43,7 @@ class BeanstalkResourceTest {
             entry(SERVICE_INSTANCE_ID, "4"),
             entry(SERVICE_VERSION, "2"),
             entry(SERVICE_NAMESPACE, "HttpSubscriber-env"));
-    assertThat(resource.getSchemaUrl()).isEqualTo(SchemaUrls.V1_25_0);
+    assertThat(resource.getSchemaUrl()).isEqualTo(SchemaUrls.V1_40_0);
   }
 
   @Test

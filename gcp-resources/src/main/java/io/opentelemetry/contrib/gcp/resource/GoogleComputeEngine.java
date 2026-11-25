@@ -7,6 +7,9 @@ package io.opentelemetry.contrib.gcp.resource;
 
 import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_AVAILABILITY_ZONE;
 import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_CLOUD_REGION;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_INSTANCE_GROUP_MANAGER_NAME;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_INSTANCE_GROUP_MANAGER_REGION;
+import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_INSTANCE_GROUP_MANAGER_ZONE;
 import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_INSTANCE_HOSTNAME;
 import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_INSTANCE_ID;
 import static io.opentelemetry.contrib.gcp.resource.AttributeKeys.GCE_INSTANCE_NAME;
@@ -33,6 +36,9 @@ final class GoogleComputeEngine implements DetectedPlatform {
     map.put(GCE_INSTANCE_NAME, this.metadataConfig.getInstanceName());
     map.put(GCE_INSTANCE_HOSTNAME, this.metadataConfig.getInstanceHostName());
     map.put(GCE_MACHINE_TYPE, this.metadataConfig.getMachineType());
+    map.put(GCE_INSTANCE_GROUP_MANAGER_NAME, this.metadataConfig.getMigNameFromCreatedBy());
+    map.put(GCE_INSTANCE_GROUP_MANAGER_ZONE, this.metadataConfig.getMigZoneFromCreatedBy());
+    map.put(GCE_INSTANCE_GROUP_MANAGER_REGION, this.metadataConfig.getMigRegionFromCreatedBy());
     return Collections.unmodifiableMap(map);
   }
 
