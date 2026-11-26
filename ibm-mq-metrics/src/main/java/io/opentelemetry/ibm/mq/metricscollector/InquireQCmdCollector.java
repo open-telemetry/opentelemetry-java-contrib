@@ -8,6 +8,7 @@ package io.opentelemetry.ibm.mq.metricscollector;
 import com.ibm.mq.constants.CMQC;
 import com.ibm.mq.constants.CMQCFC;
 import com.ibm.mq.headers.pcf.PCFMessage;
+import io.opentelemetry.ibm.mq.config.ExcludeFilters;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -55,6 +56,10 @@ final class InquireQCmdCollector implements Consumer<MetricsCollectorContext> {
       PCFMessage request = new PCFMessage(CMQCFC.MQCMD_INQUIRE_Q);
       request.addParameter(CMQC.MQCA_Q_NAME, queueGenericName);
       request.addParameter(CMQC.MQIA_Q_TYPE, CMQC.MQQT_ALL);
+
+      for (ExcludeFilters filter : context.getQueueExcludeFilters()) {
+        filter.addFilter(request, CMQC.MQCA_Q_NAME);
+      }
       request.addParameter(CMQCFC.MQIACF_Q_ATTRS, ATTRIBUTES);
 
       queueBuddy.processPcfRequestAndPublishQMetrics(
