@@ -18,6 +18,7 @@ artifact:
   group_id: io.opentelemetry.contrib
   artifact_id: opentelemetry-span-stacktrace
 min_java_version: 8
+distributions: []
 configurations:
   - type: sdk-autoconfiguration
     display_name: SDK autoconfiguration properties

@@ -1,8 +1,7 @@
 # Component metadata
 
-Component metadata describes contrib components for discovery in the Ecosystem Explorer.
-See [the metadata discussion](https://github.com/open-telemetry/opentelemetry-java-contrib/issues/2586)
-and [span-stacktrace](../span-stacktrace/metadata.yaml) for an example.
+Component metadata describes contrib components for discovery in the
+[Ecosystem Explorer](https://github.com/open-telemetry/opentelemetry-ecosystem-explorer).
 
 For each component, place a `metadata.yaml` in the source directory. Use a YAML mapping with
 the fields below. Keep values synchronized with the component's README, source, tests, and
@@ -11,7 +10,7 @@ build configuration. Metadata describes the current checkout, not a specific rel
 ## Fields
 
 | Field              | Required | Type             | Meaning                                                                                                             |
-| ------------------ | -------- | ---------------- | ------------------------------------------------------------------------------------------------------------------- |
+|--------------------|----------|------------------|---------------------------------------------------------------------------------------------------------------------|
 | `display_name`     | Yes      | String           | Human-readable component name.                                                                                      |
 | `description`      | Yes      | String           | Purpose and effect on telemetry.                                                                                    |
 | `source_path`      | Yes      | String           | Directory relative to the repository root, without a leading or trailing slash.                                     |
@@ -21,36 +20,63 @@ build configuration. Metadata describes the current checkout, not a specific rel
 | `status`           | Yes      | Mapping          | Contains required `stability`: `development`, `alpha`, `beta`, or `stable`.                                         |
 | `artifact`         | No       | Mapping          | Maven coordinates; required when the component publishes a Maven artifact. Contains `group_id` and `artifact_id`.   |
 | `min_java_version` | Yes      | Integer          | Minimum supported runtime Java major version, not the build JDK.                                                    |
+| `distributions`    | Yes      | List of mappings | Other projects' distributions that bundle the component; use `[]` when none do.                                     |
 | `configurations`   | Yes      | List of mappings | Supported configuration methods, each with inline instructions, an example, and settings; use `[]` when none apply. |
 
 Strings must be nonempty. The only nullable value is a configuration `default`.
-Propose schema changes before adding new fields. Stability follows the repository's
-component maturity listing in the root README, not the Maven version suffix or a
-declarative component identifier.
+Stability follows the repository's component maturity listing in the root README, not the Maven
+version suffix or a declarative component identifier.
 
 ## Component types
 
 `component_types` describes how users integrate a component. Available values are:
 
-* `library`: included as an application dependency, used programmatically or through SDK autoconfiguration.
+* `library`: included as an application dependency, used programmatically or through SDK
+  autoconfiguration.
 * `agent-extension`: explicitly supported for loading as a Java agent extension.
 * `standalone`: run as a separate application or process.
 
-Select every verified usage category. SDK autoconfiguration support alone is not
-evidence of Java agent extension support. Describe the specific activation mode in
-`usage`; for example, adding a library to the runtime classpath still requires an
-application using SDK autoconfiguration for its customizer to run.
+Select every verified usage category. Describe the specific activation mode in `usage`.
+
+## Distributions
+
+`distributions` lists distributions published outside this repository that include the
+component's artifact, so their users get it without adding a dependency or extension.
+Each entry requires these fields:
+
+| Field            | Type   | Meaning                                                                                       |
+|------------------|--------|-----------------------------------------------------------------------------------------------|
+| `name`           | String | Distribution identifier from the list below, unique within `distributions`.                   |
+| `repository_url` | String | Absolute HTTPS URL of the GitHub repository that publishes the distribution, as listed below. |
+
+For example, a component bundled in the OpenTelemetry Java agent uses:
+
+```yaml
+distributions:
+  - name: javaagent
+    repository_url: https://github.com/open-telemetry/opentelemetry-java-instrumentation
+```
+
+Available distributions are:
+
+* `javaagent`: the OpenTelemetry Java agent, published from
+  <https://github.com/open-telemetry/opentelemetry-java-instrumentation>.
+
+Entries reflect each distribution's main branch when last verified, and those projects
+can change what they bundle in any release.
+
+Being bundled does not mean being enabled. Describe any distribution-specific activation,
+such as an enabling property, in `usage`. Distributions are independent of
+`component_types`: `agent-extension` means users load the component themselves as an extension.
 
 ## Configuration methods
 
-`configurations` is a list of supported methods. Consumers can display each method
-with its instructions, example, and settings, without requiring users to follow
-documentation links.
+`configurations` is a list of supported methods.
 
 Each method requires these fields:
 
 | Field          | Type             | Meaning                                                                                 |
-| -------------- | ---------------- | --------------------------------------------------------------------------------------- |
+|----------------|------------------|-----------------------------------------------------------------------------------------|
 | `type`         | String           | Method identifier, unique within the list: `sdk-autoconfiguration` or `declarative`.    |
 | `display_name` | String           | Human-readable heading for the method.                                                  |
 | `description`  | String           | Activation instructions and method-specific prerequisites or limitations.               |
@@ -66,7 +92,7 @@ defaults. Methods are alternatives; do not imply that their settings are merged.
 Each setting requires:
 
 | Field         | Type           | Meaning                                                                                                                      |
-| ------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+|---------------|----------------|------------------------------------------------------------------------------------------------------------------------------|
 | `name`        | String         | Full SDK property name, or declarative key relative to the component mapping shown in the example; unique within the method. |
 | `type`        | String         | Logical value type: `string`, `boolean`, `int`, or `duration`.                                                               |
 | `default`     | Scalar or null | Default value when unset; null means no configured value.                                                                    |
@@ -82,10 +108,3 @@ These types describe parsed values even though system properties are supplied as
 text. A null default must have its fallback behavior explained in `description`.
 List only component-owned settings, not all inherited SDK options. Every listed
 setting is optional to configure; the schema cannot yet express required settings.
-
-## Review checklist
-
-* Verify purpose, activation, and settings against implementation and tests.
-* Verify stability against the root README and coordinates against publishing conventions.
-* Verify runtime Java against shared build conventions and any module override.
-* Check documentation links and YAML syntax, and run repository Markdown linting.
