@@ -42,7 +42,7 @@ public final class PerformanceEventQueueCollector implements Consumer<MetricsCol
           context.getMqQueueManager().accessQueue(performanceEventsQueueName, queueAccessOptions);
       // keep going until receiving the exception MQConstants.MQRC_NO_MSG_AVAILABLE
       logger.debug("Start reading events from performance queue {}", performanceEventsQueueName);
-      while (true) {
+      while (!Thread.currentThread().isInterrupted()) {
         try {
           MQGetMessageOptions getOptions = new MQGetMessageOptions();
           getOptions.options = MQConstants.MQGMO_NO_WAIT | MQConstants.MQGMO_FAIL_IF_QUIESCING;
