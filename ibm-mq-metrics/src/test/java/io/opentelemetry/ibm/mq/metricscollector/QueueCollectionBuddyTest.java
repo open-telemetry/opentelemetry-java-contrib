@@ -60,7 +60,8 @@ class QueueCollectionBuddyTest {
     sharedState.putQueueType("DEV.QUEUE.1", "local-transmission");
     PCFMessage request = createPCFRequestForInquireQStatusCmd();
     when(pcfMessageAgent.send(request)).thenReturn(createPCFResponseForInquireQStatusCmd());
-    classUnderTest = new QueueCollectionBuddy(sharedState);
+    classUnderTest = new QueueCollectionBuddy();
+    classUnderTest.sharedStates.put(collectorContext.getQueueManagerName(), sharedState);
     classUnderTest.processPcfRequestAndPublishQMetrics(
         collectorContext, request, "*", InquireQStatusCmdCollector.ATTRIBUTES);
 
@@ -86,7 +87,7 @@ class QueueCollectionBuddyTest {
                         "ibm.mq.onqtime.long_period", -1L,
                         "ibm.mq.queue.depth", 1L))));
 
-    for (MetricData metric : producer.produce(Resource.empty())) {
+    for (MetricData metric : collectorContext.getMetricProducer().produce(Resource.empty())) {
       for (LongPointData d : metric.getLongGaugeData().getPoints()) {
         String queueName = d.getAttributes().get(MESSAGING_DESTINATION_NAME);
         Long expectedValue = expectedValues.get(queueName).remove(metric.getName());
@@ -103,7 +104,10 @@ class QueueCollectionBuddyTest {
   void testProcessPcfRequestAndPublishQMetricsForInquireQCmd() throws Exception {
     PCFMessage request = createPCFRequestForInquireQCmd();
     when(pcfMessageAgent.send(request)).thenReturn(createPCFResponseForInquireQCmd());
-    classUnderTest = new QueueCollectionBuddy(new QueueCollectorSharedState());
+    classUnderTest = new QueueCollectionBuddy();
+    classUnderTest.sharedStates.put(
+        collectorContext.getQueueManagerName(), new QueueCollectorSharedState());
+
     classUnderTest.processPcfRequestAndPublishQMetrics(
         collectorContext, request, "*", InquireQCmdCollector.ATTRIBUTES);
 
@@ -125,7 +129,7 @@ class QueueCollectionBuddyTest {
                         "ibm.mq.open.input.count", 3L,
                         "ibm.mq.open.output.count", 3L))));
 
-    for (MetricData metric : producer.produce(Resource.empty())) {
+    for (MetricData metric : collectorContext.getMetricProducer().produce(Resource.empty())) {
       for (LongPointData d : metric.getLongGaugeData().getPoints()) {
         String queueName = d.getAttributes().get(MESSAGING_DESTINATION_NAME);
         Long expectedValue = expectedValues.get(queueName).remove(metric.getName());
@@ -146,11 +150,12 @@ class QueueCollectionBuddyTest {
     sharedState.putQueueType("DEV.QUEUE.1", "local-transmission");
     PCFMessage request = createPCFRequestForResetQStatsCmd();
     when(pcfMessageAgent.send(request)).thenReturn(createPCFResponseForResetQStatsCmd());
-    classUnderTest = new QueueCollectionBuddy(sharedState);
+    classUnderTest = new QueueCollectionBuddy();
+    classUnderTest.sharedStates.put(collectorContext.getQueueManagerName(), sharedState);
     classUnderTest.processPcfRequestAndPublishQMetrics(
         collectorContext, request, "*", ResetQStatsCmdCollector.ATTRIBUTES);
 
-    for (MetricData metric : producer.produce(Resource.empty())) {
+    for (MetricData metric : collectorContext.getMetricProducer().produce(Resource.empty())) {
       Iterator<LongPointData> iterator = metric.getLongGaugeData().getPoints().iterator();
       if (metric.getName().equals("ibm.mq.high.queue.depth")) {
         assertThat(iterator.next().getValue()).isEqualTo(10);

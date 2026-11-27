@@ -28,6 +28,8 @@ import io.opentelemetry.ibm.mq.metrics.MetricProducer;
 import io.opentelemetry.ibm.mq.metrics.MetricsConfig;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,11 +41,9 @@ import org.slf4j.LoggerFactory;
 final class QueueCollectionBuddy {
   private static final Logger logger = LoggerFactory.getLogger(QueueCollectionBuddy.class);
 
-  private final QueueCollectorSharedState sharedState;
+  final Map<String, QueueCollectorSharedState> sharedStates = new ConcurrentHashMap<>();
 
-  QueueCollectionBuddy(QueueCollectorSharedState sharedState) {
-    this.sharedState = sharedState;
-  }
+  QueueCollectionBuddy() {}
 
   /**
    * Sends a PCFMessage request, reads the response, and generates metrics from the response. It
@@ -51,6 +51,7 @@ final class QueueCollectionBuddy {
    */
   void processPcfRequestAndPublishQMetrics(
       MetricsCollectorContext context, PCFMessage request, String queueGenericName, int[] fields) {
+
     try {
       doProcessPcfRequestAndPublishQMetrics(context, request, queueGenericName, fields);
     } catch (PCFException pcfe) {
@@ -104,7 +105,7 @@ final class QueueCollectionBuddy {
   private void handleMessage(MetricsCollectorContext context, PCFMessage message, int[] fields)
       throws PCFException {
     String queueName = MessageBuddy.queueName(message);
-    String queueType = getQueueTypeFromName(message, queueName);
+    String queueType = getQueueTypeFromName(context.getQueueManagerName(), message, queueName);
     if (queueType == null) {
       logger.info("Unable to determine queue type for queue name = {}", queueName);
       return;
@@ -115,7 +116,10 @@ final class QueueCollectionBuddy {
   }
 
   @Nullable
-  private String getQueueTypeFromName(PCFMessage message, String queueName) throws PCFException {
+  private String getQueueTypeFromName(String queueManagerName, PCFMessage message, String queueName)
+      throws PCFException {
+    QueueCollectorSharedState sharedState =
+        sharedStates.computeIfAbsent(queueManagerName, key -> new QueueCollectorSharedState());
     if (message.getParameterValue(CMQC.MQIA_Q_TYPE) == null) {
       return sharedState.getType(queueName);
     }

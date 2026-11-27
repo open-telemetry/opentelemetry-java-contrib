@@ -67,7 +67,6 @@ class ChannelMetricsCollectorTest {
   void testPublishMetrics() throws Exception {
     when(pcfMessageAgent.send(any(PCFMessage.class)))
         .thenReturn(createPCFResponseForInquireChannelStatusCmd());
-
     classUnderTest = new ChannelMetricsCollector();
 
     classUnderTest.accept(context);
@@ -81,6 +80,8 @@ class ChannelMetricsCollectorTest {
                 "ibm.mq.byte.received",
                 "ibm.mq.buffers.sent",
                 "ibm.mq.buffers.received"));
+
+    MetricProducer producer = context.getMetricProducer();
 
     for (MetricData metric : producer.produce(Resource.empty())) {
       if (metricsList.remove(metric.getName())) {
@@ -196,7 +197,7 @@ class ChannelMetricsCollectorTest {
     classUnderTest = new ChannelMetricsCollector();
 
     classUnderTest.accept(context);
-    assertThat(producer.produce(Resource.empty())).isEmpty();
+    assertThat(context.getMetricProducer().produce(Resource.empty())).isEmpty();
   }
 
   @Test
@@ -205,7 +206,7 @@ class ChannelMetricsCollectorTest {
     classUnderTest = new ChannelMetricsCollector();
 
     classUnderTest.accept(context);
-    assertThat(producer.produce(Resource.empty())).isEmpty();
+    assertThat(context.getMetricProducer().produce(Resource.empty())).isEmpty();
   }
 
   @ParameterizedTest
@@ -216,7 +217,7 @@ class ChannelMetricsCollectorTest {
 
     classUnderTest.accept(context);
 
-    List<MetricData> exported = producer.produce(Resource.empty());
+    List<MetricData> exported = context.getMetricProducer().produce(Resource.empty());
     assertThat(exported.get(0).getLongGaugeData().getPoints()).hasSize(1);
     assertThatMetric(exported.get(0), 0).hasName("ibm.mq.manager.active.channels").hasValue(0);
   }

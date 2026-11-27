@@ -60,7 +60,7 @@ class QueueManagerMetricsCollectorTest {
     List<String> metricsList = new ArrayList<>(singletonList("ibm.mq.manager.status"));
     metricsList.add("ibm.mq.queue_manager.uptime");
 
-    for (MetricData metric : producer.produce(Resource.empty())) {
+    for (MetricData metric : context.getMetricProducer().produce(Resource.empty())) {
       if (metricsList.remove(metric.getName())) {
         if ("ibm.mq.manager.status".equals(metric.getName())) {
           assertThat(metric.getLongGaugeData().getPoints().iterator().next().getValue())
