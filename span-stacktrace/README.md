@@ -12,6 +12,15 @@ As a consequence it should only be used when the span duration is known, thus on
 This extension supports autoconfiguration, so it will be automatically enabled by OpenTelemetry
 SDK when included in the application runtime dependencies.
 
+When using the OpenTelemetry Java agent, load the artifact as an extension via
+`otel.javaagent.extensions`; no other dependencies are needed.
+
+When using the SDK directly, the following dependencies must also be added to the application
+runtime classpath:
+
+* `io.opentelemetry.instrumentation:opentelemetry-declarative-config-bridge`
+* `io.opentelemetry.semconv:opentelemetry-semconv`
+
 `otel.java.experimental.span-stacktrace.min.duration`
 
 * allows to configure the minimal duration for which spans have a stacktrace captured
