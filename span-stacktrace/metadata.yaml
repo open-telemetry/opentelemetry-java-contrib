@@ -10,7 +10,10 @@ component_types:
   - library
 docs_url: https://github.com/open-telemetry/opentelemetry-java-contrib/blob/main/span-stacktrace/README.md#usage-and-configuration
 usage: >-
-  Include the artifact in application runtime dependencies. The application must
+  With the OpenTelemetry Java agent, load the artifact as an extension via
+  `otel.javaagent.extensions`; no other dependencies are needed. With the SDK
+  directly, add the artifact plus `io.opentelemetry.instrumentation:opentelemetry-declarative-config-bridge`
+  and `io.opentelemetry.semconv:opentelemetry-semconv` to the runtime classpath, and
   use SDK autoconfiguration or declarative SDK configuration. Stack trace capture
   runs when eligible spans end and can add overhead.
 status:
